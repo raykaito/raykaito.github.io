@@ -17,6 +17,8 @@ constructor(cornersIn, imgIn){
 			this.tiles[x][y] = [0,1,2,3,4,5,6,7,8,9];
 		}
 	}
+	this.originalPlate = new Array();
+	this.originalPlateIndex = 0;
 
 	//Initialize Solve Method Parameters
 	this.interval;
@@ -51,11 +53,15 @@ loadSudoku(loadIndex){
 	}
 	this.updateCanvas();
 }
-setNumber(x,y,number){
+setNumber(x,y,number,original=false){
 	if(number==0) return;
 	//console.log(x+","+y+","+number);
 	for(var i=1;i<=9;i++) this.tiles[x][y][i] = 0;
 	this.tiles[x][y][0] = number;
+	if(original){
+		this.originalPlate[this.originalPlateIndex] = x+9*y;
+		this.originalPlateIndex++;
+	}
 }
 updateCanvas(){
 	ct.putImageData(this.imgO, 0, 0);
@@ -84,12 +90,17 @@ drawTile(x,y){
 	
 	//Fill the background
 	if(this.displayCandidate&&cell[0]==this.eraseCandidateTarget){
-		ct.fillStyle = "green";
+		ct.fillStyle = "lightgreen";
 		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2)
 		ct.fillStyle = "cyan";
 		for(var i=0;i<this.proIndex;i++){
-			if(x==(this.suspects[i])%9&&y==Math.floor(this.suspects[i]/9)){
-				ct.fillStyle=(i==(this.proIndex-1)?"orange":"yellow");
+			if(this.suspects[i]==(x+9*y)){
+				ct.fillStyle=(i==(this.proIndex-1)?"yellow":"yellow");
+			}
+		}
+		for(var i=0;i<this.originalPlateIndex;i++){
+			if(this.originalPlate[i]==(x+9*y)){
+				ct.fillStyle="darkCyan";
 			}
 		}
 		cl*=0.8;
@@ -98,8 +109,13 @@ drawTile(x,y){
 	}else{
 		ct.fillStyle = unknown?"white":"cyan";
 		for(var i=0;i<this.proIndex;i++){
-			if(x==(this.suspects[i])%9&&y==Math.floor(this.suspects[i]/9)){
-				ct.fillStyle=(i==(this.proIndex-1)?"orange":"yellow");
+			if(this.suspects[i]==(x+9*y)){
+				ct.fillStyle=(i==(this.proIndex-1)?"yellow":"yellow");
+			}
+		}
+		for(var i=0;i<this.originalPlateIndex;i++){
+			if(this.originalPlate[i]==(x+9*y)){
+				ct.fillStyle="darkCyan";
 			}
 		}
 		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);

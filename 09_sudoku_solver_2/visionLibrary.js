@@ -1,31 +1,3 @@
-var charMinModel, charMaxModel;
-
-function visionInit(){
-	charMinModel = new Array();
-	charMaxModel = new Array();
-
-	charMinModel[1] = [57, 57, 57, 53, 46, 40, 33, 20, 6, 0, 0, 0, 0, 0, 0, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57, 57];
-	charMinModel[2] = [33, 20, 16, 12, 12, 8, 4, 4, 4, 4, 4, 57, 57, 57, 57, 57, 57, 57, 57, 54, 45, 41, 37, 37, 29, 25, 20, 16, 12, 8, 8, 4, 0, 0, 0, 0, 4];
-	charMinModel[3] = [25, 20, 12, 8, 8, 4, 4, 0, 0, 4, 57, 57, 57, 54, 37, 33, 33, 33, 37, 57, 57, 57, 57, 57, 57, 0, 0, 0, 0, 0, 4, 4, 8, 12, 20, 20, 29];
-	charMinModel[4] = [57, 57, 57, 53, 50, 50, 46, 42, 38, 34, 34, 30, 26, 26, 23, 19, 15, 15, 11, 7, 7, 3, 0, 0, 0, 0, 0, 0, 3, 57, 57, 57, 57, 57, 57, 57, 57];
-	charMinModel[5] = [16, 12, 12, 12, 12, 12, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 57, 57, 57, 57, 57, 57, 0, 0, 0, 0, 4, 4, 8, 12, 16, 25, 33];
-	charMinModel[6] = [37, 29, 20, 20, 16, 12, 8, 8, 8, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 12, 16, 20, 25, 33, 45];
-	charMinModel[7] = [4, 0, 0, 0, 0, 0, 57, 57, 57, 56, 52, 52, 52, 48, 44, 40, 40, 40, 36, 36, 32, 32, 32, 28, 28, 28, 28, 28, 24, 24, 24, 20, 20, 20, 20, 20, 20, 20];
-	charMinModel[8] = [33, 25, 20, 16, 12, 12, 8, 8, 8, 8, 8, 8, 12, 12, 16, 20, 25, 16, 12, 8, 8, 4, 4, 4, 0, 0, 0, 4, 4, 4, 8, 8, 12, 16, 20, 29, 41];
-	charMinModel[9] = [33, 20, 16, 12, 8, 8, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 8, 8, 12, 20, 25, 37, 57, 57, 57, 4, 4, 4, 8, 8, 12, 16, 25, 33];
-
-	charMaxModel[1] = [93, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 93];
-	charMaxModel[2] = [75, 83, 91, 91, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 95, 95, 91, 87, 83, 79, 75, 70, 66, 62, 58, 54, 45, 41, 37, 33, 100, 100, 100, 100, 100, 100];
-	charMaxModel[3] = [66, 75, 83, 83, 87, 91, 91, 91, 95, 95, 91, 91, 91, 87, 83, 79, 79, 87, 91, 95, 95, 100, 100, 100, 100, 100, 100, 100, 100, 95, 95, 91, 87, 83, 79, 75, 66];
-	charMaxModel[4] = [76, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 96, 100, 100, 100, 96, 92, 80, 80, 80, 80, 80, 80, 80, 80];
-	charMaxModel[5] = [91, 95, 95, 91, 91, 33, 33, 29, 29, 29, 29, 29, 70, 79, 83, 87, 91, 95, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100, 95, 95, 91, 91, 87, 83, 79, 70, 62];
-	charMaxModel[6] = [70, 83, 87, 87, 91, 95, 95, 95, 95, 25, 20, 20, 70, 79, 83, 87, 91, 95, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100, 95, 95, 91, 91, 87, 83, 79, 70, 62];
-	charMaxModel[7] = [92, 100, 100, 100, 100, 96, 92, 88, 88, 84, 80, 80, 76, 76, 72, 68, 64, 64, 64, 60, 60, 60, 56, 56, 52, 52, 52, 52, 48, 48, 48, 48, 44, 44, 44, 44, 44, 40];
-	charMaxModel[8] = [66, 75, 83, 83, 87, 91, 91, 95, 95, 95, 95, 91, 91, 87, 87, 79, 75, 83, 87, 91, 95, 95, 100, 100, 100, 100, 100, 100, 100, 95, 95, 91, 91, 87, 79, 70, 62];
-	charMaxModel[9] = [62, 70, 79, 83, 87, 87, 91, 91, 95, 95, 95, 95, 95, 95, 100, 100, 100, 100, 100, 100, 95, 95, 95, 95, 95, 95, 95, 91, 91, 91, 87, 83, 83, 79, 70, 66, 54];
-
-}
-
 function grbg(imgIn,x,y,type){
 	return imgIn.data[4*(x+imgIn.width*y)+type];
 }
@@ -53,7 +25,7 @@ function histogram(imgIn){
 		max = Math.max(max,grayScale[i]);
 		min = Math.min(min,grayScale[i]);
 	}
-	this.autoThresh = function(type){
+	this.autoThresh = function(type, parameter = 16){
 		if(type=="whiteMajor"){
 			var i, maxIndex, localMax = 0;
 			//Get Maximum Index
@@ -67,7 +39,7 @@ function histogram(imgIn){
 		}
 		if(type=="smooth"){
 			var smoothScale = new Array(256);
-			var range = 16;
+			var range = parameter;
 			for(i=range;i<255-range;i++){
 				smoothScale[i] = 0;
 				for(var j=-range;j<range;j++){
@@ -89,12 +61,12 @@ function histogram(imgIn){
 		}
 		return type;
 	}
-	this.binarize = function(type = "whiteMajor"){
+	this.binarize = function(type = "whiteMajor", parameter = 16){
 		//Check Dimension & Copy data
 		var imgOut = ct.createImageData(imgIn.width, imgIn.height);
 		for(i=0;i<imgIn.data.length;i++) imgOut.data[i] = imgIn.data[i];
 
-		threshhold = this.autoThresh(type);
+		threshhold = this.autoThresh(type, parameter);
 		//Binarize
 		for(i=0;i<imgIn.width*imgIn.height;i++){
 			darkness = imgIn.data[4*i+0];
@@ -117,11 +89,11 @@ function histogram(imgIn){
 		ct.fillStyle = "red";
 		ct.fillRect(threshhold,0, 1,100);
 	};
-	this.graphSpecial = function(){
+	this.graphSpecial = function(range = 16){
 		ct.fillStyle = "white";
 		ct.fillRect(0,110,256,100);
 		ct.fillStyle = "black";
-		var y, range = 16;
+		var y;
 		for(i=range;i<255-range;i++){
 			y = 0;
 			for(var j=-range;j<=range;j++) y+= Math.floor(grayScale[i+j]*100/max)
@@ -148,9 +120,7 @@ function extractLargestBlob(imgIn){
 	//Find the first Blob
 	for(i=0;i<imgIn.width*imgIn.height;i++){
 		if(imgOut.data[4*i]!=255) break;
-		if(i==imgIn.width*imgIn.height-1){
-			return false;
-		}
+		if(i==imgIn.width*imgIn.height-1) return ;
 	}
 	blob = new extractBlob(imgOut, i);
 	imgOut = blob.imgOut();
@@ -283,8 +253,6 @@ function extractBlob(imgIn, index){
 		imgThin = thin(imgThin);
 		imgTrim = trim(imgThin);
 
-
-
 		//Determine Key Characteristics
 		var noBlobAfterTrim, verticalIntersection = 0;
 		var xMean, yMean;
@@ -318,15 +286,10 @@ function extractBlob(imgIn, index){
 				for(leftFirstIndex=1 ;leftFirstIndex <hei;leftFirstIndex++ ) if(grbg(imgFill,xMean-1,leftFirstIndex   ,0)==255) break;
 				for(rightFirstIndex=1;rightFirstIndex<hei;rightFirstIndex++) if(grbg(imgFill,xMean+1,rightFirstIndex  ,0)==255) break;
 
-				ct.putImageData(imgLine,0,hei*2.2);
-				ct.putImageData(imgFill,0,hei*3.3);
-
 				if(leftFirstIndex==hei) return 3;
 				if(leftFirstIndex>rightFirstIndex) return 2;
 				return 5;
 			}else{
-				//1 or 7
-				//Determine the Character Dimension
 				var x, y;
 				cxMin = wid;
 				cyMin = hei;
@@ -340,16 +303,11 @@ function extractBlob(imgIn, index){
 						cyMin = Math.min(cyMin, x);
 						cxMax = Math.max(cxMax, y);
 						cyMax = Math.max(cyMax, y);
-						//console.log(cxMin+","+cyMin+","+cxMax+","+cyMax);
 					}
-					//console.log("x,y,g = "+x+","+y+","+grbg(imgThin,x,y,0));
 				}
-				//ct.putImageData(imgThin,20, 0);
-				//return;
 				var xMaxIndex, xAtMiddle, y, yIndex, xMaxFound;
 
 				xMaxFound = false;
-				//ct.putImageData(imgThin,0,0);
 				for(xMaxIndex=wid-1;!xMaxFound&&xMaxIndex>0;xMaxIndex--){
 					for(y=0;!xMaxFound&&y<hei;y++){
 						if(grbg(imgThin,xMaxIndex,y,0)==0){
@@ -359,16 +317,12 @@ function extractBlob(imgIn, index){
 						imgThin.data[4*(xMaxIndex+wid*Math.floor(y))+1]=0;
 					}
 				}
-				//ct.putImageData(imgThin,0,hei*2.2);
 
 
 				for(xAtMiddle=wid-1;xAtMiddle>0;xAtMiddle--){
 					if(grbg(imgThin,xAtMiddle,Math.floor(cyMax),0)==0)break;
 					imgThin.data[4*(xAtMiddle+wid*Math.floor(cyMax))]=0;
 				}
-				//ct.putImageData(imgThin,0,hei*3.3);
-				///console.log("Max: "+ xMaxIndex+", Mid: "+xAtMiddle);(xMaxIndex-xAtMiddle)/(cxMax-cxMin)>0.1
-				//console.log((xMaxIndex-xAtMiddle)/(cxMax-cxMin));
 				if((xMaxIndex-xAtMiddle)/(cxMax-cxMin)>0.2) return 7;
 				return 1;
 			}
@@ -391,10 +345,6 @@ function extractBlob(imgIn, index){
 					if(grbg(imgFill,xMean-1,i,0)==255&&grbg(imgFill,xMean-1,i-1,0)==0) leftCounter++;
 					if(grbg(imgFill,xMean+1,i,0)==255&&grbg(imgFill,xMean+1,i-1,0)==0) rightCounter++;
 				}
-
-				ct.putImageData(imgLine,0,hei*2.2);
-				ct.putImageData(imgFill,0,hei*3.3);
-
 				if(leftCounter==2) return 6;
 				if(rightCounter==2) return 9;
 				return 4;
@@ -573,7 +523,7 @@ function thin(imgIn){
 	return imgOut;
 }
 
-function filter(imgIn, type, range){
+function filter(imgIn, type, range = 2){
 	//Check Dimension & Copy data
 	var imgOut = ct.createImageData(imgIn.width, imgIn.height);
 	for(i=0;i<imgIn.data.length;i++) imgOut.data[i] = imgIn.data[i];
