@@ -25,7 +25,7 @@ function histogram(imgIn){
 		max = Math.max(max,grayScale[i]);
 		min = Math.min(min,grayScale[i]);
 	}
-	this.autoThresh = function(type, parameter = 2){
+	this.autoThresh = function(type, parameter = 16){
 		if(type=="whiteMajor"){
 			var i, maxIndex, localMax = 0;
 			//Get Maximum Index
@@ -61,7 +61,7 @@ function histogram(imgIn){
 		}
 		return type;
 	}
-	this.binarize = function(type = "whiteMajor", parameter){
+	this.binarize = function(type = "whiteMajor", parameter = 16){
 		//Check Dimension & Copy data
 		var imgOut = ct.createImageData(imgIn.width, imgIn.height);
 		for(i=0;i<imgIn.data.length;i++) imgOut.data[i] = imgIn.data[i];
@@ -120,10 +120,7 @@ function extractLargestBlob(imgIn){
 	//Find the first Blob
 	for(i=0;i<imgIn.width*imgIn.height;i++){
 		if(imgOut.data[4*i]!=255) break;
-		if(i==imgIn.width*imgIn.height-1){
-			globalAbort = true;
-			return false;
-		}
+		if(i==imgIn.width*imgIn.height-1) return ;
 	}
 	blob = new extractBlob(imgOut, i);
 	imgOut = blob.imgOut();
@@ -256,8 +253,6 @@ function extractBlob(imgIn, index){
 		imgThin = thin(imgThin);
 		imgTrim = trim(imgThin);
 
-
-
 		//Determine Key Characteristics
 		var noBlobAfterTrim, verticalIntersection = 0;
 		var xMean, yMean;
@@ -291,15 +286,10 @@ function extractBlob(imgIn, index){
 				for(leftFirstIndex=1 ;leftFirstIndex <hei;leftFirstIndex++ ) if(grbg(imgFill,xMean-1,leftFirstIndex   ,0)==255) break;
 				for(rightFirstIndex=1;rightFirstIndex<hei;rightFirstIndex++) if(grbg(imgFill,xMean+1,rightFirstIndex  ,0)==255) break;
 
-				ct.putImageData(imgLine,0,hei*2.2);
-				ct.putImageData(imgFill,0,hei*3.3);
-
 				if(leftFirstIndex==hei) return 3;
 				if(leftFirstIndex>rightFirstIndex) return 2;
 				return 5;
 			}else{
-				//1 or 7
-				//Determine the Character Dimension
 				var x, y;
 				cxMin = wid;
 				cyMin = hei;
@@ -313,16 +303,11 @@ function extractBlob(imgIn, index){
 						cyMin = Math.min(cyMin, x);
 						cxMax = Math.max(cxMax, y);
 						cyMax = Math.max(cyMax, y);
-						//console.log(cxMin+","+cyMin+","+cxMax+","+cyMax);
 					}
-					//console.log("x,y,g = "+x+","+y+","+grbg(imgThin,x,y,0));
 				}
-				//ct.putImageData(imgThin,20, 0);
-				//return;
 				var xMaxIndex, xAtMiddle, y, yIndex, xMaxFound;
 
 				xMaxFound = false;
-				//ct.putImageData(imgThin,0,0);
 				for(xMaxIndex=wid-1;!xMaxFound&&xMaxIndex>0;xMaxIndex--){
 					for(y=0;!xMaxFound&&y<hei;y++){
 						if(grbg(imgThin,xMaxIndex,y,0)==0){
@@ -332,16 +317,12 @@ function extractBlob(imgIn, index){
 						imgThin.data[4*(xMaxIndex+wid*Math.floor(y))+1]=0;
 					}
 				}
-				//ct.putImageData(imgThin,0,hei*2.2);
 
 
 				for(xAtMiddle=wid-1;xAtMiddle>0;xAtMiddle--){
 					if(grbg(imgThin,xAtMiddle,Math.floor(cyMax),0)==0)break;
 					imgThin.data[4*(xAtMiddle+wid*Math.floor(cyMax))]=0;
 				}
-				//ct.putImageData(imgThin,0,hei*3.3);
-				///console.log("Max: "+ xMaxIndex+", Mid: "+xAtMiddle);(xMaxIndex-xAtMiddle)/(cxMax-cxMin)>0.1
-				//console.log((xMaxIndex-xAtMiddle)/(cxMax-cxMin));
 				if((xMaxIndex-xAtMiddle)/(cxMax-cxMin)>0.2) return 7;
 				return 1;
 			}
@@ -364,10 +345,6 @@ function extractBlob(imgIn, index){
 					if(grbg(imgFill,xMean-1,i,0)==255&&grbg(imgFill,xMean-1,i-1,0)==0) leftCounter++;
 					if(grbg(imgFill,xMean+1,i,0)==255&&grbg(imgFill,xMean+1,i-1,0)==0) rightCounter++;
 				}
-
-				ct.putImageData(imgLine,0,hei*2.2);
-				ct.putImageData(imgFill,0,hei*3.3);
-
 				if(leftCounter==2) return 6;
 				if(rightCounter==2) return 9;
 				return 4;

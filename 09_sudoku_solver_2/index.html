@@ -26,13 +26,6 @@
 		<tr>
 			<td align="center">
 				<input type="file" id="inp" accept="image/*">
-				<input type="button" width="20%" value="1" onclick="button1()">
-				<input type="button" width="20%" value="2" onclick="button2()">
-				<input type="button" width="20%" value="3" onclick="button3()">
-				<input type="button" width="20%" value="4" onclick="button4()"><br>
-				<input class="slider" type="range" min="0" max="255" id="slider" onchange="changeParameter()" oninput="changeParameter()">
-				<input class="slider" type="range" min="0" max="8" id="slider2" onchange="changeParameter()" oninput="changeParameter()">
-				<input class="slider" type="range" min="0" max="16" id="slider3" onchange="changeParameter()" oninput="changeParameter()">
 			</td>
 		</tr>
 
@@ -56,9 +49,6 @@
 		var body = document.getElementById('Body');
 		var table = document.getElementById('Table');
 		var canvas = document.getElementById('canvas');
-		var slider  = document.getElementById('slider');
-		var slider2  = document.getElementById('slider2');
-		var slider3  = document.getElementById('slider3');
 
 		showObject(body, table);
 

@@ -1,13 +1,11 @@
 var ex, ey;
 var stepper;
-var img, himg, imgOriented;
-var globalAbort;
+var img, himg;
 
 function initJS(){
 	ex = [1,1,0,-1,-1,-1, 0, 1];
 	ey = [0,1,1, 1, 0,-1,-1,-1];
 	stepper = new stepManager();
-	globalAbort = false;
 }
 
 document.getElementById('inp').onchange = function(e) {
@@ -34,28 +32,14 @@ function himageLoaded() {
 
 function stepManager(){
 	//Variables
-	var interval;
-	var step = 0;
-	var stepping = false;
-
-	var imgData;
-	var startPoint;
-	var corner;
-	var sudoku;
-
-	var imgSaved;
-	var originalImage;
-	var horiginalImage;
-
-	this.updateSudoku = function(){
-		sudoku.updateCanvas();
-	};
+	var interval, step = 0,stepping = false;
+	var imgData, startPoint, corner, sudoku;
+	var originalImage, horiginalImage;
 
 	this.startSolving = function(time = 100){
 		clearInterval(interval);
 		interval = setInterval(this.solve, time);
 	};
-
 	this.solve = function(){
 		var status = sudoku.makeaProgress();
 		if(status=="UNSOLVABLE"){
@@ -67,54 +51,35 @@ function stepManager(){
 			alert("Success!");
 		}
 	};
-
 	this.saveOriginalImageData = function(){
 		originalImage = ct.getImageData(0,0,width ,height );
 		horiginalImage= hct.getImageData(0,0,hwidth,hheight);
 	};
-
 	this.startStepping = function(){
 		if(stepping) stepper.stopStepping();
+		ct.putImageData(originalImage ,0,0);
+		hct.putImageData(horiginalImage,0,0);
 		interval = setInterval(this.step, 1000);
 		stepping = true;
 	};
-
 	this.stopStepping = function(message = false){
-		//ct.putImageData(originalImage ,0,0);
-		hct.putImageData(horiginalImage,0,0);
 		clearInterval(interval);
 		if(message) alert(message);
 		stepping = false;
 		step = 0;
 	};
-
 	this.step = function(){
 		step++;
 		switch(step){
 			case  1: imgData    = step1(); break;
 			case  2: startPoint = step2(imgData   ); break;
-			case  3: corner     = step3(startPoint); imgSaved = ct.getImageData(0,0,width,height); break;
-			case  4: sudoku     = step4(corner); break;
-			case  5: step5() ; break;
-			case  6: step6() ; break;
+			case  3: corner     = step3(startPoint); break;
+			case  4: sudoku     = step4(corner, originalImage); break;
+			case  5: sudoku.updateCanvas(); break;
+			case  6: step6(); break;
 			default: clearInterval(interval); return;
 		}
 		console.log("Current Step: "+step);
-	};
-
-	this.try = function(){
-		//Test things in here
-		sudoku.saveSudoku();
-	};
-
-	this.try2 = function(){
-		//Test things in here
-			clearInterval(interval);
-	};
-
-	this.loadSaved = function(){
-		console.log("im here");
-		ct.putImageData(imgSaved,0,0);
 	};
 }
 
@@ -124,16 +89,14 @@ function step1(){//Filter the section in middle
 	return imgData;
 }
 
-function getProcessedImageData(xIn, yIn, widthIn, heightIn, test = false){//Shrink, Binarize, and Trims the image
+function getProcessedImageData(xIn, yIn, widthIn, heightIn){//Shrink, Binarize, and Trims the image
 	var imgOut, histog;
 	if(hRatio>1){
 		imgOut = hct.getImageData(xIn*hRatio, yIn*hRatio, widthIn*hRatio, heightIn*hRatio);
-		if(test) return imgOut;
 		imgOut = shrink(imgOut,1/hRatio);
 	}else{
 		imgOut = ct.getImageData(xIn, yIn, widthIn, heightIn);
 	}
-	//imgOut = filter(imgOut,"blend",2);
 	histog = new histogram(imgOut);
 	imgOut = histog.binarize("smooth", 16);
 	imgOut = trim(imgOut);
@@ -189,13 +152,12 @@ function step2(imgIn){//Find the starting point sx and sy
 				//Starting Point Found
 				console.log("Success: "+Math.floor(distRatio*angleRatio*10000)/100+"%");
 				rotateCanvas(width *2/5+blob.txx(i),height*2/5+blob.txy(i), angle1);
+				stepper.saveOriginalImageData();
 				circle(width *2/5+blob.txx(i),height*2/5+blob.txy(i),12);
 				return [width *2/5+blob.txx(i),height*2/5+blob.txy(i),dist1];
 			}
 		}
 	}
-	//It failed to find the starting point
-	//ct.putImageData(imgIn,width*2/5, height*2/5);
 	stepper.stopStepping("Error: Unable to find a cell");
 }
 
@@ -208,7 +170,6 @@ function rotateCanvas(x,y,t){
 	ct.rotate(-Math.PI*t/180);
 	ct.translate(-x,-y);
 	ct.drawImage(img, 0,0,width, height);
-	imgOriented = ct.getImageData(0,0,width,height);
 	ct.restore();
 
 	//Hidden canvas
@@ -272,9 +233,7 @@ function findCorner(startPoint,dir){
 }
 
 function findX(x,y,length){
-	var blob, imgOut, i;
-	var min=-1;
-	var minIndex = 0;
+	var blob, imgOut, i, min=-1, minIndex = 0;
 	
 	imgOut = getProcessedImageData(x-length,y-length,2*length, 2*length);
 	ct.putImageData(imgOut,x-length,y-length);
@@ -282,10 +241,6 @@ function findX(x,y,length){
 	imgOut = thin(imgOut);
 	imgOut = trim(imgOut);
 	blob = new extractLargestBlob(imgOut);
-	if(globalAbort){
-		return "FAIL";
-	}
-	console.log(blob);
 	for(i=0;i<blob.txLength();i++){
 		if(min==-1||getDist(length,length, blob.txx(i), blob.txy(i))<min){
 			min = getDist(length,length, blob.txx(i), blob.txy(i));
@@ -300,12 +255,12 @@ function findX(x,y,length){
 	else 									return "END";
 }
 
-function step4(corner, index = -1){
-	var sudoku = new Sudoku(corner, imgOriented);
+function step4(corner, imgIn, index = -1){
+	var sudoku = new Sudoku(corner, imgIn);
 	var sideL  = (corner[3][0] - corner[2][0])/8;
 	var xTempU, xTempD, yTempL, yTempR;
 
-	ct.putImageData(imgOriented,0,0);
+	ct.putImageData(imgIn,0,0);
 	for(var x=0;x<9;x++){
 		for(var y=0;y<9;y++){
 			if(index!=-1) if(index!=(x+9*y)) continue; 
@@ -320,19 +275,18 @@ function step4(corner, index = -1){
 				stepper.stopStepping("Error: Unable to read a number");
 				return;
 			}
-			sudoku.setNumber(x,y,num);
+			sudoku.setNumber(x,y,num, true);
 		}
 	}
 	return sudoku;
 }
 
 function readNumber(x,y,sideL){
-	//Check if the cell is Empty or not
+
 	var imgCell, historia, blob;
 	imgCell = ct.getImageData(x-sideL/4,y-sideL/4,sideL/2,sideL/2);
 	historia = new histogram(imgCell);
-	//Display Variance
-	//USING SHRINK FUNCION MIGHT SOLVE THE PROBLEM
+
 	if(false){
 		ct.fillStyle = "cyan";
 		ct.font = sideL/3+"px Arial";
@@ -345,18 +299,14 @@ function readNumber(x,y,sideL){
 
 	imgCell = ct.getImageData(x-sideL*0.7/2,y-sideL*0.7/2,sideL*0.7,sideL*0.7);
 	imgCell = clearEdge(imgCell);
-	//imgCell = hct.getImageData(hRatio*(x-sideL*0.7/2),hRatio*(y-sideL*0.7/2),hRatio*(sideL*0.7),hRatio*(sideL*0.7));
-	//imgCell = shrink(imgCell,1/hRatio)
 	historia = new histogram(imgCell);
 	imgCell = historia.binarize("smooth", 16);
-	//ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	imgCell = trim(imgCell);
 	ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	blob = new extractLargestBlob(imgCell);
 
 	if(!blob) return "FAIL";
 
-	//ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	return blob.readNumber();
 }
 
