@@ -1,11 +1,13 @@
 var ex, ey;
 var stepper;
 var img, himg, imgOriented;
+var globalAbort;
 
 function initJS(){
 	ex = [1,1,0,-1,-1,-1, 0, 1];
 	ey = [0,1,1, 1, 0,-1,-1,-1];
 	stepper = new stepManager();
+	globalAbort = false;
 }
 
 document.getElementById('inp').onchange = function(e) {
@@ -26,17 +28,24 @@ function himageLoaded() {
 	resizeH(this.width, this.height);
 	hct.drawImage(this,0,0,this.width,this.height);
 
+	stepper.saveOriginalImageData();
 	stepper.startStepping();
 }
 
 function stepManager(){
 	//Variables
-	var interval, step;
+	var interval;
+	var step = 0;
+	var stepping = false;
+
 	var imgData;
 	var startPoint;
 	var corner;
 	var sudoku;
+
 	var imgSaved;
+	var originalImage;
+	var horiginalImage;
 
 	this.updateSudoku = function(){
 		sudoku.updateCanvas();
@@ -46,6 +55,7 @@ function stepManager(){
 		clearInterval(interval);
 		interval = setInterval(this.solve, time);
 	};
+
 	this.solve = function(){
 		var status = sudoku.makeaProgress();
 		if(status=="UNSOLVABLE"){
@@ -58,16 +68,30 @@ function stepManager(){
 		}
 	};
 
+	this.saveOriginalImageData = function(){
+		originalImage = ct.getImageData(0,0,width ,height );
+		horiginalImage= hct.getImageData(0,0,hwidth,hheight);
+	};
+
 	this.startStepping = function(){
-		clearInterval(interval);
-		step = 0;
+		if(stepping) stepper.stopStepping();
 		interval = setInterval(this.step, 1000);
+		stepping = true;
+	};
+
+	this.stopStepping = function(message = false){
+		//ct.putImageData(originalImage ,0,0);
+		hct.putImageData(horiginalImage,0,0);
+		clearInterval(interval);
+		if(message) alert(message);
+		stepping = false;
+		step = 0;
 	};
 
 	this.step = function(){
 		step++;
 		switch(step){
-			case  1: imgData    = step1(          ); break;
+			case  1: imgData    = step1(); break;
 			case  2: startPoint = step2(imgData   ); break;
 			case  3: corner     = step3(startPoint); imgSaved = ct.getImageData(0,0,width,height); break;
 			case  4: sudoku     = step4(corner); break;
@@ -85,7 +109,7 @@ function stepManager(){
 
 	this.try2 = function(){
 		//Test things in here
-		sudoku.loadSudoku(0);
+			clearInterval(interval);
 	};
 
 	this.loadSaved = function(){
@@ -100,27 +124,33 @@ function step1(){//Filter the section in middle
 	return imgData;
 }
 
-function getProcessedImageData(xIn, yIn, widthIn, heightIn){//Shrink, Binarize, and Trims the image
+function getProcessedImageData(xIn, yIn, widthIn, heightIn, test = false){//Shrink, Binarize, and Trims the image
 	var imgOut, histog;
 	if(hRatio>1){
 		imgOut = hct.getImageData(xIn*hRatio, yIn*hRatio, widthIn*hRatio, heightIn*hRatio);
+		if(test) return imgOut;
 		imgOut = shrink(imgOut,1/hRatio);
 	}else{
 		imgOut = ct.getImageData(xIn, yIn, widthIn, heightIn);
 	}
+	//imgOut = filter(imgOut,"blend",2);
 	histog = new histogram(imgOut);
-	imgOut = histog.binarize();
+	imgOut = histog.binarize("smooth", 16);
 	imgOut = trim(imgOut);
 	return imgOut;
 }
 
 function step2(imgIn){//Find the starting point sx and sy
-	var fb, angleRatio, distRatio, angle1, angle2, dist1, dist2, txLength, ffdProblem;
+	var blob, angleRatio, distRatio, angle1, angle2, dist1, dist2, txLength, ffdProblem;
 
 	imgIn = thin(imgIn);
 	imgIn = trim(imgIn);
-	fb = new extractLargestBlob(imgIn);
-	txLength = fb.txLength();
+	blob = new extractLargestBlob(imgIn);
+	if(!blob){
+		stepper.stopStepping("Error: Unable to find the cross");
+		return;
+	}
+	txLength = blob.txLength();
 
 	for(var i=0;i<txLength;i++){
 		for(var j=0;j<txLength;j++){
@@ -128,28 +158,28 @@ function step2(imgIn){//Find the starting point sx and sy
 				//Skip if i==j==k
 				if(i==j||i==k||j==k) continue;
 				//Check Distance Ratio
-				dist1 = getDist(fb.txx(i),fb.txy(i),fb.txx(j),fb.txy(j));
-				dist2 = getDist(fb.txx(i),fb.txy(i),fb.txx(k),fb.txy(k));
+				dist1 = getDist(blob.txx(i),blob.txy(i),blob.txx(j),blob.txy(j));
+				dist2 = getDist(blob.txx(i),blob.txy(i),blob.txx(k),blob.txy(k));
 				distRatio = dist1/dist2;
 				if(distRatio>1.03||distRatio<0.97) continue;
 
 				//Check Angle Ratio
-				angle1 = getDir(fb.txx(i),fb.txy(i),fb.txx(j),fb.txy(j));
-				angle2 = getDir(fb.txx(i),fb.txy(i),fb.txx(k),fb.txy(k));
+				angle1 = getDir(blob.txx(i),blob.txy(i),blob.txx(j),blob.txy(j));
+				angle2 = getDir(blob.txx(i),blob.txy(i),blob.txx(k),blob.txy(k));
 				angleRatio = Math.min(((360+angle1-angle2)%360)/(90),((360+angle2-angle1)%360)/(90));
 				if(angleRatio>1.03||angleRatio<0.97) continue;
 
 				//Check for the 45 degree error problem
 				ffdProblem = false;
 				for(var l=0;l<txLength;l++){
-					if(getDist(fb.txx(l),fb.txy(l),(fb.txx(j)+fb.txx(k))/2,(fb.txy(j)+fb.txy(k))/2)<dist1/4){
+					if(getDist(blob.txx(l),blob.txy(l),(blob.txx(j)+blob.txx(k))/2,(blob.txy(j)+blob.txy(k))/2)<dist1/4){
 						ffdProblem = true;
 						continue;
 					}
 				}
 				if(ffdProblem) continue;
 				for(var l=0;l<txLength;l++){
-					if(getDist(fb.txx(l),fb.txy(l),(fb.txx(i)+fb.txx(k))/2,(fb.txy(i)+fb.txy(k))/2)<dist1/4){
+					if(getDist(blob.txx(l),blob.txy(l),(blob.txx(i)+blob.txx(k))/2,(blob.txy(i)+blob.txy(k))/2)<dist1/4){
 						ffdProblem = true;
 						continue;
 					}
@@ -158,18 +188,15 @@ function step2(imgIn){//Find the starting point sx and sy
 
 				//Starting Point Found
 				console.log("Success: "+Math.floor(distRatio*angleRatio*10000)/100+"%");
-				rotateCanvas(width *2/5+fb.txx(i),height*2/5+fb.txy(i), angle1);
-				circle(width *2/5+fb.txx(i),height*2/5+fb.txy(i),12);
-				return [width *2/5+fb.txx(i),height*2/5+fb.txy(i),dist1];
+				rotateCanvas(width *2/5+blob.txx(i),height*2/5+blob.txy(i), angle1);
+				circle(width *2/5+blob.txx(i),height*2/5+blob.txy(i),12);
+				return [width *2/5+blob.txx(i),height*2/5+blob.txy(i),dist1];
 			}
 		}
 	}
-	//Code won't reach here unless it failed
-	ct.putImageData(imgIn,width*2/5, height*2/5);
-	if(startPoint=="FAIL"){
-		alert("Error: Unable to find a cell.");
-		return;
-	}
+	//It failed to find the starting point
+	//ct.putImageData(imgIn,width*2/5, height*2/5);
+	stepper.stopStepping("Error: Unable to find a cell");
 }
 
 function rotateCanvas(x,y,t){
@@ -195,19 +222,23 @@ function rotateCanvas(x,y,t){
 
 function step3(startPoint){
 	var i, sumMove, corner = new Array();
-	for(i=0;i<4;i++) corner[i] = findCorner(startPoint, i);
+	for(i=0;i<4;i++){
+		corner[i] = findCorner(startPoint, i);
+		if(corner[i]=="FAIL"){
+			stepper.stopStepping("Error: Unable to find corners");
+			return;
+		}
+	}
 	sumMove = corner.reduce(function(a,b,c){return a+b[2];},0);
 	if(sumMove!=36){
-		alert("Error: Unable to locate the corners.");
-		console.log(sumMove);
-		return;
+		stepper.stopStepping("Error: Unable to locate the corners.");
 	}
 	for(i=0;i<4;i++){
 		corner[i][0]+=ex[2*i+1]*startPoint[2]/2;
 		corner[i][1]+=ey[2*i+1]*startPoint[2]/2;
 	}
 
-	return corner
+	return corner;
 }
 
 function findCorner(startPoint,dir){
@@ -223,12 +254,12 @@ function findCorner(startPoint,dir){
 	for(var i=0;i<18;i++){
 
 		currentp = findX(lastp[0]+ex[dir]*sideL,lastp[1]+ey[dir]*sideL,windL);
+		if(currentp=="FAIL") return "FAIL";
 		error = 100*getDist(lastp[0]+ex[dir]*sideL,lastp[1]+ey[dir]*sideL,currentp[0],currentp[1])/sideL;
 		moveC++;
 		
-		//ct.putImageData(fb.imgOut(),lastp[0]+ex[dir]*sideL-windL,lastp[1]+ey[dir]*sideL-windL);
 		circle(currentp[0],currentp[1],12);
-		if(currentp=="FAIL"){
+		if(currentp=="END"){
 			dir=(dir+2)%8;
 			dc++;
 			if(dc==2) break;
@@ -241,32 +272,40 @@ function findCorner(startPoint,dir){
 }
 
 function findX(x,y,length){
-	var imgOut, i, min=1000, minIndex = 0;;
+	var blob, imgOut, i;
+	var min=-1;
+	var minIndex = 0;
 	
 	imgOut = getProcessedImageData(x-length,y-length,2*length, 2*length);
 	ct.putImageData(imgOut,x-length,y-length);
 	imgOut = trim(imgOut);
 	imgOut = thin(imgOut);
 	imgOut = trim(imgOut);
-	fb = new extractLargestBlob(imgOut);
-	for(i=0;i<fb.txLength();i++){
-		if(getDist(length,length, fb.txx(i), fb.txy(i))<min){
-			min = getDist(length,length, fb.txx(i), fb.txy(i));
+	blob = new extractLargestBlob(imgOut);
+	if(globalAbort){
+		return "FAIL";
+	}
+	console.log(blob);
+	for(i=0;i<blob.txLength();i++){
+		if(min==-1||getDist(length,length, blob.txx(i), blob.txy(i))<min){
+			min = getDist(length,length, blob.txx(i), blob.txy(i));
 			minIndex = i;
 		}
 	}
 
-	x = x-length+fb.txx(minIndex);
-	y = y-length+fb.txy(minIndex);
+	x = x-length+blob.txx(minIndex);
+	y = y-length+blob.txy(minIndex);
 	
-	if(fb.checkIfBlobIsOnEveryEdge(4)) 	return [x, y];
-	else 								return "FAIL";
+	if(blob.checkIfBlobIsOnEveryEdge(4)) 	return [x, y];
+	else 									return "END";
 }
 
 function step4(corner, index = -1){
 	var sudoku = new Sudoku(corner, imgOriented);
 	var sideL  = (corner[3][0] - corner[2][0])/8;
 	var xTempU, xTempD, yTempL, yTempR;
+
+	ct.putImageData(imgOriented,0,0);
 	for(var x=0;x<9;x++){
 		for(var y=0;y<9;y++){
 			if(index!=-1) if(index!=(x+9*y)) continue; 
@@ -278,7 +317,7 @@ function step4(corner, index = -1){
 			yTempL = yTempL+x*(yTempR-yTempL)/8;
 			num = readNumber(xTempU, yTempL, sideL);
 			if(num=="FAIL"){
-				alert("Error: Number not found.");
+				stepper.stopStepping("Error: Unable to read a number");
 				return;
 			}
 			sudoku.setNumber(x,y,num);
@@ -309,11 +348,13 @@ function readNumber(x,y,sideL){
 	//imgCell = hct.getImageData(hRatio*(x-sideL*0.7/2),hRatio*(y-sideL*0.7/2),hRatio*(sideL*0.7),hRatio*(sideL*0.7));
 	//imgCell = shrink(imgCell,1/hRatio)
 	historia = new histogram(imgCell);
-	imgCell = historia.binarize("smooth");
+	imgCell = historia.binarize("smooth", 16);
 	//ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	imgCell = trim(imgCell);
 	ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	blob = new extractLargestBlob(imgCell);
+
+	if(!blob) return "FAIL";
 
 	//ct.putImageData(imgCell,x-sideL*0.7/2,y-sideL*0.7/2);
 	return blob.readNumber();
@@ -339,16 +380,18 @@ function button3(){
 	stepper.startSolving();
 }
 function button4(){
-	stepper.try();
+	stepper.step();
 }
 
 function changeParameter(){
-	stepper.try2();
-	return;
+	//imgTestO = ct.getImageData(width*0.67, height*0.66,width*0.05, height*0.05);
+	//imgTestO = getProcessedImageData(width*0.66, height*0.66,width*0.05, height*0.05, true);
+	imgTestO = getProcessedImageData(width*0.2, height*0.32,width*0.05, height*0.05, true);
+	imgTestO = filter(imgTestO,"blend",Number(slider2.value));
 	var histogramTest = new histogram(imgTestO);
-	imgTest = histogramTest.binarize(Number(slider.value));
+	imgTest = histogramTest.binarize(Number(slider.value), 16);
 	histogramTest.graph();
-	histogramTest.graphSpecial();
+	histogramTest.graphSpecial(Number(slider3.value));
 	ct.putImageData(imgTest,0,220);
 }
 
