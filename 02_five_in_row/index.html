@@ -1,0 +1,116 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Five In a Row</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=520, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center" width="512">
+	
+		<tr>
+			<td colspan ="5" align="center">	
+				<img src="icon_igo.png"
+				width="122" height="60" align="top">
+				<Font size="10" Font color="black"><TNR>
+			       Five In a Row
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+		<tr>
+			<td width="10" align="center">
+				
+			</td>
+			<td width="140" align="left">
+				<Font size="4" Font color="black"><div id="display"></div></font>
+			</td>
+			<td width="120" align="right">
+
+			</td>
+			<td width="120" align="right">
+				<Font size="4" Font color="black"><div id="displaz"></div></font>			</td>
+			<td align="left">
+				<select id="cplevel" onchange="cpuSelected()">
+					<option value="1">Beginner</option>
+					<option value="2">Normal</option>
+					<option value="3">Advanced</option>
+					<option value="4">Ace</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan ="5"  align="center">
+				<canvas id="myCanvas" width="500" height="500"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td colspan ="5"  align="center">
+				Click <a target="_blank" href="http://kaleidoscope.cultural-china.com/en/140Kaleidoscope3757.html">here</a> to learn how to play Five in a Row!
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="cpu.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="laplase.js"></script>
+	<script type="text/javascript" src="manager.js"></script>
+	<script type="text/javascript" src="analyzer.js"></script>
+	<script type="text/javascript" src="settings.js"></script>
+	<script type="text/javascript" src="../opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		var table = document.getElementById('Table');
+		var body = document.getElementById('Body');
+		showObject(body, table);
+		
+		var canvas = document.getElementById('myCanvas');
+		var cplevel= document.getElementById('cplevel');
+		var display= document.getElementById('display');
+		var displaz= document.getElementById('displaz');
+
+		var imgb = new Image();
+		var imgw = new Image();
+
+		imgb.src = 'stone_black.png';
+		imgw.src = 'stone_white.png';
+
+		if(screen.width<800){
+			document.body.style.width='520xp';
+		}
+
+		var cs = canvas.getContext('2d');
+		cs.lineWidth = 1;
+
+		addEventListener('keydown',keyPressed,false);
+		addEventListener('keyup',keyReleased,false);
+
+		canvas.addEventListener('click', clicked, false);
+		display.addEventListener('click', diyclick,false);
+		displaz.addEventListener('click', dizclick,false);
+		canvas.addEventListener('touchcancel', clicked, false);
+		display.addEventListener('touchcancel', diyclick, false);
+		displaz.addEventListener('touchcancel', dizclick, false);
+
+
+		init();
+		setup();
+		updateCanvas();
+
+
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

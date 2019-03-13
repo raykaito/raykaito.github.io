@@ -1,0 +1,83 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Catan</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=520, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+	<div id="catanPage">
+		<table id="Table" border="0" align="center" width="512">
+		
+			<tr>
+				<td align="center">	
+					<img src="Images/desert.png"
+					width="48" height="60" align="top">
+					<Font size="10" Font color="black"><TNR>
+				       Catan
+					</TNR></Font>
+					<hr>
+				</td>
+			</tr>
+			<tr>
+				<td align="center">
+					<canvas id="myCanvas" width="500" height="1200"></canvas>
+				</td>
+			</tr>
+		</table>
+
+		<script type="text/javascript" src="canvas.js">  </script>
+		<script type="text/javascript" src="manager.js"> </script>
+		<script type="text/javascript" src="settings.js"></script>
+		<script type="text/javascript" src="functions.js"></script>
+		<script type="text/javascript" src="../opacityController.js"></script>
+		<script type="text/javascript">
+		<!--
+		 
+			var desert = new Image();
+			var wheat  = new Image();
+			var sheep  = new Image();
+			var frame  = new Image();
+			var iron   = new Image();
+			var wood   = new Image();
+			var clay   = new Image();
+			desert.src = 'Images/desert.png';
+			wheat.src  = 'Images/wheat.png';
+			sheep.src  = 'Images/sheep.png';
+			frame.src  = 'Images/Frame.png';
+			iron.src   = 'Images/iron.png';
+			wood.src   = 'Images/wood.png';
+			clay.src   = 'Images/clay.png';
+
+			var table = document.getElementById('Table');
+			var body = document.getElementById('Body');
+			showObject(body, table);
+			
+			var canvas = document.getElementById('myCanvas');
+
+
+			if(screen.width<800){
+				document.body.style.width='520xp';
+			}
+
+			var cs = canvas.getContext('2d');
+			cs.lineWidth = 1;
+
+			canvas.addEventListener('mousedown', clicked, false);
+			canvas.addEventListener('touchstart', clicked, false);
+
+			window.setTimeout(init,500);
+
+		 
+		//--> 
+		</script>
+	</div>
+</body>
+
+
+</html>

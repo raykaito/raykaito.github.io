@@ -1,0 +1,58 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Swipe or Tap</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=520, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()">
+
+	<table id="Table" border="0" align="center" width="512">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Swipe or Tap
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="Canvas" style="border:1px solid #000000;"></canvas>
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="game.js"></script>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="cell.js"></script>
+	<script type="text/javascript" src="../opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		var table = document.getElementById('Table');
+		var body = document.getElementById('Body');
+		var canvas = document.getElementById('Canvas');
+		showObject(body, table);
+
+		var game;
+
+		function init(){
+			game = new Game();
+			init();
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>
