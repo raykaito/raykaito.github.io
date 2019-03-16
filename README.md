@@ -1,2 +1,2 @@
 # raykaito.github.io
-A website to display my personal HTML and JavaScript projects
+This is a personal website to display my HTML and JavaScript projects
