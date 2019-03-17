@@ -29,38 +29,54 @@ function himageLoaded() {
 }
 
 function button1(){
-	let newImage = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 200, 100);
-	binarize = new Binarize(newImage.passdata);
-	binarize.displayGraph();
-	binarize.binarize();
-	binarize.display();
+	newImage = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 200, 200);
+	filteredImage = new Filter(newImage.passdata);
+	filteredImage.fuzzy(Number(slider2.value));
+	filteredImage.display();
+	binarize = new Binarize(filteredImage.passdata);
 }
 
 function button2(){
-	blob = new FindBlob(binarize.passdata);
-	blob.scanBlobs();
-	blob.display();
+	newImage2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 100, 100);
+	lineScanner = new FindLine(newImage2.passdata);
+	lineScanner.scanAngle = 3.9;
+	lineScanner.displayGraph();
+	lineScanner.display();
 }
 
 function button3(){
-	binarize.display();
+	binarize = new Binarize(filteredImage.passdata);
 }
+
 function button4(){
-	let newImage = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 200, 100);
-	newImage.display();
 }
 
 function changeParameter(){
 	let s1 = Number(slider.value);
 	let s2 = Number(slider2.value);
 	let s3 = Number(slider3.value);
+
+	filteredImage.fuzzy(Number(slider2.value));
+
+
+	binarize = new Binarize(filteredImage.passdata);
 	binarize.thresh = s1;
 	binarize.binarize();
 	binarize.displayGraph();
-	binarize.display();
+
 	blob = new FindBlob(binarize.passdata);
 	blob.scanBlobs();
 	blob.display();
+}
+
+function changeParameter3(){
+	let s1 = Number(slider.value);
+	let s2 = Number(slider2.value);
+	let s3 = Number(slider3.value);
+
+	lineScanner.scanAngle = s3;
+	lineScanner.displayGraph();
+	lineScanner.display();
 }
 
 console.log("Loaded: javascript.js");
