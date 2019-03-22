@@ -26,26 +26,19 @@ function imageLoaded() {
 function himageLoaded() {
 	resizeH(this.width, this.height);
 	hct.drawImage(this,0,0,this.width,this.height);
+	fucktion();
 }
 
 function button1(){
-	newImage = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 200, 200);
-	filteredImage = new Filter(newImage.passdata);
-	filteredImage.fuzzy(Number(slider2.value));
-	filteredImage.display();
-	binarize = new Binarize(filteredImage.passdata);
+	let array = [1,2,1,2,1,7,1,3,1,3,1,3,1,4,1,4,1,4,1,7,1,5,1,5,1,6,1,5,1,6,0];
+	getLocalMinMaxIndex(array,2);
 }
 
 function button2(){
-	newImage2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, 100, 100);
-	lineScanner = new FindLine(newImage2.passdata);
-	lineScanner.scanAngle = 3.9;
-	lineScanner.displayGraph();
-	lineScanner.display();
+	fl.findIntersection();
 }
 
 function button3(){
-	binarize = new Binarize(filteredImage.passdata);
 }
 
 function button4(){
@@ -53,30 +46,28 @@ function button4(){
 
 function changeParameter(){
 	let s1 = Number(slider.value);
+	console.log(nextBinary(s1));
+}
+
+function changeParameter2(){
 	let s2 = Number(slider2.value);
-	let s3 = Number(slider3.value);
-
-	filteredImage.fuzzy(Number(slider2.value));
-
-
-	binarize = new Binarize(filteredImage.passdata);
-	binarize.thresh = s1;
-	binarize.binarize();
-	binarize.displayGraph();
-
-	blob = new FindBlob(binarize.passdata);
-	blob.scanBlobs();
-	blob.display();
+	binarize = new Binarize(imageDataNew.passdata);
+	binarize.display();
+	binarize.updateSmoothHistogram(s2);
+	binarize.displayHistogram();
+	binarize.displaySmoothHistogram();
 }
 
 function changeParameter3(){
-	let s1 = Number(slider.value);
-	let s2 = Number(slider2.value);
-	let s3 = Number(slider3.value);
+	fl.scanAngle = Number(slider3.value);
+	fl.scanIntensity();
+	fl.display();
+	fl.displayGraph();
+}
 
-	lineScanner.scanAngle = s3;
-	lineScanner.displayGraph();
-	lineScanner.display();
+function fucktion(){
+	const imageDataNew = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+	fl = new FindLine(imageDataNew.passdata);
 }
 
 console.log("Loaded: javascript.js");
