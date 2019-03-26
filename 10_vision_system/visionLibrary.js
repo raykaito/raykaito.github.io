@@ -143,6 +143,8 @@ class FindLine extends RotatableImageData{
 		const x  = Math.floor(xo*abcd[0] + yo*abcd[2] + this.width/2);
 		const y  = Math.floor(xo*abcd[1] + yo*abcd[3] + this.height/2);
 
+		return [this.xpos+x, this.ypos+y, this.angle];
+
 		circle(this.dxpos+x/canvasScale, this.dypos+y/canvasScale, 10);
 	}
 
