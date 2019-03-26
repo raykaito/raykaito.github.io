@@ -11,7 +11,10 @@ function resizeH(widthIn, heightIn){
     hcanvas.height= heightIn;
 
     hctResized = true;
-    if(ctResized) canvasScale = hcanvas.height/canvas.height;
+    if(ctResized){
+        canvasScale = hcanvas.height/canvas.height;
+        imagesLoaded();
+    }
 }
 
 function initCanvas(){
@@ -37,7 +40,10 @@ function resize(widthHeightRatio){
     canvas.height*= pixelRatio;
 
     ctResized = true;
-    if(hctResized) canvasScale = hcanvas.height/canvas.height;
+    if(hctResized){
+        canvasScale = hcanvas.height/canvas.height;
+        imagesLoaded();
+    }
 
     console.log("Canvas Resize Requested...");
     console.log("pixelRatio: "+pixelRatio);

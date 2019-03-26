@@ -1,4 +1,7 @@
-var newWindow = () => {
+const dx = [1, 1, 0,-1,-1,-1, 0, 1];
+const dy = [0, 1, 1, 1, 0,-1,-1,-1];
+
+const newWindow = () => {
 	return {
 		centerWidthHeight : (centerX, centerY, widthIn, heightIn) => {
 			let xpos = Math.floor(centerX-widthIn /2);
@@ -48,7 +51,8 @@ class ImageData{
 
 	display(){
 		this.updateDisplayImage();
-		ct.putImageData(this.dimgOut, this.dxpos, this.dypos);
+		ct.putImageData(this.imgOut, 0,0);//this.dxpos, this.dypos);
+		//ct.putImageData(this.dimgOut, this.dxpos, this.dypos);
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
 		ct.rect(this.dxpos+0.5,this.dypos+0.5,this.dwidth-1,this.dheight-1);
@@ -72,12 +76,43 @@ class ImageData{
 	i2xy(i, width=this.width){
 		return [i%width, Math.floor(i/width)];
 	}
+	//-------------------SET PIXEL FROM XY-------------------//
+	setPixel(xy, value, type){
+		const index = this.xy2i(xy, this.width);
+		this.setPixeli(index, value, type);
+	}
+	setPixelAverage(xy, value){
+		const index = this.xy2i(xy, this.width);
+		this.setPixeliAverage(index, value);
+	}
+	//-----------------SET PIXEL  FROM INDEX-----------------//
+	setPixeli(index, value, type){
+		this.imgOut.data[4*index+type] = value;
+	}
+	setPixeliAverage(index, value){
+		this.setPixeli(index, value, 0);
+		this.setPixeli(index, value, 1);
+		this.setPixeli(index, value, 2);
+	}
+	//-------------------GET PIXEL FROM XY-------------------//
 	getPixel(imgIn, xy, type){
 		let indexai = this.xy2i([xy[0],xy[1]],imgIn.width);
 		return imgIn.data[4*indexai+type];
 	}
+	getPixelAverage(imgIn, xy){
+		let indexai = this.xy2i([xy[0],xy[1]],imgIn.width);
+		return this.getPixeliAverage(imgIn, indexai);
+	}
+	//-----------------GET PIXEL  FROM INDEX-----------------//
 	getPixeli(imgIn, index, type){
 		return imgIn.data[4*index+type];
+	}
+	getPixeliAverage(imgIn, index){
+		let averageRGB;
+		averageRGB  = this.getPixeli(imgIn, index, 0);
+		averageRGB += this.getPixeli(imgIn, index, 1);
+		averageRGB += this.getPixeli(imgIn, index, 2);
+		return averageRGB/3;
 	}
 }
 
@@ -113,6 +148,54 @@ class RotatableImageData extends ImageData{
 			this.rotatedImageData[i]+= this.getPixeli(this.imgIn, index, 2);
 			this.rotatedImageData[i]/= 3;
 		}
+	}
+}
+
+class derivativeFilter extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		this.allowableDerivative = 0;
+		this.horizontalDerivative = new Array(this.area).fill(0);
+		this.verticalDerivative = new Array(this.area).fill(0);
+		this.maximumDerivative = new Array(this.area).fill(0);
+		this.scanDerivative();
+	}
+	set allowedDerivative(newValue) {
+		this.allowableDerivative = newValue;
+		this.applyFilter();
+	}
+	applyFilter(){
+		let value;
+		for(let index=0;index<this.area;index++){
+			value = (this.maximumDerivative[index]>this.allowableDerivative?0:255);
+			this.setPixeliAverage(index, value);
+		}
+	}
+	scanDerivative(){
+		let newRGB, lastRGB;
+		for(let x=0; x<this.width;x++){
+			for(let y=0; y<this.height;y++){
+				if(y==0){
+					lastRGB = this.getPixelAverage(this.imgIn, [x,y]);
+					continue;
+				}
+				newRGB = this.getPixelAverage(this.imgIn, [x,y]);
+				this.verticalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
+				lastRGB = newRGB;
+			}
+		}
+		for(let y=0; y<this.height;y++){
+			for(let x=0; x<this.width;x++){
+				if(x==0){
+					lastRGB = this.getPixelAverage(this.imgIn, [x,y]);
+					continue;
+				}
+				newRGB = this.getPixelAverage(this.imgIn, [x,y]);
+				this.horizontalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
+				lastRGB = newRGB;
+			}
+		}
+		for(let i=0;i<this.area;i++) this.maximumDerivative[i] = Math.max(this.horizontalDerivative[i], this.verticalDerivative[i]);
 	}
 }
 
