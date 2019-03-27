@@ -51,8 +51,8 @@ class ImageData{
 
 	display(){
 		this.updateDisplayImage();
-		ct.putImageData(this.imgOut, 0,0);//this.dxpos, this.dypos);
-		//ct.putImageData(this.dimgOut, this.dxpos, this.dypos);
+		//ct.putImageData(this.imgOut, 0,0);//this.dxpos, this.dypos);
+		ct.putImageData(this.dimgOut, this.dxpos, this.dypos);
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
 		ct.rect(this.dxpos+0.5,this.dypos+0.5,this.dwidth-1,this.dheight-1);
@@ -154,22 +154,31 @@ class RotatableImageData extends ImageData{
 class derivativeFilter extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
 		super([imgIn, xpos, ypos]);
-		this.allowableDerivative = 0;
 		this.horizontalDerivative = new Array(this.area).fill(0);
 		this.verticalDerivative = new Array(this.area).fill(0);
 		this.maximumDerivative = new Array(this.area).fill(0);
+		this.threshholdToMaxRatio = 5;
 		this.scanDerivative();
 	}
-	set allowedDerivative(newValue) {
-		this.allowableDerivative = newValue;
-		this.applyFilter();
-	}
 	applyFilter(){
-		let value;
-		for(let index=0;index<this.area;index++){
-			value = (this.maximumDerivative[index]>this.allowableDerivative?0:255);
-			this.setPixeliAverage(index, value);
+		let threshhold = 0;
+		for(let i=0;i<this.area;i++){
+			threshhold = Math.max(threshhold, this.maximumDerivative[i]);
 		}
+		threshhold /= this.threshholdToMaxRatio;
+
+		let averageRGB;
+		let darkPixelCount = 0;
+		for(let index=0;index<this.area;index++){
+			if(this.maximumDerivative[index]>threshhold){
+				averageRGB = 0;
+				darkPixelCount++;
+			}else{
+				averageRGB = 255;
+			}
+			this.setPixeliAverage(index, averageRGB);
+		}
+		return darkPixelCount/this.area;
 	}
 	scanDerivative(){
 		let newRGB, lastRGB;
@@ -226,10 +235,10 @@ class FindLine extends RotatableImageData{
 		const x  = Math.floor(xo*abcd[0] + yo*abcd[2] + this.width/2);
 		const y  = Math.floor(xo*abcd[1] + yo*abcd[3] + this.height/2);
 
-		return [this.xpos+x, this.ypos+y, this.angle];
-
 		circle(this.dxpos+x/canvasScale, this.dypos+y/canvasScale, 10);
-	}
+
+
+		return [this.xpos+x, this.ypos+y, this.angle];	}
 
 	findMaxIntensityAngle(){
 		let maxIntensityAtAngle = 0;

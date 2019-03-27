@@ -28,9 +28,28 @@ function himageLoaded() {
 	hct.drawImage(this,0,0,this.width,this.height);
 }
 
+function binarizeBoundary(imageData){
+	const dprThreshhold = 0.25;
+	const fuzzyImageData = new Filter(imageData);
+	let darkPixelRatio = new Array()
+	for(let fuzzyRange = 0;fuzzyRange<6;fuzzyRange++){
+		fuzzyImageData.fuzzy(fuzzyRange);
+		derivativeFilteredImageData = new derivativeFilter(fuzzyImageData.passdata);
+		darkPixelRatio[fuzzyRange] = derivativeFilteredImageData.applyFilter();
+
+		if(darkPixelRatio[fuzzyRange]<dprThreshhold){
+			return derivativeFilteredImageData;
+		}
+	}
+	alert("You need to take better picture.");
+	return false;
+}
+
 function button1(){
 	const imageDataNew = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
-	df = new derivativeFilter(imageDataNew.passdata);
+	const binarizedImageData = binarizeBoundary(imageDataNew.passdata);
+	scanLineImageData = new FindLine(binarizedImageData.passdata);
+	scanLineImageData.findIntersection();
 }
 
 function button2(){
@@ -43,6 +62,10 @@ function button4(){
 }
 
 function changeParameter(){
+	fuzzy.fuzzy(Number(slider.value));
+	df = new derivativeFilter(fuzzy.passdata);
+	df.applyFilter();
+	df.display();
 }
 
 function changeParameter2(){
