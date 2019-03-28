@@ -64,10 +64,10 @@ class ImageData{
 			xy = this.i2xy(i, this.dwidth);
 			xy[0]*=canvasScale;
 			xy[1]*=canvasScale;
-			this.dimgOut.data[4*i  ] = this.getPixel(this.imgOut,xy, 0);
-			this.dimgOut.data[4*i+1] = this.getPixel(this.imgOut,xy, 1);
-			this.dimgOut.data[4*i+2] = this.getPixel(this.imgOut,xy, 2);
-			this.dimgOut.data[4*i+3] = this.getPixel(this.imgOut,xy, 3);
+			this.dimgOut.data[4*i  ] = this.getPix(this.imgOut,xy, 0);
+			this.dimgOut.data[4*i+1] = this.getPix(this.imgOut,xy, 1);
+			this.dimgOut.data[4*i+2] = this.getPix(this.imgOut,xy, 2);
+			this.dimgOut.data[4*i+3] = this.getPix(this.imgOut,xy, 3);
 		}
 	}
 	xy2i(xy,width=this.width){
@@ -76,43 +76,32 @@ class ImageData{
 	i2xy(i, width=this.width){
 		return [i%width, Math.floor(i/width)];
 	}
-	//-------------------SET PIXEL FROM XY-------------------//
-	setPixel(xy, value, type){
-		const index = this.xy2i(xy, this.width);
-		this.setPixeli(index, value, type);
+	setPix(indexIn, value, type){
+		//Check if indexIn is xy or index
+		let index;
+		if(indexIn.length==2) 	index = this.xy2i(indexIn);
+		else					index = indexIn;
+
+		//Set the pixel based on type
+		if(type=="all"||type==0) this.imgOut.data[4*index+0] = value;
+		if(type=="all"||type==1) this.imgOut.data[4*index+1] = value;
+		if(type=="all"||type==2) this.imgOut.data[4*index+2] = value;
 	}
-	setPixelAverage(xy, value){
-		const index = this.xy2i(xy, this.width);
-		this.setPixeliAverage(index, value);
-	}
-	//-----------------SET PIXEL  FROM INDEX-----------------//
-	setPixeli(index, value, type){
-		this.imgOut.data[4*index+type] = value;
-	}
-	setPixeliAverage(index, value){
-		this.setPixeli(index, value, 0);
-		this.setPixeli(index, value, 1);
-		this.setPixeli(index, value, 2);
-	}
-	//-------------------GET PIXEL FROM XY-------------------//
-	getPixel(imgIn, xy, type){
-		let indexai = this.xy2i([xy[0],xy[1]],imgIn.width);
-		return imgIn.data[4*indexai+type];
-	}
-	getPixelAverage(imgIn, xy){
-		let indexai = this.xy2i([xy[0],xy[1]],imgIn.width);
-		return this.getPixeliAverage(imgIn, indexai);
-	}
-	//-----------------GET PIXEL  FROM INDEX-----------------//
-	getPixeli(imgIn, index, type){
-		return imgIn.data[4*index+type];
-	}
-	getPixeliAverage(imgIn, index){
-		let averageRGB;
-		averageRGB  = this.getPixeli(imgIn, index, 0);
-		averageRGB += this.getPixeli(imgIn, index, 1);
-		averageRGB += this.getPixeli(imgIn, index, 2);
-		return averageRGB/3;
+	getPix(imgIn, indexIn, type){
+		//Check if indexIn is xy or index
+		let index;
+		if(indexIn.length==2) 	index = this.xy2i(indexIn, imgIn.width);
+		else					index = indexIn;
+
+		//Get the pixel based on type
+		let rgbValue =0;
+		if(type=="all"||type==0) rgbValue += imgIn.data[4*index+0];
+		if(type=="all"||type==1) rgbValue += imgIn.data[4*index+1];
+		if(type=="all"||type==2) rgbValue += imgIn.data[4*index+2];
+		if(				type==3) rgbValue += imgIn.data[4*index+3];
+		if(type=="all") rgbValue /= 3;
+
+		return rgbValue;
 	}
 }
 
@@ -120,9 +109,9 @@ class RotatableImageData extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
 		super([imgIn, xpos, ypos]);
 		this.length = Math.floor(Math.sqrt(this.width*this.width+this.height*this.height));
-		this.rotatedImageData = new Array(this.length*this.length);
+		this.rotatedImageData = new Array(this.length*this.length*3);
 	}
-	rotateImage(angle = 0){
+	rotateImage(angle = 0, centerxy = [this.width/2, this.height/2]){
 		let x, y, xo, yo, index;
 		let a, b,  c,  d, theta;
 		
@@ -132,22 +121,34 @@ class RotatableImageData extends ImageData{
 		c = -b;
 		d = a;
 		
-		for(let i=0;i<this.rotatedImageData.length;i++){
-			xo = i%this.length-this.length/2;
-			yo = Math.floor(i/this.length-this.length/2);
-			x  = Math.floor(xo*a + yo*c+this.width/2);
-			y  = Math.floor(xo*b + yo*d+this.height/2);
+		for(let i=0;i<this.length*this.length;i++){
+			xo = i%this.length-this.length/2+this.width/2-centerxy[0];
+			yo = Math.floor(i/this.length-this.length/2+this.height/2-centerxy[1]);
+			x  = Math.floor(xo*a + yo*c+centerxy[0]);
+			y  = Math.floor(xo*b + yo*d+centerxy[1]);
 
 			if(x<0||x>=this.width||y<0||y>=this.height){
-				this.rotatedImageData[i] = 255;
+				this.rotatedImageData[3*i+0] = 255;
+				this.rotatedImageData[3*i+1] = 255;
+				this.rotatedImageData[3*i+2] = 255;
 				continue;
 			}
 			index = this.xy2i([x,y],this.width);
-			this.rotatedImageData[i] = this.getPixeli(this.imgIn, index, 0);
-			this.rotatedImageData[i]+= this.getPixeli(this.imgIn, index, 1);
-			this.rotatedImageData[i]+= this.getPixeli(this.imgIn, index, 2);
-			this.rotatedImageData[i]/= 3;
+			this.rotatedImageData[3*i+0] = this.getPix(this.imgIn, index, 0);
+			this.rotatedImageData[3*i+1] = this.getPix(this.imgIn, index, 1);
+			this.rotatedImageData[3*i+2] = this.getPix(this.imgIn, index, 2);
 		}
+	}
+	pasteRotatedImageData(){
+		for(let i=0;i<this.area;i++){
+			let xy = this.i2xy(i, this.width);
+			xy[0] = Math.floor(xy[0]+this.length/2-this.width/2);
+			xy[1] = Math.floor(xy[1]+this.length/2-this.height/2);
+			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+0], 0);
+			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+1], 1);
+			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+2], 2);
+		}
+		hct.putImageData(this.imgOut, 0, 0);
 	}
 }
 
@@ -176,7 +177,7 @@ class derivativeFilter extends ImageData{
 			}else{
 				averageRGB = 255;
 			}
-			this.setPixeliAverage(index, averageRGB);
+			this.setPix(index, averageRGB, "all");
 		}
 		return darkPixelCount/this.area;
 	}
@@ -185,10 +186,10 @@ class derivativeFilter extends ImageData{
 		for(let x=0; x<this.width;x++){
 			for(let y=0; y<this.height;y++){
 				if(y==0){
-					lastRGB = this.getPixelAverage(this.imgIn, [x,y]);
+					lastRGB = this.getPix(this.imgIn, [x,y], "all");
 					continue;
 				}
-				newRGB = this.getPixelAverage(this.imgIn, [x,y]);
+				newRGB = this.getPix(this.imgIn, [x,y], "all");
 				this.verticalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
 				lastRGB = newRGB;
 			}
@@ -196,10 +197,10 @@ class derivativeFilter extends ImageData{
 		for(let y=0; y<this.height;y++){
 			for(let x=0; x<this.width;x++){
 				if(x==0){
-					lastRGB = this.getPixelAverage(this.imgIn, [x,y]);
+					lastRGB = this.getPix(this.imgIn, [x,y], "all");
 					continue;
 				}
-				newRGB = this.getPixelAverage(this.imgIn, [x,y]);
+				newRGB = this.getPix(this.imgIn, [x,y], "all");
 				this.horizontalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
 				lastRGB = newRGB;
 			}
@@ -238,7 +239,8 @@ class FindLine extends RotatableImageData{
 		circle(this.dxpos+x/canvasScale, this.dypos+y/canvasScale, 10);
 
 
-		return [this.xpos+x, this.ypos+y, this.angle];	}
+		return [this.xpos+x, this.ypos+y, this.angle];
+	}
 
 	findMaxIntensityAngle(){
 		let maxIntensityAtAngle = 0;
@@ -255,17 +257,7 @@ class FindLine extends RotatableImageData{
 		}
 		return [maxIntensityAngle, maxIntensityIndex];
 	}
-
-	scanLines(num = 10){
-		let lineList = new Array(num);
-		for(let i=0;i<num;i++){
-			lineList[i] = {
-				xIntercept: 0,
-				intensity: 0,
-				angle: 0
-			};
-		}
-	}
+	
 	scanIntensity(){
 		this.rotateImage(this.angle);
 		this.maxIntensity = 0;
@@ -273,7 +265,7 @@ class FindLine extends RotatableImageData{
 		for(let i=0;i<this.length;i++){
 			this.lineIntensity[i] = 0;
 			for(let j=0;j<this.length;j++){
-				this.lineIntensity[i] += (255-this.rotatedImageData[i+j*this.length]);
+				this.lineIntensity[i] += (255-this.rotatedImageData[3*(i+j*this.length)]);
 			}
 			if(this.lineIntensity[i]>this.maxIntensity){
 				this.maxIntensity = this.lineIntensity[i];
@@ -333,16 +325,16 @@ class Filter extends ImageData{
 				
 				if(x+range<this.width){
 					counter++;
-					tempR += this.getPixeli(this.imgIn, index+range, 0);
-					tempG += this.getPixeli(this.imgIn, index+range, 1);
-					tempB += this.getPixeli(this.imgIn, index+range, 2);
+					tempR += this.getPix(this.imgIn, index+range, 0);
+					tempG += this.getPix(this.imgIn, index+range, 1);
+					tempB += this.getPix(this.imgIn, index+range, 2);
 				}
 				
 				if(x-range>=0){
 					counter--;
-					tempR -= this.getPixeli(this.imgIn, index-range, 0);
-					tempG -= this.getPixeli(this.imgIn, index-range, 1);
-					tempB -= this.getPixeli(this.imgIn, index-range, 2);
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+					tempG -= this.getPix(this.imgIn, index-range, 1);
+					tempB -= this.getPix(this.imgIn, index-range, 2);
 				}
 				this.imgOut.data[4*index  ] = tempR/counter;
 				this.imgOut.data[4*index+1] = tempG/counter;
@@ -360,16 +352,16 @@ class Filter extends ImageData{
 				
 				if(y+range<this.height){
 					counter++;
-					tempR += this.getPixeli(this.imgIn, index+range*this.width, 0);
-					tempG += this.getPixeli(this.imgIn, index+range*this.width, 1);
-					tempB += this.getPixeli(this.imgIn, index+range*this.width, 2);
+					tempR += this.getPix(this.imgIn, index+range*this.width, 0);
+					tempG += this.getPix(this.imgIn, index+range*this.width, 1);
+					tempB += this.getPix(this.imgIn, index+range*this.width, 2);
 				}
 				
 				if(y-range>=0){
 					counter--;
-					tempR -= this.getPixeli(this.imgIn, index-range*this.width, 0);
-					tempG -= this.getPixeli(this.imgIn, index-range*this.width, 1);
-					tempB -= this.getPixeli(this.imgIn, index-range*this.width, 2);
+					tempR -= this.getPix(this.imgIn, index-range*this.width, 0);
+					tempG -= this.getPix(this.imgIn, index-range*this.width, 1);
+					tempB -= this.getPix(this.imgIn, index-range*this.width, 2);
 				}
 				this.imgOut.data[4*index  ] = tempR/counter;
 				this.imgOut.data[4*index+1] = tempG/counter;
@@ -389,16 +381,16 @@ class Filter extends ImageData{
 				
 				if(x+range<this.width){
 					counter++;
-					tempR += this.getPixeli(this.imgIn, index+range, 0);
-					tempG += this.getPixeli(this.imgIn, index+range, 1);
-					tempB += this.getPixeli(this.imgIn, index+range, 2);
+					tempR += this.getPix(this.imgIn, index+range, 0);
+					tempG += this.getPix(this.imgIn, index+range, 1);
+					tempB += this.getPix(this.imgIn, index+range, 2);
 				}
 				
 				if(x-range>=0){
 					counter--;
-					tempR -= this.getPixeli(this.imgIn, index-range, 0);
-					tempG -= this.getPixeli(this.imgIn, index-range, 1);
-					tempB -= this.getPixeli(this.imgIn, index-range, 2);
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+					tempG -= this.getPix(this.imgIn, index-range, 1);
+					tempB -= this.getPix(this.imgIn, index-range, 2);
 				}
 				if(x>=0&&x<this.width){
 					imgHolder.data[4*index  ] = tempR/counter;
@@ -414,16 +406,16 @@ class Filter extends ImageData{
 				
 				if(y+range<this.height){
 					counter++;
-					tempR += this.getPixeli(imgHolder, index+range*this.width, 0);
-					tempG += this.getPixeli(imgHolder, index+range*this.width, 1);
-					tempB += this.getPixeli(imgHolder, index+range*this.width, 2);
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
+					tempG += this.getPix(imgHolder, index+range*this.width, 1);
+					tempB += this.getPix(imgHolder, index+range*this.width, 2);
 				}
 				
 				if(y-range>=0){
 					counter--;
-					tempR -= this.getPixeli(imgHolder, index-range*this.width, 0);
-					tempG -= this.getPixeli(imgHolder, index-range*this.width, 1);
-					tempB -= this.getPixeli(imgHolder, index-range*this.width, 2);
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
+					tempG -= this.getPix(imgHolder, index-range*this.width, 1);
+					tempB -= this.getPix(imgHolder, index-range*this.width, 2);
 				}
 				if(y>=0&&y<this.height){
 					this.imgOut.data[4*index  ] = tempR/counter;
@@ -458,9 +450,16 @@ class FindBlob extends ImageData{
 			this.dblobMap[i] = this.blobMap[this.xy2i(xy,this.imgOut.width)];
 		}
 		for(let i=0;i<this.darea;i++){
-			if(this.getPixeli(this.dimgOut,i,1)==0&&this.dblobMap[i]!=(10*(this.maxAreaIndex+1))){
+			if(this.getPix(this.dimgOut,i,1)==0&&this.dblobMap[i]!=(10*(this.maxAreaIndex+1))){
 				this.dimgOut.data[4*i+0]=0;
 				this.dimgOut.data[4*i+2]=0;
+			}
+		}
+	}
+	eraseSmallerBlobs(){
+		for(let i=0;i<this.area;i++){
+			if(this.getPix(this.imgOut,i,1)==0&&this.blobMap[i]!=(10*(this.maxAreaIndex+1))){
+				this.setPix(i, 255, "all");
 			}
 		}
 	}
@@ -471,7 +470,7 @@ class FindBlob extends ImageData{
 			this.blobMap[i]=0;
 		}
 		for(let i=0;i<this.area;i++){
-			if(this.getPixeli(this.imgOut,i,0)==255) continue;
+			if(this.getPix(this.imgOut,i,0)==255) continue;
 			if(this.blobMap[i]!=0) continue;
 			this.blobNumber++;
 
@@ -491,7 +490,7 @@ class FindBlob extends ImageData{
 
 			while(tim!=-1){
 				//go up until the end
-				while(ty[tic]>=0&&this.getPixel(this.imgOut, [tx[tic],ty[tic]-1], 0)==0){
+				while(ty[tic]>=0&&this.getPix(this.imgOut, [tx[tic],ty[tic]-1], 0)==0){
 					ty[tic]--;
 				}
 
@@ -499,7 +498,7 @@ class FindBlob extends ImageData{
 				left  = false;
 				right = false;
 				yMin = Math.min(yMin,ty[tic]);
-				while(ty[tic]<this.height&&this.getPixel(this.imgOut, [tx[tic],ty[tic]], 0)==0){
+				while(ty[tic]<this.height&&this.getPix(this.imgOut, [tx[tic],ty[tic]], 0)==0){
 					//Travel down one by one
 					let index = this.xy2i([tx[tic],ty[tic]], this.imgOut.width);
 					this.blobMap[index] = this.blobNumber*10;
@@ -510,7 +509,7 @@ class FindBlob extends ImageData{
 
 					//Check for Cell on Left
 					if(tx[tic]>0){
-						if(left!=(this.getPixel(this.imgOut, [tx[tic]-1,ty[tic]], 0)==0)){
+						if(left!=(this.getPix(this.imgOut, [tx[tic]-1,ty[tic]], 0)==0)){
 							left = !left;
 							if(left){
 								xMin = Math.min(xMin,tx[tic]-1);
@@ -524,7 +523,7 @@ class FindBlob extends ImageData{
 
 					//Check for Cell on Right
 					if(tx[tic]<this.width-1){
-						if(right!=(this.getPixel(this.imgOut, [tx[tic]+1,ty[tic]], 0)==0)){
+						if(right!=(this.getPix(this.imgOut, [tx[tic]+1,ty[tic]], 0)==0)){
 							right = !right;
 							if(right){
 								xMax = Math.max(xMax,tx[tic]+1);
@@ -571,10 +570,7 @@ class Binarize extends ImageData{
 		let index;
 		for(let i=0;i<this.histogram.length;i++) this.histogram[i]=0;
 		for(let i=0;i<this.imgIn.data.length;i+=4){
-			index  = this.getPixeli(this.imgIn,i,0);
-			index += this.getPixeli(this.imgIn,i,1);
-			index += this.getPixeli(this.imgIn,i,2);
-			index  = Math.floor(index/3);
+			index  = Math.floor(this.getPix(this.imgIn,i,"all"));
 			this.histogram[index]++;
 		}
 		this.max = this.histogram.reduce((a,b)=>{return Math.max(a,b);},0);

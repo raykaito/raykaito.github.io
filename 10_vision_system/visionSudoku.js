@@ -1,32 +1,52 @@
-var img, himg, interval;
+class VisionProgram_SudokuReader{
+	constructor(){
+		this.time = 250;
+		this.interval;
+	}
+	startReading(phase=1, additionalInfo = false){
+		//look for Optimal Fuzzy range;
+		if(phase==1){
+			//variables;
+			this.fuzzyRange = 0;
+			this.dprThreshhold = 0.25;
 
-function initJS(){
-	sudokuV = new VisionProgram_SudokuReader();
-	ex = [1,1,0,-1,-1,-1, 0, 1];
-	ey = [0,1,1, 1, 0,-1,-1,-1];
+			const imgData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+			this.imgDataFuzzy = new Filter(imgData.passdata);
+			this.interval = setInterval(()=>{sudokuV.findOptimalFuzzyRange();}, this.time);
+		}
+		//look for the starting point and angle
+		if(phase==2){
+			const imgData = new FindBlob(additionalInfo);
+			imgData.display();
+			setTimeout(()=>{sudokuV.startReading(3, imgData);}, this.time);
+		}
+		if(phase==3){
+			additionalInfo.scanBlobs();
+			additionalInfo.eraseSmallerBlobs();
+			additionalInfo.display();
+		}
+		//Rotate the image
+	}
+
+	findOptimalFuzzyRange(){
+		this.imgDataFuzzy.fuzzy(this.fuzzyRange);
+		this.imgDataFuzzy.display();
+		const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
+		const darkPixelRatio = imgDataDFilter.applyFilter();
+		if(darkPixelRatio<this.dprThreshhold){
+			clearInterval(this.interval);
+			//imgDataDFilter.display();
+			this.startReading(2, imgDataDFilter.passdata);
+			return;
+		}
+		this.fuzzyRange++;
+		if(this.fuzzyRange>20){
+			alert("This program failed to find Optimal Filter Parameter.");
+			clearInterval(this.interval);
+		}
+	}
 }
-
-document.getElementById('inp').onchange = function(e) {
-	 ctResized = false;
-	hctResized = false;
-   img = new Image();
-  himg = new Image();
-   img.onload =  imageLoaded;
-  himg.onload = himageLoaded;
-   img.src = URL.createObjectURL(this.files[0]);
-  himg.src = URL.createObjectURL(this.files[0]);
-};
-
-function imageLoaded() {
-	resize(this.height/this.width);
-	ct.drawImage(this, 0,0,canvas.width, canvas.height);
-}
-
-function himageLoaded() {
-	resizeH(this.width, this.height);
-	hct.drawImage(this,0,0,this.width,this.height);
-}
-
+/*
 function findStartingPointAndAngle(){
 	const imageDataNew = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
 	const binarizedImageData = binarizeBoundary(imageDataNew.passdata);
@@ -67,38 +87,4 @@ function button1(){
 	imageRotor.pasteRotatedImageData();
 	imageRotor.display();
 }
-
-function button2(){
-	const imageDataBeforeRotated = newWindow().cornerToCorner(0,0,hcanvas.width,hcanvas.height);
-	imageDataAfterRotated = new RotatableImageData(imageDataBeforeRotated.passdata);
-}
-
-function button3(){
-	sudokuV.startReading(1);
-}
-
-function button4(){
-}
-
-function changeParameter(){
-	fuzzy.fuzzy(Number(slider.value));
-	df = new derivativeFilter(fuzzy.passdata);
-	df.applyFilter();
-	df.display();
-}
-
-function changeParameter2(){
-	imageDataAfterRotated.rotateImage(Number(slider2.value), [0,0]);
-	imageDataAfterRotated.pasteRotatedImageData();
-	imageDataAfterRotated.display();
-}
-
-function changeParameter3(){
-	df.allowedDerivative = Number(slider3.value);
-	df.display();
-}
-
-function imagesLoaded(){
-}
-
-console.log("Loaded: javascript.js");
+*/
