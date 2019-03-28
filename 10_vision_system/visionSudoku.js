@@ -22,7 +22,7 @@ class VisionProgram_SudokuReader{
 		}
 		if(phase==3){
 			additionalInfo.scanBlobs();
-			additionalInfo.eraseSmallerBlobs();
+			//additionalInfo.eraseSmallerBlobs();
 			additionalInfo.display();
 		}
 		//Rotate the image
