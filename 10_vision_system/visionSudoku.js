@@ -24,7 +24,7 @@ class VisionProgram_SudokuReader{
 		}
 		if(phase==3){
 			additionalInfo.scanBlobs();
-			additionalInfo.display(1);
+			//additionalInfo.display(1);
 		}
 		//Rotate the image
 	}
@@ -48,7 +48,7 @@ class VisionProgram_SudokuReader{
 
 		if(darkPixelRatio<this.dprThreshhold){
 			clearInterval(this.interval);
-			this.startReading(2, expandBlack_1.passdata);
+			this.startReading(2, expandBlack_2.passdata);
 			return;
 		}
 
@@ -73,7 +73,7 @@ class VisionProgram_SudokuReader{
 				  expandBlack_2.thresh = 254;
 				  expandBlack_2.binarize();
 
-			this.startReading(2, expandBlack_1.passdata);
+			this.startReading(2, expandBlack_2.passdata);
 			return;
 		}
 	}
