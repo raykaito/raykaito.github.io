@@ -48,7 +48,7 @@ class VisionProgram_SudokuReader{
 
 		if(darkPixelRatio<this.dprThreshhold){
 			clearInterval(this.interval);
-			this.startReading(2, expandBlack_2.passdata);
+			this.startReading(2, expandBlack_1.passdata);
 			return;
 		}
 
@@ -73,7 +73,7 @@ class VisionProgram_SudokuReader{
 				  expandBlack_2.thresh = 254;
 				  expandBlack_2.binarize();
 
-			this.startReading(2, expandBlack_2.passdata);
+			this.startReading(2, expandBlack_1.passdata);
 			return;
 		}
 	}
