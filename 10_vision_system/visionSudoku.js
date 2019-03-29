@@ -24,7 +24,7 @@ class VisionProgram_SudokuReader{
 		}
 		if(phase==3){
 			additionalInfo.scanBlobs();
-			additionalInfo.display();
+			additionalInfo.display(1);
 		}
 		//Rotate the image
 	}
@@ -35,7 +35,7 @@ class VisionProgram_SudokuReader{
 		this.imgDataFuzzy.fuzzyR(this.fuzzyRange);
 		const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
 			  imgDataDFilter.applyFilter();
-			  imgDataDFilter.display();
+			  imgDataDFilter.display(1);
 
 		const expandBlack_1 = new Filter(imgDataDFilter.passdata);
 			  expandBlack_1.fuzzyR(3);
