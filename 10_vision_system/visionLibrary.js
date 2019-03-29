@@ -221,10 +221,10 @@ class FindLine extends RotatableImageData{
 	}
 	set scanAngle(value){this.angle = value;}
 
-	findIntersection(){
-		const angleIndex = this.findMaxIntensityAngle();
+	findIntersection(step=1){
+		const angleIndex = this.findMaxIntensityAngle(step);
 		this.angle = angleIndex[0]+90;
-		this.scanIntensity();
+		this.scanIntensity(step);
 		const coordinateBeforeRotation = [angleIndex[1], this.length-this.maxIntensityIndex];
 
 		console.log(coordinateBeforeRotation);
@@ -244,13 +244,13 @@ class FindLine extends RotatableImageData{
 		return [this.xpos+x, this.ypos+y, this.angle];
 	}
 
-	findMaxIntensityAngle(){
+	findMaxIntensityAngle(step=1){
 		let maxIntensityAtAngle = 0;
 		let maxIntensityAngle = 0;
 		let maxIntensityIndex = 0;
 		for(let i=0;i<180;i++){
 			this.angle = i;
-			this.scanIntensity();
+			this.scanIntensity(step);
 			if(this.maxIntensity>maxIntensityAtAngle){
 				maxIntensityAtAngle = this.maxIntensity;
 				maxIntensityAngle   = this.angle;
@@ -260,13 +260,13 @@ class FindLine extends RotatableImageData{
 		return [maxIntensityAngle, maxIntensityIndex];
 	}
 	
-	scanIntensity(){
+	scanIntensity(step = 1){
 		this.rotateImage(this.angle);
 		this.maxIntensity = 0;
 		this.maxIntensityIndex = 0;
-		for(let i=0;i<this.length;i++){
+		for(let i=0;i<this.length;i+=step){
 			this.lineIntensity[i] = 0;
-			for(let j=0;j<this.length;j++){
+			for(let j=0;j<this.length;j+=step){
 				this.lineIntensity[i] += (255-this.rotatedImageData[3*(i+j*this.length)]);
 			}
 			if(this.lineIntensity[i]>this.maxIntensity){
@@ -317,57 +317,46 @@ class Filter extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
 		super([imgIn, xpos, ypos]);
 	}
-	horizontalFuzzy(range = 1){
+	fuzzyR(range = 1){
 		if(range==0) return;
-		let counter, tempR, tempG, tempB, index;
+		let imgHolder = {data: new Array(this.area*4)};
+		let counter, tempR, index;
 		for(let y=0;y<this.height;y++){
-			counter = tempR = tempG = tempB = 0;
+			counter = tempR = 0;
 			for(let x=-range;x<this.width+range;x++){
 				index = this.xy2i([x,y], this.width);
 				
 				if(x+range<this.width){
 					counter++;
 					tempR += this.getPix(this.imgIn, index+range, 0);
-					tempG += this.getPix(this.imgIn, index+range, 1);
-					tempB += this.getPix(this.imgIn, index+range, 2);
 				}
 				
 				if(x-range>=0){
 					counter--;
 					tempR -= this.getPix(this.imgIn, index-range, 0);
-					tempG -= this.getPix(this.imgIn, index-range, 1);
-					tempB -= this.getPix(this.imgIn, index-range, 2);
 				}
-				this.imgOut.data[4*index  ] = tempR/counter;
-				this.imgOut.data[4*index+1] = tempG/counter;
-				this.imgOut.data[4*index+2] = tempB/counter;
+				if(x>=0&&x<this.width){
+					imgHolder.data[4*index] = tempR/counter;
+				}
 			}
 		}
-	}
-	verticalFuzzy(range = 1){
-		if(range==0) return;
-		let counter, tempR, tempG, tempB, index;
 		for(let x=0;x<this.width;x++){
-			counter = tempR = tempG = tempB = 0;
+			counter = tempR = 0;
 			for(let y=-range;y<this.height+range;y++){
 				index = this.xy2i([x,y], this.width);
 				
 				if(y+range<this.height){
 					counter++;
-					tempR += this.getPix(this.imgIn, index+range*this.width, 0);
-					tempG += this.getPix(this.imgIn, index+range*this.width, 1);
-					tempB += this.getPix(this.imgIn, index+range*this.width, 2);
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
 				}
 				
 				if(y-range>=0){
 					counter--;
-					tempR -= this.getPix(this.imgIn, index-range*this.width, 0);
-					tempG -= this.getPix(this.imgIn, index-range*this.width, 1);
-					tempB -= this.getPix(this.imgIn, index-range*this.width, 2);
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
 				}
-				this.imgOut.data[4*index  ] = tempR/counter;
-				this.imgOut.data[4*index+1] = tempG/counter;
-				this.imgOut.data[4*index+2] = tempB/counter;
+				if(y>=0&&y<this.height){
+					this.setPix(index, Math.floor(tempR/counter), "all");
+				}
 			}
 		}
 	}

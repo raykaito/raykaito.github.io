@@ -1,6 +1,6 @@
 class VisionProgram_SudokuReader{
 	constructor(){
-		this.time = 50;
+		this.time = 60;
 		this.interval;
 	}
 	startReading(phase=1, additionalInfo = false){
@@ -18,19 +18,13 @@ class VisionProgram_SudokuReader{
 		}
 		//look for the starting point and angle
 		if(phase==2){
-			const shrinkBlack_1 = new Filter(additionalInfo);
-				  shrinkBlack_1.fuzzy(3);
+			const imgData = new FindBlob(additionalInfo);
 
-			const shrinkBlack_2 = new Binarize(shrinkBlack_1.passdata);
-				  shrinkBlack_2.thresh = 1;
-				  shrinkBlack_2.binarize();
-				  shrinkBlack_2.display(1);
-
-			//setTimeout(()=>{sudokuV.startReading(3, imgData);}, this.time);
+			setTimeout(()=>{sudokuV.startReading(3, imgData);}, this.time);
 		}
 		if(phase==3){
 			additionalInfo.scanBlobs();
-			additionalInfo.display(1);
+			additionalInfo.display();
 		}
 		//Rotate the image
 	}
@@ -38,13 +32,13 @@ class VisionProgram_SudokuReader{
 	}
 
 	findOptimalFuzzyRange(){
-		this.imgDataFuzzy.fuzzy(this.fuzzyRange);
+		this.imgDataFuzzy.fuzzyR(this.fuzzyRange);
 		const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
 			  imgDataDFilter.applyFilter();
-			  imgDataDFilter.display(1);
+			  imgDataDFilter.display();
 
 		const expandBlack_1 = new Filter(imgDataDFilter.passdata);
-			  expandBlack_1.fuzzy(3);
+			  expandBlack_1.fuzzyR(3);
 
 		const expandBlack_2 = new Binarize(expandBlack_1.passdata);
 			  expandBlack_2.thresh = 254;
@@ -66,15 +60,14 @@ class VisionProgram_SudokuReader{
 		this.fuzzyRange++;
 
 		if(this.fuzzyRange>this.imgDataFuzzy._width/40){
-			alert("This program failed to find Optimal Filter Parameter. But the program will continue to run..."+this.imgDataFuzzy._width);
 			clearInterval(this.interval);
-			this.imgDataFuzzy.fuzzy(this.minDprFuzzyRange);
+			this.imgDataFuzzy.fuzzyR(this.minDprFuzzyRange);
 			const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
 				  imgDataDFilter.applyFilter();
-				  imgDataDFilter.display(1);
+				  imgDataDFilter.display();
 
 			const expandBlack_1 = new Filter(imgDataDFilter.passdata);
-				  expandBlack_1.fuzzy(3);
+				  expandBlack_1.fuzzyR(3);
 
 			const expandBlack_2 = new Binarize(expandBlack_1.passdata);
 				  expandBlack_2.thresh = 254;

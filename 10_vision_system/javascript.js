@@ -31,7 +31,7 @@ function findStartingPointAndAngle(){
 	const imageDataNew = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
 	const binarizedImageData = binarizeBoundary(imageDataNew.passdata);
 	const scanLineImageData = new FindLine(binarizedImageData.passdata);
-	return scanLineImageData.findIntersection();
+	return scanLineImageData.findIntersection(10);
 }
 
 function binarizeBoundary(imageData){
