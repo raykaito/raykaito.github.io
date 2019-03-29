@@ -64,7 +64,6 @@ class VisionProgram_SudokuReader{
 			this.imgDataFuzzy.fuzzyR(this.minDprFuzzyRange);
 			const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
 				  imgDataDFilter.applyFilter();
-				  imgDataDFilter.display();
 
 			const expandBlack_1 = new Filter(imgDataDFilter.passdata);
 				  expandBlack_1.fuzzyR(3);
