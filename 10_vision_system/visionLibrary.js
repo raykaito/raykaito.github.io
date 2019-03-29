@@ -48,17 +48,19 @@ class ImageData{
 		this.updateDisplayImage();
 		return this.dimgOut;
 	}
-
-	display(){
-		this.updateDisplayImage();
-		//ct.putImageData(this.imgOut, 0,0);//this.dxpos, this.dypos);
-		ct.putImageData(this.dimgOut, this.dxpos, this.dypos);
+	get _width(){return this.width;}
+	display(actual = false){
+		const dxpos = this.dxpos+Math.floor((this.dwidth-this.width)/2)*actual;
+		const dypos = this.dypos+Math.floor((this.dheight-this.height)/2)*actual;
+		this.updateDisplayImage(actual);
+		ct.putImageData(actual?this.imgOut:this.dimgOut, dxpos, dypos);
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
-		ct.rect(this.dxpos+0.5,this.dypos+0.5,this.dwidth-1,this.dheight-1);
+		ct.rect(dxpos+0.5,dypos+0.5,actual?this.width:this.dwidth-1,actual?this.height:this.dheight-1);
 		ct.stroke();
 	}
-	updateDisplayImage(){
+	updateDisplayImage(actual = false){
+		if(actual) return;
 		let xy;
 		for(let i=0;i<this.darea;i++){
 			xy = this.i2xy(i, this.dwidth);
@@ -440,7 +442,16 @@ class FindBlob extends ImageData{
 	get blobNum(){
 		return this.blobNumber;
 	}
-	updateDisplayImage(){
+	updateDisplayImage(actual = false){
+		if(actual){
+			for(let i=0;i<this.area;i++){
+				if(this.getPix(this.imgOut,i,1)==0&&this.blobMap[i]!=(10*(this.maxAreaIndex+1))){
+					this.imgOut.data[4*i+0]=0;
+					this.imgOut.data[4*i+2]=0;
+				}
+			}			
+			return;
+		}
 		super.updateDisplayImage();
 		let xy;
 		for(let i=0;i<this.darea;i++){
@@ -562,6 +573,13 @@ class Binarize extends ImageData{
 	set thresh(threshIn){
 		this.threshhold = threshIn;
 	}
+	get darkPixelRatio(){
+		let darkPixel = 0;
+		for(let i=this.threshhold;i>=0;i--){
+			darkPixel+=this.histogram[i];
+		}
+		return darkPixel/this.area;
+	}
 	updateSmoothHistogram(range = 1){
 		this.smoothHistogram = smoothenArray(this.histogram, range);
 		console.log(countLocalMax(this.smoothHistogram));
@@ -569,20 +587,20 @@ class Binarize extends ImageData{
 	updateHistogram(){
 		let index;
 		for(let i=0;i<this.histogram.length;i++) this.histogram[i]=0;
-		for(let i=0;i<this.imgIn.data.length;i+=4){
+		for(let i=0;i<this.area;i++){
 			index  = Math.floor(this.getPix(this.imgIn,i,"all"));
 			this.histogram[index]++;
 		}
 		this.max = this.histogram.reduce((a,b)=>{return Math.max(a,b);},0);
 	}
 	binarize(){
-		let darkness;
+		let brightness;
 		for(let i=0;i<this.width*this.height;i++){
-			darkness = this.imgIn.data[4*i+0];
-			darkness+= this.imgIn.data[4*i+1];
-			darkness+= this.imgIn.data[4*i+2];
+			brightness = this.imgIn.data[4*i+0];
+			brightness+= this.imgIn.data[4*i+1];
+			brightness+= this.imgIn.data[4*i+2];
 			for(let c=0;c<3;c++){
-				this.imgOut.data[4*i+c] = (3*this.threshhold>darkness)?0:255;
+				this.imgOut.data[4*i+c] = (brightness<=3*this.threshhold)?0:255;
 			}
 		}
 	}
