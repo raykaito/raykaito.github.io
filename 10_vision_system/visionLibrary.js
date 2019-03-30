@@ -221,37 +221,65 @@ class derivativeFilter extends ImageData{
 class LineScanner extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
 		super([imgIn, xpos, ypos]);
-		this.horizontalScanner = new Array(this.height);
-		this.verticalScanner = new Array(this.width);
+		this.xPioneer = new Array(this.height);
+		this.xAngle = 0;
 		this.whiteToBlack = true;
 		this.lineThresh=10;
+
+		this.bandWidth = Math.tan(deg2rad(2))*this.height;
+		this.minPioneersInBand = 0.8;
 
 		if(preset!=false) this.scanHorizontal();
 	}
 	scanHorizontal(){
-		this.horizontalScanner.fill(0);
-		for(let y=0;y<this.horizontalScanner.length;y++){
-			this.horizontalScanner[y] = this.nextX([this.horizontalScanner[y],y]);
-			this.setPix([this.horizontalScanner[y],y],  0,0);
-			this.setPix([this.horizontalScanner[y],y],255,1);
-			this.setPix([this.horizontalScanner[y],y],255,2);
-			continue;
+		let lineIntensity, threshhold = 1;
+		this.xPioneer.fill(0);
+		while(true){
+			for(let y=0;y<this.xPioneer.length;y++){
+				if(Math.floor(this.xPioneer[y]-this.xAngle*y)<threshhold)
+					this.xPioneer[y] = this.nextX([this.xPioneer[y],y]);
+				continue;
+			}
+			this.xAngle = this.getAngle();
+			threshhold = this.getNewThreshhold();
+			if(threshhold=="break") break;
 		}
-		this.getAngle();
+		alert(Math.floor(100*rad2deg(Math.atan(this.xAngle))/100));
+	}
+	getNewThreshhold(){
+		const sortedXPioneer = new Array(this.height);
+		for(let y=0;y<this.height;y++)
+			sortedXPioneer[y] = Math.floor(this.xPioneer[y]-this.xAngle*y);
+		sortedXPioneer.sort(function(a,b){return a - b;});
+		
+		const median = (sortedXPioneer[Math.floor(this.height/2)]);
+		const lowThresh = median - this.bandWidth/2;
+		const highThresh = median + this.bandWidth/2;
+
+		let counter = 0;
+		for(let y=0;y<this.height;y++){
+			if(sortedXPioneer[y]>=lowThresh&&sortedXPioneer[y]<=highThresh) counter++;
+		}
+		
+		if(counter/this.height>this.minPioneersInBand) return "break";
+		return lowThresh;
 	}
 	getAngle(){
-		let counter = 0;
-		let accumulator = 0;
+		let counter = new Array(3).fill(0);
 		let derivative = 0;
-		for(let y=0;y<this.horizontalScanner.length-1;y++){
-			derivative = this.horizontalScanner[y+1]-this.horizontalScanner[y];
+		for(let y=0;y<this.xPioneer.length-1;y++){
+			derivative = this.xPioneer[y+1]-this.xPioneer[y];
 			if(derivative>=-1&&derivative<=1){
-				counter++;
-				accumulator+=derivative;
+				counter[derivative+1]++;
 			}
 		}
-		alert(Math.floor(100*180*Math.atan(accumulator/counter)/Math.PI)/100);
-		return (accumulator/counter);
+		let angle;
+		if(counter[0]>counter[2]){
+			angle = -counter[0]/(counter[0]+counter[1]);
+		}else{
+			angle = counter[2]/(counter[2]+counter[1]);
+		}
+		return (angle);
 	}
 	nextX(xy){
 		let newR, lastR = this.getPix(this.imgIn, xy, 0);
