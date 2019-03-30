@@ -1,56 +1,40 @@
 class VisionProgram_SudokuReader{
 	constructor(){
-		this.time = 60;
+		this.time = 100;
 		this.interval;
 	}
 	startReading(phase=1, additionalInfo = false){
-		//look for Optimal Fuzzy range;
-		if(phase==1){
+		if(phase==1){//look for Optimal Fuzzy Range;
 			//variables;
 			this.fuzzyRange = 0;
-			this.dprThreshhold = 0.25;
 			this.minDpr=1;
 			this.minDprFuzzyRange=0;
-
-			const imgData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
-			this.imgDataFuzzy = new Filter(imgData.passdata);
+			this.imgData_1 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, 10);//Math.max(10,hcanvas.height/80));
+			
 			this.interval = setInterval(()=>{sudokuV.findOptimalFuzzyRange();}, this.time);
 		}
-		//look for the starting point and angle
 		if(phase==2){
-			const imgData = new FindBlob(additionalInfo);
+			const imgData_2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/5, hcanvas.height/5);
+			const binarizedImage = this.filterPreset_1(imgData_2, this.minDprFuzzyRange);
+			binarizedImage.display(1);
 
-			setTimeout(()=>{sudokuV.startReading(3, imgData);}, this.time);
+			setTimeout(()=>{sudokuV.startReading(3);}, this.time);
 		}
 		if(phase==3){
-			additionalInfo.scanBlobs();
-			//additionalInfo.display(1);
 		}
-		//Rotate the image
 	}
-	ShrinkBlack(){
+	filterPreset_1(imgData, fuzzyRange){
+		//fuzzy_derivativeFilter_expandBlack
+		const fuzzy = new Filter(imgData.passdata, fuzzyRange);
+		const deriv = new derivativeFilter(fuzzy.passdata, true);
+		const black = new Filter(deriv.passdata, 3);
+		const binar = new Binarize(black.passdata, 254);
+		black.display(1);
+		return  binar;
 	}
-
 	findOptimalFuzzyRange(){
-		this.imgDataFuzzy.fuzzyR(this.fuzzyRange);
-		const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
-			  imgDataDFilter.applyFilter();
-			  imgDataDFilter.display(1);
-
-		const expandBlack_1 = new Filter(imgDataDFilter.passdata);
-			  expandBlack_1.fuzzyR(3);
-
-		const expandBlack_2 = new Binarize(expandBlack_1.passdata);
-			  expandBlack_2.thresh = 254;
-			  expandBlack_2.binarize();
-
-		const darkPixelRatio = expandBlack_2.darkPixelRatio;
-
-		if(darkPixelRatio<this.dprThreshhold){
-			clearInterval(this.interval);
-			this.startReading(2, expandBlack_2.passdata);
-			return;
-		}
+		const binarizedImage = this.filterPreset_1(this.imgData_1, this.fuzzyRange);
+		const darkPixelRatio = binarizedImage.darkPixelRatio;
 
 		if(darkPixelRatio<this.minDpr){
 			this.minDpr = darkPixelRatio;
@@ -58,64 +42,11 @@ class VisionProgram_SudokuReader{
 		}
 
 		this.fuzzyRange++;
-
-		if(this.fuzzyRange>this.imgDataFuzzy._width/40){
+		
+		if(this.fuzzyRange>this.imgData_1._width/40){
 			clearInterval(this.interval);
-			this.imgDataFuzzy.fuzzyR(this.minDprFuzzyRange);
-			const imgDataDFilter = new derivativeFilter(this.imgDataFuzzy.passdata);
-				  imgDataDFilter.applyFilter();
-
-			const expandBlack_1 = new Filter(imgDataDFilter.passdata);
-				  expandBlack_1.fuzzyR(3);
-
-			const expandBlack_2 = new Binarize(expandBlack_1.passdata);
-				  expandBlack_2.thresh = 254;
-				  expandBlack_2.binarize();
-
-			this.startReading(2, expandBlack_2.passdata);
+			setTimeout(()=>{sudokuV.startReading(2, binarizedImage.passdata);}, this.time);
 			return;
 		}
 	}
 }
-/*
-function findStartingPointAndAngle(){
-	const imageDataNew = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
-	const binarizedImageData = binarizeBoundary(imageDataNew.passdata);
-	const scanLineImageData = new FindLine(binarizedImageData.passdata);
-	return scanLineImageData.findIntersection();
-}
-
-function binarizeBoundary(imageData){
-	const dprThreshhold = 0.25;
-	const fuzzyImageData = new Filter(imageData);
-	let darkPixelRatio = new Array()
-	for(let fuzzyRange = 0;fuzzyRange<6;fuzzyRange++){
-		fuzzyImageData.fuzzy(fuzzyRange);
-		derivativeFilteredImageData = new derivativeFilter(fuzzyImageData.passdata);
-		darkPixelRatio[fuzzyRange] = derivativeFilteredImageData.applyFilter();
-
-		if(darkPixelRatio[fuzzyRange]<dprThreshhold){
-			derivativeFilteredImageData.display();
-			return derivativeFilteredImageData;
-		}
-	}
-	alert("You need to take better picture.");
-	return false;
-}
-
-function button1(){
-	//let startX, startY, startAngle;
-	//[startX, startY, startAngle]
-	const variable = findStartingPointAndAngle();
-	if(variable==false){
-		console.log("The program failed to determine the Starting Point");
-		return;
-	}
-	variable[2] = (variable[2]+405)%90-45;
-	imageDataOriginal = newWindow().cornerToCorner(0,0,hcanvas.width, hcanvas.height);
-	imageRotor = new RotatableImageData(imageDataOriginal.passdata);
-	imageRotor.rotateImage(variable[2], [variable[0], variable[1]]);
-	imageRotor.pasteRotatedImageData();
-	imageRotor.display();
-}
-*/

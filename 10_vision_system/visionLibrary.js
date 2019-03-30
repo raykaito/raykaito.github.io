@@ -52,11 +52,16 @@ class ImageData{
 	display(actual = false){
 		const dxpos = this.dxpos+Math.floor((this.dwidth-this.width)/2)*actual;
 		const dypos = this.dypos+Math.floor((this.dheight-this.height)/2)*actual;
+		
 		this.updateDisplayImage(actual);
-		ct.putImageData(actual?this.imgOut:this.dimgOut, dxpos, dypos);
+		
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
-		ct.rect(dxpos+0.5,dypos+0.5,actual?this.width:this.dwidth-1,actual?this.height:this.dheight-1);
+		ct.beginPath();
+		ct.rect(dxpos+0.5,dypos+0.5,actual?this.width-1:this.dwidth-1,actual?this.height-1:this.dheight-1);
+
+		ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
+		ct.putImageData(actual?this.imgOut:this.dimgOut, dxpos, dypos);
 		ct.stroke();
 	}
 	updateDisplayImage(actual = false){
@@ -155,13 +160,14 @@ class RotatableImageData extends ImageData{
 }
 
 class derivativeFilter extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], scan=false){
 		super([imgIn, xpos, ypos]);
 		this.horizontalDerivative = new Array(this.area).fill(0);
 		this.verticalDerivative = new Array(this.area).fill(0);
 		this.maximumDerivative = new Array(this.area).fill(0);
 		this.threshholdToMaxRatio = 5;
 		this.scanDerivative();
+		if(scan!=false) this.applyFilter();
 	}
 	applyFilter(){
 		let threshhold = 0;
@@ -314,8 +320,9 @@ class FindLine extends RotatableImageData{
 }
 
 class Filter extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], rangeIn = false){
 		super([imgIn, xpos, ypos]);
+		if(rangeIn!=false) this.fuzzyR(rangeIn);
 	}
 	fuzzyR(range = 1){
 		if(range==0) return;
@@ -551,13 +558,20 @@ class FindBlob extends ImageData{
 }
 
 class Binarize extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], threshIn = false){
 		super([imgIn, xpos, ypos]);
 		this.histogram = new Array(256).fill(0);
 		this.smoothHistogram = new Array(256).fill(0);
 		this.max;
-		this.threshhold = 64;
-		this.updateHistogram();
+
+		if(threshIn!=false){
+			this.threshhold = threshIn;
+			this.updateHistogram();
+			this.binarize();
+		}else{
+			this.threshhold = 64;
+			this.updateHistogram();
+		}
 	}
 	set thresh(threshIn){
 		this.threshhold = threshIn;

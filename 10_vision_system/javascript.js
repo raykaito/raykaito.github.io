@@ -53,6 +53,8 @@ function binarizeBoundary(imageData){
 }
 
 function button1(){
+	sudokuV.startReading(1);
+	return;
 	//let startX, startY, startAngle;
 	//[startX, startY, startAngle]
 	const variable = findStartingPointAndAngle();
@@ -69,12 +71,15 @@ function button1(){
 }
 
 function button2(){
-	const imageDataBeforeRotated = newWindow().cornerToCorner(0,0,hcanvas.width,hcanvas.height);
-	imageDataAfterRotated = new RotatableImageData(imageDataBeforeRotated.passdata);
+	const imageData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+	df = new derivativeFilter(imageData.passdata);
+	df.applyFilter();
+	df.display(1);
 }
 
 function button3(){
-	sudokuV.startReading(1);
+	ct.clearRect(200,200,250,250);
+		alert("cleared");
 }
 
 function button4(){
@@ -88,9 +93,8 @@ function changeParameter(){
 }
 
 function changeParameter2(){
-	imageDataAfterRotated.rotateImage(Number(slider2.value), [0,0]);
-	imageDataAfterRotated.pasteRotatedImageData();
-	imageDataAfterRotated.display();
+	df.applyFilter();
+	df.display(1);
 }
 
 function changeParameter3(){
