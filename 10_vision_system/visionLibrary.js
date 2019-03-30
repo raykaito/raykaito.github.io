@@ -54,7 +54,7 @@ class ImageData{
 		const dypos = this.dypos+Math.floor((this.dheight-this.height)/2)*actual;
 		
 		this.updateDisplayImage(actual);
-		
+
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
 		ct.beginPath();
@@ -160,14 +160,15 @@ class RotatableImageData extends ImageData{
 }
 
 class derivativeFilter extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], scan=false){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
 		super([imgIn, xpos, ypos]);
 		this.horizontalDerivative = new Array(this.area).fill(0);
 		this.verticalDerivative = new Array(this.area).fill(0);
 		this.maximumDerivative = new Array(this.area).fill(0);
 		this.threshholdToMaxRatio = 5;
 		this.scanDerivative();
-		if(scan!=false) this.applyFilter();
+
+		if(preset!=false) this.applyFilter();
 	}
 	applyFilter(){
 		let threshhold = 0;
@@ -214,6 +215,60 @@ class derivativeFilter extends ImageData{
 			}
 		}
 		for(let i=0;i<this.area;i++) this.maximumDerivative[i] = Math.max(this.horizontalDerivative[i], this.verticalDerivative[i]);
+	}
+}
+
+class LineScanner extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
+		super([imgIn, xpos, ypos]);
+		this.horizontalScanner = new Array(this.height);
+		this.verticalScanner = new Array(this.width);
+		this.whiteToBlack = true;
+		this.lineThresh=10;
+
+		if(preset!=false) this.scanHorizontal();
+	}
+	scanHorizontal(){
+		this.horizontalScanner.fill(0);
+		for(let y=0;y<this.horizontalScanner.length;y++){
+			this.horizontalScanner[y] = this.nextX([this.horizontalScanner[y],y]);
+			this.setPix([this.horizontalScanner[y],y],  0,0);
+			this.setPix([this.horizontalScanner[y],y],255,1);
+			this.setPix([this.horizontalScanner[y],y],255,2);
+			continue;
+		}
+		this.getAngle();
+	}
+	getAngle(){
+		let counter = 0;
+		let accumulator = 0;
+		let derivative = 0;
+		for(let y=0;y<this.horizontalScanner.length-1;y++){
+			derivative = this.horizontalScanner[y+1]-this.horizontalScanner[y];
+			if(derivative>=-1&&derivative<=1){
+				counter++;
+				accumulator+=derivative;
+			}
+		}
+		alert(Math.floor(100*180*Math.atan(accumulator/counter)/Math.PI)/100);
+		return (accumulator/counter);
+	}
+	nextX(xy){
+		let newR, lastR = this.getPix(this.imgIn, xy, 0);
+		for(;xy[0]<this.width;){
+			xy[0]++;
+			newR = this.getPix(this.imgIn, xy, 0);
+			if(this.whiteToBlack){
+				if(newR-lastR<-this.lineThresh) return xy[0];
+			}else{
+				if(newR-lastR> this.lineThresh) return xy[0];
+			}
+			this.setPix(xy,  0,0);
+			this.setPix(xy,255,1);
+			this.setPix(xy,255,2);
+			lastR = newR;
+		}
+		return -1;
 	}
 }
 
@@ -320,9 +375,10 @@ class FindLine extends RotatableImageData{
 }
 
 class Filter extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], rangeIn = false){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
 		super([imgIn, xpos, ypos]);
-		if(rangeIn!=false) this.fuzzyR(rangeIn);
+
+		if(preset!=false) this.fuzzyR(preset);
 	}
 	fuzzyR(range = 1){
 		if(range==0) return;
@@ -426,7 +482,7 @@ class Filter extends ImageData{
 }
 
 class FindBlob extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
 		super([imgIn, xpos, ypos]);
 		this.blobMap  = new Array(this.area);
 		this.dblobMap = new Array(this.darea);
@@ -434,6 +490,8 @@ class FindBlob extends ImageData{
 		this.blobNumber = 0;
 		this.maxArea = 0;
 		this.maxAreaIndex = 0;
+
+		if(preset!=false) this.scanBlobs();
 	}
 	get blobNum(){
 		return this.blobNumber;
@@ -558,14 +616,14 @@ class FindBlob extends ImageData{
 }
 
 class Binarize extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], threshIn = false){
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
 		super([imgIn, xpos, ypos]);
 		this.histogram = new Array(256).fill(0);
 		this.smoothHistogram = new Array(256).fill(0);
 		this.max;
 
-		if(threshIn!=false){
-			this.threshhold = threshIn;
+		if(preset!=false){
+			this.threshhold = preset;
 			this.updateHistogram();
 			this.binarize();
 		}else{

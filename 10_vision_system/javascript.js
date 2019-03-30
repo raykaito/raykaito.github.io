@@ -78,8 +78,8 @@ function button2(){
 }
 
 function button3(){
-	ct.clearRect(200,200,250,250);
-		alert("cleared");
+	const imageData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+	const scanner = new LineScanner(imageData.passdata, true);
 }
 
 function button4(){

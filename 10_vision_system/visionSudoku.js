@@ -18,9 +18,12 @@ class VisionProgram_SudokuReader{
 			const binarizedImage = this.filterPreset_1(imgData_2, this.minDprFuzzyRange);
 			binarizedImage.display(1);
 
-			setTimeout(()=>{sudokuV.startReading(3);}, this.time);
+			setTimeout(()=>{sudokuV.startReading(3, binarizedImage);}, this.time);
 		}
 		if(phase==3){
+			const lineScanner = new LineScanner(additionalInfo.passdata);
+			lineScanner.scanHorizontal();
+			lineScanner.display(1);
 		}
 	}
 	filterPreset_1(imgData, fuzzyRange){
