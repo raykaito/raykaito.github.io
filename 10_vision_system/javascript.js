@@ -78,18 +78,18 @@ function button2(){
 }
 
 function button3(){
-	const imageData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
-	const scanner = new LineScanner(imageData.passdata, true);
+	const imgData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+	binar = new Binarize(imgData.passdata);
 }
 
 function button4(){
 }
 
-function changeParameter(){
-	fuzzy.fuzzy(Number(slider.value));
-	df = new derivativeFilter(fuzzy.passdata);
-	df.applyFilter();
-	df.display();
+function changeParameter1(){
+	binar.thresh = Number(slider1.value);
+	binar.binarize();
+	const blob = new FindBlob(binar.passdata, true);
+	blob.display(1);
 }
 
 function changeParameter2(){

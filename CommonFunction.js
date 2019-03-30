@@ -41,8 +41,8 @@ function getDist(x,y,tx,ty){
 }
 
 function getDir(x,y,tx,ty){
-	dx = tx-x;
-	dy = ty-y;
+	let dx = tx-x;
+	let dy = ty-y;
 
 	if(dx==0) return (dy<0)?270:90;
 

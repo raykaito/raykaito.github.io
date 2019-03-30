@@ -232,17 +232,22 @@ class LineScanner extends ImageData{
 		if(preset!=false) this.scanHorizontal();
 	}
 	scanHorizontal(){
-		let lineIntensity, threshhold = 1;
+		let threshhold = 1;
 		this.xPioneer.fill(0);
-		while(true){
+		for(let limit=500;limit>0;limit--){
+			let noProgress = true;
 			for(let y=0;y<this.xPioneer.length;y++){
-				if(Math.floor(this.xPioneer[y]-this.xAngle*y)<threshhold)
-					this.xPioneer[y] = this.nextX([this.xPioneer[y],y]);
+				if(Math.floor(this.xPioneer[y]-this.xAngle*y)<threshhold){
+					const nextX = this.nextX([this.xPioneer[y],y]);
+					if(nextX==-1) continue;
+					this.xPioneer[y] = nextX;
+					noProgress = false;
+				}
 				continue;
 			}
 			this.xAngle = this.getAngle();
 			threshhold = this.getNewThreshhold();
-			if(threshhold=="break") break;
+			if(noProgress||threshhold=="break")break;
 		}
 		alert(Math.floor(100*rad2deg(Math.atan(this.xAngle))/100));
 	}
@@ -262,7 +267,7 @@ class LineScanner extends ImageData{
 		}
 		
 		if(counter/this.height>this.minPioneersInBand) return "break";
-		return lowThresh;
+		return lowThresh-this.bandWidth;
 	}
 	getAngle(){
 		let counter = new Array(3).fill(0);
