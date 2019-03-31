@@ -13,18 +13,19 @@ class VisionProgram_SudokuReader{
 			
 			this.interval = setInterval(()=>{sudokuV.findOptimalFuzzyRange();}, this.time);
 		}
-		if(phase==2){
+		if(phase==2){//Apply Fuzzy filter to new Window
 			const imgData_2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/5, hcanvas.height/5);
 			const binarizedImage = this.filterPreset_1(imgData_2, this.minDprFuzzyRange);
-			binarizedImage.display(1);
+			binarizedImage.display(0);
 
 			setTimeout(()=>{sudokuV.startReading(3, binarizedImage);}, this.time);
 		}
-		if(phase==3){
+		if(phase==3){//Scan for lines
 			const lineScanner = new LineScanner(additionalInfo.passdata);
 			lineScanner.scanHorizontal();
 			lineScanner.scanVertical();
-			lineScanner.display(1);
+			const center_CellInnerLegLength = this.getCellInfo(lineScanner);
+			lineScanner.display(0);
 		}
 	}
 	filterPreset_1(imgData, fuzzyRange){
@@ -33,7 +34,7 @@ class VisionProgram_SudokuReader{
 		const deriv = new derivativeFilter(fuzzy.passdata, true);
 		const black = new Filter(deriv.passdata, 3);
 		const binar = new Binarize(black.passdata, 254);
-		black.display(1);
+		black.display(0);
 		return  binar;
 	}
 	findOptimalFuzzyRange(){
@@ -52,5 +53,46 @@ class VisionProgram_SudokuReader{
 			setTimeout(()=>{sudokuV.startReading(2, binarizedImage.passdata);}, this.time);
 			return;
 		}
+	}
+	getCellInfo(lineScanner){
+		const xInt = lineScanner.xIntersect();
+		const yInt = lineScanner.yIntersect();
+		const xAng = lineScanner.x_Angle();
+		const yAng = lineScanner.y_Angle();
+
+		let cellLengthMax = 0;
+		let maxIndex = 0;
+		for(let i=3;i<xInt.length;i+=2){
+			const cellLength = xInt[i]-xInt[i-1];
+			if(cellLength>cellLengthMax){
+				cellLengthMax = cellLength;
+				maxIndex = i;
+			}
+		}
+		if(maxIndex==0){
+			console.log("No cells found. maxIndex for X is 0");
+			return false;
+		}
+		const xLineGap = cellLengthMax;
+		const xIntMid  = (xInt[maxIndex]+xInt[maxIndex-1])/2;
+
+		cellLengthMax = 0;
+		maxIndex = 0;
+		for(let i=3;i<yInt.length;i+=2){
+			const cellLength = yInt[i]-yInt[i-1];
+			if(cellLength>cellLengthMax){
+				cellLengthMax = cellLength;
+				maxIndex = i;
+			}
+		}
+		if(maxIndex==0){
+			console.log("No cells found. maxIndex for X is 0");
+			return false;
+		}
+		const yLineGap = cellLengthMax;
+		const yIntMid  = (yInt[maxIndex]+yInt[maxIndex-1])/2;
+
+		(yIn/xlope+xint)/(1-yslope/xslope)=x
+		return [xy, length];
 	}
 }

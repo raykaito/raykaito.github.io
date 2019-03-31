@@ -221,6 +221,10 @@ class derivativeFilter extends ImageData{
 class LineScanner extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
 		super([imgIn, xpos, ypos]);
+		//Absolute X and Y intersects
+		this.absxIntersect = new Array();
+		this.absyIntersect = new Array();
+
 		//For Horizontal
 		this.xPioneer = new Array(this.height);
 		this.xAngle = 0;
@@ -244,6 +248,11 @@ class LineScanner extends ImageData{
 
 		if(preset!=false) this.scanHorizontal();
 	}
+	get xIntersect(){return this.absxIntersect;}
+	get yIntersect(){return this.absyIntersect;}
+	get x_Angle()	{return this.xAngle;}
+	get y_Angle()	{return this.yAngle;}
+	
 	scanHorizontal(){
 		//Set up Variables
 		let threshhold = 1;
@@ -298,8 +307,12 @@ class LineScanner extends ImageData{
 				this.setPix(index,0   ,2);
 			}
 		}
-		console.log(xIntersects);
-		return xIntersects;
+		this.absxIntersect = [];
+		for(let i in xIntersects){
+			xIntersects[i] -= this.xAngle*this.ypos-this.xpos;
+			this.absxIntersect[i] = xIntersects[i];
+		}
+		return;
 	}
 
 	scanVertical(){
@@ -356,8 +369,11 @@ class LineScanner extends ImageData{
 				this.setPix(index,0   ,2);
 			}
 		}
-		console.log(yIntersects);
-		return yIntersects;
+		this.absyIntersect = [];
+		for(let i in yIntersects){
+			yIntersects[i] -= this.yAngle*this.xpos-this.ypos;
+			this.absyIntersect[i] = yIntersects[i];
+		}
 	}
 	sortPioneer(pioneerIn, angleIn){
 		const sortedPioneer = new Array(pioneerIn.length);
