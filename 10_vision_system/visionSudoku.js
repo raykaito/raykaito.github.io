@@ -9,7 +9,7 @@ class VisionProgram_SudokuReader{
 			this.fuzzyRange = 0;
 			this.minDpr=1;
 			this.minDprFuzzyRange=0;
-			this.imgData_1 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, 10);//Math.max(10,hcanvas.height/80));
+			this.imgData_1 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6/canvasScale, hcanvas.height/6/canvasScale);//Math.max(10,hcanvas.height/80));
 			
 			this.interval = setInterval(()=>{sudokuV.findOptimalFuzzyRange();}, this.time);
 		}
@@ -24,11 +24,15 @@ class VisionProgram_SudokuReader{
 			const lineScanner = new LineScanner(additionalInfo.passdata);
 			lineScanner.scanHorizontal();
 			lineScanner.scanVertical();
+			lineScanner.display(0);
 			const center_CellInnerLegLength = this.getCellInfo(lineScanner);
+			if(center_CellInnerLegLength==false){
+				lineScanner.display(1);
+				return;
+			}
 			const x = center_CellInnerLegLength[0][0];
 			const y = center_CellInnerLegLength[0][1];
 			const l = center_CellInnerLegLength[1];
-			lineScanner.display(0);
 			circle(x/canvasScale, y/canvasScale, l/canvasScale/2);
 		}
 	}
@@ -38,12 +42,13 @@ class VisionProgram_SudokuReader{
 		const deriv = new derivativeFilter(fuzzy.passdata, true);
 		const black = new Filter(deriv.passdata, 3);
 		const binar = new Binarize(black.passdata, 254);
-		black.display(0);
 		return  binar;
 	}
 	findOptimalFuzzyRange(){
 		const binarizedImage = this.filterPreset_1(this.imgData_1, this.fuzzyRange);
 		const darkPixelRatio = binarizedImage.darkPixelRatio;
+
+		binarizedImage.display(1);
 
 		if(darkPixelRatio<this.minDpr){
 			this.minDpr = darkPixelRatio;
@@ -52,7 +57,7 @@ class VisionProgram_SudokuReader{
 
 		this.fuzzyRange++;
 		
-		if(this.fuzzyRange>this.imgData_1._width/40){
+		if(this.fuzzyRange>this.imgData_1._width/40*canvasScale){
 			clearInterval(this.interval);
 			setTimeout(()=>{sudokuV.startReading(2, binarizedImage.passdata);}, this.time);
 			return;
