@@ -23,6 +23,7 @@ class VisionProgram_SudokuReader{
 		if(phase==3){
 			const lineScanner = new LineScanner(additionalInfo.passdata);
 			lineScanner.scanHorizontal();
+			lineScanner.scanVertical();
 			lineScanner.display(1);
 		}
 	}

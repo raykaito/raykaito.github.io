@@ -221,20 +221,42 @@ class derivativeFilter extends ImageData{
 class LineScanner extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
 		super([imgIn, xpos, ypos]);
+		//For Horizontal
 		this.xPioneer = new Array(this.height);
 		this.xAngle = 0;
-		this.whiteToBlack = true;
-		this.lineThresh=10;
+		this.xAngleFixed = true;
 
+		//For Vertical
+		this.yPioneer = new Array(this.width);
+		this.yAngle = 0;
+		this.yAngleFixed = true;
+
+		//Parameter for scanHorizontal();
+		this.whiteToBlack = true;
 		this.bandWidth = Math.tan(deg2rad(2))*this.height;
 		this.minPioneersInBand = 0.8;
+
+		//Parameter for getAngle();
+		this.allowableRange = 5;
+
+		//Parameter for nextX() and nextY();
+		this.lineThresh=10;
 
 		if(preset!=false) this.scanHorizontal();
 	}
 	scanHorizontal(){
+		//Set up Variables
 		let threshhold = 1;
+		let xIntersects = new Array();
+		let intersectCounter = 0;
 		this.xPioneer.fill(0);
-		for(let limit=500;limit>0;limit--){
+		this.xAngle = 0;
+		this.xAngleFixed = false;
+		this.whiteToBlack = true;
+
+		let sortedXPioneer = new Array(this.height);
+
+		while(true){
 			let noProgress = true;
 			for(let y=0;y<this.xPioneer.length;y++){
 				if(Math.floor(this.xPioneer[y]-this.xAngle*y)<threshhold){
@@ -245,48 +267,204 @@ class LineScanner extends ImageData{
 				}
 				continue;
 			}
-			this.xAngle = this.getAngle();
-			threshhold = this.getNewThreshhold();
-			if(noProgress||threshhold=="break")break;
+			if(!this.xAngleFixed) this.xAngle = this.getAngle(this.xPioneer);
+
+			sortedXPioneer = this.sortPioneer(this.xPioneer, this.xAngle);
+
+			if(this.lineDetected(sortedXPioneer)){
+				this.xAngleFixed = true;
+				xIntersects[intersectCounter] = this.getIntersect(sortedXPioneer);
+
+				if(xIntersects[intersectCounter]<=xIntersects[intersectCounter-1]){
+					xIntersects.pop();
+					break;
+				}
+
+				threshhold = this.getNewThreshhold(sortedXPioneer, true)+1;
+				this.whiteToBlack = !this.whiteToBlack;
+				intersectCounter++;
+				continue;
+			}
+
+			threshhold = this.getNewThreshhold(sortedXPioneer);
+
+			if(noProgress)break;
 		}
-		alert(Math.floor(100*rad2deg(Math.atan(this.xAngle))/100));
+		for(let y=0;y<this.height;y++){
+			for(let i=0;i<xIntersects.length;i++){
+				let index = [Math.floor(xIntersects[i]+y*this.xAngle),y];
+				this.setPix(index,255 ,0);
+				this.setPix(index,0   ,1);
+				this.setPix(index,0   ,2);
+			}
+		}
+		console.log(xIntersects);
+		return xIntersects;
 	}
-	getNewThreshhold(){
-		const sortedXPioneer = new Array(this.height);
-		for(let y=0;y<this.height;y++)
-			sortedXPioneer[y] = Math.floor(this.xPioneer[y]-this.xAngle*y);
-		sortedXPioneer.sort(function(a,b){return a - b;});
-		
-		const median = (sortedXPioneer[Math.floor(this.height/2)]);
+
+	scanVertical(){
+		//Set up Variables
+		let threshhold = 1;
+		let yIntersects = new Array();
+		let intersectCounter = 0;
+		this.yPioneer.fill(0);
+		this.yAngle = 0;
+		this.yAngleFixed = false;
+		this.whiteToBlack = true;
+
+		let sortedYPioneer = new Array(this.width);
+
+		while(true){
+			let noProgress = true;
+			for(let x=0;x<this.yPioneer.length;x++){
+				if(Math.floor(this.yPioneer[x]-this.yAngle*x)<threshhold){
+					const nextY = this.nextY([x, this.yPioneer[x]]);
+					if(nextY==-1) continue;
+					this.yPioneer[x] = nextY;
+					noProgress = false;
+				}
+				continue;
+			}
+			if(!this.yAngleFixed) this.yAngle = this.getAngle(this.yPioneer);
+
+			sortedYPioneer = this.sortPioneer(this.yPioneer, this.yAngle);
+
+			if(this.lineDetected(sortedYPioneer)){
+				this.yAngleFixed = true;
+				yIntersects[intersectCounter] = this.getIntersect(sortedYPioneer);
+
+				if(yIntersects[intersectCounter]<=yIntersects[intersectCounter-1]){
+					yIntersects.pop();
+					break;
+				}
+
+				threshhold = this.getNewThreshhold(sortedYPioneer, true)+1;
+				this.whiteToBlack = !this.whiteToBlack;
+				intersectCounter++;
+				continue;
+			}
+
+			threshhold = this.getNewThreshhold(sortedYPioneer);
+
+			if(noProgress)break;
+		}
+		for(let x=0;x<this.width;x++){
+			for(let i=0;i<yIntersects.length;i++){
+				let index = [x, Math.floor(yIntersects[i]+x*this.yAngle)];
+				this.setPix(index,255 ,0);
+				this.setPix(index,0   ,1);
+				this.setPix(index,0   ,2);
+			}
+		}
+		console.log(yIntersects);
+		return yIntersects;
+	}
+	sortPioneer(pioneerIn, angleIn){
+		const sortedPioneer = new Array(pioneerIn.length);
+		for(let i=0;i<pioneerIn.length;i++)
+			sortedPioneer[i] = Math.floor(pioneerIn[i]-angleIn*i);
+		sortedPioneer.sort(function(a,b){return a - b;});
+		return sortedPioneer;
+	}
+	lineDetected(sortedPioneer){		
+		const median = sortedPioneer[Math.floor(sortedPioneer.length/2)];
 		const lowThresh = median - this.bandWidth/2;
 		const highThresh = median + this.bandWidth/2;
 
 		let counter = 0;
-		for(let y=0;y<this.height;y++){
-			if(sortedXPioneer[y]>=lowThresh&&sortedXPioneer[y]<=highThresh) counter++;
+		for(let i=0;i<sortedPioneer.length;i++){
+			if(sortedPioneer[i]<lowThresh) continue;
+			if(sortedPioneer[i]>highThresh)break;
+			counter++
+		}
+
+		const InBandRatio = counter/sortedPioneer.length;
+
+		return (InBandRatio>this.minPioneersInBand);
+	}
+	getIntersect(sortedPioneer){
+		let counter,  maxCounter,  maxCounterPioneer,  currentPioneer;
+		    counter = maxCounter = maxCounterPioneer = currentPioneer = 0;
+		
+		for(let i=0;i<sortedPioneer.length;i++){
+			if(currentPioneer<sortedPioneer[i]||i==sortedPioneer.length-1){
+				if(counter>maxCounter){
+					maxCounterPioneer = currentPioneer;
+					maxCounter = counter;
+				}
+				currentPioneer = sortedPioneer[i];
+				counter = 0;
+			}
+			counter++;
+		}
+		if(maxCounterPioneer==0){
+			console.log(sortedPioneer);
+		}
+		return maxCounterPioneer;
+
+	}
+
+	getNewThreshhold(sortedPioneer, flipped = false){		
+		const median = (sortedPioneer[Math.floor(sortedPioneer.length/2)]);
+		if(flipped) return median+this.bandWidth/2;
+		const lowThresh = median - this.bandWidth*2;
+
+		if(sortedPioneer[0]<lowThresh) return lowThresh;
+
+		return sortedPioneer[Math.floor(sortedPioneer.length*0.02)]+1;
+	}
+
+	getAngle(pioneer){
+		let derivative = new Array(pioneer.length-1);
+		for(let i=0;i<pioneer.length-1;i++){
+			derivative[i] = pioneer[i+1]-pioneer[i];
 		}
 		
-		if(counter/this.height>this.minPioneersInBand) return "break";
-		return lowThresh-this.bandWidth;
-	}
-	getAngle(){
-		let counter = new Array(3).fill(0);
-		let derivative = 0;
-		for(let y=0;y<this.xPioneer.length-1;y++){
-			derivative = this.xPioneer[y+1]-this.xPioneer[y];
-			if(derivative>=-1&&derivative<=1){
-				counter[derivative+1]++;
+		let streak,  maxStreak,  maxStreakIndex,  newStreakIndex,  rangeMin,  rangeMax;
+		    streak = maxStreak = maxStreakIndex = newStreakIndex = rangeMin = rangeMax = 0;
+		let streakBreakCount = 0;
+
+		let startStreak = true;
+		
+		for(let i=0;i<pioneer.length-1;i++){
+			if(startStreak){
+				streakBreakCount++;
+				if(streak>maxStreak){
+					maxStreak = streak;
+					maxStreakIndex = newStreakIndex;
+				}
+				rangeMin = rangeMax = derivative[i];
+				newStreakIndex = i;
+				streak = 0;
+				startStreak = false;
+				continue;
 			}
+			rangeMin = Math.min(rangeMin, derivative[i]);
+			rangeMax = Math.max(rangeMax, derivative[i]);
+			if(rangeMax-rangeMin>this.allowableRange){
+				startStreak = true;
+				continue;
+			}
+			streak++;
 		}
-		let angle;
-		if(counter[0]>counter[2]){
-			angle = -counter[0]/(counter[0]+counter[1]);
-		}else{
-			angle = counter[2]/(counter[2]+counter[1]);
+
+		let accumulator = 0;
+
+		//This is for a case in which streak==this.height
+		if(streakBreakCount==1){
+			maxStreakIndex=0;
+			maxStreak=pioneer.length-1;
 		}
-		return (angle);
+
+		for(let y=maxStreakIndex;y<maxStreakIndex+maxStreak;y++){
+			accumulator+=derivative[y];
+		}
+		const angle = accumulator/maxStreak;
+		return angle;
 	}
+
 	nextX(xy){
+		if(xy[0]==this.width-1) return -1;
 		let newR, lastR = this.getPix(this.imgIn, xy, 0);
 		for(;xy[0]<this.width;){
 			xy[0]++;
@@ -296,12 +474,25 @@ class LineScanner extends ImageData{
 			}else{
 				if(newR-lastR> this.lineThresh) return xy[0];
 			}
-			this.setPix(xy,  0,0);
-			this.setPix(xy,255,1);
-			this.setPix(xy,255,2);
 			lastR = newR;
 		}
-		return -1;
+		return this.width-1;
+	}
+
+	nextY(xy){
+		if(xy[1]==this.height-1) return -1;
+		let newR, lastR = this.getPix(this.imgIn, xy, 0);
+		for(;xy[1]<this.height;){
+			xy[1]++;
+			newR = this.getPix(this.imgIn, xy, 0);
+			if(this.whiteToBlack){
+				if(newR-lastR<-this.lineThresh) return xy[1];
+			}else{
+				if(newR-lastR> this.lineThresh) return xy[1];
+			}
+			lastR = newR;
+		}
+		return this.height-1;
 	}
 }
 
