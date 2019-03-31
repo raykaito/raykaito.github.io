@@ -25,7 +25,11 @@ class VisionProgram_SudokuReader{
 			lineScanner.scanHorizontal();
 			lineScanner.scanVertical();
 			const center_CellInnerLegLength = this.getCellInfo(lineScanner);
+			const x = center_CellInnerLegLength[0][0];
+			const y = center_CellInnerLegLength[0][1];
+			const l = center_CellInnerLegLength[1];
 			lineScanner.display(0);
+			circle(x/canvasScale, y/canvasScale, l/canvasScale/2);
 		}
 	}
 	filterPreset_1(imgData, fuzzyRange){
@@ -54,45 +58,34 @@ class VisionProgram_SudokuReader{
 			return;
 		}
 	}
-	getCellInfo(lineScanner){
-		const xInt = lineScanner.xIntersect();
-		const yInt = lineScanner.yIntersect();
-		const xAng = lineScanner.x_Angle();
-		const yAng = lineScanner.y_Angle();
-
-		let cellLengthMax = 0;
-		let maxIndex = 0;
-		for(let i=3;i<xInt.length;i+=2){
-			const cellLength = xInt[i]-xInt[i-1];
-			if(cellLength>cellLengthMax){
-				cellLengthMax = cellLength;
-				maxIndex = i;
+	getCellInfo(lineScanner){//0 for X and 1 for Y
+		const intersects = lineScanner.intersects;
+		const angles = lineScanner.angles;
+		let intersectMids = [];
+		let lineGaps = []
+		for(let phase=0;phase<2;phase++){
+			//phase 0 for X and phase 1 for Ylet cellLengthMax = 0;
+			let cellLengthMax = 0;
+			let maxIndex = 0;
+			for(let i=2;i<intersects[phase].length;i+=2){
+				const cellLength = intersects[phase][i]-intersects[phase][i-1];
+				if(cellLength>cellLengthMax){
+					cellLengthMax = cellLength;
+					maxIndex = i;
+				}
 			}
-		}
-		if(maxIndex==0){
-			console.log("No cells found. maxIndex for X is 0");
-			return false;
-		}
-		const xLineGap = cellLengthMax;
-		const xIntMid  = (xInt[maxIndex]+xInt[maxIndex-1])/2;
-
-		cellLengthMax = 0;
-		maxIndex = 0;
-		for(let i=3;i<yInt.length;i+=2){
-			const cellLength = yInt[i]-yInt[i-1];
-			if(cellLength>cellLengthMax){
-				cellLengthMax = cellLength;
-				maxIndex = i;
+			if(maxIndex==0){
+				console.log("No cells found. maxIndex for X is 0");
+				return false;
 			}
+			lineGaps[phase] = cellLengthMax;
+			intersectMids[phase] = (intersects[phase][maxIndex]+intersects[phase][maxIndex-1])/2;
+			
 		}
-		if(maxIndex==0){
-			console.log("No cells found. maxIndex for X is 0");
-			return false;
-		}
-		const yLineGap = cellLengthMax;
-		const yIntMid  = (yInt[maxIndex]+yInt[maxIndex-1])/2;
 
-		(yIn/xlope+xint)/(1-yslope/xslope)=x
-		return [xy, length];
+		const x = (intersectMids[0]+(angles[0]*intersectMids[1]))/(1-angles[0]*angles[1]);
+		const y = (intersectMids[1]+x*angles[1]);
+
+		return [[x,y], (lineGaps[0]+lineGaps[1])/2];
 	}
 }

@@ -248,10 +248,8 @@ class LineScanner extends ImageData{
 
 		if(preset!=false) this.scanHorizontal();
 	}
-	get xIntersect(){return this.absxIntersect;}
-	get yIntersect(){return this.absyIntersect;}
-	get x_Angle()	{return this.xAngle;}
-	get y_Angle()	{return this.yAngle;}
+	get intersects(){return [this.absxIntersect, this.absyIntersect];}
+	get angles()	{return [this.xAngle, this.yAngle];}
 	
 	scanHorizontal(){
 		//Set up Variables

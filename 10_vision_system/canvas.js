@@ -51,7 +51,7 @@ function resize(widthHeightRatio){
     console.log("dimension : "+canvas.width + "  , "+ canvas.height);
 }
 
-function line(xi,yi,xii,yii,w){
+const line=(xi,yi,xii,yii,w)=>{
     ct.lineWidth = w;
     ct.beginPath();
     ct.moveTo(xi ,yi );
@@ -59,7 +59,7 @@ function line(xi,yi,xii,yii,w){
     ct.stroke();
 }
 
-function circle(x,y,rad){
+const circle=(x,y,rad)=>{
     ct.beginPath();
     ct.arc(x,y,rad,0,2*Math.PI);
     ct.stroke();
