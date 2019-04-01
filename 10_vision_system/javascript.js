@@ -1,4 +1,4 @@
-var img, himg, interval;
+var img, himg;
 
 function initJS(){
 	sudokuV = new VisionProgram_SudokuReader();
@@ -83,6 +83,7 @@ function button3(){
 }
 
 function button4(){
+	sudokuV.fillNextCellInfo(true);
 }
 
 function changeParameter1(){
@@ -93,8 +94,10 @@ function changeParameter1(){
 }
 
 function changeParameter2(){
-	df.applyFilter();
-	df.display(1);
+	binar.updateThreshFromDarkPixelRatio(Number(slider2.value)/100);
+	binar.binarize();
+	binar.display(1);
+	binar.displayHistogram();
 }
 
 function changeParameter3(){

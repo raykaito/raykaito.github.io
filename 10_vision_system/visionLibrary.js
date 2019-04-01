@@ -237,8 +237,8 @@ class LineScanner extends ImageData{
 
 		//Parameter for scanHorizontal();
 		this.whiteToBlack = true;
-		this.bandWidth = Math.tan(deg2rad(2))*this.height;
-		this.minPioneersInBand = 0.8;
+		this.bandWidth = Math.tan(deg2rad(1))*this.height;
+		this.minPioneersInBand = 0.6;
 
 		//Parameter for getAngle();
 		this.allowableRange = 5;
@@ -246,8 +246,19 @@ class LineScanner extends ImageData{
 		//Parameter for nextX() and nextY();
 		this.lineThresh=10;
 
-		if(preset!=false) this.scanHorizontal();
+		if(preset!=false){
+			this.scanHorizontal();
+			this.scanVertical();
+			//this.display();
+		}
 	}
+	set bandWidthAngle(angle){
+		this.bandWidth = Math.tan(deg2rad(angle))*this.height;
+	}
+	set InBandrate(rateIn){
+		this.minPioneersInBand = rateIn;
+	}
+
 	get intersects(){return [this.absxIntersect, this.absyIntersect];}
 	get angles()	{return [this.xAngle, this.yAngle];}
 	
@@ -507,108 +518,6 @@ class LineScanner extends ImageData{
 			lastR = newR;
 		}
 		return this.height-1;
-	}
-}
-
-class FindLine extends RotatableImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
-		super([imgIn, xpos, ypos]);
-		this.lineIntensity = new Array(this.length);
-		this.maxIntensityIndex;
-		this.maxIntensity;
-		this.angle = 0;
-	}
-	set scanAngle(value){this.angle = value;}
-
-	findIntersection(step=1){
-		const angleIndex = this.findMaxIntensityAngle(step);
-		this.angle = angleIndex[0]+90;
-		this.scanIntensity(step);
-		const coordinateBeforeRotation = [angleIndex[1], this.length-this.maxIntensityIndex];
-
-		console.log(coordinateBeforeRotation);
-		console.log(this.angle-90);
-
-		const theta = -1*(this.angle-90)*Math.PI/180;
-		const abcd = [Math.cos(theta), Math.sin(theta), -Math.sin(theta), Math.cos(theta)];
-
-		const xo = coordinateBeforeRotation[0]-this.length/2;
-		const yo = coordinateBeforeRotation[1]-this.length/2;
-		const x  = Math.floor(xo*abcd[0] + yo*abcd[2] + this.width/2);
-		const y  = Math.floor(xo*abcd[1] + yo*abcd[3] + this.height/2);
-
-		circle(this.dxpos+x/canvasScale, this.dypos+y/canvasScale, 10);
-
-
-		return [this.xpos+x, this.ypos+y, this.angle];
-	}
-
-	findMaxIntensityAngle(step=1){
-		let maxIntensityAtAngle = 0;
-		let maxIntensityAngle = 0;
-		let maxIntensityIndex = 0;
-		for(let i=0;i<180;i++){
-			this.angle = i;
-			this.scanIntensity(step);
-			if(this.maxIntensity>maxIntensityAtAngle){
-				maxIntensityAtAngle = this.maxIntensity;
-				maxIntensityAngle   = this.angle;
-				maxIntensityIndex   = this.maxIntensityIndex;
-			}
-		}
-		return [maxIntensityAngle, maxIntensityIndex];
-	}
-	
-	scanIntensity(step = 1){
-		this.rotateImage(this.angle);
-		this.maxIntensity = 0;
-		this.maxIntensityIndex = 0;
-		for(let i=0;i<this.length;i+=step){
-			this.lineIntensity[i] = 0;
-			for(let j=0;j<this.length;j+=step){
-				this.lineIntensity[i] += (255-this.rotatedImageData[3*(i+j*this.length)]);
-			}
-			if(this.lineIntensity[i]>this.maxIntensity){
-				this.maxIntensity = this.lineIntensity[i];
-				this.maxIntensityIndex = i;
-			}
-		}
-	}
-	updateDisplayImage(){
-		super.updateDisplayImage();
-		let y, x, xtemp, ytemp;
-		let theta = this.angle*Math.PI/180;
-		for(let x=0;true&&x<this.dwidth;x++){
-			xtemp = this.dwidth/2-x;
-			y = xtemp*Math.tan(theta);
-			y = Math.floor(y+this.dheight/2);
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)  ] = 255;
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)+1] =   0;
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)+2] = 255;
-		}
-		for(let y=0;true&&y<this.dheight;y++){
-			ytemp = y-this.dheight/2;
-			x = ytemp*Math.tan(Math.PI/2+theta);
-			x = Math.floor(x+this.dwidth/2);
-			if(x<0||x>=this.dwidth) continue;
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)  ] = 255;
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)+1] =   0;
-			this.dimgOut.data[4*this.xy2i([x,y],this.dwidth)+2] = 255;
-		}
-	}
-	displayGraph(){
-		this.scanIntensity();
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(0,0,202,102);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(1,1,200,100);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		let index, intensity;
-		for(let i=0;i<200;i++){
-			index = Math.floor(i*this.length/200);
-			intensity = 100*this.lineIntensity[index]/this.maxIntensity;
-			ct.fillRect(i+1,101-intensity,1,intensity);
-		}
 	}
 }
 
@@ -878,6 +787,17 @@ class Binarize extends ImageData{
 			darkPixel+=this.histogram[i];
 		}
 		return darkPixel/this.area;
+	}
+	updateThreshFromDarkPixelRatio(ratio){
+		let counter = 0;
+		let threshCounter = ratio*this.area;
+		for(let i=0;i<256;i++){
+			counter+=this.histogram[i];
+			if(counter>=threshCounter){
+				this.thresh = i;
+				return;
+			}
+		}
 	}
 	updateSmoothHistogram(range = 1){
 		this.smoothHistogram = smoothenArray(this.histogram, range);
