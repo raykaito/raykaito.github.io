@@ -1,11 +1,41 @@
-const rad2deg = (radIn)=>{return radIn*180/Math.PI;}
-const deg2rad = (degIn)=>{return degIn/180*Math.PI;}
+const nextBinary= (num) => {return Number(toDecimal(Math.pow(10, (""+toBinary(num)).length)));}
+const toBinary  = (num) => {return Number(ConvertBase(num).from(10).to(2));}
+const toDecimal = (num) => {return Number(ConvertBase(num).from(2).to(10));}
 
-const getAveStd = (array)=>{
-	const total = array.length;
-	const ave = array.reduce(function(a,b,c){return a+b; })/total;
-	const std = array.reduce(function(a,b,c){return a+Math.pow((b-ave),2); })/total;
-	return [ave, Math.sqrt(std)];
+const ConvertBase = (num) => {
+	return {
+		from : (baseFrom) =>  {
+			return {
+				to : (baseTo) => {
+					return parseInt(num, baseFrom).toString(baseTo);
+				}
+			};
+		}
+	};
+}
+
+class binarySearchIndexController{
+	
+	constructor(maxIndex){
+		this.currentIndex = nextBinary(maxIndex);
+		this.searchRange = this.currentIndex/2;
+		this.step(-1);
+	}
+	
+	get index(){return this.currentIndex;}
+	get range(){return this.searchRange;}
+
+	step(num){
+		this.currentIndex += this.searchRange*num;
+		this.searchRange /= 2;
+	}
+}
+
+const reverseBinaryCounter = (number, digit)=>{
+	number = number.toString(2).split("").reverse().join("");
+	while(number.length<digit) number = number + "0";
+	number = parseInt(number,2);
+	return number;
 }
 
 const getLocalMinMaxIndex = (array, localMaxNumber) => {
@@ -57,39 +87,6 @@ const isLocalMaxLTOET = (array, localMaxNumberLimit, fuzzy) =>{
 		}
 	}
 	return [localMinIndex, localMaxIndex];
-}
-
-class binarySearchIndexController{
-	
-	constructor(maxIndex){
-		this.currentIndex = nextBinary(maxIndex);
-		this.searchRange = this.currentIndex/2;
-		this.step(-1);
-	}
-	
-	get index(){return this.currentIndex;}
-	get range(){return this.searchRange;}
-
-	step(num){
-		this.currentIndex += this.searchRange*num;
-		this.searchRange /= 2;
-	}
-}
-
-const nextBinary= (num) => {return Number(toDecimal(Math.pow(10, (""+toBinary(num)).length)));}
-const toBinary  = (num) => {return Number(ConvertBase(num).from(10).to(2));}
-const toDecimal = (num) => {return Number(ConvertBase(num).from(2).to(10));}
-
-const ConvertBase = (num) => {
-	return {
-		from : (baseFrom) =>  {
-			return {
-				to : (baseTo) => {
-					return parseInt(num, baseFrom).toString(baseTo);
-				}
-			};
-		}
-	};
 }
 
 const getAbsoluteMinMax = (array) => {
@@ -170,3 +167,30 @@ const countLocalMax = (array) => {
 	}
 	return localMaxCounter;
 }
+
+const interpolate = (outLow, outHigh, rate)=>{//Rate 0.00 ~ 1.00
+	return outLow+(outHigh-outLow)*rate;
+}
+
+const loopInBound = (num, upper)=>{
+	num=num%upper;
+	if(num>=0)
+		return num;
+	else
+		return num+upper;
+}
+
+const keepInBound = (num, low, high)=>{
+	if(num<low) return low;
+	if(num>high)return high;
+	return num;
+}
+
+const checkInBound = (num, low, high)=>{
+	if(num>=low&&num<=high)
+		return true;
+	else
+		return false;
+}
+
+console.log("Loaded: DataScript.js");

@@ -1,10 +1,7 @@
 class VisionProgram_SudokuReader{
 	constructor(){
-		this.time = 60;
-		this.interval;
 	}
 	abort(msg){
-		clearInterval(this.interval);
 		alert(msg);
 	}
 	startReading(phase=1, additionalInfo = false){
@@ -15,62 +12,51 @@ class VisionProgram_SudokuReader{
 			this.minDprFuzzyRange=0;
 			this.imgData_1 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6/canvasScale, hcanvas.height/6/canvasScale);//Math.max(10,hcanvas.height/80));
 			
-			this.interval = setInterval(()=>{sudokuV.findOptimalFuzzyRange();}, this.time);
+			const func_1= ()=>{return this.findOptimalFuzzyRange();}
+			const func_2= (input)=>{this.startReading(2, input);}
+			const rep = new Repeater(func_1, func_2, 60);
 		}
 		if(phase==2){//Apply Fuzzy filter to new Window
 			const imgData_2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/5, hcanvas.height/5);
 			const binarizedImage = this.filterPreset_1(imgData_2, this.minDprFuzzyRange);
 			binarizedImage.display(0);
 
-			setTimeout(()=>{sudokuV.startReading(3, binarizedImage);}, this.time);
+			setTimeout(()=>{this.startReading(3, binarizedImage);}, 250);
 		}
 		if(phase==3){//Scan for lines
 			const lineScanner = new LineScanner(additionalInfo.passdata, true);
-			const center_CellInnerLegLength = this.getCellInfo(lineScanner);
+			const cellInfo = this.getCellInfo(lineScanner);
 
-			if(center_CellInnerLegLength[0]==false){
+			if(cellInfo[0]==false){
 				lineScanner.display(1);
-				this.abort(center_CellInnerLegLength[1]);
+				this.abort(cellInfo[1]);
 				return;
 			}
 
-			this.xStartCellCenter = center_CellInnerLegLength[0][0];
-			this.yStartCellCenter = center_CellInnerLegLength[0][1];
-			this.cellInnerLength  = center_CellInnerLegLength[1];
+			this.drawSquare(cellInfo);
 
-			const x = this.xStartCellCenter;
-			const y = this.yStartCellCenter;
-			const l = this.cellInnerLength;
-			const angle = rad2deg(Math.atan(lineScanner.angles[0]));
-
-			circle(x/canvasScale, y/canvasScale, l/canvasScale/2);
-			circle(x/canvasScale, y/canvasScale, l/canvasScale/2-1);
-			circle(x/canvasScale, y/canvasScale, l/canvasScale/2-2);
-
-			setTimeout(()=>{sudokuV.startReading(4, angle);}, this.time+500);
+			setTimeout(()=>{this.startReading(4, Math.atan(cellInfo[2]));}, 1500);
 		}
 		if(phase==4){
 			this.rotateCanvas(this.xStartCellCenter, this.yStartCellCenter, additionalInfo);
 
-			setTimeout(()=>{sudokuV.startReading(5);}, this.time);
+			setTimeout(()=>{this.startReading(5);}, 250);
 		}
 		if(phase==5){
-			this.frame = new SudokuFrameInformation(this.xStartCellCenter, this.yStartCellCenter, this.cellInnerLength, this.minDprFuzzyRange);
+			this.frame = new SudokuCellInformation(this.xStartCellCenter, this.yStartCellCenter, this.cellInnerLength, this.minDprFuzzyRange);
 		}
 	}
-	fillNextCellInfo(){
-		this.frame.fillNextCellInfo(true);
-	}
-	filterPreset_1(imgData, fuzzyRange){
+	filterPreset_1(imgData, fuzzyRange, anotherFuzzyRange = 3){
 		//fuzzy_derivativeFilter_expandBlack
 		const fuzzy = new Filter(imgData.passdata, fuzzyRange);
 		const deriv = new derivativeFilter(fuzzy.passdata, true);
-		const black = new Filter(deriv.passdata, 3);
+		const black = new Filter(deriv.passdata, anotherFuzzyRange);
 		const binar = new Binarize(black.passdata, 254);
 		return  binar;
 	}
-	filterPreset_2(imgData, rate){
-		const binar = new Binarize(imgData.passdata);
+	filterPreset_2(imgData, rate, fuzzyRange){
+		const fuzzy = new Filter(imgData.passdata, fuzzyRange);
+		const binar = new Binarize(fuzzy.passdata);
 		binar.updateThreshFromDarkPixelRatio(rate);
 		binar.binarize();
 		return binar;
@@ -90,10 +76,9 @@ class VisionProgram_SudokuReader{
 		this.fuzzyRange++;
 		
 		if(abort||this.fuzzyRange>this.imgData_1._width/40*canvasScale){
-			clearInterval(this.interval);
-			setTimeout(()=>{sudokuV.startReading(2, binarizedImage.passdata);}, this.time);
-			return;
+			return binarizedImage.passdata;
 		}
+		return "continue";
 	}
 	getCellInfo(lineScanner){//0 for X and 1 for Y
 		const intersects = lineScanner.intersects;
@@ -126,14 +111,33 @@ class VisionProgram_SudokuReader{
 		const x = (intersectMids[0]+(angles[0]*intersectMids[1]))/(1-angles[0]*angles[1]);
 		const y = (intersectMids[1]+x*angles[1]);
 
-		return [[x,y], (lineGaps[0]+lineGaps[1])/2];
+		return [[x,y], (lineGaps[0]+lineGaps[1])/2, angles[0]];
+	}
+	drawSquare(cellInfo){
+		this.xStartCellCenter = cellInfo[0][0];
+		this.yStartCellCenter = cellInfo[0][1];
+		this.cellInnerLength  = cellInfo[1];
+
+		const x = this.xStartCellCenter/canvasScale;
+		const y = this.yStartCellCenter/canvasScale;
+		const l = this.cellInnerLength/canvasScale;
+		const angle = -Math.atan(cellInfo[2]);
+
+		ct.save();
+		ct.transform(Math.cos(angle), Math.sin(angle), -Math.sin(angle), Math.cos(angle), x, y);
+		ct.strokeStyle = "rgb(255,0,0)";
+		ct.lineWidth = 5;
+		ct.beginPath();
+		ct.rect(-l/2,-l/2,l,l);
+		ct.stroke();
+		ct.restore();
 	}
 	rotateCanvas(x,y,t){
 		//Small canvas
 		ct.clearRect(0,0,canvas.width, canvas.height);
 		ct.save();
 		ct.translate(x/canvasScale,y/canvasScale);
-		ct.rotate(deg2rad(t));
+		ct.rotate(t);
 		ct.translate(-x/canvasScale,-y/canvasScale);
 		ct.drawImage(img, 0,0,canvas.width, canvas.height);
 		ct.restore();
@@ -142,14 +146,14 @@ class VisionProgram_SudokuReader{
 		hct.clearRect(0,0,hcanvas.width, hcanvas.height);
 		hct.save();
 		hct.translate(x,y);
-		hct.rotate(deg2rad(t));
+		hct.rotate(t);
 		hct.translate(-x,-y);
 		hct.drawImage(himg, 0,0,hcanvas.width, hcanvas.height);
 		hct.restore();
 	}
 }
 
-class SudokuFrameInformation{
+class SudokuCellInformation{
 	constructor(xStart, yStart, cellLegLength, fuzzyIn){
 		this.gapBtwnCells = cellLegLength*1.1;
 		this.initialFuzzy = fuzzyIn;
@@ -164,15 +168,6 @@ class SudokuFrameInformation{
 				cellFound: 	false,
 				noMoreNei: 	false
 			}
-		}
-		//This is the starting point
-		this.cell[144] = {
-			x: 			xStart,
-			y: 			yStart,
-			fuzzy: 		fuzzyIn,
-			legLength: 	cellLegLength,
-			scanned: 	true,
-			cellFound: 	true
 		}
 		this.xMax = this.xMin = this.yMax = this.yMin = 8;
 
@@ -222,8 +217,8 @@ class SudokuFrameInformation{
 		let imgData, imgData_processed, scanner, cen_leg, fuzzyRange;
 		for(fuzzyRange=-1;fuzzyRange<l/40*canvasScale;fuzzyRange++){
 			imgData = newWindow().centerWidthHeight(x,y,l,l);
-			//imgData_processed = sudokuV.filterPreset_1(imgData, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
-			imgData_processed = sudokuV.filterPreset_2(imgData, 0.13);
+			imgData_processed = sudokuV.filterPreset_1(imgData, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange),2);
+			//imgData_processed = sudokuV.filterPreset_2(imgData, 0.17, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
 			scanner = new LineScanner(imgData_processed.passdata);
 			scanner.bandWidthAngle = 1;
 			scanner.InBandrate = 0.7;
@@ -235,10 +230,11 @@ class SudokuFrameInformation{
 		}
 		if(cen_leg[0]!=false){
 			this.cellFound(cen_leg, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
-			ct.strokeStyle="lightGreen";
+			ct.strokeStyle="rgb(0,255,0)";
 		}else{
 			this.cellNotFound(x,y,l/1.8);
-			ct.strokeStyle="Yellow";
+			scanner.display(0);
+			ct.strokeStyle="rgb(255,0,0)";
 		}
 		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2);
 		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2-1);
@@ -246,16 +242,102 @@ class SudokuFrameInformation{
 		this.getNextTarget();
 	}
 	getNextTarget(){
+		const width  = this.xMax-this.xMin;
+		const height = this.yMax-this.yMin;
+		const jumpDist = Math.max(1,Math.floor((9-Math.min(width,height))/2));
+		if(width<=height){
+			//Jump sideways
+			//check negative direction
+			let x=this.xMin;
+			let y, i;
+			for(y=this.yMin;y<=this.yMax;y++){
+				i=this.xy2i([x,y]);
+				if(this.cell[i].found){
+					break;
+				}
+			}
+			let target = this.xy2i([x-jumpDist,y]);
+			if(this.cell[target].scanned==false){
+				let xy_cord = this.getXY_Cord(i);
+				this.currentXY = [xy_cord[0]-jumpDist*this.gapBtwnCells, xy_cord[1]];
+				this.currentIndex = this.xy2i([x-jumpDist, y]);
+				setTimeout(()=>{this.fillNextCellInfo(true);}, 100);
+				console.log("1xy is "+this.i2xy(target)+","+target);
+				return;
+			}
+
+			//Now Try Positive Direction
+			x=this.xMax;
+			for(y=this.yMax;y>=this.yMin;y--){
+				i=this.xy2i([x,y]);
+				if(this.cell[i].found){
+					break;
+				}
+			}
+			target = this.xy2i([x+jumpDist,y]);
+			if(this.cell[target].scanned==false){
+				let xy_cord = this.getXY_Cord(i);
+				this.currentXY = [xy_cord[0]+jumpDist*this.gapBtwnCells, xy_cord[1]];
+				this.currentIndex = this.xy2i([x+jumpDist, y]);
+				setTimeout(()=>{this.fillNextCellInfo(true);}, 100);
+				console.log("2xy is "+this.i2xy(target));
+				return;
+			}
+			alert("1Its time to improve the filters");
+			return;
+		}else{
+			//Jump vertically
+			//check negative direction
+			let y=this.yMin;
+			let x, i;
+			for(x=this.xMin;x<=this.xMax;x++){
+				i=this.xy2i([x,y]);
+				if(this.cell[i].found){
+					break;
+				}
+			}
+			let target = this.xy2i([x,y-jumpDist]);
+			if(this.cell[target].scanned==false){
+				let xy_cord = this.getXY_Cord(i);
+				this.currentXY = [xy_cord[0], xy_cord[1]-jumpDist*this.gapBtwnCells];
+				this.currentIndex = this.xy2i([x, y-jumpDist]);
+				setTimeout(()=>{this.fillNextCellInfo(true);}, 100);
+				console.log("3xy is "+this.i2xy(target));
+				return;
+			}
+
+			//Now Try Positive Direction
+			y=this.yMax;
+			for(x=this.xMax;x>=this.xMin;x--){
+				i=this.xy2i([x,y]);
+				if(this.cell[i].found){
+					break;
+				}
+			}
+			target = this.xy2i([x,y+jumpDist]);
+			if(this.cell[target].scanned==false){
+				let xy_cord = this.getXY_Cord(i);
+				this.currentXY = [xy_cord[0], xy_cord[1]+jumpDist*this.gapBtwnCells];
+				this.currentIndex = this.xy2i([x, y+jumpDist]);
+				setTimeout(()=>{this.fillNextCellInfo(true);}, 100);
+				console.log("4xy is "+this.i2xy(target));
+				return;
+			}
+			alert("2Its time to improve the filters"+this.i2xy(target));
+			return;
+		}
+	}
+	getNextTarget_old(){
 		for(let x = this.xMin;x<=this.xMax;x++){
-			for(let y=this.xMin;y<=this.yMax;y++){
+			for(let y=this.yMin;y<=this.yMax;y++){
 				const i = this.xy2i([x,y]);
 				if(this.cell[i].found&&!this.cell[i].noMoreNei){
 					let cd = this.getFirstUnscannedCell(x,y);//Direction is from 0~7.
 					if(cd === false) continue;
-					let xy_cord = this.getXY_Cord(x,y);
+					let xy_cord = this.getXY_Cord([x,y]);
 					this.currentXY = [xy_cord[0]+dx[cd]*this.gapBtwnCells, xy_cord[1]+dy[cd]*this.gapBtwnCells];
 					this.currentIndex = this.xy2i([x+dx[cd], y+dy[cd]]);
-					setTimeout(()=>{sudokuV.fillNextCellInfo();}, 60);
+					setTimeout(()=>{this.fillNextCellInfo(true);}, 60);
 					return;
 				}
 			}
@@ -277,8 +359,13 @@ class SudokuFrameInformation{
 		console.log(xIndex,yIndex);
 		return false;
 	}
-	getXY_Cord(xIndex, yIndex){
-		const i = this.xy2i([xIndex, yIndex]);
+	getXY_Cord(xy){
+		let i;
+		if(xy.length==2){
+			i = this.xy2i([xIndex, yIndex]);
+		}else{
+			i = xy;
+		}
 		return [this.cell[i].x, this.cell[i].y];
 	}
 }

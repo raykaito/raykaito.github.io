@@ -55,9 +55,9 @@ class ImageData{
 		
 		this.updateDisplayImage(actual);
 
+		ct.beginPath();
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
-		ct.beginPath();
 		ct.rect(dxpos+0.5,dypos+0.5,actual?this.width-1:this.dwidth-1,actual?this.height-1:this.dheight-1);
 
 		ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
@@ -156,6 +156,35 @@ class RotatableImageData extends ImageData{
 			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+2], 2);
 		}
 		hct.putImageData(this.imgOut, 0, 0);
+	}
+}
+
+class doubleFuzzySubtraction extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
+		super([imgIn, xpos, ypos]);
+		this.baseFuzzyRange = preset[0];
+		this.sharFuzzyRange = preset[1];
+		if(preset!=false) this.applyFilter();
+	}
+	applyFilter(){
+		const fuzzy_base = new Filter(this.passdata, this.baseFuzzyRange);
+		const fuzzy_shar = new Filter(this.passdata, this.sharFuzzyRange);
+		const imgData_base = fuzzy_base.passdata[0];
+		const imgData_shar = fuzzy_shar.passdata[0];
+		let difference;
+		for(let i=0;i<this.area;i++){
+			difference = (this.getPix(imgData_base,i,0)-this.getPix(imgData_shar,i,0));
+			this.setPix(i, difference, "all");
+		}
+		let max = 0;
+		for(let i=0;i<this.area;i++){
+			max = Math.max(max,this.getPix(this.imgOut,i, 0));
+		}
+		for(let i=0;i<this.area;i++){
+			const pix = this.getPix(this.imgOut,i, 0);
+			this.setPix(i, Math.floor(255-pix/max*255), "all");;
+		}
+
 	}
 }
 
@@ -848,3 +877,5 @@ class Binarize extends ImageData{
 		ct.fillRect(this.threshhold+1,201, 1,100);
 	}
 }
+
+console.log("Loaded: EyesScript.js");

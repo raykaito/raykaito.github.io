@@ -72,8 +72,7 @@ function button1(){
 
 function button2(){
 	const imageData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
-	df = new derivativeFilter(imageData.passdata);
-	df.applyFilter();
+	df = new doubleFuzzySubtraction(imageData.passdata, [80,6]);
 	df.display(1);
 }
 
