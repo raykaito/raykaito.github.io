@@ -107,4 +107,48 @@ function changeParameter3(){
 function imagesLoaded(){
 }
 
+function GetOptimalFuzzyRange(imgData, funcAfter, show=false){
+	this.imgData_1 = imgData;
+	this.fuzzyRange = 0;
+	this.minDpr=1;
+	this.minDprFuzzyRange=0;
+	findOptimalFuzzyRange=()=>{
+		const binarizedImage = filterPreset_1(this.imgData_1, this.fuzzyRange);
+		const darkPixelRatio = binarizedImage.darkPixelRatio;
+		const abort = (darkPixelRatio<0.5);
+
+		if(show) binarizedImage.display(1);
+
+		if(darkPixelRatio<this.minDpr){
+			this.minDpr = darkPixelRatio;
+			this.minDprFuzzyRange = this.fuzzyRange;
+		}
+
+		this.fuzzyRange++;
+		
+		if(abort||this.fuzzyRange>this.imgData_1._width/40*canvasScale){
+			return this.minDprFuzzyRange;
+		}
+		return "continue";
+	}
+	const func_1= ()=>{return findOptimalFuzzyRange();}
+	const rep = new Repeater(func_1, (result)=>{funcAfter(result);} , 120);
+}
+
+const filterPreset_1=(imgData, fuzzyRange, anotherFuzzyRange = 3)=>{
+	//fuzzy_derivativeFilter_expandBlack
+	const fuzzy = new Filter(imgData.passdata, fuzzyRange);
+	const deriv = new derivativeFilter(fuzzy.passdata, true);
+	const black = new Filter(deriv.passdata, anotherFuzzyRange);
+	const binar = new Binarize(black.passdata, 254);
+	return  binar;
+}
+const filterPreset_2=(imgData, rate, fuzzyRange)=>{
+	const fuzzy = new Filter(imgData.passdata, fuzzyRange);
+	const binar = new Binarize(fuzzy.passdata);
+	binar.updateThreshFromDarkPixelRatio(rate);
+	binar.binarize();
+	return binar;
+}
+
 console.log("Loaded: javascript.js");

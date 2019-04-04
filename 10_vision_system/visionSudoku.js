@@ -6,19 +6,13 @@ class VisionProgram_SudokuReader{
 	}
 	startReading(phase=1, additionalInfo = false){
 		if(phase==1){//look for Optimal Fuzzy Range;
-			//variables;
-			this.fuzzyRange = 0;
-			this.minDpr=1;
-			this.minDprFuzzyRange=0;
-			this.imgData_1 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6/canvasScale, hcanvas.height/6/canvasScale);//Math.max(10,hcanvas.height/80));
-			
-			const func_1= ()=>{return this.findOptimalFuzzyRange();}
+			const imgData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6/canvasScale, hcanvas.height/6/canvasScale);//Math.max(10,hcanvas.height/80));
 			const func_2= (input)=>{this.startReading(2, input);}
-			const rep = new Repeater(func_1, func_2, 60);
+			GetOptimalFuzzyRange(imgData, func_2, true);
 		}
 		if(phase==2){//Apply Fuzzy filter to new Window
 			const imgData_2 = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/5, hcanvas.height/5);
-			const binarizedImage = this.filterPreset_1(imgData_2, this.minDprFuzzyRange);
+			const binarizedImage = filterPreset_1(imgData_2, additionalInfo);
 			binarizedImage.display(0);
 
 			setTimeout(()=>{this.startReading(3, binarizedImage);}, 250);
@@ -45,40 +39,6 @@ class VisionProgram_SudokuReader{
 		if(phase==5){
 			this.frame = new SudokuCellInformation(this.xStartCellCenter, this.yStartCellCenter, this.cellInnerLength, this.minDprFuzzyRange);
 		}
-	}
-	filterPreset_1(imgData, fuzzyRange, anotherFuzzyRange = 3){
-		//fuzzy_derivativeFilter_expandBlack
-		const fuzzy = new Filter(imgData.passdata, fuzzyRange);
-		const deriv = new derivativeFilter(fuzzy.passdata, true);
-		const black = new Filter(deriv.passdata, anotherFuzzyRange);
-		const binar = new Binarize(black.passdata, 254);
-		return  binar;
-	}
-	filterPreset_2(imgData, rate, fuzzyRange){
-		const fuzzy = new Filter(imgData.passdata, fuzzyRange);
-		const binar = new Binarize(fuzzy.passdata);
-		binar.updateThreshFromDarkPixelRatio(rate);
-		binar.binarize();
-		return binar;
-	}
-	findOptimalFuzzyRange(){
-		const binarizedImage = this.filterPreset_1(this.imgData_1, this.fuzzyRange);
-		const darkPixelRatio = binarizedImage.darkPixelRatio;
-		const abort = (darkPixelRatio<0.5);
-
-		binarizedImage.display(1);
-
-		if(darkPixelRatio<this.minDpr){
-			this.minDpr = darkPixelRatio;
-			this.minDprFuzzyRange = this.fuzzyRange;
-		}
-
-		this.fuzzyRange++;
-		
-		if(abort||this.fuzzyRange>this.imgData_1._width/40*canvasScale){
-			return binarizedImage.passdata;
-		}
-		return "continue";
 	}
 	getCellInfo(lineScanner){//0 for X and 1 for Y
 		const intersects = lineScanner.intersects;
@@ -182,6 +142,48 @@ class SudokuCellInformation{
 	}
 	i2xy(indexIn){	return [indexIn%17,Math.floor(indexIn/17)];}
 	xy2i(xy)	 {	return xy[0]+xy[1]*17;}
+	fillCellInfo_1(){
+		const x = this.currentXY[0];
+		const y = this.currentXY[1];
+		const l = this.gapBtwnCells*2;
+
+		let imgData, imgData_processed, scanner, cen_leg, fuzzyRange;
+
+		imgData = newWindow().centerWidthHeight(x,y, hcanvas.width/6/canvasScale, hcanvas.height/6/canvasScale);
+		const func_2= (input)=>{this.fillCellInfo_2(input);}
+		GetOptimalFuzzyRange(imgData, func_2);
+	}
+	fillCellInfo_2(fuzzyRange){
+		const x = this.currentXY[0];
+		const y = this.currentXY[1];
+		const l = this.gapBtwnCells*1.5;
+
+		let imgData, imgData_processed, scanner, cen_leg;
+
+		imgData = newWindow().centerWidthHeight(x,y,l,l);
+		imgData_processed = filterPreset_1(imgData, fuzzyRange, 2);
+		//imgData_processed = sudokuV.filterPreset_2(imgData, 0.17, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
+			scanner = new LineScanner(imgData_processed.passdata);
+			scanner.bandWidthAngle = 1.5;
+			scanner.InBandrate = 0.5;
+			scanner.scanHorizontal();
+			scanner.scanVertical();
+
+		cen_leg = sudokuV.getCellInfo(scanner);
+
+		if(cen_leg[0]!=false){
+			this.cellFound(cen_leg, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
+			ct.strokeStyle="rgb(0,255,0)";
+		}else{
+			this.cellNotFound(x,y,l/1.8);
+			scanner.display(1);
+			ct.strokeStyle="rgb(255,0,0)";
+		}
+		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2);
+		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2-1);
+		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2-2);
+		this.getNextTarget();
+	}
 	updateMinMax(){
 		const xy = this.i2xy(this.currentIndex);
 		this.xMax = Math.max(this.xMax, xy[0]);
@@ -210,6 +212,8 @@ class SudokuCellInformation{
 		this.cell[this.currentIndex].legLength = leg;
 	}
 	fillNextCellInfo(quick = false){
+		this.fillCellInfo_1();
+		return;
 		const x = this.currentXY[0];
 		const y = this.currentXY[1];
 		const l = this.gapBtwnCells*1.5;
@@ -217,7 +221,7 @@ class SudokuCellInformation{
 		let imgData, imgData_processed, scanner, cen_leg, fuzzyRange;
 		for(fuzzyRange=-1;fuzzyRange<l/40*canvasScale;fuzzyRange++){
 			imgData = newWindow().centerWidthHeight(x,y,l,l);
-			imgData_processed = sudokuV.filterPreset_1(imgData, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange),2);
+			imgData_processed = filterPreset_1(imgData, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange),2);
 			//imgData_processed = sudokuV.filterPreset_2(imgData, 0.17, ((fuzzyRange==-1)?this.initialFuzzy:fuzzyRange));
 			scanner = new LineScanner(imgData_processed.passdata);
 			scanner.bandWidthAngle = 1;
@@ -233,7 +237,7 @@ class SudokuCellInformation{
 			ct.strokeStyle="rgb(0,255,0)";
 		}else{
 			this.cellNotFound(x,y,l/1.8);
-			scanner.display(0);
+			//scanner.display(1);
 			ct.strokeStyle="rgb(255,0,0)";
 		}
 		circle(this.currentXY[0]/canvasScale, this.currentXY[1]/canvasScale, this.cell[this.currentIndex].legLength/canvasScale/2);
