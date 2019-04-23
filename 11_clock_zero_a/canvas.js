@@ -57,7 +57,7 @@ const animate = (time) => {
     ct.stroke();
     
     ct.lineWidth = charWidth*3;
-    xy = getXYfromDirDis(hr*15-90,charDist*0.6);
+    xy = getXYfromDirDis(hr*30+min/2-90,charDist*0.6);
     ct.beginPath();
     ct.moveTo(width/2, height/2);
     ct.lineTo(xy[0]+width/2, xy[1]+height/2);
