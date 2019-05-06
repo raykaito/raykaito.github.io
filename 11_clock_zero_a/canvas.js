@@ -67,10 +67,43 @@ const animate = (time) => {
 const drawCharacter = (digit) =>{
     const direction=360/12*digit-90;
     let a, b, c, d;
+    let sign = [0,0,0,0];
     let xy = getXYfromDirDis(direction, charDist);
     xy[0]+=width/2;
     xy[1]+=height/2;
     ct.beginPath();
+    /**
+    phase = digit;
+    for(let i=0;i<4;i++){
+        if(phase== 4||phase== 5||phase== 6||phase== 7||phase==8||phase==11){
+            sign.fill((i==0||i==3)?1:-1);
+            sign[i]*=-1;
+            a = Math.floor(xy[0]+sign[0]*charLength-charWidth);
+            b = Math.floor(xy[1]+sign[1]*charLength-charWidth);
+            c = Math.floor(xy[0]+sign[2]*charLength+charWidth-a);
+            d = Math.floor(xy[1]+sign[3]*charLength+charWidth-b);
+            ct.rect(a,b,c,d);
+        }
+        phase = (phase+9)%12;
+    }
+    if(digit==0||digit==6){
+        //FifthLine
+        a = Math.floor(xy[0]           -charWidth);
+        b = Math.floor(xy[1]-charLength-charWidth);
+        c = Math.floor(xy[0]           +charWidth-a);
+        d = Math.floor(xy[1]+charLength+charWidth-b);
+        ct.rect(a,b,c,d);
+    }
+    if(digit==3||digit==9){
+        //SixthLine
+        a = Math.floor(xy[0]-charLength-charWidth);
+        b = Math.floor(xy[1]           -charWidth);
+        c = Math.floor(xy[0]+charLength+charWidth-a);
+        d = Math.floor(xy[1]           +charWidth-b);
+        ct.rect(a,b,c,d);
+    }
+    ct.fill();
+    **/
     if(digit==10||digit==11||digit== 0||digit== 1||digit== 2||digit==5){
         //FirstLine
         a = Math.floor(xy[0]-charLength-charWidth);
