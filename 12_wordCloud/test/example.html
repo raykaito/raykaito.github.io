@@ -15,6 +15,7 @@ function loadXMLDoc() {
     if (this.readyState == 4 && this.status == 200) {
       
       var arr = this.responseText.split('\n');
+      console.log(arr);
       //1次元配列を2次元配列に変換
       var res = [];
       for(var i = 0; i < arr.length; i++){
