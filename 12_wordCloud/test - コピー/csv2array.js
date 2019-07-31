@@ -1,16 +1,11 @@
 function getCsv(url){
   //CSVファイルを文字列で取得。
   var txt = new XMLHttpRequest();
-  txt.open('get', url, true);
-  console.log(txt);
-  console.log(txt.responseText);
+  txt.open('get', url, false);
   txt.send();
-  console.log(txt);
-  console.log(txt.responseText);
 
   //改行ごとに配列化
   var arr = txt.responseText.split('\n');
-  console.log(arr);
 
   //1次元配列を2次元配列に変換
   var res = [];
@@ -28,7 +23,6 @@ function getCsv(url){
       }
     }
   }
-  console.log(res);
 
   return res;
 }
