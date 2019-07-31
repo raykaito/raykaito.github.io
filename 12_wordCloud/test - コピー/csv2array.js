@@ -4,7 +4,9 @@ function getCsv(url){
   txt.open('get', url, true);
   console.log(txt);
   console.log(txt.responseText);
-  //txt.send();
+  txt.send();
+  console.log(txt);
+  console.log(txt.responseText);
 
   //改行ごとに配列化
   var arr = txt.responseText.split('\n');
