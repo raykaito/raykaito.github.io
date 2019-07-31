@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html>
-<body>
 
-<h2>Using the XMLHttpRequest object</h2>
-
-<button type="button" onclick="loadXMLDoc()">Change Content</button>
-
-<p id="demo"></p>
-
-<script>
-function loadXMLDoc() {
+function loadXMLDoc(url) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -27,14 +17,9 @@ function loadXMLDoc() {
       }
       console.log(res);
 
-      document.getElementById("demo").innerHTML =
-      res[0][0];
+      document.getElementById("demo").innerHTML = res[0][0];
     }
   };
-  xhttp.open("GET", "faculty.txt", true);
+  xhttp.open("GET", url, true);
   xhttp.send();
 }
-</script>
-
-</body>
-</html>
