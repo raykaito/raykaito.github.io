@@ -6,7 +6,7 @@ function getCsv(url){
   txt.send();
 
   //改行ごとに配列化
-  var arr = txt.responseText.split('\n');
+  var arr = txt.responseText.split('1');
   console.log(arr);
 
   //1次元配列を2次元配列に変換
