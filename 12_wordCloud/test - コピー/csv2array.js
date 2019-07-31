@@ -2,11 +2,11 @@ function getCsv(url){
   //CSVファイルを文字列で取得。
   var txt = new XMLHttpRequest();
   txt.open('get', url, true);
-  console.log(txt);
-  txt.send();
+  console.log(txt.responseText);
+  //txt.send();
 
   //改行ごとに配列化
-  var arr = txt.responseText.split('1');
+  var arr = txt.responseText.split('\n');
   console.log(arr);
 
   //1次元配列を2次元配列に変換
