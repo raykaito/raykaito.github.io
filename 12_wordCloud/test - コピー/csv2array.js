@@ -1,7 +1,8 @@
 function getCsv(url){
   //CSVファイルを文字列で取得。
   var txt = new XMLHttpRequest();
-  txt.open('get', url, true);
+  txt.open('get', url, false);
+  console.log(txt);
   console.log(txt.responseText);
   //txt.send();
 
