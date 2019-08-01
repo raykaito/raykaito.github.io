@@ -118,3 +118,5 @@ const appendProfessor = function(res,en=false){
   document.getElementById("aa").appendChild(arti);
 
 };
+
+loadRemoteTxt("../faculty.txt");
