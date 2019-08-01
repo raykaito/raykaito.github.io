@@ -9,7 +9,6 @@ const loadRemoteTxt = function(url) {
   const xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200){
-      alert("loading");
       txt2Array(this.responseText);
     }
   };
@@ -120,5 +119,3 @@ const appendProfessor = function(res,en=false){
   document.getElementById("aa").appendChild(arti);
 
 };
-
-loadRemoteTxt("faculty.txt");
