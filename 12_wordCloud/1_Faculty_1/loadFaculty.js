@@ -121,4 +121,4 @@ const appendProfessor = function(res,en=false){
 
 };
 
-loadRemoteTxt("../faculty.txt");
+loadRemoteTxt("faculty.txt");
