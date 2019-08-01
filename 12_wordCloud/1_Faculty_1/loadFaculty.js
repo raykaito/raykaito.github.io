@@ -8,9 +8,10 @@ const lnk2 = "&lang=jp"
 const loadRemoteTxt = function(url) {
   const xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    alert("loading");
-    if (this.readyState == 4 && this.status == 200)
+    if (this.readyState == 4 && this.status == 200){
+      alert("loading");
       txt2Array(this.responseText);
+    }
   };
   xhttp.open("GET", url, true);
   xhttp.send();
