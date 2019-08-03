@@ -155,3 +155,5 @@ const appendProfessor = function(res,sect,en=false){
   sect.appendChild(arti);
 
 };
+
+loadRemoteTxt('faculty.txt');
