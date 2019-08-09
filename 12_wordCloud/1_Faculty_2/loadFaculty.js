@@ -12,7 +12,7 @@ const courseName_en = ['Mathematics','Physics','Chemistry','Earth and Planetary 
 
 const lnk1 = "https://search.star.titech.ac.jp/titech-ss/pursuer.act?event=outside&";
 const lnk2 = "&lang=jp";
-const lnk2_en = "&lang=jp";
+const lnk2_en = "&lang=en";
 
 const sections = ['あ','aa','か','ka','さ','sa','た','ta','な','na','は','ha','ま','ma','や','ya','ら','ra','わ','wa'];
 const sectionLimits_en = ['F','K','P','U'];
@@ -171,7 +171,7 @@ const appendProfessor = function(res,sect,en=false){
   lis2.setAttribute('class', 'link02');
   lin1.setAttribute('href', res[49]);
   lin1.setAttribute('target', "_blank");
-  lin2.setAttribute('href', lnk1+res[51]+en?lnk2_en:lnk2);
+  lin2.setAttribute('href', (lnk1+res[51]+(en?lnk2_en:lnk2)));
   lin2.setAttribute('target', "_blank");
 
   lin1.appendChild(spa1);
