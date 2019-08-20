@@ -19,6 +19,8 @@ const sectionLimits_en = ['F','K','P','U'];
 const sectionIDs_en = ['ae','fj','ko','pt','uz'];
 const sectionTitles_en = ['A - E','F - J','K - O','P - T','U - Z'];
 
+let department = -1;
+
 const loadRemoteTxt = function(url, en = false) {
   const xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -89,8 +91,8 @@ const createSection = function(newSection, main){
   sect.setAttribute("id",id);
   sect.setAttribute("class","tabContents");
   head.setAttribute("class","bgGreen");
-  head.appendChild(text);
-  sect.appendChild(head);
+  //head.appendChild(text);
+  //sect.appendChild(head);
   main.appendChild(sect);
   return sect;
 };
@@ -134,13 +136,15 @@ const createSection_en = function(newSectionIndex, main){
   sect.setAttribute("id",id);
   sect.setAttribute("class","tabContents");
   head.setAttribute("class","bgGreen");
-  head.appendChild(text);
-  sect.appendChild(head);
+  //head.appendChild(text);
+  //sect.appendChild(head);
   main.appendChild(sect);
   return sect;
 };
 
 const appendProfessor = function(res,sect,en=false){
+  if(wrongDepartment(res)) return;
+  const primary = checkIfPrimary(res);
   //Append title
   const hea4 = document.createElement("H4");
   const titl = document.createTextNode(getPos(res[4],en));
@@ -185,16 +189,13 @@ const appendProfessor = function(res,sect,en=false){
   unor.appendChild(lis1);
   unor.appendChild(lis2);
   arti.appendChild(unor);
+
   //Append Course
-  let string = "";
-  for(let i=14;res[i]!="";i+=4){
-    string = string + (i==14?"":" / ") + getDept(res[i],en) + (en?", ":" ") + getCourse(res[i+2],en);
-  }
   const dfl1 = document.createElement("DL");
   const dft1 = document.createElement("DT");
   const dfd1 = document.createElement("DD");
-  const cou1 = document.createTextNode(en?"Major, Department":"担当系・コース");
-  const cou2 = document.createTextNode(string);
+  const cou1 = document.createTextNode(en?"Energy Course":"エネルギ―コース");
+  const cou2 = document.createTextNode(primary?(en?"Primary":"主担当"):(en?"Secondary":"副担当"));
 
   dft1.appendChild(cou1);
   dfd1.appendChild(cou2);
@@ -218,9 +219,34 @@ const appendProfessor = function(res,sect,en=false){
   dfl2.appendChild(dfd2);
   arti.appendChild(dfl2);
 
+  //Append Location
+  const dfl3 = document.createElement("DL");
+  const dft3 = document.createElement("DT");
+  const dfd3 = document.createElement("DD");
+  const loc1 = document.createTextNode(en?"Office Location":"居所");
+  const loc2 = document.createTextNode(res[55+en*2]+" "+res[56+en*2]);
+
+  dft3.appendChild(loc1);
+  dfd3.appendChild(loc2);
+  dfl3.appendChild(dft3);
+  dfl3.appendChild(dfd3);
+  arti.appendChild(dfl3);
+
   sect.appendChild(arti);
 
 };
+
+const wrongDepartment = function(res){
+  for(let i=14;res[i]!="";i+=4){
+    if(parseInt(res[i+2])==1){
+      return parseInt(res[i])!=department;
+    }
+  }
+}
+
+const checkIfPrimary = function(res){
+  return parseInt(res[16])==1;
+}
 
 const getCodeIndex = function(codeArray,targetValue){
   let i=0;
