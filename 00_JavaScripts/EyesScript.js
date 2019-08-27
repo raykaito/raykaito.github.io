@@ -159,6 +159,66 @@ class RotatableImageData extends ImageData{
 	}
 }
 
+class Analyzer extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		this.xdata = new Array(hcanvas.width).fill(0);
+		this.dxdata = new Array(hcanvas.width).fill(0);
+		this.ydata = new Array(hcanvas.height).fill(0);
+		this.max;
+		this.yPosition = 0;
+
+		this.updateYposition();
+		this.updateXdata();
+		this.displayXdata();
+	}
+	updateYposition(input = 0){
+		this.yPosition = Math.floor(input*this.height);
+	}
+	displaydXdata(){
+		ct.fillStyle = "rgb(255,  0,255)";
+		ct.fillRect(0,103,this.width+2,102);
+		ct.fillStyle = "rgb(255,255,255)";
+		ct.fillRect(1,104,this.width,100);
+		ct.fillStyle = "rgb(  0,  0,  0)";
+		for(let i=0;i<this.width;i++){
+			ct.fillRect(i+1,203-Math.ceil(this.dxdata[i]*100/255),1,Math.ceil(this.dxdata[i]*100/255));
+		}
+	}
+	updateXdata(){
+		for(let i=0;i<this.width;i++) this.xdata[i] = this.getPix(this.imgIn,[i,this.yPosition],"all");
+		//parameters
+		const range = 5;
+		let counter = 0;
+		let total = 0;
+		for(let i=0;i<this.width;i++){
+			total += this.xdata[i];
+			counter++;
+			if(counter>range){
+				total -= this.xdata[i-range];
+				counter--;
+			}
+			const avg = total/counter;
+			let errorSq = 0;
+			for(let j=0;j<range;j++){
+				errorSq += (this.xdata[i-j]-avg)^2;
+			}
+			this.dxdata[i] = Math.sqrt(errorSq)*100;
+		}
+	}
+	displayXdata(){
+		ct.fillStyle = "rgb(255,  0,255)";
+		ct.fillRect(0,0,this.width+2,102);
+		ct.fillStyle = "rgb(255,255,255)";
+		ct.fillRect(1,1,this.width,100);
+		ct.fillStyle = "rgb(  0,  0,  0)";
+		for(let i=0;i<this.width;i++){
+			ct.fillRect(i+1,101-Math.ceil(this.xdata[i]*100/255),1,Math.ceil(this.xdata[i]*100/255));
+		}
+		this.displaydXdata();
+	}
+}
+
 class doubleFuzzySubtraction extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
 		super([imgIn, xpos, ypos]);

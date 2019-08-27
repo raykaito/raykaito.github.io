@@ -82,7 +82,8 @@ function button3(){
 }
 
 function button4(){
-	sudokuV.fillNextCellInfo(true);
+	const imgData = newWindow().centerWidthHeight(hcanvas.width/2, hcanvas.height/2, hcanvas.width/6, hcanvas.height/6);
+	lyzer = new Analyzer(imgData.passdata);
 }
 
 function changeParameter1(){
@@ -100,8 +101,17 @@ function changeParameter2(){
 }
 
 function changeParameter3(){
-	df.allowedDerivative = Number(slider3.value);
-	df.display();
+	lyzer.updateYposition(Number(slider3.value)/100);
+	lyzer.updateXdata();
+	lyzer.display(1);
+	lyzer.displayXdata();
+}
+
+function changeParameter4(){
+	lyzer.layer(Number(slider4.value)*100/100);
+	lyzer.updateXdata();
+	lyzer.display(1);
+	lyzer.displayXdata();
 }
 
 function imagesLoaded(){
