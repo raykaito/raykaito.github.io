@@ -1,8 +1,8 @@
-var lastTime = 0;
-var applicationTime = 0;
+let lastTime = 0;
+let applicationTime = 0;
 
-var pixelRatio;
-var context;
+let pixelRatio;
+let context;
 
 function init(){
     console.log("Initializing...");
@@ -25,7 +25,7 @@ function startGame() {
 
 function animate(time) {
     requestAnimationFrame(animate);
-    var dt = time - lastTime;
+    let dt = time - lastTime;
     if(dt<10) return;
     lastTime = time;
     applicationTime+=dt;

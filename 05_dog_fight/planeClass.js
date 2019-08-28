@@ -1,19 +1,18 @@
 function planeClass(){
     this.init = function(){
         //Object Limitations.
-        this.tiltSpeed = 1;
         this.accel = 1;
         this.maxSpeed = 200;
         this.nomSpeed = 100;
         this.minSpeed = 50;
+        this.ddirMax = 1;
         this.firingRate = 100;
-        this.tiltMax = 30;
 
         //Object Conditions.
         this.x = 0;
         this.y = 0;
         this.dir = 45;
-        this.tilt = 0;
+        this.ddir = 0;
         this.speed = 100;
         this.health = 100;
         this.lastFired = 0;
@@ -27,6 +26,9 @@ function planeClass(){
             this.bullet[i] = new bullet();
             this.bullet[i].init();
         }
+
+        //DebuggerMessenger
+        this.msg = "";
     }
     this.spawn = function(x, y, dir, affiliation, type, color){
         this.x = x;
@@ -37,29 +39,34 @@ function planeClass(){
         this.color = color;
         this.health = 100;
         this.alive = true;
-        if(type == "player") this.tiltSpeed = 3;
-        else this.tiltSpeed = 1;
+        if(type == "player") this.ddirMax = 3;
+        else this.ddirMax = 1;
     }
     this.draw = function(){
         if(!this.alive) return;
         for(i=0;i<10;i++) this.bullet[i].draw();
 
-        ctx = context;
+        const ctx = context;
         ctx.fillStyle = this.color;
+        //Display Body
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        ctx.arc(Math.floor(this.x), Math.floor(this.y), 20, (this.dir/180+1-0.12*(1-Math.abs(this.tilt/70)))*Math.PI, (this.dir/180+1+0.12*(1-Math.abs(this.tilt/70)))*Math.PI);
+        ctx.arc(Math.floor(this.x), Math.floor(this.y), 15, (this.dir/180+1-0.12)*Math.PI, (this.dir/180+1+0.12)*Math.PI);
         ctx.fill();
+        //Dispaly Health Bar
+        ctx.fillStyle = "darkgray";
+        ctx.fillRect(Math.floor(this.x)+15.5, Math.floor(this.y)-15.5,20,2);
+        ctx.fillStyle = "white";
+        ctx.fillRect(Math.floor(this.x)+15.5, Math.floor(this.y)-15.5,20*this.health/100,2);
+        //Debugger Messenger
+        ctx.fillText(this.msg,Math.floor(this.x), Math.floor(this.y));
     }
-    this.tiltPlane = function(tilt){
+    this.directPlane = function(targetDirection){
         if(!this.alive) return;
-        if(tilt==0){
-            this.tilt -= Math.sign(this.tilt)*this.tiltSpeed/2;
-            return;
-        }
-        tilt = keepInBound(tilt, -this.tiltSpeed, this.tiltSpeed);
-        this.tilt += tilt;
-        this.tilt = keepInBound(this.tilt, -this.tiltMax, this.tiltMax);
+        this.dir = keepInBound(targetDirection,this.dir-this.ddirMax*this.speed/100,this.dir+this.ddirMax*this.speed/100);
+    }
+    this.turnPlane = function(turnDirection){
+        this.dir-=this.ddirMax*this.speed*turnDirection/10000;
     }
     this.accelerate = function(accel){
         if(!this.alive) return;
@@ -85,9 +92,6 @@ function planeClass(){
         for(i=0;i<10;i++) this.bullet[i].newPos();
 
         manuver(this);
-
-        this.dir+=this.tilt/10;
-        this.dir = loopInBound(this.dir,360);
 
         this.x += this.speed*Math.cos(this.dir*Math.PI/180)/30;
         this.x = loopInBound(this.x, width);

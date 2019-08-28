@@ -17,8 +17,8 @@ function getDist(x,y,tx,ty){
 }
 
 function optimalCordinate(x,y,tx,ty){
-	king = {i:0, j:0, record:getDist(x,y,tx,ty)};
-	challenger = 0;
+	let king = {i:0, j:0, record:getDist(x,y,tx,ty)};
+	let challenger = 0;
 	for(i=-1;i<=1;i++){
 		for(j=-1;j<=1;j++){
 			if(i==0&&j==0) continue;
@@ -37,12 +37,12 @@ function optimalCordinate(x,y,tx,ty){
 }
 
 function getDir(x,y,tx,ty){
-	dx = tx-x;
-	dy = ty-y;
+	const dx = tx-x;
+	const dy = ty-y;
 
 	if(dx==0) return (dy<0)?270:90;
 
-	dir = Math.atan(dy/dx)*180/Math.PI;
+	let dir = Math.atan(dy/dx)*180/Math.PI;
 	if(dx<0) dir+=180;
 	else if(dy<0) dir+=360;
 

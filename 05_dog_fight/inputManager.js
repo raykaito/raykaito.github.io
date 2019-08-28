@@ -1,12 +1,12 @@
-var leftKey  = false;
-var rightKey = false;
-var upKey    = false;
-var downKey  = false;
-var spaceKey = false;
-var ctrKey   = false;
+let leftKey  = false;
+let rightKey = false;
+let upKey    = false;
+let downKey  = false;
+let spaceKey = false;
+let ctrKey   = false;
 
-var width;
-var height;
+let width;
+let height;
 
 function initEventlistener(){    
     addEventListener('keydown',keyPressed,false);
@@ -44,9 +44,9 @@ function keyReleased(event){
 }
 
 function clicked(event){
-	rect = event.target.getBoundingClientRect();
-	x = event.pageX-rect.left-document.body.scrollLeft;
-	y = event.pageY-rect.top-document.body.scrollTop;
+	const rect = event.target.getBoundingClientRect();
+	let x = event.pageX-rect.left-document.body.scrollLeft;
+	let y = event.pageY-rect.top-document.body.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
 
@@ -55,8 +55,8 @@ function clicked(event){
 }
 
 function resize(event){
-	rect = canvas.getBoundingClientRect();
-    pixelRatio = window.devicePixelRatio;
+	const rect = canvas.getBoundingClientRect();
+    const pixelRatio = window.devicePixelRatio;
     canvas.width  = Math.floor(window.innerWidth-40);
     canvas.height = Math.floor((window.innerHeight-rect.top-20));
     canvas.style.width  = canvas.width +"px";
