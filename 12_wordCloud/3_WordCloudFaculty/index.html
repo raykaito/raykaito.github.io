@@ -14,11 +14,13 @@
 
 <body id="dept" class="deptSecond" style>
 
-	<section id="container"><div id="main">
-        <input type='file' accept='text/plain' onchange='loadLocalTxt(event)'><br>
+	<section id="container">
+        <input type='file' accept='text/plain' onchange='loadLocalTxt(event)'>
         <div id='wordcloud'></div>
-        <section id="interestingOnes" class="tabContents"></section>
-	</div></section>
+        <div id="main"><br>
+            <section id="interestingOnes" class="tabContents"></section>
+        </div>
+    </section>
 
     <script type="text/javascript">
         loadRemoteTxt('faculty.txt');

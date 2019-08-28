@@ -58,16 +58,51 @@ const getKeywords = function(res, en){
   for(let i=0;i<res.length;i++){
     let j=41+en;
     while(res[i][j]!=""&&j<47){
-      keywords[index] =  {text: res[i][j], size: 1, res: res[i], en: en};
+      const ttext = res[i][j];
+      const tsize = getSize(res[i][j],en);
+      console.log(ttext+","+tsize);
+      keywords[index] =  {text: ttext, size: tsize, res: res[i], en: en};
       //console.log("index: "+index+", keyword: "+keywords[index]);
       j+=2;
       index++;
     }
   }
+  keywords.sort(function(a,b){
+    if(a.size>b.size) return -1;
+    if(a.size<b.size) return  1;
+    return 0;
+  });
+  console.log(keywords);
   return keywords;
 };
 
-const appendProfessor = function(res,en=false){
+const getSize = function(x,en){
+  if(en){
+    if(x.length<=4) return 10;
+    if(x.length<=5) return 25;
+    if(x.length<=7) return 50;
+    if(x.length<=10) return 80;
+    if(x.length<=12) return 100;
+    if(x.length<=15) return 25;
+    if(x.length<=18) return 10;
+    if(x.length<=20) return 5;
+    if(x.length<=25)return 2;
+    return 1;
+  }else{
+    if(x.length==1) return 10;
+    if(x.length==2) return 25;
+    if(x.length==3) return 50;
+    if(x.length==4) return 80;
+    if(x.length==5) return 100;
+    if(x.length==7) return 25;
+    if(x.length==8) return 10;
+    if(x.length==9) return 5;
+    if(x.length==10)return 2;
+    return 1;
+  }
+};
+
+const appendProfessor = function(res,en=false, keyWord){
   const sect = document.getElementById("interestingOnes");
   //Append title
   const hea4 = document.createElement("H4");
@@ -89,7 +124,7 @@ const appendProfessor = function(res,en=false){
   const brea = document.createElement("BR");
   const spa1 = document.createElement("SPAN");
   const spa2 = document.createElement("SPAN");
-  const dtil = document.createTextNode(en?"Link":"詳細リスト");
+  const dtil = document.createTextNode(en?"Link":"ホームページ");
   const rsch = document.createTextNode(en?"Researcher Profile":"研究者情報");
   const star = document.createTextNode("(STAR Search)");
 
@@ -129,18 +164,18 @@ const appendProfessor = function(res,en=false){
   dfl1.appendChild(dfd1);
   arti.appendChild(dfl1);
   //Append Keywords
-  let course = res[41+en];
+  string = res[41+en];
   for(let i=43+en;res[i]!=""&&i<49;i+=2){
-    course += " / " + res[i];
+    string += " / " + res[i];
   }
+  string = emphasize(string, keyWord);
   const dfl2 = document.createElement("DL");
   const dft2 = document.createElement("DT");
   const dfd2 = document.createElement("DD");
   const key1 = document.createTextNode(en?"Research Field":"研究分野");
-  const key2 = document.createTextNode(course);
 
   dft2.appendChild(key1);
-  dfd2.appendChild(key2);
+  dfd2.innerHTML = string;
   dfl2.appendChild(dft2);
   dfl2.appendChild(dfd2);
   arti.appendChild(dfl2);
@@ -149,7 +184,18 @@ const appendProfessor = function(res,en=false){
   sect.insertBefore(hea4,sect.childNodes[0]);
 };
 
-const loadWordCloud = function (words, height = 300, width = 500){
+const emphasize = function (str, word){
+  const index = str.indexOf(word);
+  let newStr = str.slice(0,index);
+  newStr += "<div style='font-weight: bold; color: red; display: inline;'>";
+  newStr += word+"</div>";
+  newStr += str.slice(index+word.length,str.length);
+  return newStr;
+}
+
+const loadWordCloud = function (words){
+  const width = document.getElementById("container").clientWidth;
+  const height= Math.floor(width*0.4);
   d3.wordcloud()
     .size([width, height])
     .fill(d3.scale.ordinal().range(["#884400", "#448800", "#888800", "#444400"]))

@@ -149,7 +149,7 @@
       }
     }
 
-    return d3.rebind(wordcloud, layout, 'on', 'words', 'size', 'font', 'fontStyle', 'fontWeight', 'spiral', 'padding');
+    return d3.rebind(wordcloud, layout, 'on', 'words', 'size', 'font', 'fontStyle', 'fontWeight', 'spiral', 'padding', 'rotate');
   }
 
   if (typeof module === "object" && module.exports) module.exports = wordcloud;
