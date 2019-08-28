@@ -104,7 +104,7 @@
         .style("font-size", function(d) {
           return d.size + "px";
         })
-        .style("opacity", 1e-6)
+        .style("opacity", 1)
         .transition()
         .duration(transitionDuration)
         .style("opacity", 1);
