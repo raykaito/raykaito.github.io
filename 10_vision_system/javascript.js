@@ -60,69 +60,21 @@ const changeParameter = function(){
 	lyzer.display(0);
 };
 
-let video = document.getElementById("video");
-
-document.getElementById("draw").onclick = function(){
-    try{
-        drawVideo();
-    }catch(e){
-        alert(e);
+if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
+        const err = new Error('getUserMedia()が使えないブラウザだよ');
+        alert(`${err.name} ${err.message}`);
+        throw err;
     }
-};
 
+    // 操作する画面エレメント変数定義します。
+    const $start = document.getElementById('start_btn');   // スタートボタン
+    const $video = document.getElementById('video_area');  // 映像表示エリア
 
-var localstream;
-
-/*webカメラを起動する*/
-function start() {
-    if (navigator.webkitGetUserMedia) {
-
-        navigator.webkitGetUserMedia({
-            audio: false,
-            video: true
-        }, function(stream) {
-            localstream = stream;
-            console.dir(stream.getVideoTracks()[0]);
-            var url = window.webkitURL.createObjectURL(stream);
-            video.src = url;
-        }, function(error) {});
-
-    } else if (navigator.mozGetUserMedia) {
-
-        navigator.mozGetUserMedia({
-            video: true
-        }, function(stream) {
-            video.mozSrcObject = stream;
-            video.play();
-            streaming = true;
-        }, function(err) {
-            alert("An error occured! " + err);
-        });
-
-    } else if (navigator.getUserMedia) {
-        navigator.getUserMedia("audio, video", success, error);
-    }
-}
-
-
-/*canvasにvideoを展開*/
-function drawVideo(){
-    var video = document.getElementById("video");
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    context.drawImage(video, 0, 0, 260, 260);
-}
-
-/*videoをstop*/
-function stop() {
-    if (video.mozSrcObject) {
-        xvideo.pause();
-        video.mozSrcObject = null;
-    } else {
-        if (localstream) {
-            localstream.stop();
-        }
-    }
-}
+    // 「スタートボタン」を押下で、getUserMedia を使って映像を「映像表示エリア」に表示するよ。
+    $start.addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(stream => $video.srcObject = stream)
+        .catch(err => alert(`${err.name} ${err.message}`));
+    }, false);
 
 console.log("Loaded: javascript.js");
