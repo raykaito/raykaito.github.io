@@ -89,6 +89,18 @@ const isLocalMaxLTOET = (array, localMaxNumberLimit, fuzzy) =>{
 	return [localMinIndex, localMaxIndex];
 }
 
+const getMaxIndex = (array) => {
+	let max = array[0];
+	let maxIndex = 0;
+	for(let i=1;i<array.length;i++){
+		if(array[i]>max){
+			max = array[i];
+			maxIndex = i;
+		}
+	}
+	return [maxIndex,max];
+}
+
 const getAbsoluteMinMax = (array) => {
 	let minmax = new Array(2);
 	minmax[0] = minmax[1] = array[0]
@@ -126,10 +138,78 @@ const smoothenArrayLMN = (array, localMaxNumber) => {
 	return newArray;
 }
 
+const getLineIntensity = (array) => {
+	let lineIntensity = new Array(array.length).fill(0);
+	let lastNegative = -1;
+	let negativeIntensity = 0;
+	for(let i=0;i<array.length;i++){
+		if(array[i]>0){
+			if(lastNegative<0){
+				continue;
+			}else{
+				lineIntensity[Math.floor((i+lastNegative)/2)] = array[i]+negativeIntensity;
+				lastNegative = -1;
+			}
+		}else{
+			lastNegative = i;
+			negativeIntensity = Math.abs(array[i]);
+		}
+	}
+	return lineIntensity;
+}
+
+const getSlopeIntensity = (array) => {
+	let consistency = 0;// (+) indicates the upward slope and (-) indicates the negative
+	let counter = 1;
+	let peakDerivatives = new Array(array.length-1).fill(0);
+	let maxDerivative = 0;
+	for(let i=0;i<array.length-1;i++){
+		const newDerivative = array[i+1]-array[i];
+		if(consistency*newDerivative>0){
+			consistency+=newDerivative;
+			counter++;
+			continue;
+		}else{
+			peakDerivatives[i-Math.floor(counter/2)]=consistency;
+			if(Math.abs(consistency)>maxDerivative) maxDerivative = Math.abs(consistency);
+			counter = 1;
+			consistency = newDerivative;
+		}
+	}
+	return peakDerivatives;
+}
+
+const smoothenArrayVariableRange = (array) => {
+	//Find Optimal Smoothening Range
+	let lastScore = 0;
+	let dataSmooth = new Array(array.length);
+	for(let range=0;range<10;range++){
+		//Smoothen Array
+		dataSmooth = smoothenArray(array,range);
+		//Find Derivative
+		let derivative = new Array(dataSmooth.length-1);
+		for(let i=0;i<derivative.length;i++) derivative[i] = Math.abs(dataSmooth[i+1]-dataSmooth[i]);
+		//Exclude top 10% of Derivative Array
+		derivative.sort(function(a,b){
+			if(a<b) return -1;
+			if(a>b) return  1;
+			return 0;
+		})
+		let aaa = new Array(Math.floor(derivative.length*0.9))
+		for (let i=0;i<aaa.length;i++) aaa[i] = derivative[i];
+		const minmax = getAbsoluteMinMax(dataSmooth);
+		const newScore = (minmax[1]-minmax[0])/(5+calculateVariance(aaa));
+		if(newScore<lastScore) break;
+		else lastScore = newScore;
+	}
+	return dataSmooth;
+}
+
 const smoothenArray = (array, range) => {
 	if(range==0) return array;
 	let newArray, accumulator, counter;
-	accumulator = counter = 0;
+	accumulator = 0;
+	counter = 0;
 	newArray = new Array(array.length).fill(-1);
 	for (let i=-range;i<array.length+range;i++){
 		if(i+range<array.length){
@@ -166,6 +246,12 @@ const countLocalMax = (array) => {
 		}
 	}
 	return localMaxCounter;
+}
+
+const countLocalMin = function(array){
+	invertedA = new Array(array.length).fill(0);
+	for(let i=0;i<array.length;i++) invertedA[i] = -array[i];
+	return countLocalMax(invertedA);
 }
 
 const interpolate = (outLow, outHigh, rate)=>{//Rate 0.00 ~ 1.00

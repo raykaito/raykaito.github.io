@@ -1,6 +1,6 @@
-var pixelRatio, canvasScale;
-var ct, hct, hcanvas;
-var ctResized, hctResized;
+let pixelRatio, canvasScale;
+let ct, hct, hcanvas;
+let ctResized, hctResized;
 
 function initHcanvas(){
     hcanvas = document.createElement("canvas");
@@ -13,6 +13,7 @@ function resizeH(widthIn, heightIn){
     hctResized = true;
     if(ctResized){
         canvasScale = hcanvas.height/canvas.height;
+        console.log("Canval Scale: "+canvasScale);
         imagesLoaded();
     }
 }

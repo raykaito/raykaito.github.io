@@ -30,10 +30,10 @@
 				<input type="button" width="20%" value="2" onclick="button2()">
 				<input type="button" width="20%" value="3" onclick="button3()">
 				<input type="button" width="20%" value="4" onclick="button4()"><br>
-				<input class="slider" type="range" min="0" max="255" id="slider1" onchange="changeParameter1()" oninput="changeParameter1()">
-				<input class="slider" type="range" min="0" max="100" id="slider2" onchange="changeParameter2()" oninput="changeParameter2()">
-				<input class="slider" type="range" min="0" max="100" id="slider3" onchange="changeParameter3()" oninput="changeParameter3()">
-				<input class="slider" type="range" min="0" max="10"  id="slider4" onchange="changeParameter4()" oninput="changeParameter4()">
+				<input class="slider" type="range" min="0" max="100" id="slider1" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100" id="slider2" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100" id="slider3" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100"  id="slider4" onchange="changeParameter()" oninput="changeParameter()">
 			</td>
 		</tr>
 
@@ -42,12 +42,21 @@
 				<canvas id="canvas" width="400" height="400"></canvas>
 			</td>
 		</tr>
+
+		<tr>
+			<td align="center">
+				<video id='world' width="256" height="256" autoplay></video>
+				<button onClick="start()">start</button>
+				<button onClick="stop()">stop</button>
+				<button id="draw">set canvas</button>
+			</td>
+		</tr>
 	</table>
 
 	<script type="text/javascript" src="canvas.js"></script>
-	<script type="text/javascript" src="sudoku.js"></script>
 	<script type="text/javascript" src="javascript.js"></script>
-	<script type="text/javascript" src="visionSudoku.js"></script>
+	<script type="text/javascript" src="sudokuSolver.js"></script>
+	<script type="text/javascript" src="sudokuScanner.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/DataScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/StatScript.js"></script>

@@ -18,7 +18,7 @@ const newWindow = () => {
 }
 
 class ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0]){
 		//Set up variables
 		this.imgIn= imgIn;
 		this.xpos = xpos;
@@ -29,8 +29,8 @@ class ImageData{
 		this.width  = imgIn.width;
 		this.height = imgIn.height;
 		this.area   = this.width*this.height;
-		this.dwidth = Math.floor(this.width/canvasScale);
-		this.dheight= Math.floor(this.height/canvasScale);
+		this.dwidth = Math.ceil(this.width/canvasScale);
+		this.dheight= Math.ceil(this.height/canvasScale);
 		this.darea  = this.dwidth*this.dheight;
 		
 		this.imgOut = hct.createImageData(this.width , this.height);
@@ -58,11 +58,25 @@ class ImageData{
 		ct.beginPath();
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
-		ct.rect(dxpos+0.5,dypos+0.5,actual?this.width-1:this.dwidth-1,actual?this.height-1:this.dheight-1);
+		ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
 
 		ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
 		ct.putImageData(actual?this.imgOut:this.dimgOut, dxpos, dypos);
 		ct.stroke();
+	}
+	displayArray(array,height=Math.floor(hcanvas.height/canvasScale/6),width = Math.floor(hcanvas.width/canvasScale)-4){
+		if(array.length<width) width = array.length;
+		ct.fillStyle = "rgb(255,  0,255)";
+		ct.fillRect(101,1,width+2,height+2);
+		ct.fillStyle = "rgb(255,255,255)";
+		ct.fillRect(102,2,width,height);
+		ct.fillStyle = "rgb(  0,  0,  0)";
+		const arrayMax = getAbsoluteMinMax(array)[1];
+		for(let i=0;i<array.length;i++){
+			const x = 2+(i/array.length)*width;
+			const y = height+2-Math.ceil(array[i]*height/arrayMax);
+			ct.fillRect(100+x,y,1,height+2-y);
+		}
 	}
 	updateDisplayImage(actual = false){
 		if(actual) return;
@@ -113,7 +127,7 @@ class ImageData{
 }
 
 class RotatableImageData extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0]){
 		super([imgIn, xpos, ypos]);
 		this.length = Math.floor(Math.sqrt(this.width*this.width+this.height*this.height));
 		this.rotatedImageData = new Array(this.length*this.length*3);
@@ -159,63 +173,59 @@ class RotatableImageData extends ImageData{
 	}
 }
 
-class Analyzer extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+class IntersectionDetector extends ImageData{
+	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
 		super([imgIn, xpos, ypos]);
-		this.xdata = new Array(hcanvas.width).fill(0);
-		this.dxdata = new Array(hcanvas.width).fill(0);
-		this.ydata = new Array(hcanvas.height).fill(0);
-		this.max;
-		this.yPosition = 0;
-
-		this.updateYposition();
-		this.updateXdata();
-		this.displayXdata();
-	}
-	updateYposition(input = 0){
-		this.yPosition = Math.floor(input*this.height);
-	}
-	displaydXdata(){
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(0,103,this.width+2,102);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(1,104,this.width,100);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		for(let i=0;i<this.width;i++){
-			ct.fillRect(i+1,203-Math.ceil(this.dxdata[i]*100/255),1,Math.ceil(this.dxdata[i]*100/255));
+		this.vertical = vertical;
+		this.lineIntensityArray;
+		this.updateLineIntensity();
+		if(display){
+			this.displayLineIntensity();
+			this.display(0);
 		}
 	}
-	updateXdata(){
-		for(let i=0;i<this.width;i++) this.xdata[i] = this.getPix(this.imgIn,[i,this.yPosition],"all");
-		//parameters
-		const range = 5;
-		let counter = 0;
-		let total = 0;
-		for(let i=0;i<this.width;i++){
-			total += this.xdata[i];
-			counter++;
-			if(counter>range){
-				total -= this.xdata[i-range];
-				counter--;
+	get lineIntensity(){
+		return this.lineIntensityArray;
+	}
+	get lineIntensitySorted(){
+		let array = new Array(this.lineIntensityArray.length);
+		for(let i=0;i<array.length;i++){
+			array[i] = [this.lineIntensityArray[i], i];
+		}
+		array.sort(function(a,b){
+			if(a[0]>b[0]) return -1;
+			if(a[0]<b[0]) return  1;
+			return 0;
+		});
+		return array;
+	}
+	updateLineIntensity(){
+		const data = this.getdata();
+		const smoth = smoothenArrayVariableRange(data);
+		const slope = getSlopeIntensity(smoth);
+		this.lineIntensityArray = getLineIntensity(slope);
+	}
+	displayLineIntensity(){
+		this.displayArray(this.lineIntensityArray);
+	}
+	getdata(){
+		let data = new Array();
+		if(this.vertical){
+			for(let i=0;i<this.height;i++){
+				data[i] = 0;
+				for(let j=0;j<this.width;j++){
+					data[i] += this.getPix(this.imgIn,[j,i],"all");
+				}
 			}
-			const avg = total/counter;
-			let errorSq = 0;
-			for(let j=0;j<range;j++){
-				errorSq += (this.xdata[i-j]-avg)^2;
+		}else{
+			for(let i=0;i<this.width;i++){
+				data[i] = 0;
+				for(let j=0;j<this.height;j++){
+					data[i] += this.getPix(this.imgIn,[i,j],"all");
+				}
 			}
-			this.dxdata[i] = Math.sqrt(errorSq)*100;
 		}
-	}
-	displayXdata(){
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(0,0,this.width+2,102);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(1,1,this.width,100);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		for(let i=0;i<this.width;i++){
-			ct.fillRect(i+1,101-Math.ceil(this.xdata[i]*100/255),1,Math.ceil(this.xdata[i]*100/255));
-		}
-		this.displaydXdata();
+		return data;
 	}
 }
 
