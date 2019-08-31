@@ -60,32 +60,4 @@ const changeParameter = function(){
 	lyzer.display(0);
 };
 
-if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        const err = new Error('getUserMedia()が使えないブラウザだよ');
-        alert(`${err.name} ${err.message}`);
-        throw err;
-    }
-
-    // 操作する画面エレメント変数定義します。
-    const $start = document.getElementById('start_btn');   // スタートボタン
-    const $video = document.getElementById('video_area');  // 映像表示エリア
-
-    // 「スタートボタン」を押下で、getUserMedia を使って映像を「映像表示エリア」に表示するよ。
-    $start.addEventListener('click', () => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        .then(stream => $video.srcObject = stream)
-        .catch(err => alert(`${err.name} ${err.message}`));
-    }, false);
-
-    function copyFrame() {
-
-        var canvas_capture_image = document.getElementById('capture_image');
-        var cci = canvas_capture_image.getContext('2d');
-        var va = document.getElementById('video_area');
-
-        canvas_capture_image.width  = va.videoWidth;
-        canvas_capture_image.height = va.videoHeight;
-        cci.drawImage(va, 0, 0);  // canvasに『「静止画取得」ボタン』押下時点の画像を描画。
-    }
-    
 console.log("Loaded: javascript.js");
