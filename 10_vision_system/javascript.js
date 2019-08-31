@@ -77,4 +77,15 @@ if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
         .catch(err => alert(`${err.name} ${err.message}`));
     }, false);
 
+    function copyFrame() {
+
+        var canvas_capture_image = document.getElementById('capture_image');
+        var cci = canvas_capture_image.getContext('2d');
+        var va = document.getElementById('video_area');
+
+        canvas_capture_image.width  = va.videoWidth;
+        canvas_capture_image.height = va.videoHeight;
+        cci.drawImage(va, 0, 0);  // canvasに『「静止画取得」ボタン』押下時点の画像を描画。
+    }
+    
 console.log("Loaded: javascript.js");
