@@ -44,52 +44,28 @@ class ImageData{
 	}
 	//getters and setters
 	get passdata(){return [this.imgOut, this.xpos, this.ypos]; }
-	get dimageOut(){
-		this.updateDisplayImage();
-		return this.dimgOut;
-	}
-	get _width(){return this.width;}
 	display(actual = false){
 		const dxpos = this.dxpos+Math.floor((this.dwidth-this.width)/2)*actual;
 		const dypos = this.dypos+Math.floor((this.dheight-this.height)/2)*actual;
 		
-		this.updateDisplayImage(actual);
+		const timg = this.updateDisplayImage(actual);
 
 		ct.beginPath();
 		ct.strokeStyle = "rgb(0,255,0)";
 		ct.lineWidth = 0;
 		ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
 
-		ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
-		ct.putImageData(actual?this.imgOut:this.dimgOut, dxpos, dypos);
+		//ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
+		ct.drawImage(timg,dxpos, dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
 		ct.stroke();
 	}
-	displayArray(array,height=Math.floor(hcanvas.height/canvasScale/6),width = Math.floor(hcanvas.width/canvasScale)-4){
-		if(array.length<width) width = array.length;
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(101,1,width+2,height+2);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(102,2,width,height);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		const arrayMax = getAbsoluteMinMax(array)[1];
-		for(let i=0;i<array.length;i++){
-			const x = 2+(i/array.length)*width;
-			const y = height+2-Math.ceil(array[i]*height/arrayMax);
-			ct.fillRect(100+x,y,1,height+2-y);
-		}
-	}
-	updateDisplayImage(actual = false){
-		if(actual) return;
-		let xy;
-		for(let i=0;i<this.darea;i++){
-			xy = this.i2xy(i, this.dwidth);
-			xy[0]*=canvasScale;
-			xy[1]*=canvasScale;
-			this.dimgOut.data[4*i  ] = this.getPix(this.imgOut,xy, 0);
-			this.dimgOut.data[4*i+1] = this.getPix(this.imgOut,xy, 1);
-			this.dimgOut.data[4*i+2] = this.getPix(this.imgOut,xy, 2);
-			this.dimgOut.data[4*i+3] = this.getPix(this.imgOut,xy, 3);
-		}
+	updateDisplayImage(){
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = this.width;
+		tcanvas.height= this.height;
+		const tct = tcanvas.getContext("2d");
+		tct.putImageData(this.imgOut,0,0);
+		return tcanvas;
 	}
 	xy2i(xy,width=this.width){
 		return Math.floor(xy[0])+width*Math.floor(xy[1]);
@@ -177,6 +153,9 @@ class IntersectionDetector extends ImageData{
 	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
 		super([imgIn, xpos, ypos]);
 		this.vertical = vertical;
+		this.dataArray;
+		this.dataSmoothArray;
+		this.dataSlopeArray;
 		this.lineIntensityArray;
 		this.updateLineIntensity();
 		if(display){
@@ -184,9 +163,10 @@ class IntersectionDetector extends ImageData{
 			this.display(0);
 		}
 	}
-	get lineIntensity(){
-		return this.lineIntensityArray;
-	}
+	get data(){return this.dataArray;}
+	get dataSmooth(){return this.dataSmoothArray;}
+	get dataSlope(){return this.dataSlopeArray;}
+	get lineIntensity(){return this.lineIntensityArray;}
 	get lineIntensitySorted(){
 		let array = new Array(this.lineIntensityArray.length);
 		for(let i=0;i<array.length;i++){
@@ -200,13 +180,16 @@ class IntersectionDetector extends ImageData{
 		return array;
 	}
 	updateLineIntensity(){
-		const data = this.getdata();
-		const smoth = smoothenArrayVariableRange(data);
-		const slope = getSlopeIntensity(smoth);
-		this.lineIntensityArray = getLineIntensity(slope);
+		this.dataArray = this.getdata();
+		this.dataSmoothArray = smoothenArrayVariableRange(this.dataArray);
+		this.dataSlopeArray = getSlopeIntensity(this.dataSmoothArray);
+		this.lineIntensityArray = getLineIntensity(this.dataSlopeArray);
 	}
 	displayLineIntensity(){
-		this.displayArray(this.lineIntensityArray);
+		displayArray(this.dataArray,0);
+		displayArray(this.dataSmoothArray,1);
+		displayArray(this.dataSlopeArray,2);
+		displayArray(this.lineIntensityArray,3);
 	}
 	getdata(){
 		let data = new Array();
