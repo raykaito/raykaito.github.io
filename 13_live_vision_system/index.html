@@ -10,7 +10,7 @@
 </head>
 
 
-<body id="Body" onload="init()">
+<body id="Body">
 
 	<table class="main" id="Table">
 
@@ -67,6 +67,7 @@
         var handleSuccess = function(stream) {
             video.srcObject = stream;
         };
+        var front = false;
         var constraints = {
             audio: false,
             video: {
