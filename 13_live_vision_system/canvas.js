@@ -45,10 +45,8 @@ function resize(vLength){
 function resizeM(){
     mcanvas.width  = canvas.width;
     mcanvas.height = canvas.height;
-    mcanvas.style.width  = mcanvas.width +"px";
-    mcanvas.style.height = mcanvas.height+"px";
-    mcanvas.width *= pixelRatio;
-    mcanvas.height*= pixelRatio;
+    mcanvas.style.width  = canvas.width/pixelRatio +"px";
+    mcanvas.style.height = canvas.height/pixelRatio+"px";
     mct.fillRect(0,0,mcanvas.width,mcanvas.height);
 }
 
