@@ -1,0 +1,72 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Ray's Vision System</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()">
+
+	<table class="main" id="Table">
+
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Ray's Vision System
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+	
+		<tr>
+			<td align="center">
+		        <video id="player" controls autoplay playsinline></video>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="canvas" width="400" height="400"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	 
+		var body = document.getElementById('Body');
+		var table = document.getElementById('Table');
+		showObject(body, table);
+
+        var video = document.getElementById("player"),
+            canvas = document.getElementById("canvas"),
+            ctx = canvas.getContext("2d");
+        requestAnimationFrame(draw);
+
+        function draw() {
+            canvas.width = 300;
+            canvas.height = 100;
+            ctx.drawImage(video, 100, 300, 600, 200,
+                0, 0, 300, 100);
+            imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                ave = (data[i + 0] + data[i + 1] + data[i + 2]) / 3;
+                data[i + 0] =
+                    data[i + 1] =
+                    data[i + 2] = (ave > 128) ? 255 : 0;
+                data[i + 3] = 255;
+            }
+            ctx.putImageData(imgData, 0, 0);
+            requestAnimationFrame(draw);
+        }
+    </script>
+
+</body>
+
+
+</html>
