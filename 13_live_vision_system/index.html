@@ -25,13 +25,13 @@
 	
 		<tr>
 			<td align="center">
-		        <video id="player" controls autoplay playsinline></video>
+				<canvas id="canvas" width="400" height="400"></canvas>
 			</td>
 		</tr>
 
 		<tr>
 			<td align="center">
-				<canvas id="canvas" width="400" height="400"></canvas>
+		        <video id="player" controls autoplay playsinline></video>
 			</td>
 		</tr>
 	</table>
@@ -64,6 +64,18 @@
             ctx.putImageData(imgData, 0, 0);
             requestAnimationFrame(draw);
         }
+        var handleSuccess = function(stream) {
+            video.srcObject = stream;
+        };
+        var constraints = {
+            audio: false,
+            video: {
+                width: 1920,
+                height: 1080,
+                facingMode: (front ? "user" : "environment")
+            }
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
     </script>
 
 </body>
