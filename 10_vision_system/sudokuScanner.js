@@ -25,6 +25,7 @@ class VisionProgram_SudokuReader{
 	}
 	findFourCorners([angle, xin, yin]){
 		let xy = this.findStartingXY(xin,yin);
+		if(xy=="fail") return "fail";
 		const startingPoint = this.findCross(xy[0], xy[1]);
 		//go east
 		const eeEdge = this.findEdge(startingPoint[0],startingPoint[1], 1, 0);
@@ -84,21 +85,11 @@ class VisionProgram_SudokuReader{
 		let dx=dxin*this.cellLength;
 		let dy=dyin*this.cellLength;
 		let counter = 0;
-		const error=20;
-		const intensity = 2;
 		while(true){
 			const result = this.findCross(x+dx,y+dy);
-			const er1 = result[2][0];
-			const er2 = result[2][1];
-			const er3 = result[2][2];
-			const er4 = result[2][3];
-			const in1 = result[3][0];
-			const in2 = result[3][1];
-			const in3 = result[3][2];
-			const in4 = result[3][3];
 			const nX  = result[0];
 			const nY  = result[1];
-			if(er1<error&&er2<error&&er3<error&&er4<error&&in1>intensity&&in2>intensity&&in3>intensity&&in4>intensity){
+			if(result[2]){
 				dx=nX-x;
 				dy=nY-y;
 				x =nX;
@@ -108,9 +99,13 @@ class VisionProgram_SudokuReader{
 			}else{
 				return [x,y,counter];
 			}
+			continue;
 		}
 	}
 	findCross(xin,yin){
+		const error=20;
+		const intensity = 2;
+
 		const offset = this.cellLength/12;
 		const length = this.cellLength*0.8;
 		const imgn = newWindow().centerWidthHeight(xin,yin-offset  ,length,1);
@@ -129,16 +124,25 @@ class VisionProgram_SudokuReader{
 						scns.lineIntensitySorted[0][0]/scns.lineIntensitySorted[1][0],
 						scnw.lineIntensitySorted[0][0]/scnw.lineIntensitySorted[1][0],
 						scne.lineIntensitySorted[0][0]/scne.lineIntensitySorted[1][0]];
+		if(itst[0]<intensity||itst[1]<intensity||itst[2]<intensity||itst[3]<intensity){
+			console.log("NG intensity");
+			console.log(itst);
+			return [0,0,false];
+		}
 		const errs = [findError(arrn,length/2), findError(arrs,length/2), findError(arrw,length/2), findError(arre,length/2)];
+		if(errs[0]>error||errs[1]>error||errs[2]>error||errs[3]>error){
+			console.log("NG error");
+			console.log(errs);
+			return [0,0,false];
+		}
 		const newX = (arrn+arrs)/2+xin-length/2;
 		const newY = (arrw+arre)/2+yin-length/2;
-		console.log([newX, newY, errs, itst]);
 		return [newX, newY, errs, itst];
 	}
 	findStartingXY(xin,yin){
 		const offset = this.cellMax/20;
 		const imgr = newWindow().centerWidthHeight(xin+offset,yin,1,this.cellMax*2);
-		const scannerr = new IntersectionDetector(imgr.passdata,1);
+		const scannerr = new IntersectionDetector(imgr.passdata,1,1);
 		const arrayr = scannerr.lineIntensitySorted;
 		let lineIndex = [0,0];
 		let indexCounter = 0;
@@ -152,7 +156,11 @@ class VisionProgram_SudokuReader{
 				if(indexCounter==2){
 					this.cellLength = Math.abs(lineIndex[1]-lineIndex[0]);
 					const startingPoint = this.findCross(xin,lineIndex[0]);
+					circle(startingPoint[0]/canvasScale,startingPoint[1]/canvasScale,3);
+					console.log(startingPoint);
 					const nextPoint = this.findCross(xin,lineIndex[0]+this.cellLength);
+					circle(nextPoint[0]/canvasScale,nextPoint[1]/canvasScale,3);
+					console.log(nextPoint);
 					this.cellLength=(nextPoint[1]-startingPoint[1]);
 					return [startingPoint[0],startingPoint[1]];
 				}
