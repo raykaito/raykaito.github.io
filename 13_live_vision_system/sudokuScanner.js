@@ -23,6 +23,10 @@ class VisionProgram_SudokuReader{
 		//locate the four corners
 		const xyCorner = this.getFourCorners(xyAngle[0],xyAngle[1]);
 	}
+	temp(){
+		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
+		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
+	}
 	getFourCorners(xin, yin){
 		const cl = this.cellLength;
 		const x = xin +cl/2;
@@ -31,46 +35,48 @@ class VisionProgram_SudokuReader{
 		const yc = y%cl;
 		const nx = Math.min(15,Math.floor(hcanvas.width /cl));
 		const ny = Math.min(15,Math.floor(hcanvas.height/cl));
-		let inX, xIndex;
-		let inY, yIndex;
+		let inX = new Array(), xIndex;
+		let inY = new Array(), yIndex;
 		const acceptableErrorPercentage = 5;
 		const minCounter = 2;
-		for(let i=0;i<nx;i++){
+		for(let i=0;i<ny;i++){
 			const imgX = newWindow().cornerWidthHeight(xc,yc+cl*i,nx*cl,1);
-			const scnX = new IntersectionDetector(imgX.passdata, 0);
-			inX = scnX.intersections;
-			//check if lines are in expected locations
-			let counter = 0;
-			for(let j=0;j<inX.length;j++){
-				const distToCenterofBox = (inX[j])%this.cellLength;
-				if(findError(this.cellLength/2, distToCenterofBox)<acceptableErrorPercentage) counter++;
-			}
-			if(counter>=minCounter){
-				yIndex = i;
-				break;
-			}
+			const scnX = new IntersectionDetector(imgX.passdata, 0, 0);
+			inX[i] = scnX.intersections;
+		}
+		for(let i=0;i<nx;i++){
+			const imgY = newWindow().cornerWidthHeight(xc+cl*i,yc,1,ny*cl);
+			const scnY = new IntersectionDetector(imgY.passdata, 1, 0);
+			inY[i] = scnY.intersections;
 		}
 		for(let i=0;i<ny;i++){
-			const imgY = newWindow().cornerWidthHeight(xc+cl*i,yc,1,ny*cl);
-			const scnY = new IntersectionDetector(imgY.passdata, 1);
-			inY = scnY.intersections;
-			//check if lines are in expected locations
-			let counter = 0;
-			for(let j=0;j<inY.length;j++){
-				const distToCenterofBox = (inY[j])%this.cellLength;
-				if(findError(this.cellLength/2, distToCenterofBox)<acceptableErrorPercentage) counter++;
+			let counter=0;
+			for(let j=0;j<inX[i].length-1;j++){
+				if(findError(cl,inX[i][j+1]-inX[i][j])<acceptableErrorPercentage){
+					counter++;
+				}
 			}
-			if(counter>=minCounter){
-				xIndex = i;
-				break;
-			}
+			ct.fillStyle = "cyan";
+			ct.font = "20px Arial";
+			ct.fillText(""+counter,xc,yc+cl*i);
 		}
+		for(let i=0;i<nx;i++){
+			let counter=0;
+			for(let j=0;j<inY[i].length-1;j++){
+				if(findError(cl,inY[i][j+1]-inY[i][j])<acceptableErrorPercentage){
+					counter++;
+				}
+			}
+			ct.fillStyle = "cyan";
+			ct.font = "20px Arial";
+			ct.fillText(""+counter,xc+cl*i,yc);
+		}
+		//Analyze intersections horizontal
 		circle((xc+cl* xIndex   )/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
 		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
 		circle((xc+cl* xIndex   )/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
 		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
 		//Analyze X intersections
-		this.abort("unable to locate corners");
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
@@ -170,7 +176,7 @@ class VisionProgram_SudokuReader{
 			gapList[gapList.length] = xyV[i+1][0]-xyV[i][0];
 		}
 		for(let i=0;i<xyH.length-1;i++){
-			gapList[gapList.length] = xyH[i+1][0]-xyH[i][0];
+			gapList[gapList.length] = xyH[i+1][1]-xyH[i][1];
 		}
 		//Analyze the gapList
 		const acceptableErrorPercentage = 3;
