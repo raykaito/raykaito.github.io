@@ -33,8 +33,8 @@ class VisionProgram_SudokuReader{
 		const ny = Math.min(15,Math.floor(hcanvas.height/cl));
 		let inX, xIndex;
 		let inY, yIndex;
-		const acceptableErrorPercentage = 10;
-		const minCounter = 4;
+		const acceptableErrorPercentage = 5;
+		const minCounter = 2;
 		for(let i=0;i<nx;i++){
 			const imgX = newWindow().cornerWidthHeight(xc,yc+cl*i,nx*cl,1);
 			const scnX = new IntersectionDetector(imgX.passdata, 0);
