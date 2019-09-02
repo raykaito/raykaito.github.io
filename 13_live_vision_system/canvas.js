@@ -50,7 +50,7 @@ function resizeM(){
     mct.fillRect(0,0,mcanvas.width,mcanvas.height);
 }
 
-function displayArray(array, index = 0, height = (mcanvas.height-16)/4, width = mcanvas.width-4){
+function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16)/4, width = mcanvas.width-4){
     const dy = (height+4)*index;
     if(array.length<width) width = array.length;
     mct.fillStyle = "rgb(255,  0,255)";
@@ -59,10 +59,11 @@ function displayArray(array, index = 0, height = (mcanvas.height-16)/4, width = 
     mct.fillRect(2,dy+2,width,height);
     mct.fillStyle = "rgb(  0,  0,  0)";
     const arrayMax = getAbsoluteMinMax(array)[1];
+    const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
     for(let i=0;i<array.length;i++){
         const x = 2+(i/array.length)*width;
-        const y = dy+height+2-Math.ceil(array[i]*height/arrayMax);
-        mct.fillRect(x,y,1,Math.ceil(array[i]*height/arrayMax));
+        const y = dy+height+2-Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin));
+        mct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
     }
 }
 
@@ -113,7 +114,7 @@ function draw() {
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,vLength,vLength);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
         sudokuV.startScan();
-        //setTimeout(draw,1000);
+        //setTimeout(draw,100);
         //return;
         requestAnimationFrame(draw);
     }else{

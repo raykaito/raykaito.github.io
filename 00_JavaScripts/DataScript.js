@@ -143,8 +143,8 @@ const getLineIntensity = (array) => {
 	let lastNegative = -1;
 	let negativeIntensity = 0;
 	for(let i=0;i<array.length;i++){
-		if(array[i]>0){
-			if(lastNegative<0){
+		if(array[i]>=0){
+			if(array[i]==0||lastNegative<0){
 				continue;
 			}else{
 				lineIntensity[Math.floor((i+lastNegative)/2)] = array[i]+negativeIntensity;

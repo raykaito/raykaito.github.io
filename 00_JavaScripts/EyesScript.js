@@ -154,61 +154,57 @@ class IntersectionDetector extends ImageData{
 		super([imgIn, xpos, ypos]);
 		this.vertical = vertical;
 		this.dataArray;
+		this.variance;
 		this.dataSmoothArray;
 		this.dataSlopeArray;
 		this.lineIntensityArray;
+		this.indexList;
 		this.updateLineIntensity();
 		if(display){
 			this.displayLineIntensity();
-			this.display(0);
+			//this.display(0);
+			this.displayIntersections();
 		}
 	}
 	get data(){return this.dataArray;}
 	get dataSmooth(){return this.dataSmoothArray;}
 	get dataSlope(){return this.dataSlopeArray;}
 	get lineIntensity(){return this.lineIntensityArray;}
-	get lineIntensitySorted(){
-		let array = new Array(this.lineIntensityArray.length);
-		for(let i=0;i<array.length;i++){
-			array[i] = [this.lineIntensityArray[i], i];
-		}
-		array.sort(function(a,b){
-			if(a[0]>b[0]) return -1;
-			if(a[0]<b[0]) return  1;
-			return 0;
-		});
-		return array;
-	}
+	get intersections(){return this.indexList;}
 	updateLineIntensity(){
 		this.dataArray = this.getdata();
+		this.variance = calculateVariance(this.dataArray);
 		this.dataSmoothArray = smoothenArrayVariableRange(this.dataArray);
 		this.dataSlopeArray = getSlopeIntensity(this.dataSmoothArray);
 		this.lineIntensityArray = getLineIntensity(this.dataSlopeArray);
+		this.indexList = this.getIntersections(this.lineIntensityArray);
+	}
+	getdata(){
+		let data = new Array();
+		if(this.vertical)
+			for(let i=0;i<this.height;i++)	data[i] = this.getPix(this.imgIn,[0,i],"all");
+		else
+			for(let i=0;i<this.width;i++)	data[i] = this.getPix(this.imgIn,[i,0],"all");
+		return data;
+	}
+	getIntersections(ain){
+		let indexList = new Array();
+		for(let i=0;i<ain.length;i++){
+			if(ain[i]>this.variance){
+				indexList[indexList.length] = i;
+			}
+		}
+		return indexList;
 	}
 	displayLineIntensity(){
 		displayArray(this.dataArray,0);
 		displayArray(this.dataSmoothArray,1);
-		displayArray(this.dataSlopeArray,2);
-		displayArray(this.lineIntensityArray,3);
+		displayArray(this.lineIntensityArray,2);
 	}
-	getdata(){
-		let data = new Array();
-		if(this.vertical){
-			for(let i=0;i<this.height;i++){
-				data[i] = 0;
-				for(let j=0;j<this.width;j++){
-					data[i] += this.getPix(this.imgIn,[j,i],"all");
-				}
-			}
-		}else{
-			for(let i=0;i<this.width;i++){
-				data[i] = 0;
-				for(let j=0;j<this.height;j++){
-					data[i] += this.getPix(this.imgIn,[i,j],"all");
-				}
-			}
+	displayIntersections(){
+		for(let i=0;i<this.indexList.length;i++){
+			circle((this.xpos+(this.indexList[i]*(!this.vertical)))/canvasScale,(this.ypos+(this.indexList[i]*this.vertical))/canvasScale,3);
 		}
-		return data;
 	}
 }
 
