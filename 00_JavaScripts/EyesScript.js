@@ -102,53 +102,6 @@ class ImageData{
 	}
 }
 
-class RotatableImageData extends ImageData{
-	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0]){
-		super([imgIn, xpos, ypos]);
-		this.length = Math.floor(Math.sqrt(this.width*this.width+this.height*this.height));
-		this.rotatedImageData = new Array(this.length*this.length*3);
-	}
-	rotateImage(angle = 0, centerxy = [this.width/2, this.height/2]){
-		let x, y, xo, yo, index;
-		let a, b,  c,  d, theta;
-		
-		theta = -1*angle*Math.PI/180;
-		a = Math.cos(theta);
-		b = Math.sin(theta);
-		c = -b;
-		d = a;
-		
-		for(let i=0;i<this.length*this.length;i++){
-			xo = i%this.length-this.length/2+this.width/2-centerxy[0];
-			yo = Math.floor(i/this.length-this.length/2+this.height/2-centerxy[1]);
-			x  = Math.floor(xo*a + yo*c+centerxy[0]);
-			y  = Math.floor(xo*b + yo*d+centerxy[1]);
-
-			if(x<0||x>=this.width||y<0||y>=this.height){
-				this.rotatedImageData[3*i+0] = 255;
-				this.rotatedImageData[3*i+1] = 255;
-				this.rotatedImageData[3*i+2] = 255;
-				continue;
-			}
-			index = this.xy2i([x,y],this.width);
-			this.rotatedImageData[3*i+0] = this.getPix(this.imgIn, index, 0);
-			this.rotatedImageData[3*i+1] = this.getPix(this.imgIn, index, 1);
-			this.rotatedImageData[3*i+2] = this.getPix(this.imgIn, index, 2);
-		}
-	}
-	pasteRotatedImageData(){
-		for(let i=0;i<this.area;i++){
-			let xy = this.i2xy(i, this.width);
-			xy[0] = Math.floor(xy[0]+this.length/2-this.width/2);
-			xy[1] = Math.floor(xy[1]+this.length/2-this.height/2);
-			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+0], 0);
-			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+1], 1);
-			this.setPix(i, this.rotatedImageData[3*this.xy2i(xy, this.length)+2], 2);
-		}
-		hct.putImageData(this.imgOut, 0, 0);
-	}
-}
-
 class IntersectionDetector extends ImageData{
 	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
 		super([imgIn, xpos, ypos]);
@@ -159,6 +112,7 @@ class IntersectionDetector extends ImageData{
 		this.dataSlopeArray;
 		this.lineIntensityArray;
 		this.indexList;
+		this.lineIntensityFiltered;
 		this.updateLineIntensity();
 		if(display){
 			this.displayLineIntensity();
@@ -173,8 +127,8 @@ class IntersectionDetector extends ImageData{
 	get intersections(){return this.indexList;}
 	updateLineIntensity(){
 		this.dataArray = this.getdata();
-		this.variance = calculateVariance(this.dataArray);
-		this.dataSmoothArray = smoothenArrayVariableRange(this.dataArray);
+		this.dataSmoothArray = this.dataArray;//smoothenArrayVariableRange(this.dataArray);
+		this.variance = calculateVariance(this.dataSmoothArray);
 		this.dataSlopeArray = getSlopeIntensity(this.dataSmoothArray);
 		this.lineIntensityArray = getLineIntensity(this.dataSlopeArray);
 		this.indexList = this.getIntersections(this.lineIntensityArray);
@@ -189,17 +143,25 @@ class IntersectionDetector extends ImageData{
 	}
 	getIntersections(ain){
 		let indexList = new Array();
+		let tempArray = new Array;
 		for(let i=0;i<ain.length;i++){
 			if(ain[i]>this.variance){
 				indexList[indexList.length] = i;
 			}
+			if(ain[i]!=0){
+				tempArray[i] = ain[i];
+			}else{
+				tempArray[i] = this.variance;
+			}
 		}
+		this.lineIntensityFiltered = tempArray;
 		return indexList;
 	}
 	displayLineIntensity(){
 		displayArray(this.dataArray,0);
 		displayArray(this.dataSmoothArray,1);
 		displayArray(this.lineIntensityArray,2);
+		displayArray(this.lineIntensityFiltered,3);
 	}
 	displayIntersections(){
 		for(let i=0;i<this.indexList.length;i++){

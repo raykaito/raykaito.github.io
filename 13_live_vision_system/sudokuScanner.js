@@ -4,6 +4,7 @@ class VisionProgram_SudokuReader{
 		this.failed;
 	}
 	init(){
+		this.cellLength = -1;
 		this.failed=false;
 	}
 	abort(msg){
@@ -12,16 +13,12 @@ class VisionProgram_SudokuReader{
 	}
 	startScan(){
 		this.init();
-		//find angle and an intersection
+		//find angle, intersection and cell length
 		const  xyAngle = this.getXYangle();
 		if(this.failed) return;
-		
+
 		//rotate canvas
 		rotateCanvas(xyAngle);
-		
-		//determine the cell length
-		this.cellLength = this.getCellLength();
-		if(this.failed) return;
 
 		//locate the four corners
 		const xyCorner = this.getFourCorners(xyAngle[0],xyAngle[1]);
@@ -32,76 +29,48 @@ class VisionProgram_SudokuReader{
 		const y = yin +cl/2;
 		const xc = x%cl;
 		const yc = y%cl;
-		const nx = Math.floor(hcanvas.width /cl);
-		const ny = Math.floor(hcanvas.height/cl);
+		const nx = Math.min(15,Math.floor(hcanvas.width /cl));
+		const ny = Math.min(15,Math.floor(hcanvas.height/cl));
+		let inX, xIndex;
+		let inY, yIndex;
+		const acceptableErrorPercentage = 10;
+		const minCounter = 4;
 		for(let i=0;i<nx;i++){
 			const imgX = newWindow().cornerWidthHeight(xc,yc+cl*i,nx*cl,1);
-			const scnX = new IntersectionDetector(imgX.passdata, 0, 1);
+			const scnX = new IntersectionDetector(imgX.passdata, 0);
+			inX = scnX.intersections;
+			//check if lines are in expected locations
+			let counter = 0;
+			for(let j=0;j<inX.length;j++){
+				const distToCenterofBox = (inX[j])%this.cellLength;
+				if(findError(this.cellLength/2, distToCenterofBox)<acceptableErrorPercentage) counter++;
+			}
+			if(counter>=minCounter){
+				yIndex = i;
+				break;
+			}
 		}
 		for(let i=0;i<ny;i++){
 			const imgY = newWindow().cornerWidthHeight(xc+cl*i,yc,1,ny*cl);
-			const scnY = new IntersectionDetector(imgY.passdata, 1, 1);
-		}
-		this.abort("unable to locate corners");
-	}
-	getCellLength(){
-		const rangeOfSearch = hcanvas.width/2;
-		const numberOfLines = 10;
-		const xCorner = (hcanvas.width - rangeOfSearch)/2;
-		const yCorner = (hcanvas.height- rangeOfSearch)/2;
-		let inH = new Array(numberOfLines+1);
-		//Gather Circles
-		for(let i=0;i<=numberOfLines;i++){
-			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), rangeOfSearch, 1);
-			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);
-			inH[i] = scannerH.intersections;
-		}		
-		//Analyze intersections horizontal
-		const acceptableError = rangeOfSearch/100;
-		const minInterCounter = numberOfLines*0.7;
-		let xIndex = new Array();
-		for(let upperIndex = 0;upperIndex<inH[0].length;upperIndex++){
-			const xup = inH[0][upperIndex];
-			for(let lowerIndex = 0;lowerIndex<inH[numberOfLines].length;lowerIndex++){
-				const xlo = inH[numberOfLines][lowerIndex];
-				let interCounter = 0;
-				for(let i=1;i<numberOfLines;i++){
-					const xta = xup+(xlo-xup)*i/numberOfLines;
-					let error = rangeOfSearch;
-					for(let index = 0;index<inH[i].length;index++){
-						error = Math.min(Math.abs(inH[i][index]-xta),error);
-					}
-					if(error<acceptableError)interCounter++;
-				}
-				if(interCounter>=minInterCounter){
-					xIndex[xIndex.length] = xCorner+xup;
-				}
-			}
-		}
-		if(xIndex.length==0){
-			this.abort("cell length not found");
-			return;
-		}
-		//Create list of gaps
-		let gapList = new Array(xIndex.length-1);
-		for(let i=0;i<gapList.length;i++){
-			gapList[i] = xIndex[i+1]-xIndex[i];
-		}
-		//Analyze the gap list
-		const acceptableErrorPercentage = 3;
-		const minCounter = 3;
-		let counter;
-		for(let i=0;i<gapList.length;i++){
-			counter = 0;
-			for(let j=0;j<gapList.length;j++){
-				if(findError(gapList[i],gapList[j])<acceptableErrorPercentage) counter++;
+			const scnY = new IntersectionDetector(imgY.passdata, 1);
+			inY = scnY.intersections;
+			//check if lines are in expected locations
+			let counter = 0;
+			for(let j=0;j<inY.length;j++){
+				const distToCenterofBox = (inY[j])%this.cellLength;
+				if(findError(this.cellLength/2, distToCenterofBox)<acceptableErrorPercentage) counter++;
 			}
 			if(counter>=minCounter){
-				return gapList[i];
+				xIndex = i;
+				break;
 			}
 		}
-		this.abort("cell length not found");
-		return;
+		circle((xc+cl* xIndex   )/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
+		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
+		circle((xc+cl* xIndex   )/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
+		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
+		//Analyze X intersections
+		this.abort("unable to locate corners");
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
@@ -114,8 +83,8 @@ class VisionProgram_SudokuReader{
 		for(let i=0;i<=numberOfLines;i++){
 			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), rangeOfSearch, 1);
 			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, rangeOfSearch);
-			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);
-			const scannerV = new IntersectionDetector(imgV.passdata, 1, 0);
+			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);//((i==0||i==numberOfLines)?1:0));
+			const scannerV = new IntersectionDetector(imgV.passdata, 1, 0);//((i==0||i==numberOfLines)?1:0));
 			inH[i] = scannerH.intersections;
 			inV[i] = scannerV.intersections;
 		}
@@ -142,8 +111,8 @@ class VisionProgram_SudokuReader{
 			}
 		}/*
 		for(let i=0;i<xyV.length;i++){
-			circle(xyV[i][0]/canvasScale,xyV[i][1]/canvasScale,5);
-			circle(xyV[i][2]/canvasScale,xyV[i][3]/canvasScale,5);
+			circle(xyV[i][0]/canvasScale,xyV[i][1]/canvasScale,15);
+			circle(xyV[i][2]/canvasScale,xyV[i][3]/canvasScale,15);
 		}*/
 		//Analyze intersections vertical
 		let xyH = new Array();
@@ -166,8 +135,8 @@ class VisionProgram_SudokuReader{
 			}
 		}/*
 		for(let i=0;i<xyH.length;i++){
-			circle(xyH[i][0]/canvasScale,xyH[i][1]/canvasScale,5);
-			circle(xyH[i][2]/canvasScale,xyH[i][3]/canvasScale,5);
+			circle(xyH[i][0]/canvasScale,xyH[i][1]/canvasScale,15);
+			circle(xyH[i][2]/canvasScale,xyH[i][3]/canvasScale,15);
 		}*/
 		if(xyV.length*xyH.length==0){
 			this.abort("unable to find lines");
@@ -195,6 +164,32 @@ class VisionProgram_SudokuReader{
 			x = (y-y1)/(y2-y1)*(x2-x1)+x1;
 		}
 		const angle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
+		//Calculate cell length
+		let gapList = new Array();
+		for(let i=0;i<xyV.length-1;i++){
+			gapList[gapList.length] = xyV[i+1][0]-xyV[i][0];
+		}
+		for(let i=0;i<xyH.length-1;i++){
+			gapList[gapList.length] = xyH[i+1][0]-xyH[i][0];
+		}
+		//Analyze the gapList
+		const acceptableErrorPercentage = 3;
+		const minCounter = 3;
+		let counter;
+		for(let i=0;i<gapList.length;i++){
+			counter = 0;
+			for(let j=0;j<gapList.length;j++){
+				if(findError(gapList[i],gapList[j])<acceptableErrorPercentage) counter++;
+			}
+			if(counter>=minCounter){
+				this.cellLength = gapList[i]*Math.cos(deg2rad(angle));
+				break;
+			}
+		}
+		if(this.cellLength==-1){
+			this.abort("cell length not found");
+			return;
+		}
 		return [x,y,angle];
 	}
 }
