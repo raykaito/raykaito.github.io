@@ -67,10 +67,10 @@ function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16
     }
 }
 
-function rotateCanvas(angleXY=[20, hcanvas.width/2, hcanvas.height/2]){
-    const d = angleXY[0];
-    const x = angleXY[1];
-    const y = angleXY[2];
+function rotateCanvas(xyAngle=[hcanvas.width/2, hcanvas.height/2, 20]){
+    const x = xyAngle[0];
+    const y = xyAngle[1];
+    const d = xyAngle[2];
     const r = deg2rad(d);
 
     const tcanvas = document.createElement("canvas");

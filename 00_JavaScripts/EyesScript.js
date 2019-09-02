@@ -162,7 +162,7 @@ class IntersectionDetector extends ImageData{
 		this.updateLineIntensity();
 		if(display){
 			this.displayLineIntensity();
-			//this.display(0);
+			this.display(0);
 			this.displayIntersections();
 		}
 	}
