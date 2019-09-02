@@ -27,7 +27,7 @@ function resizeH(vLength){
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
 function resize(vLength){
-    canvas.width  = Math.floor(Math.min(window.innerWidth-40,760,vLength)/pixelRatio);
+    canvas.width  = Math.floor(Math.min(window.innerWidth-40,760)/pixelRatio);
     canvas.height = canvas.width;
     canvas.style.width  = canvas.width +"px";
     canvas.style.height = canvas.height+"px";
