@@ -58,7 +58,7 @@ class VisionProgram_SudokuReader{
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+counter,xc,yc+cl*i);
+			ct.fillText(""+counter,(xc)/canvasScale,(yc+cl*i)/canvasScale);
 		}
 		for(let i=0;i<nx;i++){
 			let counter=0;
@@ -69,7 +69,7 @@ class VisionProgram_SudokuReader{
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+counter,xc+cl*i,yc);
+			ct.fillText(""+counter,(xc+cl*i)/canvasScale,(yc)/canvasScale);
 		}
 		//Analyze intersections horizontal
 		circle((xc+cl* xIndex   )/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
