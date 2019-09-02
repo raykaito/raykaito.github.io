@@ -37,7 +37,7 @@ class VisionProgram_SudokuReader{
 		const ny = Math.min(15,Math.floor(hcanvas.height/cl));
 		let inX = new Array(), xIndex;
 		let inY = new Array(), yIndex;
-		const acceptableErrorPercentage = 5;
+		const acceptableErrorPercentage = 10;
 		const minCounter = 2;
 		for(let i=0;i<ny;i++){
 			const imgX = newWindow().cornerWidthHeight(xc,yc+cl*i,nx*cl,1);
@@ -49,27 +49,35 @@ class VisionProgram_SudokuReader{
 			const scnY = new IntersectionDetector(imgY.passdata, 1, 0);
 			inY[i] = scnY.intersections;
 		}
+		//Count the empty boxes;
+		let ebx = new Array(ny).fill(0);
+		let eby = new Array(nx).fill(0);
 		for(let i=0;i<ny;i++){
-			let counter=0;
 			for(let j=0;j<inX[i].length-1;j++){
 				if(findError(cl,inX[i][j+1]-inX[i][j])<acceptableErrorPercentage){
-					counter++;
+					circle((xc+(inX[i][j+1]+inX[i][j])/2)/canvasScale,(yc+cl*i)/canvasScale,this.cellLength/2/canvasScale);
+					ebx[i]++;
+					eby[Math.floor((inX[i][j+1]+inX[i][j])/2/cl)]++;
 				}
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+counter,(xc)/canvasScale,(yc+cl*i)/canvasScale);
+			ct.fillText(""+ebx[i],(xc)/canvasScale,(yc+cl*i)/canvasScale);
 		}
 		for(let i=0;i<nx;i++){
-			let counter=0;
 			for(let j=0;j<inY[i].length-1;j++){
 				if(findError(cl,inY[i][j+1]-inY[i][j])<acceptableErrorPercentage){
-					counter++;
+					circle((xc+cl*i)/canvasScale,(yc+(inY[i][j+1]+inY[i][j])/2)/canvasScale,this.cellLength/4/canvasScale);
+					ct.fillStyle = "red";
+					ct.font = "10px Arial";
+					ct.fillText(""+Math.floor(findError(cl,inY[i][j+1]-inY[i][j])*10)/10,(xc+cl*i)/canvasScale,(yc+(inY[i][j+1]+inY[i][j])/2)/canvasScale,);
+					eby[i]++;
+					ebx[Math.floor((inY[i][j+1]+inY[i][j])/2/cl)]++;
 				}
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+counter,(xc+cl*i)/canvasScale,(yc)/canvasScale);
+			ct.fillText(""+eby[i],(xc+cl*i)/canvasScale,(yc)/canvasScale);
 		}
 		//Analyze intersections horizontal
 		circle((xc+cl* xIndex   )/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
