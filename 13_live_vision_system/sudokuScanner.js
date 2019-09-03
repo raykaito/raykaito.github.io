@@ -1,7 +1,16 @@
 class VisionProgram_SudokuReader{
 	constructor(){
-		this.cellLength;
+		//tells if the program as failed or not
 		this.failed;
+		//Orientation of the board
+		this.xCofR;
+		this.yCofR;
+		this.rotationAngle;
+		this.vAngle;//angle of vertical line at xyCofR
+		this.xScale;//vertical   distance exapnds as it moves in +x direction
+		this.yScale;//horizontal distance exapnds as it moves in +y direction
+		//Properties of the board
+		this.cellLength;
 	}
 	init(){
 		this.cellLength = -1;
@@ -14,12 +23,12 @@ class VisionProgram_SudokuReader{
 	startScan(){
 		this.init();
 		//find angle, intersection and cell length
-		const  xyAngle = this.getXYangle();
+		this.getXYangle();
 		if(this.failed) return;
 		return;
 
 		//rotate canvas
-		rotateCanvas(xyAngle);
+		rotateCanvas(this.xCofR, this.yCofR, this.rotationAngle);
 
 		//locate the four corners
 		const xyCorner = this.getFourCorners(xyAngle[0],xyAngle[1]);
@@ -174,7 +183,9 @@ class VisionProgram_SudokuReader{
 									[xyV[xyV.length-1][2],xyV[xyV.length-1][3]],
 									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
 									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
-		const angle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
+		this.xCofR = xy1[0];
+		this.yCofR = xy1[0];
+		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
 		line(xy1,xy2);
 		line(xy2,xy4);
@@ -198,7 +209,7 @@ class VisionProgram_SudokuReader{
 				if(findError(gapList[i],gapList[j])<acceptableErrorPercentage) counter++;
 			}
 			if(counter>=minCounter){
-				this.cellLength = gapList[i]*Math.cos(deg2rad(angle));
+				this.cellLength = gapList[i]*Math.cos(deg2rad(this.rotationAngle));
 				break;
 			}
 		}
@@ -206,7 +217,16 @@ class VisionProgram_SudokuReader{
 			this.abort("cell length not found");
 			return;
 		}
-		return [xy1[0],xy1[1],angle];
+		//Analyze properties which increases the accuracy
+		const cellCountX = Math.round(getDist(xy1,xy2)/this.cellLength);
+		const cellCountY = Math.round(getDist(xy1,xy3)/this.cellLength);
+		this.vAngle = getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
+		this.xScale = getDist(xy2,xy4)/getDist(xy1,xy3)/cellCountX;
+		this.yScale = getDist(xy3,xy4)/getDist(xy1,xy2)/cellCountY;
+		ct.fillStyle = "cyan";
+		ct.font = "20px Arial";
+		ct.fillText(cellCountX+","+cellCountY,this.xCofR,this.yCofR);
+		return;
 	}
 }
 console.log("Loaded: sudokuScanner.js");

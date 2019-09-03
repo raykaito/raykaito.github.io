@@ -67,11 +67,8 @@ function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16
     }
 }
 
-function rotateCanvas(xyAngle=[hcanvas.width/2, hcanvas.height/2, 20]){
-    const x = xyAngle[0];
-    const y = xyAngle[1];
-    const d = xyAngle[2];
-    const r = deg2rad(d);
+function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
+    const r = deg2rad(deg);
 
     const tcanvas = document.createElement("canvas");
     tcanvas.width = hcanvas.width;
@@ -114,8 +111,8 @@ function draw() {
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,vLength,vLength);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
         sudokuV.startScan();
-        //setTimeout(draw,100);
-        //return;
+        setTimeout(draw,3000);
+        return;
         requestAnimationFrame(draw);
     }else{
         requestAnimationFrame(draw);

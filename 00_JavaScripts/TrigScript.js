@@ -1,7 +1,7 @@
 const rad2deg = (radIn)=>{return radIn*180/Math.PI;}
 const deg2rad = (degIn)=>{return degIn/180*Math.PI;}
 
-const getDist = (x,y,tx,ty)=>{
+const getDist = (xy,txy)=>{
 	const dx = txy[0]-xy[0];
 	const dy = txy[1]-xy[1];
 	return Math.sqrt((dx)*(dx)+(dy)*(dy));
