@@ -16,6 +16,7 @@ class VisionProgram_SudokuReader{
 		//find angle, intersection and cell length
 		const  xyAngle = this.getXYangle();
 		if(this.failed) return;
+		return;
 
 		//rotate canvas
 		rotateCanvas(xyAngle);
@@ -55,35 +56,35 @@ class VisionProgram_SudokuReader{
 		for(let i=0;i<ny;i++){
 			for(let j=0;j<inX[i].length-1;j++){
 				if(findError(cl,inX[i][j+1]-inX[i][j])<acceptableErrorPercentage){
-					circle((xc+(inX[i][j+1]+inX[i][j])/2)/canvasScale,(yc+cl*i)/canvasScale,this.cellLength/2/canvasScale);
+					circle((xc+(inX[i][j+1]+inX[i][j])/2),(yc+cl*i),this.cellLength/2);
 					ebx[i]++;
 					eby[Math.floor((inX[i][j+1]+inX[i][j])/2/cl)]++;
 				}
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+ebx[i],(xc)/canvasScale,(yc+cl*i)/canvasScale);
+			ct.fillText(""+ebx[i],(xc),(yc+cl*i));
 		}
 		for(let i=0;i<nx;i++){
 			for(let j=0;j<inY[i].length-1;j++){
 				if(findError(cl,inY[i][j+1]-inY[i][j])<acceptableErrorPercentage){
-					circle((xc+cl*i)/canvasScale,(yc+(inY[i][j+1]+inY[i][j])/2)/canvasScale,this.cellLength/4/canvasScale);
+					circle((xc+cl*i),(yc+(inY[i][j+1]+inY[i][j])/2),this.cellLength/4);
 					ct.fillStyle = "red";
 					ct.font = "10px Arial";
-					ct.fillText(""+Math.floor(findError(cl,inY[i][j+1]-inY[i][j])*10)/10,(xc+cl*i)/canvasScale,(yc+(inY[i][j+1]+inY[i][j])/2)/canvasScale,);
+					ct.fillText(""+Math.floor(findError(cl,inY[i][j+1]-inY[i][j])*10)/10,(xc+cl*i),(yc+(inY[i][j+1]+inY[i][j])/2),);
 					eby[i]++;
 					ebx[Math.floor((inY[i][j+1]+inY[i][j])/2/cl)]++;
 				}
 			}
 			ct.fillStyle = "cyan";
 			ct.font = "20px Arial";
-			ct.fillText(""+eby[i],(xc+cl*i)/canvasScale,(yc)/canvasScale);
+			ct.fillText(""+eby[i],(xc+cl*i),(yc));
 		}
 		//Analyze intersections horizontal
-		circle((xc+cl* xIndex   )/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
-		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl* yIndex   )/canvasScale,this.cellLength/2/canvasScale);
-		circle((xc+cl* xIndex   )/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
-		circle((xc+cl*(xIndex+8))/canvasScale,(yc+cl*(yIndex+8))/canvasScale,this.cellLength/2/canvasScale);
+		circle((xc+cl* xIndex   ),(yc+cl* yIndex   ),this.cellLength/2);
+		circle((xc+cl*(xIndex+8)),(yc+cl* yIndex   ),this.cellLength/2);
+		circle((xc+cl* xIndex   ),(yc+cl*(yIndex+8)),this.cellLength/2);
+		circle((xc+cl*(xIndex+8)),(yc+cl*(yIndex+8)),this.cellLength/2);
 		//Analyze X intersections
 	}
 	getXYangle(){
@@ -123,11 +124,11 @@ class VisionProgram_SudokuReader{
 					xyV[xyV.length] = [xCorner+xup,yCorner,xCorner+xlo,yCorner+rangeOfSearch];
 				}
 			}
-		}/*
+		}
 		for(let i=0;i<xyV.length;i++){
-			circle(xyV[i][0]/canvasScale,xyV[i][1]/canvasScale,15);
-			circle(xyV[i][2]/canvasScale,xyV[i][3]/canvasScale,15);
-		}*/
+			circle(xyV[i][0],xyV[i][1],15);
+			circle(xyV[i][2],xyV[i][3],15);
+		}
 		//Analyze intersections vertical
 		let xyH = new Array();
 		for(let upperIndex = 0;upperIndex<inV[0].length;upperIndex++){
@@ -147,37 +148,38 @@ class VisionProgram_SudokuReader{
 					xyH[xyH.length] = [yCorner,xCorner+xup,yCorner+rangeOfSearch,xCorner+xlo];
 				}
 			}
-		}/*
+		}
 		for(let i=0;i<xyH.length;i++){
-			circle(xyH[i][0]/canvasScale,xyH[i][1]/canvasScale,15);
-			circle(xyH[i][2]/canvasScale,xyH[i][3]/canvasScale,15);
-		}*/
+			circle(xyH[i][0],xyH[i][1],15);
+			circle(xyH[i][2],xyH[i][3],15);
+		}
 		if(xyV.length*xyH.length==0){
 			this.abort("unable to find lines");
 			return;
 		}
 		//Calculate x, y, and angle
-		const x1 = xyV[0][0],
-		      y1 = xyV[0][1],
-		      x2 = xyV[0][2],
-		      y2 = xyV[0][3],
-		      x3 = xyH[0][0],
-		      y3 = xyH[0][1],
-		      x4 = xyH[0][2],
-		      y4 = xyH[0][3];
-		//Check if the board is perfectly aligned
-		let x = 0, y = 0;
-		if(x2==x1||y3==y4){
-			x = x1;
-			y = y3;
-		}else if(y1==y2||x3==x4){
-			x = x3;
-			y = y1;
-		}else{
-			y = ((x3-x1)+(x2-x1)*(y1/(y2-y1))+(x4-x3)*(y3/(y3-y4)))/((x2-x1)/(y2-y1)+(x4-x3)/(y3-y4));
-			x = (y-y1)/(y2-y1)*(x2-x1)+x1;
-		}
+		const xy1 = getXfrom4points([xyV[0           ][0],xyV[0           ][1]],
+									[xyV[0           ][2],xyV[0           ][3]],
+									[xyH[0           ][0],xyH[0           ][1]],
+									[xyH[0           ][2],xyH[0           ][3]]);
+		const xy2 = getXfrom4points([xyV[xyV.length-1][0],xyV[xyV.length-1][1]],
+									[xyV[xyV.length-1][2],xyV[xyV.length-1][3]],
+									[xyH[0           ][0],xyH[0           ][1]],
+									[xyH[0           ][2],xyH[0           ][3]]);
+		const xy3 = getXfrom4points([xyV[0           ][0],xyV[0           ][1]],
+									[xyV[0           ][2],xyV[0           ][3]],
+									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
+									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
+		const xy4 = getXfrom4points([xyV[xyV.length-1][0],xyV[xyV.length-1][1]],
+									[xyV[xyV.length-1][2],xyV[xyV.length-1][3]],
+									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
+									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
 		const angle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
+		ct.strokeStyle = "cyan";
+		line(xy1,xy2);
+		line(xy2,xy4);
+		line(xy3,xy4);
+		line(xy3,xy1);
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -204,7 +206,7 @@ class VisionProgram_SudokuReader{
 			this.abort("cell length not found");
 			return;
 		}
-		return [x,y,angle];
+		return [xy1[0],xy1[1],angle];
 	}
 }
 console.log("Loaded: sudokuScanner.js");

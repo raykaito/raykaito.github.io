@@ -122,17 +122,17 @@ function draw() {
     }
 }
 
-const line=(xi,yi,xii,yii,w)=>{
+const line=([xi,yi],[xii,yii],w=1)=>{
     ct.lineWidth = w;
     ct.beginPath();
-    ct.moveTo(xi ,yi );
-    ct.lineTo(xii,yii);
+    ct.moveTo(xi/canvasScale ,yi /canvasScale);
+    ct.lineTo(xii/canvasScale,yii/canvasScale);
     ct.stroke();
 }
 
 const circle=(x,y,rad)=>{
     ct.beginPath();
-    ct.arc(x,y,rad,0,2*Math.PI);
+    ct.arc(x/canvasScale,y/canvasScale,rad/canvasScale,0,2*Math.PI);
     ct.stroke();
 }
 
