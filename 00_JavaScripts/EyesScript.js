@@ -165,7 +165,7 @@ class IntersectionDetector extends ImageData{
 	}
 	displayIntersections(){
 		for(let i=0;i<this.indexList.length;i++){
-			circle((this.xpos+(this.indexList[i]*(!this.vertical)))/canvasScale,(this.ypos+(this.indexList[i]*this.vertical))/canvasScale,3);
+			circle((this.xpos+(this.indexList[i]*(!this.vertical))),(this.ypos+(this.indexList[i]*this.vertical)),3);
 		}
 	}
 }

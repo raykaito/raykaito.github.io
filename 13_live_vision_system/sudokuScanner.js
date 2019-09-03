@@ -9,6 +9,8 @@ class VisionProgram_SudokuReader{
 		this.vAngle;//at x=0, x position shifts(+) as it moves in +y direction
 		this.dy; //y position shifts(+) as it moves in +x direction and as it moves in +y direction
 		this.dx; //x position shifts(+) as it moves in +y direction and as it moves in +x direction
+		this.cellCountX;
+		this.cellCountY;
 		//Properties of the board
 		this.cellLength;
 		this.cellLengthy;
@@ -42,13 +44,106 @@ class VisionProgram_SudokuReader{
 		const y = (yIndex*this.cellLengthy)*(1+xIndex*this.cellLengthy*this.dy)+this.yCofR;
 		return [x,y];
 	}
-	getFourCorners(){
-		for(let i=-4;i<=8;i++){
-			for(let j=-4;j<=8;j++){
-				const xy = this.getXYfromIndex(i,j);
-				circle(xy[0],xy[1],3*pixelRatio);				
+	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
+		//Get Position to Scan
+		const verticalScan = (xIndex1==xIndex2);
+		const xyTemp1 = this.getXYfromIndex(xIndex1, yIndex1);
+		const xyTemp2 = this.getXYfromIndex(xIndex2, yIndex2);
+		const xy1 = [xyTemp1[0]-this.cellLength/2,xyTemp1[1]-this.cellLengthy/2];
+		const xy2 = [xyTemp2[0]-this.cellLength/2,xyTemp2[1]-this.cellLengthy/2];
+		const xc = (xy1[0]+xy2[0])/2;
+		const yc = (xy1[1]+xy2[1])/2;
+		const width = verticalScan?1:(getDist(xy1,xy2));
+		const height= verticalScan?(getDist(xy1,xy2)):1;
+		//Scan the appropriate section
+		const img = newWindow().centerWidthHeight(xc,yc,width,height);
+		const scanner = new IntersectionDetector(img.passdata, verticalScan, 1);
+		const inter = scanner.intersections;
+		//Analyze the result
+		const cellLengtha = verticalScan?(this.cellLengthy)*(1+xIndex1*this.cellLengthy*this.dy):(this.cellLength)*(1+yIndex1*this.cellLength *this.dx);
+		const cellLength = width*height/(xIndex2-xIndex1+yIndex2-yIndex1);
+		const acceptableErrorPercentage = 10;
+		const minCounter = (xIndex2-xIndex1+yIndex2-yIndex1)*0.5;
+		let counter = 0;
+		for(let i=0;i<inter.length;i++){
+			ct.fillStyle = "red";
+			ct.font = "20px Arial";
+			//ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
+			ct.fillText((inter[i]),xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
+			if(findError(cellLength/2,(inter[i]%cellLength))<acceptableErrorPercentage){
+				counter++;
 			}
 		}
+		ct.fillText(counter+","+width*height,xy1[0]/canvasScale,xy1[1]/canvasScale);
+		if(counter>=minCounter){
+			ct.strokeStyle = "red";
+			circle(xy1[0],xy1[1],5);
+			circle(xy2[0],xy2[1],5);
+			return true;
+		}else{
+			return false;
+		}
+	}
+	getFourCorners(){
+		let xfrontHigh= this.cellCountX+1;
+		let yfrontHigh= this.cellCountY+1;
+		let xfrontLow = 0;
+		let yfrontLow = 0;
+		let xFrontDead = false;//This turns true when xfrontHigh is at the end;
+		let yFrontDead = false;//This turns true when xfrontHigh is at the end;
+		let xIndex1, yIndex1, xIndex2, yIndex2;
+
+		while((xfrontHigh-xfrontLow+yfrontHigh-yfrontLow)<16){
+			const verticalScan = (xfrontHigh-xfrontLow)<(yfrontHigh-yfrontLow);
+			if(verticalScan){
+				yIndex1 = yfrontLow;
+				yIndex2 = yfrontHigh;
+				if(xFrontDead){
+					xIndex1 = xfrontLow-1;
+					xIndex2 = xfrontLow-1;
+				}else{
+					xIndex1 = xfrontHigh+1;
+					xIndex2 = xfrontHigh+1;
+				}
+			}else{
+				xIndex1 = xfrontLow;
+				xIndex2 = xfrontHigh;
+				if(yFrontDead){
+					yIndex1 = yfrontLow-1;
+					yIndex2 = yfrontLow-1;
+				}else{
+					yIndex1 = yfrontHigh+1;
+					yIndex2 = yfrontHigh+1;
+				}
+			}
+			const result = this.checkForLine(xIndex1, yIndex1, xIndex2, yIndex2);
+			if(verticalScan){
+				if(!xFrontDead){
+					if(result){
+						xfrontHigh = xIndex1;
+						continue;						
+					}else{
+						xFrontDead = true;
+					}
+				}else{
+					xfrontLow = xIndex1;
+					continue;
+				}
+			}else{
+				if(!yFrontDead){
+					if(result){
+						yfrontHigh = yIndex1;
+						continue;						
+					}else{
+						yFrontDead = true;
+					}
+				}else{
+					yfrontLow = yIndex1;
+					continue;
+				}
+			}
+		}
+		return;
 	}
 	getFourCorners_bak(xin, yin){
 		const cl = this.cellLength;
@@ -146,11 +241,11 @@ class VisionProgram_SudokuReader{
 					xyV[xyV.length] = [xCorner+xup,yCorner,xCorner+xlo,yCorner+rangeOfSearch];
 				}
 			}
-		}
+		}/*
 		for(let i=0;i<xyV.length;i++){
 			circle(xyV[i][0],xyV[i][1],15);
 			circle(xyV[i][2],xyV[i][3],15);
-		}
+		}*/
 		//Analyze intersections vertical
 		let xyH = new Array();
 		for(let upperIndex = 0;upperIndex<inV[0].length;upperIndex++){
@@ -170,11 +265,11 @@ class VisionProgram_SudokuReader{
 					xyH[xyH.length] = [yCorner,xCorner+xup,yCorner+rangeOfSearch,xCorner+xlo];
 				}
 			}
-		}
+		}/*
 		for(let i=0;i<xyH.length;i++){
 			circle(xyH[i][0],xyH[i][1],15);
 			circle(xyH[i][2],xyH[i][3],15);
-		}
+		}*/
 		if(xyV.length*xyH.length==0){
 			this.abort("unable to find lines");
 			return;
@@ -235,20 +330,20 @@ class VisionProgram_SudokuReader{
 		const sideLength2 = getDist(xy2,xy3);//rigth side
 		const sideLength3 = getDist(xy3,xy4);//lower side
 		const sideLength4 = getDist(xy4,xy1);//lefto side
-		const cellCountX = Math.round(sideLength1/this.cellLength);
-		const cellCountY = Math.round(sideLength2/this.cellLength);
+		this.cellCountX = Math.round(sideLength1/this.cellLength);
+		this.cellCountY = Math.round(sideLength2/this.cellLength);
 		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
 		this.dx = (sideLength3-sideLength1)/sideLength4/sideLength1;
 		this.dy = (sideLength2-sideLength4)/sideLength4/sideLength1;
-		if(cellCountX*cellCountY==0){
+		if(this.cellCountX*this.cellCountY==0){
 			this.abort("cell length not found");
 			return;
 		}
-		this.cellLength = sideLength1/cellCountX;
-		this.cellLengthy= sideLength4/cellCountY;
+		this.cellLength = sideLength1/this.cellCountX;
+		this.cellLengthy= sideLength4/this.cellCountY;
 		ct.fillStyle = "cyan";
 		ct.font = "40px Arial";
-		ct.fillText(Math.round(this.vAngle*100)/100,100/canvasScale,100/canvasScale);
+		//ct.fillText(Math.round(this.vAngle*100)/100,100/canvasScale,100/canvasScale);
 		return;
 	}
 }
