@@ -240,8 +240,12 @@ class VisionProgram_SudokuReader{
 		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
 		this.dx = (sideLength3-sideLength1)/sideLength4/sideLength1;
 		this.dy = (sideLength2-sideLength4)/sideLength4/sideLength1;
-		if(cellCountX!=0) this.cellLength = sideLength1/cellCountX;
-		if(cellCountY!=0) this.cellLengthy= sideLength4/cellCountY;
+		if(cellCountX*cellCountY==0){
+			this.abort("cell length not found");
+			return;
+		}
+		this.cellLength = sideLength1/cellCountX;
+		this.cellLengthy= sideLength4/cellCountY;
 		ct.fillStyle = "cyan";
 		ct.font = "40px Arial";
 		ct.fillText(Math.round(this.vAngle*100)/100,100/canvasScale,100/canvasScale);
