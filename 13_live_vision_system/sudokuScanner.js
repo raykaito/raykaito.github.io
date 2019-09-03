@@ -45,8 +45,8 @@ class VisionProgram_SudokuReader{
 	getFourCorners(){
 		for(let i=-4;i<=8;i++){
 			for(let j=-4;j<=8;j++){
-				const xy = this.getXYfromIndex(i,0);
-				circle(xy[0],xy[1],3);				
+				const xy = this.getXYfromIndex(i,j);
+				circle(xy[0],xy[1],3*pixelRatio);				
 			}
 		}
 	}
