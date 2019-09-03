@@ -6,11 +6,12 @@ class VisionProgram_SudokuReader{
 		this.xCofR;
 		this.yCofR;
 		this.rotationAngle;
-		this.vAngle;//angle of vertical line at xyCofR
-		this.xScale;//vertical   distance exapnds as it moves in +x direction
-		this.yScale;//horizontal distance exapnds as it moves in +y direction
+		this.vAngle;//at x=0, x position shifts(+) as it moves in +y direction
+		this.dy; //y position shifts(+) as it moves in +x direction and as it moves in +y direction
+		this.dx; //x position shifts(+) as it moves in +y direction and as it moves in +x direction
 		//Properties of the board
 		this.cellLength;
+		this.cellLengthy;
 	}
 	init(){
 		this.cellLength = -1;
@@ -25,19 +26,31 @@ class VisionProgram_SudokuReader{
 		//find angle, intersection and cell length
 		this.getXYangle();
 		if(this.failed) return;
-		return;
 
 		//rotate canvas
 		rotateCanvas(this.xCofR, this.yCofR, this.rotationAngle);
 
 		//locate the four corners
-		const xyCorner = this.getFourCorners(xyAngle[0],xyAngle[1]);
+		this.getFourCorners();
 	}
 	temp(){
 		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
 		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
 	}
-	getFourCorners(xin, yin){
+	getXYfromIndex(xIndex, yIndex){
+		const x = (xIndex*this.cellLength )*(1+yIndex*this.cellLength *this.dx)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xCofR;
+		const y = (yIndex*this.cellLengthy)*(1+xIndex*this.cellLengthy*this.dy)+this.yCofR;
+		return [x,y];
+	}
+	getFourCorners(){
+		for(let i=-4;i<=8;i++){
+			for(let j=-4;j<=8;j++){
+				const xy = this.getXYfromIndex(i,0);
+				circle(xy[0],xy[1],3);				
+			}
+		}
+	}
+	getFourCorners_bak(xin, yin){
 		const cl = this.cellLength;
 		const x = xin +cl/2;
 		const y = yin +cl/2;
@@ -175,22 +188,22 @@ class VisionProgram_SudokuReader{
 									[xyV[xyV.length-1][2],xyV[xyV.length-1][3]],
 									[xyH[0           ][0],xyH[0           ][1]],
 									[xyH[0           ][2],xyH[0           ][3]]);
-		const xy3 = getXfrom4points([xyV[0           ][0],xyV[0           ][1]],
-									[xyV[0           ][2],xyV[0           ][3]],
-									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
-									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
-		const xy4 = getXfrom4points([xyV[xyV.length-1][0],xyV[xyV.length-1][1]],
+		const xy3 = getXfrom4points([xyV[xyV.length-1][0],xyV[xyV.length-1][1]],
 									[xyV[xyV.length-1][2],xyV[xyV.length-1][3]],
 									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
 									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
+		const xy4 = getXfrom4points([xyV[0           ][0],xyV[0           ][1]],
+									[xyV[0           ][2],xyV[0           ][3]],
+									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
+									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
 		this.xCofR = xy1[0];
-		this.yCofR = xy1[0];
+		this.yCofR = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
 		line(xy1,xy2);
-		line(xy2,xy4);
+		line(xy2,xy3);
 		line(xy3,xy4);
-		line(xy3,xy1);
+		line(xy4,xy1);
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -218,14 +231,20 @@ class VisionProgram_SudokuReader{
 			return;
 		}
 		//Analyze properties which increases the accuracy
-		const cellCountX = Math.round(getDist(xy1,xy2)/this.cellLength);
-		const cellCountY = Math.round(getDist(xy1,xy3)/this.cellLength);
-		this.vAngle = getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
-		this.xScale = getDist(xy2,xy4)/getDist(xy1,xy3)/cellCountX;
-		this.yScale = getDist(xy3,xy4)/getDist(xy1,xy2)/cellCountY;
+		const sideLength1 = getDist(xy1,xy2);//upper side
+		const sideLength2 = getDist(xy2,xy3);//rigth side
+		const sideLength3 = getDist(xy3,xy4);//lower side
+		const sideLength4 = getDist(xy4,xy1);//lefto side
+		const cellCountX = Math.round(sideLength1/this.cellLength);
+		const cellCountY = Math.round(sideLength2/this.cellLength);
+		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
+		this.dx = (sideLength3-sideLength1)/sideLength4/sideLength1;
+		this.dy = (sideLength2-sideLength4)/sideLength4/sideLength1;
+		if(cellCountX!=0) this.cellLength = sideLength1/cellCountX;
+		if(cellCountY!=0) this.cellLengthy= sideLength4/cellCountY;
 		ct.fillStyle = "cyan";
-		ct.font = "20px Arial";
-		ct.fillText(cellCountX+","+cellCountY,this.xCofR,this.yCofR);
+		ct.font = "40px Arial";
+		ct.fillText(Math.round(this.vAngle*100)/100,100/canvasScale,100/canvasScale);
 		return;
 	}
 }

@@ -111,8 +111,8 @@ function draw() {
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,vLength,vLength);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
         sudokuV.startScan();
-        setTimeout(draw,3000);
-        return;
+        //setTimeout(draw,1000);
+        //return;
         requestAnimationFrame(draw);
     }else{
         requestAnimationFrame(draw);
