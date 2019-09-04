@@ -40,16 +40,16 @@ class VisionProgram_SudokuReader{
 		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
 	}
 	getFourCorners(){
-		for(let i=-9;i<10;i++){
-			for(let j=-9;j<10;j++){
+		for(let i=-9;i<=9;i++){
+			for(let j=-9;j<=9;j++){
 				const xy = this.getXYfromIndex(i,j);
 				circle(xy[0],xy[1],5);
 			}
 		}
 	}
 	getXYfromIndex(xIndex, yIndex){
-		const x = (this.cellLength *(1/Math.log(this.dx)*(this.dx^xIndex-1)))*(this.dy^yIndex)-0*getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
-		const y = (this.cellLengthy*(1/Math.log(this.dy)*(this.dy^yIndex-1)))*(this.dx^xIndex)+this.yc;
+		const x = (this.cellLength *(1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)))*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
+		const y = (this.cellLengthy*(1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)))*Math.pow(this.dx,xIndex)+this.yc;
 		return [x,y];
 	}
 	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
@@ -190,11 +190,7 @@ class VisionProgram_SudokuReader{
 					xyV[xyV.length] = [xCorner+xup,yCorner,xCorner+xlo,yCorner+rangeOfSearch];
 				}
 			}
-		}/*
-		for(let i=0;i<xyV.length;i++){
-			circle(xyV[i][0],xyV[i][1],15);
-			circle(xyV[i][2],xyV[i][3],15);
-		}*/
+		}
 		//Analyze intersections vertical
 		let xyH = new Array();
 		for(let upperIndex = 0;upperIndex<inV[0].length;upperIndex++){
@@ -215,6 +211,10 @@ class VisionProgram_SudokuReader{
 				}
 			}
 		}/*
+		for(let i=0;i<xyV.length;i++){
+			circle(xyV[i][0],xyV[i][1],15);
+			circle(xyV[i][2],xyV[i][3],15);
+		}
 		for(let i=0;i<xyH.length;i++){
 			circle(xyH[i][0],xyH[i][1],15);
 			circle(xyH[i][2],xyH[i][3],15);
@@ -244,10 +244,12 @@ class VisionProgram_SudokuReader{
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
-		line(xy1,xy2);
-		line(xy2,xy3);
-		line(xy3,xy4);
-		line(xy4,xy1);
+		/*
+		line(xy1,xy2); //Top line
+		line(xy2,xy3); // Right line
+		line(xy3,xy4); //bottom line
+		line(xy4,xy1); //left line
+		*/
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -280,19 +282,24 @@ class VisionProgram_SudokuReader{
 		const sideLength3 = getDist(xy3,xy4);//lower side
 		const sideLength4 = getDist(xy4,xy1);//lefto side
 		this.cellCountX = Math.round(sideLength1/this.cellLength);
-		this.cellCountY = Math.round(sideLength2/this.cellLength);
+		this.cellCountY = Math.round(sideLength4/this.cellLength);
+		/*
+		ct.fillStyle = "cyan";
+		ct.font = "40px Arial";
+		ct.fillText(Math.round((sideLength2/this.cellLength)*100)/100,300/canvasScale,200/canvasScale);
+		ct.fillText(Math.round((sideLength4/this.cellLength)*100)/100,100/canvasScale,200/canvasScale);
+		ct.fillText(Math.round((sideLength1/this.cellLength)*100)/100,200/canvasScale,100/canvasScale);
+		ct.fillText(Math.round((sideLength3/this.cellLength)*100)/100,200/canvasScale,400/canvasScale);
+		*/
 		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
-		this.dx = (sideLength4/sideLength2)^(1/this.cellCountX);
-		this.dy = (sideLength3/sideLength1)^(1/this.cellCountY);
+		this.dx = Math.pow((sideLength2/sideLength4),(1/this.cellCountX));
+		this.dy = Math.pow((sideLength3/sideLength1),(1/this.cellCountY));
 		if(this.cellCountX*this.cellCountY==0){
 			this.abort("cell length not found");
 			return;
 		}
-		this.cellLength = sideLength1/((Math.log(this.dx))*(this.dx^this.cellCountX-1));
-		this.cellLengthy= sideLength4/((Math.log(this.dy))*(this.dy^this.cellCountY-1));
-		ct.fillStyle = "cyan";
-		ct.font = "40px Arial";
-		ct.fillText(Math.round(this.dx*100)/100,100/canvasScale,100/canvasScale);
+		this.cellLength = sideLength1/((1/Math.log(this.dx))*(Math.pow(this.dx,this.cellCountX)-1));
+		this.cellLengthy= sideLength4/((1/Math.log(this.dy))*(Math.pow(this.dy,this.cellCountY)-1));
 		return;
 	}
 }
