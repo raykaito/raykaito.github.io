@@ -17,8 +17,14 @@ class VisionProgram_BoardReader{
 		//Index of the corners
 		this.xIndexMin;
 		this.yIndexMin;
+		this.scanInterval = 100;
+		this.lastTime = Date.now();
 	}
 	init(){
+		if((Date.now()-this.lastTime)<this.scanInterval){
+			this.abort("not time to scan yet");
+			return;
+		}
 		this.cellLength = -1;
 		this.failed=false;
 	}
@@ -27,7 +33,10 @@ class VisionProgram_BoardReader{
 		console.log(msg);
 	}
 	startScan(){
+		//Initialize the scanner
 		this.init();
+		if(this.failed) return;
+
 		//find angle, intersection and cell length
 		this.getXYangle();
 		if(this.failed) return;
