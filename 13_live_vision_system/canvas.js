@@ -129,7 +129,7 @@ const line=([xi,yi],[xii,yii],w=1)=>{
 
 const circle=(x,y,rad)=>{
     ct.beginPath();
-    ct.arc(x/canvasScale,y/canvasScale,rad/canvasScale,0,2*Math.PI);
+    ct.arc(x/canvasScale,y/canvasScale,pixelRatio*rad/canvasScale,0,2*Math.PI);
     ct.stroke();
 }
 

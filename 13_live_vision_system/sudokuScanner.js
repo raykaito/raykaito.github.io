@@ -14,6 +14,9 @@ class VisionProgram_SudokuReader{
 		//Properties of the board
 		this.cellLength;
 		this.cellLengthy;
+		//Index of the corners
+		this.xIndexMin;
+		this.yIndexMin;
 	}
 	init(){
 		this.cellLength = -1;
@@ -34,65 +37,18 @@ class VisionProgram_SudokuReader{
 
 		//locate the four corners
 		this.getFourCorners();
+
+		//scan the numbers
+		this.scanNumbers();
+	}
+	scanNumbers(){
+		return;
 	}
 	temp(){
 		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
 		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
 	}
 	getFourCorners(){
-		for(let i=-9;i<=9;i++){
-			for(let j=-9;j<=9;j++){
-				const xy = this.getXYfromIndex(i,j);
-				circle(xy[0],xy[1],5);
-			}
-		}
-	}
-	getXYfromIndex(xIndex, yIndex){
-		const x = (this.cellLength *(1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)))*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
-		const y = (this.cellLengthy*(1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)))*Math.pow(this.dx,xIndex)+this.yc;
-		return [x,y];
-	}
-	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
-		//Get Position to Scan
-		const verticalScan = (xIndex1==xIndex2);
-		const xyTemp1 = this.getXYfromIndex(xIndex1, yIndex1);
-		const xyTemp2 = this.getXYfromIndex(xIndex2, yIndex2);
-		const xy1 = [xyTemp1[0]-this.cellLength/2,xyTemp1[1]-this.cellLengthy/2];
-		const xy2 = [xyTemp2[0]-this.cellLength/2,xyTemp2[1]-this.cellLengthy/2];
-		const xc = (xy1[0]+xy2[0])/2;
-		const yc = (xy1[1]+xy2[1])/2;
-		const width = verticalScan?1:(getDist(xy1,xy2));
-		const height= verticalScan?(getDist(xy1,xy2)):1;
-		//Scan the appropriate section
-		const img = newWindow().centerWidthHeight(xc,yc,width,height);
-		const scanner = new IntersectionDetector(img.passdata, verticalScan, 1);
-		const inter = scanner.intersections;
-		//Analyze the result
-		const cellLengtha = verticalScan?(this.cellLengthy)*(1+xIndex1*this.cellLengthy*this.dy):(this.cellLength)*(1+yIndex1*this.cellLength *this.dx);
-		const cellLength = width*height/(xIndex2-xIndex1+yIndex2-yIndex1);
-		const acceptableErrorPercentage = 10;
-		const minCounter = (xIndex2-xIndex1+yIndex2-yIndex1)*0.5;
-		let counter = 0;
-		for(let i=0;i<inter.length;i++){
-			ct.fillStyle = "red";
-			ct.font = "20px Arial";
-			//ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
-			ct.fillText((inter[i]),xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
-			if(findError(cellLength/2,(inter[i]%cellLength))<acceptableErrorPercentage){
-				counter++;
-			}
-		}
-		ct.fillText(counter+","+width*height,xy1[0]/canvasScale,xy1[1]/canvasScale);
-		if(counter>=minCounter){
-			ct.strokeStyle = "red";
-			circle(xy1[0],xy1[1],5);
-			circle(xy2[0],xy2[1],5);
-			return true;
-		}else{
-			return false;
-		}
-	}
-	getFourCorners_back(){
 		let xfrontHigh= this.cellCountX+1;
 		let yfrontHigh= this.cellCountY+1;
 		let xfrontLow = 0;
@@ -106,52 +62,89 @@ class VisionProgram_SudokuReader{
 			if(verticalScan){
 				yIndex1 = yfrontLow;
 				yIndex2 = yfrontHigh;
-				if(xFrontDead){
-					xIndex1 = xfrontLow-1;
-					xIndex2 = xfrontLow-1;
-				}else{
-					xIndex1 = xfrontHigh+1;
-					xIndex2 = xfrontHigh+1;
-				}
+				xIndex1 = xIndex2 = (xFrontDead?xfrontLow-1:xfrontHigh+1);
 			}else{
 				xIndex1 = xfrontLow;
 				xIndex2 = xfrontHigh;
-				if(yFrontDead){
-					yIndex1 = yfrontLow-1;
-					yIndex2 = yfrontLow-1;
-				}else{
-					yIndex1 = yfrontHigh+1;
-					yIndex2 = yfrontHigh+1;
-				}
+				yIndex1 = yIndex2 = (yFrontDead?yfrontLow-1:yfrontHigh+1);
 			}
 			const result = this.checkForLine(xIndex1, yIndex1, xIndex2, yIndex2);
 			if(verticalScan){
 				if(!xFrontDead){
-					if(result){
-						xfrontHigh = xIndex1;
-						continue;						
-					}else{
-						xFrontDead = true;
-					}
+					if(result)	xfrontHigh = xIndex1;		
+					else 		xFrontDead = true;
 				}else{
-					xfrontLow = xIndex1;
-					continue;
+					if(result)	xfrontLow = xIndex1;
+					else {this.abort("unable to find corners");return;}
 				}
 			}else{
 				if(!yFrontDead){
-					if(result){
-						yfrontHigh = yIndex1;
-						continue;						
-					}else{
-						yFrontDead = true;
-					}
+					if(result)	yfrontHigh = yIndex1;		
+					else 		yFrontDead = true;
 				}else{
-					yfrontLow = yIndex1;
-					continue;
+					if(result)	yfrontLow = yIndex1;
+					else {this.abort("unable to find corners"); return;}
 				}
 			}
 		}
+		this.xIndexMin = xfrontLow-0.5;
+		this.yIndexMin = yfrontLow-0.5;
+		const xyc1 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin  );
+		const xyc2 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin  );
+		const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
+		const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
+		circle(xyc1[0],xyc1[1],9);
+		circle(xyc2[0],xyc2[1],9);
+		circle(xyc3[0],xyc3[1],9);
+		circle(xyc4[0],xyc4[1],9);
 		return;
+	}
+	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
+		const v = false;
+		//Get Position to Scan
+		const verticalScan = (xIndex1==xIndex2);
+		const xy1 = this.getXYfromIndex((xIndex1-0.5), (yIndex1-0.5));
+		const xy2 = this.getXYfromIndex((xIndex2-0.5), (yIndex2-0.5));
+		const xc = (xy1[0]+xy2[0])/2;
+		const yc = (xy1[1]+xy2[1])/2;
+		const width = verticalScan?1:(getDist(xy1,xy2));
+		const height= verticalScan?(getDist(xy1,xy2)):1;
+		if(width*height==0){
+			this.abort("unknow error has occured");
+			return;
+		}
+		//Scan the appropriate section
+		const img = newWindow().centerWidthHeight(xc,yc,width,height);
+		const scanner = new IntersectionDetector(img.passdata, verticalScan, v);
+		const inter = scanner.intersections;
+		//Analyze the result
+		const expectedLines = (xIndex2-xIndex1)+(yIndex2-yIndex1);
+		const acceptableErrorPercentage = 5;
+		const minCounter = expectedLines*0.5;
+		let counter = 0;
+		for(let i=0;i<expectedLines;i++){
+			const expectedPosition = this.getXYfromIndex(xIndex1+(verticalScan?-0.5:i),yIndex1+(verticalScan?i:-0.5));
+			for(let j=0;j<inter.length;j++){
+				const actualPosition = (verticalScan?scanner.ypos:scanner.xpos)+inter[j];
+				const error = Math.abs(100*(expectedPosition[verticalScan?1:0]-actualPosition)/this.cellLength);
+				if(error<acceptableErrorPercentage){
+					ct.fillStyle = "red";
+					ct.font = "20px Arial";
+					//ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
+					if(v) ct.fillText(Math.floor(100*error)/100,expectedPosition[0]/canvasScale,expectedPosition[1]/canvasScale);
+					counter++;
+					break;
+				}
+			}
+		}
+		return (counter>=minCounter);
+	}
+	getXYfromIndex(xIndex, yIndex){
+		const partialx = (this.dx==1)?(1):((1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)));
+		const partialy = (this.dy==1)?(1):((1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)));
+		const x = (this.cellLength *partialx)*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
+		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
+		return [x,y];
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
@@ -244,12 +237,12 @@ class VisionProgram_SudokuReader{
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
-		/*
+		
 		line(xy1,xy2); //Top line
 		line(xy2,xy3); // Right line
 		line(xy3,xy4); //bottom line
 		line(xy4,xy1); //left line
-		*/
+		
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -298,8 +291,10 @@ class VisionProgram_SudokuReader{
 			this.abort("cell length not found");
 			return;
 		}
-		this.cellLength = sideLength1/((1/Math.log(this.dx))*(Math.pow(this.dx,this.cellCountX)-1));
-		this.cellLengthy= sideLength4/((1/Math.log(this.dy))*(Math.pow(this.dy,this.cellCountY)-1));
+		const partialx = (this.dx==1)?(1):((1/Math.log(this.dx)*(Math.pow(this.dx,this.cellCountX)-1)));
+		const partialy = (this.dy==1)?(1):((1/Math.log(this.dy)*(Math.pow(this.dy,this.cellCountY)-1)));
+		this.cellLength = sideLength1/partialx;
+		this.cellLengthy= sideLength4/partialy;
 		return;
 	}
 }
