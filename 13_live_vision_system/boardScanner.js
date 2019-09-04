@@ -37,12 +37,30 @@ class VisionProgram_BoardReader{
 
 		//locate the four corners
 		this.getFourCorners();
+		if(this.failed) return;
 
 		//scan the numbers
 		this.scanNumbers();
 	}
 	scanNumbers(){
+		for(let xi=0;xi<9;xi++){
+			for(let yi=0;yi<9;yi++){
+				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
+					ct.strokeStyle = "red";
+					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio);
+					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio);
+				}
+			}
+		}
 		return;
+	}
+	checkEmpty(xi,yi){
+		const xyc = this.getXYfromIndex(xi,yi);
+		const img = newWindow().centerWidthHeight(xyc[0],xyc[1],this.cellLength/2,1);
+		const scn = new IntersectionDetector(img.passdata, 0);
+		return (scn.std<15);
 	}
 	temp(){
 		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
@@ -102,10 +120,12 @@ class VisionProgram_BoardReader{
 		const xyc2 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin  );
 		const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
 		const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
+		/*
 		circle(xyc1[0],xyc1[1],9);
 		circle(xyc2[0],xyc2[1],9);
 		circle(xyc3[0],xyc3[1],9);
 		circle(xyc4[0],xyc4[1],9);
+		*/
 		return;
 	}
 	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
@@ -246,12 +266,12 @@ class VisionProgram_BoardReader{
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
-		
+		/*
 		line(xy1,xy2); //Top line
 		line(xy2,xy3); // Right line
 		line(xy3,xy4); //bottom line
 		line(xy4,xy1); //left line
-		
+		*/
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
