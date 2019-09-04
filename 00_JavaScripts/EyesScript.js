@@ -125,6 +125,7 @@ class IntersectionDetector extends ImageData{
 	get dataSlope(){return this.dataSlopeArray;}
 	get lineIntensity(){return this.lineIntensityArray;}
 	get intersections(){return this.indexList;}
+	get std(){return this.variance;}
 	updateLineIntensity(){
 		this.dataArray = this.getdata();
 		this.dataSmoothArray = smoothenArray(this.dataArray,2);//smoothenArrayVariableRange(this.dataArray);

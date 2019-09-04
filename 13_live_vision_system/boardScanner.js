@@ -47,15 +47,17 @@ class VisionProgram_BoardReader{
 		return;
 	}
 	temp(){
+		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
+		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
+
 		ct.fillStyle = "cyan";
 		ct.font = "40px Arial";
 		const number1 = hcanvas.width;
 		const number2 = hcanvas.height;
+		const number3 = scnX.std;
 		ct.fillText(Math.round((number1)*100)/100,10/canvasScale,30/canvasScale);
 		ct.fillText(Math.round((number2)*100)/100,10/canvasScale,55/canvasScale);
-
-		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
-		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
+		ct.fillText(Math.round((number3)*100)/100,10/canvasScale,80/canvasScale);
 	}
 	getFourCorners(){
 		let xfrontHigh= this.cellCountX+1;
