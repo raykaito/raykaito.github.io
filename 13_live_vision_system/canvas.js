@@ -21,8 +21,8 @@ function initMcanvas(){
 }
 
 function resizeH(vLength){
-    hcanvas.width = 500;
-    hcanvas.height= 500;
+    hcanvas.width = vLength;
+    hcanvas.height= vLength;
     hcanvas.style.width  = hcanvas.width /pixelRatio +"px";
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
