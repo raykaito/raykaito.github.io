@@ -1,4 +1,4 @@
-class VisionProgram_SudokuReader{
+class VisionProgram_numberReader{
 	constructor(){
 		//tells if the program as failed or not
 		this.failed;

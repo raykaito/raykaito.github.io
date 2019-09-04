@@ -34,7 +34,8 @@
 	</table>
 
 	<script type="text/javascript" src="canvas.js"></script>
-	<script type="text/javascript" src="sudokuScanner.js"></script>
+	<script type="text/javascript" src="boardScanner.js"></script>
+	<script type="text/javascript" src="numberScanner.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/DataScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/StatScript.js"></script>
@@ -67,7 +68,8 @@
         initCanvas();
         initMcanvas();
 
-        sudokuV = new VisionProgram_SudokuReader();
+        boardV = new VisionProgram_BoardReader();
+        numberV = new VisionProgram_BoardReader();
 
     </script>
 

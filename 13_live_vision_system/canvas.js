@@ -21,8 +21,8 @@ function initMcanvas(){
 }
 
 function resizeH(vLength){
-    hcanvas.width = vLength;
-    hcanvas.height= vLength;
+    hcanvas.width = 500;
+    hcanvas.height= 500;
     hcanvas.style.width  = hcanvas.width /pixelRatio +"px";
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
@@ -108,9 +108,9 @@ function draw() {
             sx = 0;
             sy = (video.videoHeight - video.videoWidth)/2;
         }
-        hct.drawImage(video,sx,sy,vLength,vLength,0,0,vLength,vLength);
+        hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
-        sudokuV.startScan();
+        boardV.startScan();
         //setTimeout(draw,100);
         //return;
         requestAnimationFrame(draw);
