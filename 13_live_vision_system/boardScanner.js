@@ -17,14 +17,17 @@ class VisionProgram_BoardReader{
 		//Index of the corners
 		this.xIndexMin;
 		this.yIndexMin;
-		this.scanInterval = 1000;
+		this.scanInterval = 100;
 		this.lastTime = Date.now();
 	}
 	init(){
+		/*
 		if((Date.now()-this.lastTime)<this.scanInterval){
 			this.abort("not time to scan yet");
 			return;
 		}
+		this.lastTime = Date.now();
+		*/
 		this.cellLength = -1;
 		this.failed=false;
 	}
