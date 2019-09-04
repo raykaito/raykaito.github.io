@@ -3,8 +3,8 @@ class VisionProgram_SudokuReader{
 		//tells if the program as failed or not
 		this.failed;
 		//Orientation of the board
-		this.xc;
-		this.yc;
+		this.xCofR;
+		this.yCofR;
 		this.rotationAngle;
 		this.vAngle;//at x=0, x position shifts(+) as it moves in +y direction
 		this.dy; //y position shifts(+) as it moves in +x direction and as it moves in +y direction
@@ -30,7 +30,7 @@ class VisionProgram_SudokuReader{
 		if(this.failed) return;
 
 		//rotate canvas
-		rotateCanvas(this.xc, this.yc, this.rotationAngle);
+		rotateCanvas(this.xCofR, this.yCofR, this.rotationAngle);
 
 		//locate the four corners
 		this.getFourCorners();
@@ -39,17 +39,9 @@ class VisionProgram_SudokuReader{
 		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
 		const scnX = new IntersectionDetector(imgX.passdata, 0,1);
 	}
-	getFourCorners(){
-		for(let i=-9;i<10;i++){
-			for(let j=-9;j<10;j++){
-				const xy = this.getXYfromIndex(i,j);
-				circle(xy[0],xy[1],5);
-			}
-		}
-	}
 	getXYfromIndex(xIndex, yIndex){
-		const x = (this.cellLength *(1/Math.log(this.dx)*(this.dx^xIndex-1)))*(this.dy^yIndex)-0*getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
-		const y = (this.cellLengthy*(1/Math.log(this.dy)*(this.dy^yIndex-1)))*(this.dx^xIndex)+this.yc;
+		const x = (xIndex*this.cellLength )*(1+yIndex*this.cellLength *this.dx)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xCofR;
+		const y = (yIndex*this.cellLengthy)*(1+xIndex*this.cellLengthy*this.dy)+this.yCofR;
 		return [x,y];
 	}
 	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
@@ -92,7 +84,7 @@ class VisionProgram_SudokuReader{
 			return false;
 		}
 	}
-	getFourCorners_back(){
+	getFourCorners(){
 		let xfrontHigh= this.cellCountX+1;
 		let yfrontHigh= this.cellCountY+1;
 		let xfrontLow = 0;
@@ -152,6 +144,65 @@ class VisionProgram_SudokuReader{
 			}
 		}
 		return;
+	}
+	getFourCorners_bak(xin, yin){
+		const cl = this.cellLength;
+		const x = xin +cl/2;
+		const y = yin +cl/2;
+		const xc = x%cl;
+		const yc = y%cl;
+		const nx = Math.min(15,Math.floor(hcanvas.width /cl));
+		const ny = Math.min(15,Math.floor(hcanvas.height/cl));
+		let inX = new Array(), xIndex;
+		let inY = new Array(), yIndex;
+		const acceptableErrorPercentage = 10;
+		const minCounter = 2;
+		for(let i=0;i<ny;i++){
+			const imgX = newWindow().cornerWidthHeight(xc,yc+cl*i,nx*cl,1);
+			const scnX = new IntersectionDetector(imgX.passdata, 0, 0);
+			inX[i] = scnX.intersections;
+		}
+		for(let i=0;i<nx;i++){
+			const imgY = newWindow().cornerWidthHeight(xc+cl*i,yc,1,ny*cl);
+			const scnY = new IntersectionDetector(imgY.passdata, 1, 0);
+			inY[i] = scnY.intersections;
+		}
+		//Count the empty boxes;
+		let ebx = new Array(ny).fill(0);
+		let eby = new Array(nx).fill(0);
+		for(let i=0;i<ny;i++){
+			for(let j=0;j<inX[i].length-1;j++){
+				if(findError(cl,inX[i][j+1]-inX[i][j])<acceptableErrorPercentage){
+					circle((xc+(inX[i][j+1]+inX[i][j])/2),(yc+cl*i),this.cellLength/2);
+					ebx[i]++;
+					eby[Math.floor((inX[i][j+1]+inX[i][j])/2/cl)]++;
+				}
+			}
+			ct.fillStyle = "cyan";
+			ct.font = "20px Arial";
+			ct.fillText(""+ebx[i],(xc),(yc+cl*i));
+		}
+		for(let i=0;i<nx;i++){
+			for(let j=0;j<inY[i].length-1;j++){
+				if(findError(cl,inY[i][j+1]-inY[i][j])<acceptableErrorPercentage){
+					circle((xc+cl*i),(yc+(inY[i][j+1]+inY[i][j])/2),this.cellLength/4);
+					ct.fillStyle = "red";
+					ct.font = "10px Arial";
+					ct.fillText(""+Math.floor(findError(cl,inY[i][j+1]-inY[i][j])*10)/10,(xc+cl*i),(yc+(inY[i][j+1]+inY[i][j])/2),);
+					eby[i]++;
+					ebx[Math.floor((inY[i][j+1]+inY[i][j])/2/cl)]++;
+				}
+			}
+			ct.fillStyle = "cyan";
+			ct.font = "20px Arial";
+			ct.fillText(""+eby[i],(xc+cl*i),(yc));
+		}
+		//Analyze intersections horizontal
+		circle((xc+cl* xIndex   ),(yc+cl* yIndex   ),this.cellLength/2);
+		circle((xc+cl*(xIndex+8)),(yc+cl* yIndex   ),this.cellLength/2);
+		circle((xc+cl* xIndex   ),(yc+cl*(yIndex+8)),this.cellLength/2);
+		circle((xc+cl*(xIndex+8)),(yc+cl*(yIndex+8)),this.cellLength/2);
+		//Analyze X intersections
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
@@ -240,8 +291,8 @@ class VisionProgram_SudokuReader{
 									[xyV[0           ][2],xyV[0           ][3]],
 									[xyH[xyH.length-1][0],xyH[xyH.length-1][1]],
 									[xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
-		this.xc = xy1[0];
-		this.yc = xy1[1];
+		this.xCofR = xy1[0];
+		this.yCofR = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
 		ct.strokeStyle = "cyan";
 		line(xy1,xy2);
@@ -282,17 +333,17 @@ class VisionProgram_SudokuReader{
 		this.cellCountX = Math.round(sideLength1/this.cellLength);
 		this.cellCountY = Math.round(sideLength2/this.cellLength);
 		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
-		this.dx = (sideLength4/sideLength2)^(1/this.cellCountX);
-		this.dy = (sideLength3/sideLength1)^(1/this.cellCountY);
+		this.dx = (sideLength3-sideLength1)/sideLength4/sideLength1;
+		this.dy = (sideLength2-sideLength4)/sideLength4/sideLength1;
 		if(this.cellCountX*this.cellCountY==0){
 			this.abort("cell length not found");
 			return;
 		}
-		this.cellLength = sideLength1/((Math.log(this.dx))*(this.dx^this.cellCountX-1));
-		this.cellLengthy= sideLength4/((Math.log(this.dy))*(this.dy^this.cellCountY-1));
+		this.cellLength = sideLength1/this.cellCountX;
+		this.cellLengthy= sideLength4/this.cellCountY;
 		ct.fillStyle = "cyan";
 		ct.font = "40px Arial";
-		ct.fillText(Math.round(this.dx*100)/100,100/canvasScale,100/canvasScale);
+		//ct.fillText(Math.round(this.vAngle*100)/100,100/canvasScale,100/canvasScale);
 		return;
 	}
 }
