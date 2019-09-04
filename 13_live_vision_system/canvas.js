@@ -133,4 +133,8 @@ const circle=(x,y,rad)=>{
     ct.stroke();
 }
 
+const text=([x,y],string)=>{
+    ct.fillText(string,x/canvasScale,y/canvasScale);
+}
+
 console.log("Loaded: canvas.js");

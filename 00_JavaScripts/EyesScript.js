@@ -136,23 +136,22 @@ class IntersectionDetector extends ImageData{
 	}
 	getdata(){
 		let data = new Array();
-		if(this.vertical)
-			for(let i=0;i<this.height;i++)	data[i] = this.getPix(this.imgIn,[0,i],"all");
-		else
-			for(let i=0;i<this.width;i++)	data[i] = this.getPix(this.imgIn,[i,0],"all");
+		if(this.vertical)	for(let i=0;i<this.height;i++)	data[i] = this.getPix(this.imgIn,[0,i],"all");
+		else				for(let i=0;i<this.width;i++)	data[i] = this.getPix(this.imgIn,[i,0],"all");
 		return data;
 	}
 	getIntersections(ain){
+		const thresh = Math.max(15,this.variance);
 		let indexList = new Array();
 		let tempArray = new Array;
 		for(let i=0;i<ain.length;i++){
-			if(ain[i]>this.variance){
+			if(ain[i]>thresh){
 				indexList[indexList.length] = i;
 			}
 			if(ain[i]!=0){
 				tempArray[i] = ain[i];
 			}else{
-				tempArray[i] = this.variance;
+				tempArray[i] = thresh;
 			}
 		}
 		this.lineIntensityFiltered = tempArray;

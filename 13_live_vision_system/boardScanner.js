@@ -29,8 +29,6 @@ class VisionProgram_BoardReader{
 	startScan(){
 		this.init();
 		//find angle, intersection and cell length
-		this.temp();
-		return;
 		this.getXYangle();
 		if(this.failed) return;
 
