@@ -17,7 +17,7 @@ class VisionProgram_BoardReader{
 		//Index of the corners
 		this.xIndexMin;
 		this.yIndexMin;
-		this.scanInterval = 100;
+		this.scanInterval = 1000;
 		this.lastTime = Date.now();
 	}
 	init(){
@@ -147,7 +147,7 @@ class VisionProgram_BoardReader{
 		const yc = (xy1[1]+xy2[1])/2;
 		const width = verticalScan?1:(getDist(xy1,xy2));
 		const height= verticalScan?(getDist(xy1,xy2)):1;
-		if(width*height==0){
+		if(width*height<1){
 			this.abort("unknow error has occured");
 			return;
 		}
