@@ -1,6 +1,7 @@
 var ct, hct, mct;
 var canvas, hcanvas, mcanvas;
 var pixelRatio, canvasScale;
+var animationStartTime;
 
 function initHcanvas(){
     pixelRatio = window.devicePixelRatio;
@@ -26,7 +27,7 @@ function resizeH(vLength){
     hcanvas.style.width  = hcanvas.width /pixelRatio +"px";
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
-function resize(vLength){
+function resize(){
     canvas.width  = Math.floor(Math.min((window.innerWidth-40),760));
     canvas.height = canvas.width;
     canvas.style.width  = canvas.width +"px";
@@ -92,12 +93,13 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
 }
 
 function draw() {
+    animationStartTime = Date.now();
     ct.restore();
     ct.save();
     const vLength = Math.min(video.videoWidth,video.videoHeight);
     if(hcanvas.width!=vLength){
         resizeH(vLength);
-        resize (vLength);
+        resize();
         resizeM();
     }
     if(vLength!=0){
@@ -110,8 +112,10 @@ function draw() {
         }
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
+        console.log(hcanvas.width);
         boardV.startScan();
-        //setTimeout(draw,50);
+        numberV.startScan(boardV);
+        //setTimeout(draw,500);
         //return;
         requestAnimationFrame(draw);
     }else{

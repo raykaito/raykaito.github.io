@@ -19,60 +19,37 @@ class VisionProgram_BoardReader{
 		this.yIndexMin;
 		this.scanInterval = 100;
 		this.lastTime = Date.now();
-	}
-	init(){
-		/*
-		if((Date.now()-this.lastTime)<this.scanInterval){
-			this.abort("not time to scan yet");
-			return;
-		}
-		this.lastTime = Date.now();
-		*/
-		this.cellLength = -1;
-		this.failed=false;
-	}
-	abort(msg){
-		this.failed=true;
-		console.log(msg);
+		//Info about empty cells
+		this.emptyCells = new Array(64);
 	}
 	startScan(){
 		//Initialize the scanner
 		this.init();
-		if(this.failed) return;
+		if(this.failed) return false;
 
 		//find angle, intersection and cell length
 		this.getXYangle();
-		if(this.failed) return;
+		if(this.failed) return false;
 
 		//rotate canvas
 		rotateCanvas(this.xc, this.yc, this.rotationAngle);
 
 		//locate the four corners
 		this.getFourCorners();
-		if(this.failed) return;
+		if(this.failed) return false;
 
 		//scan the numbers
-		this.scanNumbers();
+		this.scanEmptyCells();
+		return true;
 	}
-	scanNumbers(){
-		for(let xi=0;xi<9;xi++){
-			for(let yi=0;yi<9;yi++){
-				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
-					ct.strokeStyle = "red";
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio);
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio);
-				}
-			}
+	init(){
+		if((Date.now()-this.lastTime)<this.scanInterval){
+			this.abort("not time to scan yet");
+			return false;
 		}
-		return;
-	}
-	checkEmpty(xi,yi){
-		const xyc = this.getXYfromIndex(xi,yi);
-		const img = newWindow().centerWidthHeight(xyc[0],xyc[1],this.cellLength/2,1);
-		const scn = new IntersectionDetector(img.passdata, 0);
-		return (scn.std<15);
+		this.lastTime = Date.now();
+		this.cellLength = -1;
+		this.failed=false;
 	}
 	temp(){
 		const imgX = newWindow().centerWidthHeight(hcanvas.width/2,hcanvas.height/2,hcanvas.width*0.8,1);
@@ -87,105 +64,9 @@ class VisionProgram_BoardReader{
 		ct.fillText(Math.round((number2)*100)/100,10/canvasScale,55/canvasScale);
 		ct.fillText(Math.round((number3)*100)/100,10/canvasScale,80/canvasScale);
 	}
-	getFourCorners(){
-		let xfrontHigh= this.cellCountX+1;
-		let yfrontHigh= this.cellCountY+1;
-		let xfrontLow = 0;
-		let yfrontLow = 0;
-		let xFrontDead = false;//This turns true when xfrontHigh is at the end;
-		let yFrontDead = false;//This turns true when xfrontHigh is at the end;
-		let xIndex1, yIndex1, xIndex2, yIndex2;
-
-		while((xfrontHigh-xfrontLow+yfrontHigh-yfrontLow)<16){
-			const verticalScan = (xfrontHigh-xfrontLow)<(yfrontHigh-yfrontLow);
-			if(verticalScan){
-				yIndex1 = yfrontLow;
-				yIndex2 = yfrontHigh;
-				xIndex1 = xIndex2 = (xFrontDead?xfrontLow-1:xfrontHigh+1);
-			}else{
-				xIndex1 = xfrontLow;
-				xIndex2 = xfrontHigh;
-				yIndex1 = yIndex2 = (yFrontDead?yfrontLow-1:yfrontHigh+1);
-			}
-			const result = this.checkForLine(xIndex1, yIndex1, xIndex2, yIndex2);
-			if(verticalScan){
-				if(!xFrontDead){
-					if(result)	xfrontHigh = xIndex1;		
-					else 		xFrontDead = true;
-				}else{
-					if(result)	xfrontLow = xIndex1;
-					else {this.abort("unable to find corners");return;}
-				}
-			}else{
-				if(!yFrontDead){
-					if(result)	yfrontHigh = yIndex1;		
-					else 		yFrontDead = true;
-				}else{
-					if(result)	yfrontLow = yIndex1;
-					else {this.abort("unable to find corners"); return;}
-				}
-			}
-		}
-		this.xIndexMin = xfrontLow-0.5;
-		this.yIndexMin = yfrontLow-0.5;
-		const xyc1 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin  );
-		const xyc2 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin  );
-		const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
-		const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
-		/*
-		circle(xyc1[0],xyc1[1],9);
-		circle(xyc2[0],xyc2[1],9);
-		circle(xyc3[0],xyc3[1],9);
-		circle(xyc4[0],xyc4[1],9);
-		*/
-		return;
-	}
-	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
-		const v = false;
-		//Get Position to Scan
-		const verticalScan = (xIndex1==xIndex2);
-		const xy1 = this.getXYfromIndex((xIndex1-0.5), (yIndex1-0.5));
-		const xy2 = this.getXYfromIndex((xIndex2-0.5), (yIndex2-0.5));
-		const xc = (xy1[0]+xy2[0])/2;
-		const yc = (xy1[1]+xy2[1])/2;
-		const width = verticalScan?1:(getDist(xy1,xy2));
-		const height= verticalScan?(getDist(xy1,xy2)):1;
-		if(width*height<1){
-			this.abort("unknow error has occured");
-			return;
-		}
-		//Scan the appropriate section
-		const img = newWindow().centerWidthHeight(xc,yc,width,height);
-		const scanner = new IntersectionDetector(img.passdata, verticalScan, v);
-		const inter = scanner.intersections;
-		//Analyze the result
-		const expectedLines = (xIndex2-xIndex1)+(yIndex2-yIndex1);
-		const acceptableErrorPercentage = 5;
-		const minCounter = expectedLines*0.5;
-		let counter = 0;
-		for(let i=0;i<expectedLines;i++){
-			const expectedPosition = this.getXYfromIndex(xIndex1+(verticalScan?-0.5:i),yIndex1+(verticalScan?i:-0.5));
-			for(let j=0;j<inter.length;j++){
-				const actualPosition = (verticalScan?scanner.ypos:scanner.xpos)+inter[j];
-				const error = Math.abs(100*(expectedPosition[verticalScan?1:0]-actualPosition)/this.cellLength);
-				if(error<acceptableErrorPercentage){
-					ct.fillStyle = "red";
-					ct.font = "20px Arial";
-					//ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
-					if(v) ct.fillText(Math.floor(100*error)/100,expectedPosition[0]/canvasScale,expectedPosition[1]/canvasScale);
-					counter++;
-					break;
-				}
-			}
-		}
-		return (counter>=minCounter);
-	}
-	getXYfromIndex(xIndex, yIndex){
-		const partialx = (this.dx==1)?(1):((1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)));
-		const partialy = (this.dy==1)?(1):((1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)));
-		const x = (this.cellLength *partialx)*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
-		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
-		return [x,y];
+	abort(msg){
+		this.failed=true;
+		console.log(msg);
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
@@ -338,5 +219,131 @@ class VisionProgram_BoardReader{
 		this.cellLengthy= sideLength4/partialy;
 		return;
 	}
+	getFourCorners(){
+		let xfrontHigh= this.cellCountX+1;
+		let yfrontHigh= this.cellCountY+1;
+		let xfrontLow = 0;
+		let yfrontLow = 0;
+		let xFrontDead = false;//This turns true when xfrontHigh is at the end;
+		let yFrontDead = false;//This turns true when xfrontHigh is at the end;
+		let xIndex1, yIndex1, xIndex2, yIndex2;
+
+		while((xfrontHigh-xfrontLow+yfrontHigh-yfrontLow)<16){
+			const verticalScan = (xfrontHigh-xfrontLow)<(yfrontHigh-yfrontLow);
+			if(verticalScan){
+				yIndex1 = yfrontLow;
+				yIndex2 = yfrontHigh;
+				xIndex1 = xIndex2 = (xFrontDead?xfrontLow-1:xfrontHigh+1);
+			}else{
+				xIndex1 = xfrontLow;
+				xIndex2 = xfrontHigh;
+				yIndex1 = yIndex2 = (yFrontDead?yfrontLow-1:yfrontHigh+1);
+			}
+			const result = this.checkForLine(xIndex1, yIndex1, xIndex2, yIndex2);
+			if(verticalScan){
+				if(!xFrontDead){
+					if(result)	xfrontHigh = xIndex1;		
+					else 		xFrontDead = true;
+				}else{
+					if(result)	xfrontLow = xIndex1;
+					else {this.abort("unable to find corners");return;}
+				}
+			}else{
+				if(!yFrontDead){
+					if(result)	yfrontHigh = yIndex1;		
+					else 		yFrontDead = true;
+				}else{
+					if(result)	yfrontLow = yIndex1;
+					else {this.abort("unable to find corners"); return;}
+				}
+			}
+		}
+		this.xIndexMin = xfrontLow-0.5;
+		this.yIndexMin = yfrontLow-0.5;
+		const xyc1 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin  );
+		const xyc2 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin  );
+		const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
+		const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
+		/*
+		circle(xyc1[0],xyc1[1],9);
+		circle(xyc2[0],xyc2[1],9);
+		circle(xyc3[0],xyc3[1],9);
+		circle(xyc4[0],xyc4[1],9);
+		*/
+		return;
+	}
+	checkForLine(xIndex1, yIndex1, xIndex2, yIndex2){
+		const v = false;
+		//Get Position to Scan
+		const verticalScan = (xIndex1==xIndex2);
+		const xy1 = this.getXYfromIndex((xIndex1-0.5), (yIndex1-0.5));
+		const xy2 = this.getXYfromIndex((xIndex2-0.5), (yIndex2-0.5));
+		const xc = (xy1[0]+xy2[0])/2;
+		const yc = (xy1[1]+xy2[1])/2;
+		const width = verticalScan?1:(getDist(xy1,xy2));
+		const height= verticalScan?(getDist(xy1,xy2)):1;
+		if(width*height<1){
+			this.abort("unknow error has occured");
+			return;
+		}
+		//Scan the appropriate section
+		const img = newWindow().centerWidthHeight(xc,yc,width,height);
+		const scanner = new IntersectionDetector(img.passdata, verticalScan, v);
+		const inter = scanner.intersections;
+		//Analyze the result
+		const expectedLines = (xIndex2-xIndex1)+(yIndex2-yIndex1);
+		const acceptableErrorPercentage = 5;
+		const minCounter = expectedLines*0.5;
+		let counter = 0;
+		for(let i=0;i<expectedLines;i++){
+			const expectedPosition = this.getXYfromIndex(xIndex1+(verticalScan?-0.5:i),yIndex1+(verticalScan?i:-0.5));
+			for(let j=0;j<inter.length;j++){
+				const actualPosition = (verticalScan?scanner.ypos:scanner.xpos)+inter[j];
+				const error = Math.abs(100*(expectedPosition[verticalScan?1:0]-actualPosition)/this.cellLength);
+				if(error<acceptableErrorPercentage){
+					ct.fillStyle = "red";
+					ct.font = "20px Arial";
+					//ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
+					if(v) ct.fillText(Math.floor(100*error)/100,expectedPosition[0]/canvasScale,expectedPosition[1]/canvasScale);
+					counter++;
+					break;
+				}
+			}
+		}
+		return (counter>=minCounter);
+	}
+	getXYfromIndex(xIndex, yIndex){
+		const partialx = (this.dx==1)?(1):((1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)));
+		const partialy = (this.dy==1)?(1):((1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)));
+		const x = (this.cellLength *partialx)*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
+		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
+		return [x,y];
+	}
+	scanEmptyCells(){
+		for(let xi=0;xi<9;xi++){
+			for(let yi=0;yi<9;yi++){
+				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
+					this.emptyCells[xi+9*yi] = 1;
+					
+					ct.strokeStyle = "red";
+					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio);
+					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio);
+					
+				}else{
+					this.emptyCells[xi+9*yi] = 0;
+				}
+			}
+		}
+		console.log("success");
+		return;
+	}
+	checkEmpty(xi,yi){
+		const xyc = this.getXYfromIndex(xi,yi);
+		const img = newWindow().centerWidthHeight(xyc[0],xyc[1],this.cellLength/2,1);
+		const scn = new IntersectionDetector(img.passdata, 0);
+		return (scn.std<15);
+	}
 }
-console.log("Loaded: sudokuScanner.js");
+console.log("Loaded: boardScanner.js");
