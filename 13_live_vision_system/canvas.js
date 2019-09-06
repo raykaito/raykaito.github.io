@@ -22,8 +22,8 @@ function initMcanvas(){
 }
 
 function resizeH(vLength){
-    hcanvas.width = 400;//vLength;
-    hcanvas.height= 400;//vLength;
+    hcanvas.width = 640;//vLength;
+    hcanvas.height= 640;//vLength;
     hcanvas.style.width  = hcanvas.width /pixelRatio +"px";
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
@@ -97,7 +97,7 @@ function draw() {
     ct.restore();
     ct.save();
     const vLength = Math.min(video.videoWidth,video.videoHeight);
-    if(hcanvas.width!=400){
+    if(hcanvas.width!=640){
         resizeH(vLength);
         resize();
         resizeM();
