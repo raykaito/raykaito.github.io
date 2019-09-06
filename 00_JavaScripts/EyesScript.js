@@ -203,7 +203,6 @@ class Binarize extends ImageData{
 				break;
 			}
 		}
-		console.log(lowerFound,upperFound,"final");
 		let record = 0;
 		let king = -1;
 		for(let t=lowerFound;t<=upperFound;t++){

@@ -21,13 +21,14 @@ class VisionProgram_numberReader{
 		//Numbers info
 		this.numbersRead = false;
 		this.numbers = new Array(81).fill(0);
+		this.fonts = new Array(81).fill(0);
 		this.numberCounter = 0;
 		this.ncanvas = document.createElement("canvas");
 		this.nct = this.ncanvas.getContext("2d");
 		this.ncanvas.width = 32;
 		this.ncanvas.height= 32;
-		this.fontsListNot = ["32px Times New Roman"];
-		this.fontsList = ["32px Arial ",
+		this.fontsListNot = ["32px Arial","32px Courier"];
+		this.fontsList = ["32px Arial",
 						  "32px Trebuchet MS",
 						  "32px Arial Black",
 						  "32px Impact",
@@ -72,8 +73,8 @@ class VisionProgram_numberReader{
 				this.read(i%9,Math.floor(i/9));
 				
 				ct.fillStyle = "cyan";
-				ct.font = "40px Arial";
-				const xy = this.getXYfromIndex(i%9,Math.floor(i/9));
+				ct.font = this.fontsList[this.fonts[i]];
+				const xy = this.getXYfromIndex(i%9-0.2,Math.floor(i/9)+0.25);
 				text(xy,this.numbers[i]);
 				
 			}
@@ -117,6 +118,7 @@ class VisionProgram_numberReader{
 		}
 		this.tryNumber(candidate,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[font],2);
 		this.numbers[xi+yi*9] = candidate;
+		this.fonts[xi+yi*9] = font;
 		this.numberCounter++;
 	}
 	tryNumber(num, imgDataIn, font,draw = 0){
