@@ -324,19 +324,19 @@ class VisionProgram_BoardReader{
 			for(let yi=0;yi<9;yi++){
 				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
 					this.emptyCells[xi+9*yi] = 1;
-					
+					/*
 					ct.strokeStyle = "red";
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
 						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio);
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
 						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio);
-					
+					*/
 				}else{
 					this.emptyCells[xi+9*yi] = 0;
 				}
 			}
 		}
-		console.log("success");
+		console.log("success: "+(Date.now()-animationStartTime));
 		return;
 	}
 	checkEmpty(xi,yi){

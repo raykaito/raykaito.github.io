@@ -84,7 +84,7 @@ class ImageData{
 		if(type=="all"||type==1) this.imgOut.data[4*index+1] = value;
 		if(type=="all"||type==2) this.imgOut.data[4*index+2] = value;
 	}
-	getPix(imgIn, indexIn, type){
+	getPix(imgIn, indexIn, type="all"){
 		//Check if indexIn is xy or index
 		let index;
 		if(indexIn.length==2) 	index = this.xy2i(indexIn, imgIn.width);
@@ -170,499 +170,78 @@ class IntersectionDetector extends ImageData{
 	}
 }
 
-class doubleFuzzySubtraction extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
-		super([imgIn, xpos, ypos]);
-		this.baseFuzzyRange = preset[0];
-		this.sharFuzzyRange = preset[1];
-		if(preset!=false) this.applyFilter();
-	}
-	applyFilter(){
-		const fuzzy_base = new Filter(this.passdata, this.baseFuzzyRange);
-		const fuzzy_shar = new Filter(this.passdata, this.sharFuzzyRange);
-		const imgData_base = fuzzy_base.passdata[0];
-		const imgData_shar = fuzzy_shar.passdata[0];
-		let difference;
-		for(let i=0;i<this.area;i++){
-			difference = (this.getPix(imgData_base,i,0)-this.getPix(imgData_shar,i,0));
-			this.setPix(i, difference, "all");
-		}
-		let max = 0;
-		for(let i=0;i<this.area;i++){
-			max = Math.max(max,this.getPix(this.imgOut,i, 0));
-		}
-		for(let i=0;i<this.area;i++){
-			const pix = this.getPix(this.imgOut,i, 0);
-			this.setPix(i, Math.floor(255-pix/max*255), "all");;
-		}
-
-	}
-}
-
-class derivativeFilter extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
-		super([imgIn, xpos, ypos]);
-		this.horizontalDerivative = new Array(this.area).fill(0);
-		this.verticalDerivative = new Array(this.area).fill(0);
-		this.maximumDerivative = new Array(this.area).fill(0);
-		this.threshholdToMaxRatio = 5;
-		this.scanDerivative();
-
-		if(preset!=false) this.applyFilter();
-	}
-	applyFilter(){
-		let threshhold = 0;
-		for(let i=0;i<this.area;i++){
-			threshhold = Math.max(threshhold, this.maximumDerivative[i]);
-		}
-		threshhold /= this.threshholdToMaxRatio;
-
-		let averageRGB;
-		let darkPixelCount = 0;
-		for(let index=0;index<this.area;index++){
-			if(this.maximumDerivative[index]>threshhold){
-				averageRGB = 0;
-				darkPixelCount++;
-			}else{
-				averageRGB = 255;
-			}
-			this.setPix(index, averageRGB, "all");
-		}
-		return darkPixelCount/this.area;
-	}
-	scanDerivative(){
-		let newRGB, lastRGB;
-		for(let x=0; x<this.width;x++){
-			for(let y=0; y<this.height;y++){
-				if(y==0){
-					lastRGB = this.getPix(this.imgIn, [x,y], "all");
-					continue;
-				}
-				newRGB = this.getPix(this.imgIn, [x,y], "all");
-				this.verticalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
-				lastRGB = newRGB;
-			}
-		}
-		for(let y=0; y<this.height;y++){
-			for(let x=0; x<this.width;x++){
-				if(x==0){
-					lastRGB = this.getPix(this.imgIn, [x,y], "all");
-					continue;
-				}
-				newRGB = this.getPix(this.imgIn, [x,y], "all");
-				this.horizontalDerivative[this.xy2i([x,y],this.width)] = Math.abs(lastRGB-newRGB);
-				lastRGB = newRGB;
-			}
-		}
-		for(let i=0;i<this.area;i++) this.maximumDerivative[i] = Math.max(this.horizontalDerivative[i], this.verticalDerivative[i]);
-	}
-}
-
-class LineScanner extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset=false){
-		super([imgIn, xpos, ypos]);
-		//Absolute X and Y intersects
-		this.absxIntersect = new Array();
-		this.absyIntersect = new Array();
-
-		//For Horizontal
-		this.xPioneer = new Array(this.height);
-		this.xAngle = 0;
-		this.xAngleFixed = true;
-
-		//For Vertical
-		this.yPioneer = new Array(this.width);
-		this.yAngle = 0;
-		this.yAngleFixed = true;
-
-		//Parameter for scanHorizontal();
-		this.whiteToBlack = true;
-		this.bandWidth = Math.tan(deg2rad(1))*this.height;
-		this.minPioneersInBand = 0.6;
-
-		//Parameter for getAngle();
-		this.allowableRange = 5;
-
-		//Parameter for nextX() and nextY();
-		this.lineThresh=10;
-
-		if(preset!=false){
-			this.scanHorizontal();
-			this.scanVertical();
-			//this.display();
-		}
-	}
-	set bandWidthAngle(angle){
-		this.bandWidth = Math.tan(deg2rad(angle))*this.height;
-	}
-	set InBandrate(rateIn){
-		this.minPioneersInBand = rateIn;
-	}
-
-	get intersects(){return [this.absxIntersect, this.absyIntersect];}
-	get angles()	{return [this.xAngle, this.yAngle];}
-	
-	scanHorizontal(){
-		//Set up Variables
-		let threshhold = 1;
-		let xIntersects = new Array();
-		let intersectCounter = 0;
-		this.xPioneer.fill(0);
-		this.xAngle = 0;
-		this.xAngleFixed = false;
-		this.whiteToBlack = true;
-
-		let sortedXPioneer = new Array(this.height);
-
-		while(true){
-			let noProgress = true;
-			for(let y=0;y<this.xPioneer.length;y++){
-				if(Math.floor(this.xPioneer[y]-this.xAngle*y)<threshhold){
-					const nextX = this.nextX([this.xPioneer[y],y]);
-					if(nextX==-1) continue;
-					this.xPioneer[y] = nextX;
-					noProgress = false;
-				}
-				continue;
-			}
-			if(!this.xAngleFixed) this.xAngle = this.getAngle(this.xPioneer);
-
-			sortedXPioneer = this.sortPioneer(this.xPioneer, this.xAngle);
-
-			if(this.lineDetected(sortedXPioneer)){
-				this.xAngleFixed = true;
-				xIntersects[intersectCounter] = this.getIntersect(sortedXPioneer);
-
-				if(xIntersects[intersectCounter]<=xIntersects[intersectCounter-1]){
-					xIntersects.pop();
-					break;
-				}
-
-				threshhold = this.getNewThreshhold(sortedXPioneer, true)+1;
-				this.whiteToBlack = !this.whiteToBlack;
-				intersectCounter++;
-				continue;
-			}
-
-			threshhold = this.getNewThreshhold(sortedXPioneer);
-
-			if(noProgress)break;
-		}
-		for(let y=0;y<this.height;y++){
-			for(let i=0;i<xIntersects.length;i++){
-				let index = [Math.floor(xIntersects[i]+y*this.xAngle),y];
-				this.setPix(index,255 ,0);
-				this.setPix(index,0   ,1);
-				this.setPix(index,0   ,2);
-			}
-		}
-		this.absxIntersect = [];
-		for(let i in xIntersects){
-			xIntersects[i] -= this.xAngle*this.ypos-this.xpos;
-			this.absxIntersect[i] = xIntersects[i];
-		}
-		return;
-	}
-
-	scanVertical(){
-		//Set up Variables
-		let threshhold = 1;
-		let yIntersects = new Array();
-		let intersectCounter = 0;
-		this.yPioneer.fill(0);
-		this.yAngle = 0;
-		this.yAngleFixed = false;
-		this.whiteToBlack = true;
-
-		let sortedYPioneer = new Array(this.width);
-
-		while(true){
-			let noProgress = true;
-			for(let x=0;x<this.yPioneer.length;x++){
-				if(Math.floor(this.yPioneer[x]-this.yAngle*x)<threshhold){
-					const nextY = this.nextY([x, this.yPioneer[x]]);
-					if(nextY==-1) continue;
-					this.yPioneer[x] = nextY;
-					noProgress = false;
-				}
-				continue;
-			}
-			if(!this.yAngleFixed) this.yAngle = this.getAngle(this.yPioneer);
-
-			sortedYPioneer = this.sortPioneer(this.yPioneer, this.yAngle);
-
-			if(this.lineDetected(sortedYPioneer)){
-				this.yAngleFixed = true;
-				yIntersects[intersectCounter] = this.getIntersect(sortedYPioneer);
-
-				if(yIntersects[intersectCounter]<=yIntersects[intersectCounter-1]){
-					yIntersects.pop();
-					break;
-				}
-
-				threshhold = this.getNewThreshhold(sortedYPioneer, true)+1;
-				this.whiteToBlack = !this.whiteToBlack;
-				intersectCounter++;
-				continue;
-			}
-
-			threshhold = this.getNewThreshhold(sortedYPioneer);
-
-			if(noProgress)break;
-		}
-		for(let x=0;x<this.width;x++){
-			for(let i=0;i<yIntersects.length;i++){
-				let index = [x, Math.floor(yIntersects[i]+x*this.yAngle)];
-				this.setPix(index,255 ,0);
-				this.setPix(index,0   ,1);
-				this.setPix(index,0   ,2);
-			}
-		}
-		this.absyIntersect = [];
-		for(let i in yIntersects){
-			yIntersects[i] -= this.yAngle*this.xpos-this.ypos;
-			this.absyIntersect[i] = yIntersects[i];
-		}
-	}
-	sortPioneer(pioneerIn, angleIn){
-		const sortedPioneer = new Array(pioneerIn.length);
-		for(let i=0;i<pioneerIn.length;i++)
-			sortedPioneer[i] = Math.floor(pioneerIn[i]-angleIn*i);
-		sortedPioneer.sort(function(a,b){return a - b;});
-		return sortedPioneer;
-	}
-	lineDetected(sortedPioneer){		
-		const median = sortedPioneer[Math.floor(sortedPioneer.length/2)];
-		const lowThresh = median - this.bandWidth/2;
-		const highThresh = median + this.bandWidth/2;
-
-		let counter = 0;
-		for(let i=0;i<sortedPioneer.length;i++){
-			if(sortedPioneer[i]<lowThresh) continue;
-			if(sortedPioneer[i]>highThresh)break;
-			counter++
-		}
-
-		const InBandRatio = counter/sortedPioneer.length;
-
-		return (InBandRatio>this.minPioneersInBand);
-	}
-	getIntersect(sortedPioneer){
-		let counter,  maxCounter,  maxCounterPioneer,  currentPioneer;
-		    counter = maxCounter = maxCounterPioneer = currentPioneer = 0;
-		
-		for(let i=0;i<sortedPioneer.length;i++){
-			if(currentPioneer<sortedPioneer[i]||i==sortedPioneer.length-1){
-				if(counter>maxCounter){
-					maxCounterPioneer = currentPioneer;
-					maxCounter = counter;
-				}
-				currentPioneer = sortedPioneer[i];
-				counter = 0;
-			}
-			counter++;
-		}
-		if(maxCounterPioneer==0){
-			console.log(sortedPioneer);
-		}
-		return maxCounterPioneer;
-
-	}
-
-	getNewThreshhold(sortedPioneer, flipped = false){		
-		const median = (sortedPioneer[Math.floor(sortedPioneer.length/2)]);
-		if(flipped) return median+this.bandWidth/2;
-		const lowThresh = median - this.bandWidth*2;
-
-		if(sortedPioneer[0]<lowThresh) return lowThresh;
-
-		return sortedPioneer[Math.floor(sortedPioneer.length*0.02)]+1;
-	}
-
-	getAngle(pioneer){
-		let derivative = new Array(pioneer.length-1);
-		for(let i=0;i<pioneer.length-1;i++){
-			derivative[i] = pioneer[i+1]-pioneer[i];
-		}
-		
-		let streak,  maxStreak,  maxStreakIndex,  newStreakIndex,  rangeMin,  rangeMax;
-		    streak = maxStreak = maxStreakIndex = newStreakIndex = rangeMin = rangeMax = 0;
-		let streakBreakCount = 0;
-
-		let startStreak = true;
-		
-		for(let i=0;i<pioneer.length-1;i++){
-			if(startStreak){
-				streakBreakCount++;
-				if(streak>maxStreak){
-					maxStreak = streak;
-					maxStreakIndex = newStreakIndex;
-				}
-				rangeMin = rangeMax = derivative[i];
-				newStreakIndex = i;
-				streak = 0;
-				startStreak = false;
-				continue;
-			}
-			rangeMin = Math.min(rangeMin, derivative[i]);
-			rangeMax = Math.max(rangeMax, derivative[i]);
-			if(rangeMax-rangeMin>this.allowableRange){
-				startStreak = true;
-				continue;
-			}
-			streak++;
-		}
-
-		let accumulator = 0;
-
-		//This is for a case in which streak==this.height
-		if(streakBreakCount==1){
-			maxStreakIndex=0;
-			maxStreak=pioneer.length-1;
-		}
-
-		for(let y=maxStreakIndex;y<maxStreakIndex+maxStreak;y++){
-			accumulator+=derivative[y];
-		}
-		const angle = accumulator/maxStreak;
-		return angle;
-	}
-
-	nextX(xy){
-		if(xy[0]==this.width-1) return -1;
-		let newR, lastR = this.getPix(this.imgIn, xy, 0);
-		for(;xy[0]<this.width;){
-			xy[0]++;
-			newR = this.getPix(this.imgIn, xy, 0);
-			if(this.whiteToBlack){
-				if(newR-lastR<-this.lineThresh) return xy[0];
-			}else{
-				if(newR-lastR> this.lineThresh) return xy[0];
-			}
-			lastR = newR;
-		}
-		return this.width-1;
-	}
-
-	nextY(xy){
-		if(xy[1]==this.height-1) return -1;
-		let newR, lastR = this.getPix(this.imgIn, xy, 0);
-		for(;xy[1]<this.height;){
-			xy[1]++;
-			newR = this.getPix(this.imgIn, xy, 0);
-			if(this.whiteToBlack){
-				if(newR-lastR<-this.lineThresh) return xy[1];
-			}else{
-				if(newR-lastR> this.lineThresh) return xy[1];
-			}
-			lastR = newR;
-		}
-		return this.height-1;
-	}
-}
-
-class Filter extends ImageData{
+class Binarize extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
 		super([imgIn, xpos, ypos]);
-
-		if(preset!=false) this.fuzzyR(preset);
+		this.histogram = new Array(256);
+		this.updateHistogram();
+		this.threshold = (preset?preset:this.getThreshold());
+		this.binarize();
 	}
-	fuzzyR(range = 1){
-		if(range==0) return;
-		let imgHolder = {data: new Array(this.area*4)};
-		let counter, tempR, index;
-		for(let y=0;y<this.height;y++){
-			counter = tempR = 0;
-			for(let x=-range;x<this.width+range;x++){
-				index = this.xy2i([x,y], this.width);
-				
-				if(x+range<this.width){
-					counter++;
-					tempR += this.getPix(this.imgIn, index+range, 0);
-				}
-				
-				if(x-range>=0){
-					counter--;
-					tempR -= this.getPix(this.imgIn, index-range, 0);
-				}
-				if(x>=0&&x<this.width){
-					imgHolder.data[4*index] = tempR/counter;
-				}
-			}
-		}
-		for(let x=0;x<this.width;x++){
-			counter = tempR = 0;
-			for(let y=-range;y<this.height+range;y++){
-				index = this.xy2i([x,y], this.width);
-				
-				if(y+range<this.height){
-					counter++;
-					tempR += this.getPix(imgHolder, index+range*this.width, 0);
-				}
-				
-				if(y-range>=0){
-					counter--;
-					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
-				}
-				if(y>=0&&y<this.height){
-					this.setPix(index, Math.floor(tempR/counter), "all");
-				}
-			}
-		}
+	get histo(){return this.histogram;}
+	set thresh(threshIn){
+		this.threshold = threshIn;
 	}
-	fuzzy(range = 1){
-		if(range==0) return;
-		let imgHolder = {data: new Array(this.area*4)};
-		//let imgHolder.data = new Array(this.area*4);
-		let counter, tempR, tempG, tempB, index;
-		for(let y=0;y<this.height;y++){
-			counter = tempR = tempG = tempB = 0;
-			for(let x=-range;x<this.width+range;x++){
-				index = this.xy2i([x,y], this.width);
-				
-				if(x+range<this.width){
-					counter++;
-					tempR += this.getPix(this.imgIn, index+range, 0);
-					tempG += this.getPix(this.imgIn, index+range, 1);
-					tempB += this.getPix(this.imgIn, index+range, 2);
-				}
-				
-				if(x-range>=0){
-					counter--;
-					tempR -= this.getPix(this.imgIn, index-range, 0);
-					tempG -= this.getPix(this.imgIn, index-range, 1);
-					tempB -= this.getPix(this.imgIn, index-range, 2);
-				}
-				if(x>=0&&x<this.width){
-					imgHolder.data[4*index  ] = tempR/counter;
-					imgHolder.data[4*index+1] = tempG/counter;
-					imgHolder.data[4*index+2] = tempB/counter;
-				}
+	getThreshold(){
+		const factor = 5;
+		const countLimit = this.area/factor;
+		let lowerCount = 0;
+		let upperCount = 0;
+		let lowerFound = -1;
+		let upperFound = -1;
+		for(let i=0;i<this.histogram.length;i++){
+			lowerCount += this.histogram[i];
+			if(lowerCount>countLimit){
+				lowerFound = i;
+				break;
 			}
 		}
-		for(let x=0;x<this.width;x++){
-			counter = tempR = tempG = tempB = 0;
-			for(let y=-range;y<this.height+range;y++){
-				index = this.xy2i([x,y], this.width);
-				
-				if(y+range<this.height){
-					counter++;
-					tempR += this.getPix(imgHolder, index+range*this.width, 0);
-					tempG += this.getPix(imgHolder, index+range*this.width, 1);
-					tempB += this.getPix(imgHolder, index+range*this.width, 2);
-				}
-				
-				if(y-range>=0){
-					counter--;
-					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
-					tempG -= this.getPix(imgHolder, index-range*this.width, 1);
-					tempB -= this.getPix(imgHolder, index-range*this.width, 2);
-				}
-				if(y>=0&&y<this.height){
-					this.imgOut.data[4*index  ] = tempR/counter;
-					this.imgOut.data[4*index+1] = tempG/counter;
-					this.imgOut.data[4*index+2] = tempB/counter;
-				}
+		for(let i=this.histogram.length-1;i>=0;i--){
+			upperCount += this.histogram[i];
+			if(upperCount>countLimit){
+				upperFound = i;
+				break;
+			}
+		}
+		console.log(lowerFound,upperFound,"final");
+		let record = 0;
+		let king = -1;
+		for(let t=lowerFound;t<=upperFound;t++){
+			const lowA = new Array();
+			const highA= new Array();
+			for(let i=0;i<this.area;i++){
+				const newPix = this.getPix(this.imgIn,i);
+				if(newPix>=t)	highA[highA.length] = newPix;
+				else 			lowA[lowA.length]   = newPix;
+			}
+			let lowAve, lowStd;
+			let highAve, highStd;
+			[lowAve, lowStd] = getAveStd(lowA);
+			[highAve, highStd] = getAveStd(highA);
+			if((highAve-lowAve)/(lowStd+highStd)>record){
+				record = (highAve-lowAve)/(lowStd+highStd);
+				king = t;
+			}
+		}
+		return king;
+	}
+	updateHistogram(){
+		let index;
+		for(let i=0;i<this.histogram.length;i++) this.histogram[i]=0;
+		for(let i=0;i<this.area;i++){
+			index  = Math.floor(this.getPix(this.imgIn,i,"all"));
+			this.histogram[index]++;
+		}
+		this.max = this.histogram.reduce((a,b)=>{return Math.max(a,b);},0);
+	}
+	binarize(){
+		let brightness;
+		for(let i=0;i<this.width*this.height;i++){
+			brightness = this.imgIn.data[4*i+0];
+			brightness+= this.imgIn.data[4*i+1];
+			brightness+= this.imgIn.data[4*i+2];
+			for(let c=0;c<3;c++){
+				this.imgOut.data[4*i+c] = (brightness<=3*this.threshold)?0:255;
 			}
 		}
 	}
@@ -680,8 +259,26 @@ class FindBlob extends ImageData{
 
 		if(preset!=false) this.scanBlobs();
 	}
-	get blobNum(){
-		return this.blobNumber;
+	get blob(){
+		const mi = this.maxAreaIndex;
+		const tcanvas = document.createElement("canvas");
+		let xMin, yMin, xMax, yMax;
+		if(this.blobNumber!=0){
+			xMin = this.blobInfo[mi][1];
+			yMin = this.blobInfo[mi][2];
+			xMax = this.blobInfo[mi][3];
+			yMax = this.blobInfo[mi][4];
+		}else{
+			xMin = 0;
+			yMin = 0;
+			xMax = this.width;
+			yMax = this.height;
+		}
+		tcanvas.width = Math.max(1,xMax-xMin);
+		tcanvas.height= Math.max(1,yMax-yMin);
+		const tct = tcanvas.getContext("2d");
+		tct.drawImage(super.updateDisplayImage(),xMin,yMin,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		return tcanvas;
 	}
 	updateDisplayImage(actual = false){
 		if(actual){
@@ -707,6 +304,7 @@ class FindBlob extends ImageData{
 				this.dimgOut.data[4*i+2]=0;
 			}
 		}
+		return super.updateDisplayImage();
 	}
 	eraseSmallerBlobs(){
 		for(let i=0;i<this.area;i++){
@@ -798,94 +396,12 @@ class FindBlob extends ImageData{
 				this.maxAreaIndex = this.blobNumber-1;
 			}
 		}
-		console.log(this.blobNumber+" blobs found. Largest Area: "+this.maxArea+" pixels.");
 	}
 }
 
-class Binarize extends ImageData{
+class ONR extends ImageData{
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
 		super([imgIn, xpos, ypos]);
-		this.histogram = new Array(256).fill(0);
-		this.smoothHistogram = new Array(256).fill(0);
-		this.max;
-
-		if(preset!=false){
-			this.threshhold = preset;
-			this.updateHistogram();
-			this.binarize();
-		}else{
-			this.threshhold = 64;
-			this.updateHistogram();
-		}
-	}
-	set thresh(threshIn){
-		this.threshhold = threshIn;
-	}
-	get darkPixelRatio(){
-		let darkPixel = 0;
-		for(let i=this.threshhold;i>=0;i--){
-			darkPixel+=this.histogram[i];
-		}
-		return darkPixel/this.area;
-	}
-	updateThreshFromDarkPixelRatio(ratio){
-		let counter = 0;
-		let threshCounter = ratio*this.area;
-		for(let i=0;i<256;i++){
-			counter+=this.histogram[i];
-			if(counter>=threshCounter){
-				this.thresh = i;
-				return;
-			}
-		}
-	}
-	updateSmoothHistogram(range = 1){
-		this.smoothHistogram = smoothenArray(this.histogram, range);
-		console.log(countLocalMax(this.smoothHistogram));
-	}
-	updateHistogram(){
-		let index;
-		for(let i=0;i<this.histogram.length;i++) this.histogram[i]=0;
-		for(let i=0;i<this.area;i++){
-			index  = Math.floor(this.getPix(this.imgIn,i,"all"));
-			this.histogram[index]++;
-		}
-		this.max = this.histogram.reduce((a,b)=>{return Math.max(a,b);},0);
-	}
-	binarize(){
-		let brightness;
-		for(let i=0;i<this.width*this.height;i++){
-			brightness = this.imgIn.data[4*i+0];
-			brightness+= this.imgIn.data[4*i+1];
-			brightness+= this.imgIn.data[4*i+2];
-			for(let c=0;c<3;c++){
-				this.imgOut.data[4*i+c] = (brightness<=3*this.threshhold)?0:255;
-			}
-		}
-	}
-	displayHistogram(){
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(0,0,258,102);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(1,1,256,100);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		for(let i=0;i<256;i++){
-			ct.fillRect(i+1,101-Math.ceil(this.histogram[i]*100/this.max),1,Math.ceil(this.histogram[i]*100/this.max));
-		}
-		ct.fillStyle = "red";
-		ct.fillRect(this.threshhold+1,1, 1,100);
-	}
-	displaySmoothHistogram(){
-		ct.fillStyle = "rgb(255,  0,255)";
-		ct.fillRect(0,200,258,102);
-		ct.fillStyle = "rgb(255,255,255)";
-		ct.fillRect(1,201,256,100);
-		ct.fillStyle = "rgb(  0,  0,  0)";
-		for(let i=0;i<256;i++){
-			ct.fillRect(i+1,301-Math.ceil(this.smoothHistogram[i]*100/this.max),1,Math.ceil(this.smoothHistogram[i]*100/this.max));
-		}
-		ct.fillStyle = "red";
-		ct.fillRect(this.threshhold+1,201, 1,100);
 	}
 }
 

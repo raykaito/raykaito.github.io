@@ -45,9 +45,9 @@ function resize(){
 }
 function resizeM(){
     mcanvas.width  = canvas.width;
-    mcanvas.height = canvas.height;
-    mcanvas.style.width  = canvas.width/pixelRatio +"px";
-    mcanvas.style.height = canvas.height/pixelRatio+"px";
+    mcanvas.height = 1377;
+    mcanvas.style.width  = mcanvas.width/pixelRatio +"px";
+    mcanvas.style.height = mcanvas.height/pixelRatio+"px";
     mct.fillRect(0,0,mcanvas.width,mcanvas.height);
 }
 
@@ -112,10 +112,9 @@ function draw() {
         }
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
-        console.log(hcanvas.width);
         boardV.startScan();
         numberV.startScan(boardV);
-        //setTimeout(draw,500);
+        //setTimeout(draw,1000);
         //return;
         requestAnimationFrame(draw);
     }else{
