@@ -35,9 +35,16 @@ class VisionProgram_numberReader{
 						  "32px Times New Roman",
 						  "32px Verdana",
 						  "32px Comic Sans MS"];
-		//Time info
-		this.scanInterval = 500;
-		this.lastTime = Date.now();
+		//Time info // SavePoint
+		this.timeIsUp = false;
+		this.scanInterval = 50;
+		this.lastTime;
+		this.lastCell = 0;//Which cell was it reading?
+		this.lastNumber = 1; //Which example number was it compared with?
+		this.lastFont = 0; //Which font was being used?
+		this.errorRecord = 100;
+		this.candidateRecord = 0;
+		this.fontRecord = 0;
 	}
 	temp(){
 		mct.font = this.fontsList[0];
@@ -53,33 +60,75 @@ class VisionProgram_numberReader{
 
 	}
 	startScan(br){
+		this.init(br);
 		//this.temp();
 		//return;
-		if(br.failed==false){
-			this.handleNewBoard(br);
-		}else{
-			rotateCanvas(this.xc, this.yc, this.rotationAngle);			
-		}
 		if(this.boardRead==false) return;
+		//Display known numebrs
 		for(let i=0;i<81;i++){
-			if((Date.now()-this.lastTime)>this.scanInterval){
-				this.abort("Time is Up");
-				this.lastTime = Date.now();
-				return false;
-			}
-			if(this.emptyCells[i]<0){
-				if(this.numberCounter>=90) continue;
-				this.read(i%9,Math.floor(i/9));
-				
+			if(this.emptyCells[i]<0&&this.numbers[i]!=0){
 				ct.fillStyle = "cyan";
 				ct.font = "40px Arial";
 				const xy = this.getXYfromIndex(i%9-0.2,Math.floor(i/9)+0.25);
 				text(xy,this.numbers[i]);
-				
 			}
+		}
+		for(let i=this.lastCell;i<81;i++){
+			if(this.emptyCells[i]<0){
+				this.lastCell = i;
+				this.read(i%9,Math.floor(i/9));
+			}
+			if(this.timeIsUp) return;
 		}
 	}
 	read(xi, yi){
+		if(this.numbers[xi+yi*9]!=0) return;
+		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
+		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
+		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+		const binarizedImg = new Binarize(img.passdata);
+		const blobFinder = new FindBlob(binarizedImg.passdata,1);
+		blobFinder.eraseSmallerBlobs();
+		blobFinder.display();
+		const image = blobFinder.blob;
+		const imgBN = img.updateDisplayImage();
+		mct.drawImage(image,0, this.numberCounter*17,16,16);
+		mct.drawImage(imgBN,17, this.numberCounter*17,16,16);
+		//Compare with "examples"
+		let error = this.errorRecord;
+		let candidate = this.candidateRecord;
+		let font  = this.fontRecord;
+		for(let i=this.lastNumber;i<=9;i++){
+			let errorLocal = 100;
+			let candidateLocal = 0;
+			let fontLocal = 0;
+			for(let j=this.lastFont;j<this.fontsList.length;j++){
+				const newError = this.tryNumber(i,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[j]);
+				if(newError<error){
+					error = newError;
+					candidate = i;
+					font = j;
+				}
+				if(newError<errorLocal){
+					errorLocal = newError;
+					candidateLocal = i;
+					fontLocal = j;
+				}
+				this.tryNumber(candidateLocal,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[fontLocal],1);
+				this.checkTime();
+				if(this.timeIsUp) this.saveEverything(error,candidate,font,i,j);
+				if(j==this.fontsList.length-1) this.lastFont = 0;
+			}
+			if(i==9) this.lastNumber = 1;
+		}
+		this.tryNumber(candidate,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[font],2);
+		this.numbers[xi+yi*9] = candidate;
+		this.numberCounter++;
+		this.errorRecord = 100;
+		this.candidateRecord = 0;
+		this.fontRecord = 0;
+	}
+	read_bak(xi, yi){
 		if(this.numbers[xi+yi*9]!=0) return;
 		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
 		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
@@ -184,6 +233,12 @@ class VisionProgram_numberReader{
 		this.numbersRead = false;
 		this.numberCounter = 0;
 		for(let i=0;i<81;i++) this.numbers[i] = 0;
+		this.lastCell = 0;
+		this.errorRecord = 100;
+		this.candidateRecord = 0;
+		this.fontRecord = 0;
+		this.lastNumber = 1;
+		this.lastFont = 0;
 	}
 	getXYfromIndex(xin, yin){
 		const xIndex = xin+this.xIndexMin;
@@ -194,9 +249,27 @@ class VisionProgram_numberReader{
 		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
 		return [x,y];
 	}
-	init(){
+	init(br){
+		this.lastTime = Date.now();
+		this.timeIsUp = false;
+		if(br.failed==false){
+			this.handleNewBoard(br);
+		}else{
+			rotateCanvas(this.xc, this.yc, this.rotationAngle);			
+		}
 	}
-	abort(msg){
+	checkTime(msg){
+		if((Date.now()-this.lastTime)>this.scanInterval){
+			this.timeIsUp = true;
+			//Save Everything
+		}
+	}
+	saveEverything(error, candidate, font, i, j){
+		this.errorRecord = error;
+		this.candidateRecord = candidate;
+		this.fontRecord = font;
+		this.lastNumber = i;
+		this.lastFont = j;
 	}
 }
 console.log("Loaded: numberScanner.js");
