@@ -83,7 +83,7 @@ class VisionProgram_numberReader{
 		if(this.numbers[xi+yi*9]!=0) return;
 		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
 		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
-		const img = newWindow().cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
 		const binarizedImg = new Binarize(img.passdata);
 		const blobFinder = new FindBlob(binarizedImg.passdata,1);
 		blobFinder.eraseSmallerBlobs();

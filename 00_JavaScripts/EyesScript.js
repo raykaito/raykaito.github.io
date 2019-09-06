@@ -1,18 +1,18 @@
 const dx = [1, 1, 0,-1,-1,-1, 0, 1];
 const dy = [0, 1, 1, 1, 0,-1,-1,-1];
 
-const newWindow = () => {
+const newWindow = (xct = hct) => {
 	return {
 		centerWidthHeight : (centerX, centerY, widthIn, heightIn) => {
 			let xpos = Math.floor(centerX-widthIn /2);
 			let ypos = Math.floor(centerY-heightIn/2);
-			return new ImageData([hct.getImageData(xpos, ypos, widthIn, heightIn), xpos, ypos]);
+			return new ImageData([xct.getImageData(xpos, ypos, widthIn, heightIn), xpos, ypos]);
 		},
 		cornerWidthHeight : (xpos, ypos, widthIn, heightIn) => {
-			return new ImageData([hct.getImageData(xpos, ypos, widthIn, heightIn), xpos, ypos]);
+			return new ImageData([xct.getImageData(xpos, ypos, widthIn, heightIn), xpos, ypos]);
 		},
 		cornerToCorner : (xmin, ymin, xmax, ymax) => {
-			return new ImageData([hct.getImageData(xmin, ymin, (xmax-xmin), (ymax-ymin)), xmin, ymin]);
+			return new ImageData([xct.getImageData(xmin, ymin, (xmax-xmin), (ymax-ymin)), xmin, ymin]);
 		}
 	};
 }
