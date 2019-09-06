@@ -241,6 +241,8 @@ class VisionProgram_numberReader{
 		this.fontRecord = 0;
 		this.lastNumber = 1;
 		this.lastFont = 0;
+		mct.fillStyle = "black";
+		mct.fillRect(0,0,mcanvas.width,mcanvas.height);
 	}
 	getXYfromIndex(xin, yin){
 		const xIndex = xin+this.xIndexMin;
