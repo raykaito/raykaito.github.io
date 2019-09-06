@@ -117,7 +117,10 @@ class VisionProgram_numberReader{
 				this.tryNumber(candidateLocal,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[fontLocal],1);
 				this.checkTime();
 				if(this.timeIsUp) this.saveEverything(error,candidate,font,i,j+1);
-				if(j==this.fontsList.length-1) this.lastFont = 0;
+				if(j==this.fontsList.length-1){
+					this.lastFont = 0;
+					this.lastNumber++;
+				}
 				if(this.timeIsUp) return;
 			}
 			if(i==9) this.lastNumber = 1;
