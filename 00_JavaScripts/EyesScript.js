@@ -213,6 +213,7 @@ class Binarize extends ImageData{
 				if(newPix>=t)	highA[highA.length] = newPix;
 				else 			lowA[lowA.length]   = newPix;
 			}
+			if(lowA.length*highA.length==0) continue;
 			let lowAve, lowStd;
 			let highAve, highStd;
 			[lowAve, lowStd] = getAveStd(lowA);
