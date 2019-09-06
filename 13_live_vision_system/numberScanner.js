@@ -120,7 +120,6 @@ class VisionProgram_numberReader{
 				if(this.timeIsUp) this.saveEverything(error,candidate,font,i,j+1);
 				if(this.timeIsUp) return;
 			}
-			if(i==9) this.lastNumber = 1;
 		}
 		this.tryNumber(candidate,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[font],2);
 		this.numbers[xi+yi*9] = candidate;
@@ -128,6 +127,8 @@ class VisionProgram_numberReader{
 		this.errorRecord = 100;
 		this.candidateRecord = 0;
 		this.fontRecord = 0;
+		this.lastFont = 0;
+		this.lastNumber = 1;
 	}
 	read_bak(xi, yi){
 		if(this.numbers[xi+yi*9]!=0) return;
