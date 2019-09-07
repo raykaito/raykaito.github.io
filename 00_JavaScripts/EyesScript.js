@@ -278,7 +278,7 @@ class FindBlob extends ImageData{
 		tcanvas.width = Math.max(1,xMax-xMin);
 		tcanvas.height= Math.max(1,yMax-yMin);
 		const tct = tcanvas.getContext("2d");
-		tct.drawImage(super.updateDisplayImage(),xMin,yMin,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		tct.drawImage(super.updateDisplayImage(),xMin-(tcanvas.height-tcanvas.width)/2,yMin,tcanvas.height,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
 		return tcanvas;
 	}
 	updateDisplayImage(actual = false){
