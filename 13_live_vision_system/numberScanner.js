@@ -179,10 +179,10 @@ class VisionProgram_numberReader{
 			console.log(sortedSimilarity);
 			const startingIndex = this.listedCounter*(this.listedCounter+1)/2;
 			for(let i=startingIndex;i<this.listedCounter*this.listedCounter;i++){
-				//if(sortedSimilarity[i][0]<-9000){
-				//	this.resetBoard();
-				//	return;
-				//}
+				if(sortedSimilarity[i][0]<-9000){
+					this.resetBoard();
+					return;
+				}
 				const index = sortedSimilarity[i][1];
 				const x = 			 index%this.listedCounter ;
 				const y = Math.floor(index/this.listedCounter);
