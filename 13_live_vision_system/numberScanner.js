@@ -55,6 +55,7 @@ class VisionProgram_numberReader{
 		if(this.sudokuCreated==false) this.createSudokuMatrix();
 	}
 	handleNewBoard(br){
+		if(this.boardRead) return;
 		//Check if empty cell info matches
 		let matched = true;
 		for(let i=0;i<81;i++){
@@ -65,6 +66,7 @@ class VisionProgram_numberReader{
 		}
 		if(matched==false) return;
 		//Board info confirmed, and ready to update 
+		this.boardRead = true;
 		this.dx = br.dx;
 		this.dy = br.dy;
 		this.xc = br.xc;
@@ -77,8 +79,7 @@ class VisionProgram_numberReader{
 		this.yIndexMin = br.yIndexMin;
 		this.canvas.width = hcanvas.width;
 		this.canvas.height= hcanvas.height;
-		if(this.boardRead==false) this.ct.drawImage(hcanvas,0,0);
-		this.boardRead = true;
+		this.ct.drawImage(hcanvas,0,0);
 	}
 	resetBoard(){
 		this.boardRead = false;
@@ -179,7 +180,7 @@ class VisionProgram_numberReader{
 			console.log(sortedSimilarity);
 			const startingIndex = this.listedCounter*(this.listedCounter+1)/2;
 			for(let i=startingIndex;i<this.listedCounter*this.listedCounter;i++){
-				if(sortedSimilarity[i][0]<-9000){
+				if(sortedSimilarity[i][0]<-8000){
 					this.resetBoard();
 					return;
 				}
