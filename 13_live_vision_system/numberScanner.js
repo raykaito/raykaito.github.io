@@ -1,12 +1,8 @@
 class VisionProgram_numberReader{
 	constructor(){
-		//Canvas Info
+		//Board orientation info
 		this.canvas = document.createElement("canvas");
 		this.ct = this.canvas.getContext("2d");
-		//emptyCells
-		this.emptyCells = new Array(81).fill(0);
-		this.ECClimit = 5;//Empty cells counter upper limit
-		//Board orientation info
 		this.boardRead = false;
 		this.dx;
 		this.dy;
@@ -18,210 +14,45 @@ class VisionProgram_numberReader{
 		this.rotationAngle;
 		this.xIndexMin;
 		this.yIndexMin;
-		//Numbers info
-		this.numbersRead = false;
-		this.numbers = new Array(81).fill(0);
-		this.numberCounter = 0;
-		this.ncanvas = document.createElement("canvas");
-		this.nct = this.ncanvas.getContext("2d");
-		this.ncanvas.width = 32;
-		this.ncanvas.height= 32;
-		this.fontsListNot = ["32px Arial","32px Courier"];
-		this.fontsList = ["32px Arial",
-						  "32px Trebuchet MS",
-						  "32px Arial Black",
-						  "32px Impact",
-						  "32px Courier",
-						  "32px Times New Roman",
-						  "32px Verdana",
-						  "32px Comic Sans MS"];
-		//Time info // SavePoint
+		//emptyCells
+		this.emptyCells = new Array(81).fill(0);
+		this.ECClimit = 5;//Empty cells counter upper limit
+		//Time Keeping stuff
+		this.scanInterval = 30;
 		this.timeIsUp = false;
-		this.scanInterval = 50;
-		this.lastTime;
-		this.lastCell = 0;//Which cell was it reading?
-		this.lastNumber = 1; //Which example number was it compared with?
-		this.lastFont = 0; //Which font was being used?
-		this.errorRecord = 100;
-		this.candidateRecord = 0;
-		this.fontRecord = 0;
-	}
-	temp(){
-		for(let j=0;j<this.fontsList.length;j++){
-			for(let i=1;i<=10;i++){
-				mct.font = this.fontsList[j];
-				mct.fillStyle = "white";
-				if(i!=10)mct.fillRect(i*34-34,j*34,32,32);
-				else mct.fillRect(i*34-34,j*34,mct.measureText(this.fontsList[j]).width,32);
-				mct.fillStyle = "black";
-				if(i!=10)mct.fillText(i,i*34-34,(j+1)*34);
-				else mct.fillText(this.fontsList[j],i*34-34,(j+1)*34);
-			}
-		}
-
+		this.lastState = 0;
+		//---------------List----------------//
+		this.unknwnIndex = new Array();
+		this.numbersListed = false;
+		this.listedCounter = 0;
+		//----------Similarity Array---------//
+		this.similarityAcquired = false;
+		this.similarity;
+		//-----------Sudoku Matrix-----------//
+		this.sudokuCreated = false;
+		this.sameNumberIndex = new Array();
+		this.sudoku = new Array(81).fill(0);
 	}
 	startScan(br){
-		//----------Init Section Start----------//
+		//---------Init Section Start---------//
 		this.lastTime = Date.now();
 		this.timeIsUp = false;
 		if(br.failed==false)	this.handleNewBoard(br);
 		else 					rotateCanvas(this.xc, this.yc, this.rotationAngle);
 		if(this.boardRead==false) return;
-		//----------Display Known Numbers----------//
-		ct.strokeStyle = "lightGreen";
-		line(this.getXYfromIndex(-0.5,-0.5),this.getXYfromIndex( 8.5,-0.5),3);
-		line(this.getXYfromIndex( 8.5,-0.5),this.getXYfromIndex( 8.5, 8.5),3);
-		line(this.getXYfromIndex( 8.5, 8.5),this.getXYfromIndex(-0.5, 8.5),3);
-		line(this.getXYfromIndex(-0.5, 8.5),this.getXYfromIndex(-0.5,-0.5),3);
-		for(let i=0;i<81;i++){
-			if(this.emptyCells[i]<0&&this.numbers[i]!=0){
-				ct.fillStyle = "cyan";
-				ct.font = "40px Arial";
-				const xy = this.getXYfromIndex(i%9-0.2,Math.floor(i/9)+0.25);
-				text(xy,this.numbers[i]);
-			}
-		}
-		//----------Read the 9 candidates----------//
-		for(let i=this.lastCell;i<81;i++){
-			if(this.emptyCells[i]<0){
-				this.lastCell = i;
-				this.read(i%9,Math.floor(i/9));
-			}
-			this.checkTime();
-			if(this.timeIsUp) return;
-		}
-	}
-	read(xi, yi){
-		if(this.numbers[xi+yi*9]!=0) return;
-		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
-		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
-		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
-		const binarizedImg = new Binarize(img.passdata);
-		const blobFinder = new FindBlob(binarizedImg.passdata,1);
-		blobFinder.eraseSmallerBlobs();
-		blobFinder.display();
-		const image = blobFinder.blob;
-		const imgBN = img.updateDisplayImage();
-		mct.drawImage(image,0, this.numberCounter*17,16,16);
-		mct.drawImage(imgBN,17, this.numberCounter*17,16,16);
-		//Compare with "examples"
-		let error = this.errorRecord;
-		let candidate = this.candidateRecord;
-		let font  = this.fontRecord;
-		for(let i=this.lastNumber;i<=9;i++){
-			let errorLocal = 100;
-			let candidateLocal = 0;
-			let fontLocal = 0;
-			for(let j=this.lastFont;j<this.fontsList.length;j++){
-				const newError = this.tryNumber(i,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[j]);
-				if(newError<error){
-					error = newError;
-					candidate = i;
-					font = j;
-				}
-				if(newError<errorLocal){
-					errorLocal = newError;
-					candidateLocal = i;
-					fontLocal = j;
-				}
-				this.tryNumber(candidateLocal,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[fontLocal],1);
-				if(j!=this.fontsList.length-1) this.checkTime();
-				else this.lastFont = 0;
-				if(this.timeIsUp) this.saveEverything(error,candidate,font,i,j+1);
-				if(this.timeIsUp) return;
-			}
-		}
-		this.tryNumber(candidate,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[font],2);
-		this.numbers[xi+yi*9] = candidate;
-		this.numberCounter++;
-		this.errorRecord = 100;
-		this.candidateRecord = 0;
-		this.fontRecord = 0;
-		this.lastFont = 0;
-		this.lastNumber = 1;
-	}
-	read_bak(xi, yi){
-		if(this.numbers[xi+yi*9]!=0) return;
-		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
-		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
-		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
-		const binarizedImg = new Binarize(img.passdata);
-		const blobFinder = new FindBlob(binarizedImg.passdata,1);
-		blobFinder.eraseSmallerBlobs();
-		blobFinder.display();
-		const image = blobFinder.blob;
-		const imgBN = img.updateDisplayImage();
-		mct.drawImage(image,0, this.numberCounter*17,16,16);
-		mct.drawImage(imgBN,17, this.numberCounter*17,16,16);
-		//Compare with "examples"
-		let error = this.errorRecord;
-		let candidate = this.candidateRecord;
-		let font  = this.fontRecord;
-		for(let i=this.lastNumber;i<=9;i++){
-			let errorLocal = 100;
-			let candidateLocal = 0;
-			let fontLocal = 0;
-			for(let j=this.lastFont;j<this.fontsList.length;j++){
-				const newError = this.tryNumber(i,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[j]);
-				if(newError<error){
-					error = newError;
-					candidate = i;
-					font = j;
-				}
-				if(newError<errorLocal){
-					errorLocal = newError;
-					candidateLocal = i;
-					fontLocal = j;
-				}
-				this.tryNumber(candidateLocal,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[fontLocal],1);
-				if(j!=this.fontsList.length-1) this.checkTime();
-				else this.lastFont = 0;
-				if(this.timeIsUp) this.saveEverything(error,candidate,font,i,j+1);
-				if(this.timeIsUp) return;
-			}
-		}
-		this.tryNumber(candidate,mct.getImageData(0, this.numberCounter*17,16,16),this.fontsList[font],2);
-		this.numbers[xi+yi*9] = candidate;
-		this.numberCounter++;
-		this.errorRecord = 100;
-		this.candidateRecord = 0;
-		this.fontRecord = 0;
-		this.lastFont = 0;
-		this.lastNumber = 1;
-	}
-	tryNumber(num, imgDataIn, font,draw = 0){
-		if(draw==2) mct.fillStyle = "black";
-		if(draw==2) mct.fillStyle = "black";
-		if(draw==1) mct.fillStyle = "cyan";
-		if(draw==0) mct.fillStyle = "cyan";
-		mct.fillRect(num*40,this.numberCounter*17,39,16);
-		//Prepare Example Image
-		const textWidth = Math.ceil(this.nct.measureText(num).width*1.1);
-		this.nct.fillStyle = "white";
-		this.nct.fillRect(0,0,textWidth,32);
-		this.nct.fillStyle = "black";
-		this.nct.font = font;
-		this.nct.fillText(num,0,32);
-		//blobFinder the ex Image
-		const imgData = this.nct.getImageData(0,0,textWidth,32);
-		const binarizedImg = new Binarize([imgData,0,0],220);
-		const blobFinder = new FindBlob(binarizedImg.passdata,1);
-		blobFinder.eraseSmallerBlobs();
-		const imgIx = blobFinder.blob;
-		//Paste Image on the Monitor canvas
-		mct.drawImage(imgIx,num*40,this.numberCounter*17,16,16);
-		const imgDataIx = mct.getImageData(num*40,this.numberCounter*17,16,16);
-		
-		//Count Error
-		let error = 0;
-		for(let i=0;i<256;i++){
-			error += (imgDataIn.data[4*i+1]!=imgDataIx.data[4*i+1]);
-		}
-		error = error*100/256;
-		mct.fillStyle = "white";
-		mct.font = "bold 16px Arial";
-		mct.fillText(Math.floor(error),num*40+16,this.numberCounter*17+16);
-		return error;
+		//----------Display the Frame----------//
+		line(this.getXYfromIndex(-0.5,-0.5),this.getXYfromIndex( 8.5,-0.5),3, "lime");
+		line(this.getXYfromIndex( 8.5,-0.5),this.getXYfromIndex( 8.5, 8.5),3, "lime");
+		line(this.getXYfromIndex( 8.5, 8.5),this.getXYfromIndex(-0.5, 8.5),3, "lime");
+		line(this.getXYfromIndex(-0.5, 8.5),this.getXYfromIndex(-0.5,-0.5),3, "lime");
+		//----------List the Numbers-----------//
+		if(this.numbersListed==false) this.listNumbers();
+		if(this.numbersListed==false) return;
+		//----------Compare the list-----------//
+		if(this.similarityAcquired==false) this.getSimilarity();
+		if(this.similarityAcquired==false) return;
+		//------create the Sudoku Matrix------//
+		if(this.sudokuCreated==false) this.createSudokuMatrix();
 	}
 	handleNewBoard(br){
 		//Check if empty cell info matches
@@ -251,17 +82,145 @@ class VisionProgram_numberReader{
 	}
 	resetBoard(){
 		this.boardRead = false;
-		this.numbersRead = false;
-		this.numberCounter = 0;
-		for(let i=0;i<81;i++) this.numbers[i] = 0;
-		this.lastCell = 0;
-		this.errorRecord = 100;
-		this.candidateRecord = 0;
-		this.fontRecord = 0;
-		this.lastNumber = 1;
-		this.lastFont = 0;
+		//Time Keeping stuff
+		this.scanInterval = 30;
+		this.timeIsUp = false;
+		this.lastState = 0;
+		//---------------List----------------//
+		this.unknwnIndex = new Array();
+		this.numbersListed = false;
+		this.listedCounter = 0;
+		//----------Similarity Array---------//
+		this.similarityAcquired = false;
+		this.similarity;
+		//-----------Sudoku Matrix-----------//
+		this.sudokuCreated = false;
+		this.sameNumberIndex = new Array();
+		this.sudoku = new Array(81).fill(0);
 		mct.fillStyle = "black";
-		mct.fillRect(0,0,mcanvas.width,mcanvas.height);
+		mct.fillRect(0,-40,mcanvas.width,mcanvas.height-40);
+	}
+	listNumbers(){
+		for(;this.lastState<81;this.lastState++){
+			if(this.checkTime()) return;
+			if(this.emptyCells[this.lastState]<0){
+				this.unknwnIndex[this.unknwnIndex.length] = this.lastState;
+				this.list(this.lastState%9,Math.floor(this.lastState/9));
+			}
+		}
+		this.numbersListed = true;
+		this.lastState = 0;
+		this.similarity = new Array(this.listedCounter*this.listedCounter).fill(0);
+		this.sameNumberIndex = new Array(this.listedCounter).fill(-1);
+	}
+	list(xi,yi){
+		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
+		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
+		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+		const binarizedImg = new Binarize(img.passdata);
+		const blobFinder = new FindBlob(binarizedImg.passdata,1);
+		blobFinder.eraseSmallerBlobs();
+		const image = blobFinder.blob;
+		const imgBN = img.updateDisplayImage();
+		mct.drawImage(image,0, this.listedCounter*17,16,16);
+		mct.drawImage(imgBN,17, this.listedCounter*17,16,16);
+		mct.drawImage(imgBN,this.listedCounter*19+31, -17,16,16);
+		//Distance Transform
+		/*
+		const imgWindow = newWindow(mct).cornerWidthHeight(0, this.listedCounter*17,16,16);
+		const imgDT = new DistanceTransform(imgWindow.passdata);
+		mct.drawImage(imgDT.canvas,0, this.listedCounter*17,16,16);
+		*/
+		mct.strokeStyle = "gray";
+	    mct.lineWidth = 1;
+	    mct.beginPath();
+	    mct.moveTo(0, this.listedCounter*17);
+	    mct.lineTo(mcanvas.width, this.listedCounter*17);
+	    mct.stroke();
+
+		this.listedCounter++;
+	}
+	getSimilarity(){
+		for(;this.lastState<this.listedCounter*this.listedCounter;this.lastState++){
+			if(this.checkTime()) return;
+			const x = 			 this.lastState%this.listedCounter ;
+			const y = Math.floor(this.lastState/this.listedCounter);
+			if(x<=y) continue;
+			this.compare(x, y);
+		}
+		this.similarityAcquired = true;
+		this.lastState = 0;
+	}
+	compare(xi, yi){
+		const imgDataXi = mct.getImageData(0, xi*17+40,16,16);
+		const imgDataYi = mct.getImageData(0, yi*17+40,16,16);
+		//Count Error
+		let similarity = 0;
+		for(let i=0;i<256;i++){
+			similarity -= Math.abs(imgDataXi.data[4*i+1]-imgDataYi.data[4*i+1]);
+		}
+		this.similarity[this.lastState] = similarity;
+		mct.fillStyle = "white";
+		mct.font = "bold 12px Arial";
+		mct.fillText(Math.floor(-similarity/400),xi*19+32,yi*17+12);
+		return;
+	}
+	createSudokuMatrix(){
+		let numberToErase = this.listedCounter-9;
+		//-----Look for the numbers which are the same
+		if(numberToErase!=0){
+			let sortedSimilarity = new Array(this.similarity.length);
+			for(let i=0;i<sortedSimilarity.length;i++)	sortedSimilarity[i] = [this.similarity[i],i];
+			sortedSimilarity.sort(function(a,b){
+				if(a[0]<b[0]) return  1;
+				if(a[0]>b[0]) return -1;
+				return 0;
+			});
+			console.log(sortedSimilarity);
+			const startingIndex = this.listedCounter*(this.listedCounter+1)/2;
+			for(let i=startingIndex;i<this.listedCounter*this.listedCounter;i++){
+				if(sortedSimilarity[i][0]<-9000){
+					this.resetBoard();
+					return;
+				}
+				const index = sortedSimilarity[i][1];
+				const x = 			 index%this.listedCounter ;
+				const y = Math.floor(index/this.listedCounter);
+				if(this.sameNumberIndex[x]==-1){
+					numberToErase--;
+				}
+				this.sameNumberIndex[x] = y;
+				mct.strokeStyle = "lime";
+				mct.lineWidth = 1;
+				mct.strokeRect(x*19+32,y*17,19,16);
+				if(numberToErase==0) break;
+			}
+		}
+		//--------Create Sudoku array based on the array above
+		let originalCounter = 1;
+		for(let i=0;i<this.listedCounter;i++){
+			if(this.sameNumberIndex[i]==-1){
+				this.sameNumberIndex[i] = originalCounter;
+				originalCounter++;
+			}else{
+				this.sameNumberIndex[i] = this.sameNumberIndex[this.sameNumberIndex[i]];
+			}
+			this.sudoku[this.unknwnIndex[i]] = this.sameNumberIndex[i];
+		}
+		//------------display sudoku for test
+		console.log("-------------");
+		const stringListNot = [" ",1,2,3,4,5,6,7,8,9];
+		const stringList = [" ",6,1,3,8,2,9,4,5,7];
+		for(let i=0;i<9;i++){
+			let string = "|";
+			for(let j=0;j<9;j++){
+				string += stringList[this.sudoku[i*9+j]];
+				if((j+1)%3==0) string += "|";
+			}
+			console.log(string);
+			if((i+1)%3==0) console.log("-------------");
+		}
+		this.sudokuCreated = true;
 	}
 	getXYfromIndex(xin, yin){
 		const xIndex = xin+this.xIndexMin;
@@ -272,18 +231,9 @@ class VisionProgram_numberReader{
 		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
 		return [x,y];
 	}
-	checkTime(msg){
-		if((Date.now()-this.lastTime)>this.scanInterval){
-			this.timeIsUp = true;
-			//Save Everything
-		}
-	}
-	saveEverything(error, candidate, font, i, j){
-		this.errorRecord = error;
-		this.candidateRecord = candidate;
-		this.fontRecord = font;
-		this.lastNumber = i;
-		this.lastFont = j;
+	checkTime(){
+		if((Date.now()-this.lastTime)>this.scanInterval)	return true;
+		else return false;
 	}
 }
 console.log("Loaded: numberScanner.js");

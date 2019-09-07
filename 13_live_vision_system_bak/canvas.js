@@ -22,8 +22,8 @@ function initMcanvas(){
 }
 
 function resizeH(vLength){
-    hcanvas.width = vLength;
-    hcanvas.height= vLength;
+    hcanvas.width = 640;//vLength;
+    hcanvas.height= 640;//vLength;
     hcanvas.style.width  = hcanvas.width /pixelRatio +"px";
     hcanvas.style.height = hcanvas.height/pixelRatio+"px";
 }
@@ -93,15 +93,11 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
 }
 
 function draw() {
-    if(stop) return;
     animationStartTime = Date.now();
     ct.restore();
     ct.save();
-    //debut
-    mct.save()
-    mct.translate(0,40);
-    const vLength = Math.min(video.videoWidth,video.videoHeight,640);
-    if(hcanvas.width!=vLength){
+    const vLength = Math.min(video.videoWidth,video.videoHeight);
+    if(hcanvas.width!=640){
         resizeH(vLength);
         resize();
         resizeM();
@@ -124,11 +120,9 @@ function draw() {
     }else{
         requestAnimationFrame(draw);
     }
-    mct.restore();
 }
 
-const line=([xi,yi],[xii,yii],w=1, color = "black")=>{
-    ct.strokeStyle = color;
+const line=([xi,yi],[xii,yii],w=1)=>{
     ct.lineWidth = w;
     ct.beginPath();
     ct.moveTo(xi/canvasScale ,yi /canvasScale);
@@ -142,9 +136,7 @@ const circle=(x,y,rad)=>{
     ct.stroke();
 }
 
-const text=([x,y],string, color = "black", font = "16px Arial")=>{
-    ct.fillStyle = color;
-    ct.font = font;
+const text=([x,y],string)=>{
     ct.fillText(string,x/canvasScale,y/canvasScale);
 }
 

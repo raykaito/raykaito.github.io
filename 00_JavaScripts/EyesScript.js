@@ -73,7 +73,7 @@ class ImageData{
 	i2xy(i, width=this.width){
 		return [i%width, Math.floor(i/width)];
 	}
-	setPix(indexIn, value, type){
+	setPix(indexIn, value, type="all"){
 		//Check if indexIn is xy or index
 		let index;
 		if(indexIn.length==2) 	index = this.xy2i(indexIn);
@@ -263,11 +263,12 @@ class FindBlob extends ImageData{
 		const mi = this.maxAreaIndex;
 		const tcanvas = document.createElement("canvas");
 		let xMin, yMin, xMax, yMax;
+		const offset = this.width*0;
 		if(this.blobNumber!=0){
-			xMin = this.blobInfo[mi][1];
-			yMin = this.blobInfo[mi][2];
-			xMax = this.blobInfo[mi][3];
-			yMax = this.blobInfo[mi][4];
+			xMin = Math.max(this.blobInfo[mi][1]-offset,0);
+			yMin = Math.max(this.blobInfo[mi][2]-offset,0);
+			xMax = Math.min(this.blobInfo[mi][3]+offset,this.width);
+			yMax = Math.min(this.blobInfo[mi][4]+offset,this.height);
 		}else{
 			xMin = 0;
 			yMin = 0;
@@ -399,10 +400,53 @@ class FindBlob extends ImageData{
 	}
 }
 
-class ONR extends ImageData{
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
+class DistanceTransform extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
 		super([imgIn, xpos, ypos]);
+		this.distanceTransfrom();
+	}
+	get canvas(){
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = this.width;
+		tcanvas.height= this.height;
+		const tct = tcanvas.getContext("2d");
+		tct.drawImage(super.updateDisplayImage(),0,0,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		return tcanvas;
+	}
+	distanceTransfrom(){
+		let brightness;
+		for(let i=0;i<this.area;i++){
+			const [x,y] = this.i2xy(i);
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			//If it is at the edge
+			if(x==0||y==0){
+				this.setPix(i,127+128*(pixelAt>127));
+				continue;
+			}
+			const pixelUp = this.getPix(this.imgOut,[x,y-1],1);
+			const pixelLe = this.getPix(this.imgOut,[x-1,y],1);
+			if(pixelAt>127){
+				this.setPix(i,255);
+			}else{
+				this.setPix(i,Math.max(pixelUp,pixelLe)-128);
+			}
+		}
+		for(let i=this.area-1;i>=0;i--){
+			const [x,y] = this.i2xy(i);
+			const pixelAt = this.getPix(this.imgOut,i);
+			//If it is at the edge
+			if(x==this.width-1||y==this.height-1){
+				this.setPix(i,127+128*(pixelAt>127));
+				continue;
+			}
+			const pixelDo = this.getPix(this.imgOut,[x,y+1]);
+			const pixelRi = this.getPix(this.imgOut,[x+1,y]);
+			if(pixelAt>127){
+				this.setPix(i,255);
+			}else{
+				this.setPix(i,Math.max(Math.max(pixelDo,pixelRi)-128,pixelAt));
+			}
+		}
 	}
 }
-
 console.log("Loaded: EyesScript.js");

@@ -194,7 +194,7 @@ const smoothenArrayVariableRange = (array) => {
 			if(a<b) return -1;
 			if(a>b) return  1;
 			return 0;
-		})
+		});
 		let aaa = new Array(Math.floor(derivative.length*0.9))
 		for (let i=0;i<aaa.length;i++) aaa[i] = derivative[i];
 		const minmax = getAbsoluteMinMax(dataSmooth);
@@ -277,6 +277,11 @@ const checkInBound = (num, low, high)=>{
 		return true;
 	else
 		return false;
+}
+
+const round = (number, decimal=2)=>{
+	const factor = Math.pow(10,decimal);
+	return Math.round(number*factor)/factor;
 }
 
 console.log("Loaded: DataScript.js");

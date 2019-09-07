@@ -158,11 +158,12 @@ class VisionProgram_BoardReader{
 		this.xc = xy1[0];
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
+		ct.strokeStyle = "cyan";
 		/*
-		line(xy1,xy2,1,"cyan"); //Top line
-		line(xy2,xy3,1,"cyan"); // Right line
-		line(xy3,xy4,1,"cyan"); //bottom line
-		line(xy4,xy1,1,"cyan"); //left line
+		line(xy1,xy2); //Top line
+		line(xy2,xy3); // Right line
+		line(xy3,xy4); //bottom line
+		line(xy4,xy1); //left line
 		*/
 		//Calculate cell length
 		let gapList = new Array();
@@ -324,10 +325,11 @@ class VisionProgram_BoardReader{
 				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
 					this.emptyCells[xi+9*yi] = 1;
 					/*
+					ct.strokeStyle = "red";
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio);
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio);
 					*/
 				}else{
 					this.emptyCells[xi+9*yi] = 0;
