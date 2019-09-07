@@ -65,7 +65,6 @@ class VisionProgram_numberReader{
 		}
 		if(matched==false) return;
 		//Board info confirmed, and ready to update 
-		this.boardRead = true;
 		this.dx = br.dx;
 		this.dy = br.dy;
 		this.xc = br.xc;
@@ -78,7 +77,8 @@ class VisionProgram_numberReader{
 		this.yIndexMin = br.yIndexMin;
 		this.canvas.width = hcanvas.width;
 		this.canvas.height= hcanvas.height;
-		this.ct.drawImage(hcanvas,0,0);
+		if(this.boardRead==false) this.ct.drawImage(hcanvas,0,0);
+		this.boardRead = true;
 	}
 	resetBoard(){
 		this.boardRead = false;
