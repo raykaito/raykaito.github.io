@@ -20,7 +20,7 @@ class VisionProgram_numberReader{
 		this.emptyCells = new Array(81).fill(0);
 		this.ECClimit = 5;//Empty cells counter upper limit
 		//Time Keeping stuff
-		this.scanInterval = 50;
+		this.scanInterval = 25;
 		this.timeIsUp = false;
 		this.lastState = 0;
 		//---------------List----------------//
