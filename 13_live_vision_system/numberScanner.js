@@ -180,7 +180,7 @@ class VisionProgram_numberReader{
 			console.log(sortedSimilarity);
 			const startingIndex = this.listedCounter*(this.listedCounter+1)/2;
 			for(let i=startingIndex;i<this.listedCounter*this.listedCounter;i++){
-				if(sortedSimilarity[i][0]<-6000){
+				if(sortedSimilarity[i][0]<-8000){
 					this.resetBoard();
 					return;
 				}
@@ -209,11 +209,36 @@ class VisionProgram_numberReader{
 			this.sudoku[this.unknwnIndex[i]] = this.sameNumberIndex[i];
 		}
 		this.sudokuCreated = true;
+		//Create Sudoku class
+		kill();
+		let corners = new Array(4);
+		corners[0] = this.getXYfromIndex(8,8,1);
+		corners[1] = this.getXYfromIndex(0,8,1);
+		corners[2] = this.getXYfromIndex(0,0,1);
+		corners[3] = this.getXYfromIndex(8,0,1);
+		//Compensate for the different canvas size
+		const numList = [0,1,7,8,4,9,5,6,2,3];
+		const numListNot = [0,1,2,3,4,5,6,7,8,9];
+		sudoku = new Sudoku(corners,ct.getImageData(0,0,canvas.width,canvas.height));
+		for(let i=0;i<this.sudoku.length;i++){
+			if(this.sudoku[i]!=0) sudoku.setNumber(i%9,Math.floor(i/9),this.sudoku[i],true);
+		}
+		let index = 1;
+		for(let i=0;i<81;i++){
+			if(this.sudoku[i]!=index) continue;
+			const xi = i%9;
+			const yi = Math.floor(i/9);
+			const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
+			const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
+			const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+			sudoku.saveNumberPlate(index,img.updateDisplayImage());
+			index++;
+		}
+		startSolving(100);
 		//------------display sudoku for test
-		return;
 		console.log("-------------");
-		const stringListNot = [" ",1,2,3,4,5,6,7,8,9];
-		const stringList = [" ",6,1,3,8,2,9,4,5,7];
+		const stringList = [" ",1,2,3,4,5,6,7,8,9];
+		const stringListNot = [" ",6,1,3,8,2,9,4,5,7];
 		for(let i=0;i<9;i++){
 			let string = "|";
 			for(let j=0;j<9;j++){
@@ -224,14 +249,14 @@ class VisionProgram_numberReader{
 			if((i+1)%3==0) console.log("-------------");
 		}
 	}
-	getXYfromIndex(xin, yin){
+	getXYfromIndex(xin, yin,canvasScaleEnabled=false){
 		const xIndex = xin+this.xIndexMin;
 		const yIndex = yin+this.yIndexMin;
 		const partialx = (this.dx==1)?(1):((1/Math.log(this.dx)*(Math.pow(this.dx,xIndex)-1)));
 		const partialy = (this.dy==1)?(1):((1/Math.log(this.dy)*(Math.pow(this.dy,yIndex)-1)));
 		const x = (this.cellLength *partialx)*Math.pow(this.dy,yIndex)-getXYfromDirDis(this.vAngle,yIndex*this.cellLength)[1]+this.xc;
 		const y = (this.cellLengthy*partialy)*Math.pow(this.dx,xIndex)+this.yc;
-		return [x,y];
+		return [x/(canvasScaleEnabled?canvasScale:1),y/(canvasScaleEnabled?canvasScale:1)];
 	}
 	checkTime(){
 		if((Date.now()-this.lastTime)>this.scanInterval)	return true;

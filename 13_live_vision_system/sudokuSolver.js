@@ -33,6 +33,12 @@ constructor(cornersIn, imgIn){
 	this.progress[this.proIndex] = 0;
 	this.suspects = new Array();
 	this.displayEachStep = true;
+
+	this.numberPlates = new Array(9);
+}
+saveNumberPlate(index,imgDataIn){
+	this.numberPlates[index-1] = imgDataIn;
+	console.log(index);
 }
 saveSudoku(saveIndex){
 	this.savedSudoku[saveIndex] = new Array(81).fill(0);
@@ -96,16 +102,19 @@ drawTile(x,y){
 		for(let i=0;i<this.proIndex;i++){
 			if(this.suspects[i]==(x+9*y)){
 				ct.fillStyle=(i==(this.proIndex-1)?"yellow":"yellow");
+				cl*=0.8;
+				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
+				cl/=0.8;
 			}
 		}
 		for(let i=0;i<this.originalPlateIndex;i++){
 			if(this.originalPlate[i]==(x+9*y)){
 				ct.fillStyle="darkCyan";
+				cl*=0.8;
+				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
+				cl/=0.8;
 			}
 		}
-		cl*=0.8;
-		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
-		cl/=0.8;
 	}else{
 		ct.fillStyle = unknown?"white":"cyan";
 		for(let i=0;i<this.proIndex;i++){
@@ -116,9 +125,9 @@ drawTile(x,y){
 		for(let i=0;i<this.originalPlateIndex;i++){
 			if(this.originalPlate[i]==(x+9*y)){
 				ct.fillStyle="darkCyan";
+				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
 			}
 		}
-		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
 	}
 
 	//Fill Texts
@@ -127,7 +136,10 @@ drawTile(x,y){
 	ct.textAlign = "center"; 
 	ct.textBaseline = "middle"; 
 	if(!unknown){
-		ct.fillText(cell[0],xc,yc+cl/5);
+		const imgd = this.numberPlates[cell[0]-1];
+		ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc-cl*0.8,yc-cl*0.8,cl*1.6,cl*1.6);
+		//ct.putImageData(this.numberPlates[8],xc-cl*0.8,yc-cl*0.8);//,cl*1.6,cl*1.6);
+		console.log(x,y,cell[0]);
 	}else{
 		for(let i=0;i<9;i++){
 			if(cell[i+1]==0) continue;
@@ -159,7 +171,7 @@ getNthcandidate(tileIndex, candidateIndex){
 runDummy(){
 	if(this.displayEachStep){
 		this.displayEachStep = false;
-		stepper.startSolving(15);
+		startSolving(15);
 	}
 	let validCandidateFound, candNum, minCandidate, minIndex, theCandidate;
 	for(let limit=100;limit>0;limit--) {

@@ -2,6 +2,7 @@ var ct, hct, mct;
 var canvas, hcanvas, mcanvas;
 var pixelRatio, canvasScale;
 var animationStartTime;
+var interval,sudoku;
 
 function initHcanvas(){
     pixelRatio = window.devicePixelRatio;
@@ -146,6 +147,22 @@ const text=([x,y],string, color = "black", font = "16px Arial")=>{
     ct.fillStyle = color;
     ct.font = font;
     ct.fillText(string,x/canvasScale,y/canvasScale);
+}
+
+const startSolving = (time = 100)=>{
+    interval = setInterval(solve, time);
+}
+
+const solve = ()=>{
+    var status = sudoku.makeaProgress();
+    if(status=="UNSOLVABLE"){
+        clearInterval(interval);
+        alert("Failed");
+    }
+    if(status=="SOLVED"){
+        clearInterval(interval);
+        alert("Success!");
+    }
 }
 
 console.log("Loaded: canvas.js");
