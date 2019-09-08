@@ -33,6 +33,7 @@ class VisionProgram_numberReader{
 		this.sameNumberIndex = new Array();
 		this.sudoku = new Array(81).fill(0);
 	}
+	get sudokuArray(){return this.sudoku;}
 	startScan(br){
 		//---------Init Section Start---------//
 		this.lastTime = Date.now();
@@ -55,7 +56,6 @@ class VisionProgram_numberReader{
 		if(this.sudokuCreated==false) this.createSudokuMatrix();
 	}
 	handleNewBoard(br){
-		if(this.boardRead) return;
 		//Check if empty cell info matches
 		let matched = true;
 		for(let i=0;i<81;i++){
@@ -208,7 +208,9 @@ class VisionProgram_numberReader{
 			}
 			this.sudoku[this.unknwnIndex[i]] = this.sameNumberIndex[i];
 		}
+		this.sudokuCreated = true;
 		//------------display sudoku for test
+		return;
 		console.log("-------------");
 		const stringListNot = [" ",1,2,3,4,5,6,7,8,9];
 		const stringList = [" ",6,1,3,8,2,9,4,5,7];
@@ -221,7 +223,6 @@ class VisionProgram_numberReader{
 			console.log(string);
 			if((i+1)%3==0) console.log("-------------");
 		}
-		this.sudokuCreated = true;
 	}
 	getXYfromIndex(xin, yin){
 		const xIndex = xin+this.xIndexMin;
