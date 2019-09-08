@@ -1,8 +1,7 @@
 class Sudoku{
 constructor(cornersIn, imgIn){
 	//Transfer oriented image data
-	this.imgO = ct.createImageData(imgIn.width, imgIn.height);
-	for(let i=0;i<imgIn.data.length;i++) this.imgO.data[i] = imgIn.data[i];
+	this.imgO = imgIn;
 
 	//Transfer Corner locations
 	this.corners = cornersIn;
@@ -70,7 +69,7 @@ setNumber(x,y,number,original=false){
 	}
 }
 updateCanvas(){
-	ct.putImageData(this.imgO, 0, 0);
+	ct.drawImage(this.imgO, 0, 0,this.imgO.width,this.imgO.height,0,0,canvas.width,canvas.height);
 	ct.textAlign = "center"; 
 	ct.textBaseline = "middle"; 
 	for(let x=0;x<9;x++){
@@ -99,35 +98,32 @@ drawTile(x,y){
 		ct.fillStyle = "lightgreen";
 		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2)
 		ct.fillStyle = "cyan";
-		for(let i=0;i<this.proIndex;i++){
+		for(var i=0;i<this.proIndex;i++){
 			if(this.suspects[i]==(x+9*y)){
 				ct.fillStyle=(i==(this.proIndex-1)?"yellow":"yellow");
-				cl*=0.8;
-				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
-				cl/=0.8;
 			}
 		}
-		for(let i=0;i<this.originalPlateIndex;i++){
+		for(var i=0;i<this.originalPlateIndex;i++){
 			if(this.originalPlate[i]==(x+9*y)){
 				ct.fillStyle="darkCyan";
-				cl*=0.8;
-				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
-				cl/=0.8;
 			}
 		}
+		cl*=0.8;
+		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
+		cl/=0.8;
 	}else{
 		ct.fillStyle = unknown?"white":"cyan";
-		for(let i=0;i<this.proIndex;i++){
+		for(var i=0;i<this.proIndex;i++){
 			if(this.suspects[i]==(x+9*y)){
 				ct.fillStyle=(i==(this.proIndex-1)?"yellow":"yellow");
 			}
 		}
-		for(let i=0;i<this.originalPlateIndex;i++){
+		for(var i=0;i<this.originalPlateIndex;i++){
 			if(this.originalPlate[i]==(x+9*y)){
 				ct.fillStyle="darkCyan";
-				ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
 			}
 		}
+		ct.fillRect( xc-cl, yc-cl, cl*2, cl*2);
 	}
 
 	//Fill Texts
@@ -145,7 +141,9 @@ drawTile(x,y){
 			if(cell[i+1]==0) continue;
 			dx = (i%3-1)*cl*2/3;
 			dy = Math.floor(i/3-1)*cl*2/3+cl/15;
-			ct.fillText(cell[i+1],xc+dx,yc+dy);
+			//ct.fillText(cell[i+1],xc+dx,yc+dy);
+			const imgd = this.numberPlates[cell[i+1]-1];
+			ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc+dx-cl*0.2,yc+dy-cl*0.2,cl*0.4,cl*0.4);
 		}
 	}
 }
@@ -171,6 +169,7 @@ getNthcandidate(tileIndex, candidateIndex){
 runDummy(){
 	if(this.displayEachStep){
 		this.displayEachStep = false;
+		clearInterval(interval);
 		startSolving(15);
 	}
 	let validCandidateFound, candNum, minCandidate, minIndex, theCandidate;

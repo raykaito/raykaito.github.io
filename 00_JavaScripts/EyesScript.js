@@ -225,6 +225,11 @@ class Binarize extends ImageData{
 		}
 		return king;
 	}
+	white2Transparent(){
+		for(let i=0;i<this.width*this.height;i++){
+			this.imgOut.data[4*i+3] = (this.getPix(this.imgOut,i,"all")==255)?0:255;
+		}
+	}
 	updateHistogram(){
 		let index;
 		for(let i=0;i<this.histogram.length;i++) this.histogram[i]=0;

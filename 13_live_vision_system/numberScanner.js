@@ -1,6 +1,8 @@
 class VisionProgram_numberReader{
 	constructor(){
 		//Board orientation info
+		this.originalCanvas = document.createElement("canvas");
+		this.oct = this.originalCanvas.getContext("2d");
 		this.canvas = document.createElement("canvas");
 		this.ct = this.canvas.getContext("2d");
 		this.boardRead = false;
@@ -80,6 +82,9 @@ class VisionProgram_numberReader{
 		this.canvas.width = hcanvas.width;
 		this.canvas.height= hcanvas.height;
 		this.ct.drawImage(hcanvas,0,0);
+		this.originalCanvas.width = canvas.width;
+		this.originalCanvas.height= canvas.height;
+		this.oct.drawImage(canvas,0,0);
 	}
 	resetBoard(){
 		this.boardRead = false;
@@ -219,7 +224,7 @@ class VisionProgram_numberReader{
 		//Compensate for the different canvas size
 		const numList = [0,1,7,8,4,9,5,6,2,3];
 		const numListNot = [0,1,2,3,4,5,6,7,8,9];
-		sudoku = new Sudoku(corners,ct.getImageData(0,0,canvas.width,canvas.height));
+		sudoku = new Sudoku(corners,newWindow(this.oct).cornerToCorner(0,0,this.originalCanvas.width,this.originalCanvas.height).updateDisplayImage());
 		for(let i=0;i<this.sudoku.length;i++){
 			if(this.sudoku[i]!=0) sudoku.setNumber(i%9,Math.floor(i/9),this.sudoku[i],true);
 		}
@@ -228,10 +233,12 @@ class VisionProgram_numberReader{
 			if(this.sudoku[i]!=index) continue;
 			const xi = i%9;
 			const yi = Math.floor(i/9);
-			const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
-			const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
-			const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
-			sudoku.saveNumberPlate(index,img.updateDisplayImage());
+			const xy1 = this.getXYfromIndex(xi-0.35,yi-0.35,true);
+			const xy2 = this.getXYfromIndex(xi+0.35,yi+0.35,true);
+			const img = newWindow(this.oct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+			const binarizedImg = new Binarize(img.passdata);
+			binarizedImg.white2Transparent();
+			sudoku.saveNumberPlate(index,binarizedImg.updateDisplayImage());
 			index++;
 		}
 		startSolving(100);
