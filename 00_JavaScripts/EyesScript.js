@@ -183,7 +183,7 @@ class Binarize extends ImageData{
 		this.threshold = threshIn;
 	}
 	getThreshold(){
-		const factor = 6;
+		const factor = 7;
 		const countLimit = this.area/factor;
 		let lowerCount = 0;
 		let upperCount = 0;
