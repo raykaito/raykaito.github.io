@@ -180,7 +180,7 @@ class VisionProgram_numberReader{
 			console.log(sortedSimilarity);
 			const startingIndex = this.listedCounter*(this.listedCounter+1)/2;
 			for(let i=startingIndex;i<this.listedCounter*this.listedCounter;i++){
-				if(sortedSimilarity[i][0]<-8000){
+				if(sortedSimilarity[i][0]<-6000){
 					this.resetBoard();
 					return;
 				}
