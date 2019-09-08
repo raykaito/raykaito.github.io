@@ -20,7 +20,7 @@ class VisionProgram_numberReader{
 		this.emptyCells = new Array(81).fill(0);
 		this.ECClimit = 5;//Empty cells counter upper limit
 		//Time Keeping stuff
-		this.scanInterval = 30;
+		this.scanInterval = 50;
 		this.timeIsUp = false;
 		this.lastState = 0;
 		//---------------List----------------//
@@ -82,9 +82,15 @@ class VisionProgram_numberReader{
 		this.canvas.width = hcanvas.width;
 		this.canvas.height= hcanvas.height;
 		this.ct.drawImage(hcanvas,0,0);
+
 		this.originalCanvas.width = canvas.width;
 		this.originalCanvas.height= canvas.height;
+		this.oct.save();
+	    this.oct.translate(this.xc/canvasScale,this.yc/canvasScale);
+	    this.oct.rotate( +deg2rad(this.rotationAngle) );
+	    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
 		this.oct.drawImage(canvas,0,0);
+		this.oct.restore();
 	}
 	resetBoard(){
 		this.boardRead = false;
