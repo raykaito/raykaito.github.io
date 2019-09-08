@@ -134,14 +134,11 @@ drawTile(x,y){
 	if(!unknown){
 		const imgd = this.numberPlates[cell[0]-1];
 		ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc-cl*0.8,yc-cl*0.8,cl*1.6,cl*1.6);
-		//ct.putImageData(this.numberPlates[8],xc-cl*0.8,yc-cl*0.8);//,cl*1.6,cl*1.6);
-		console.log(x,y,cell[0]);
 	}else{
 		for(let i=0;i<9;i++){
 			if(cell[i+1]==0) continue;
 			dx = (i%3-1)*cl*2/3;
 			dy = Math.floor(i/3-1)*cl*2/3+cl/15;
-			//ct.fillText(cell[i+1],xc+dx,yc+dy);
 			const imgd = this.numberPlates[cell[i+1]-1];
 			ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc+dx-cl*0.2,yc+dy-cl*0.2,cl*0.4,cl*0.4);
 		}
@@ -170,7 +167,7 @@ runDummy(){
 	if(this.displayEachStep){
 		this.displayEachStep = false;
 		clearInterval(interval);
-		startSolving(15);
+		startSolving(5);
 	}
 	let validCandidateFound, candNum, minCandidate, minIndex, theCandidate;
 	for(let limit=100;limit>0;limit--) {
@@ -199,6 +196,7 @@ runDummy(){
 			this.progress[this.proIndex] = 0;
 			return true;
 		}
+		if(this.savedSudoku.length==0) return false;
 		this.progress[this.proIndex] = 0;
 		this.proIndex--;
 		this.loadSudoku(this.proIndex);

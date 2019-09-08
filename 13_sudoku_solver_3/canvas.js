@@ -158,6 +158,9 @@ const solve = ()=>{
     if(status=="UNSOLVABLE"){
         clearInterval(interval);
         alert("Failed");
+        numberV.resetBoard();
+        stop = false;
+        requestAnimationFrame(draw);
     }
     if(status=="SOLVED"){
         clearInterval(interval);
