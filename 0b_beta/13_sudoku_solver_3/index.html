@@ -1,0 +1,87 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Solver 3</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table class="main" id="Table">
+
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Sudoku Solver 3
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="displayCanvas" width="100" height="100"></canvas><br>
+		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><br>
+				<canvas id="monitorCanvas" width="100" height="100"></canvas><br>
+				<canvas id="hugeCanvas" width="10" height="10"></canvas>
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="boardScanner.js"></script>
+	<script type="text/javascript" src="numberScanner.js"></script>
+	<script type="text/javascript" src="sudokuSolver.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/DataScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/StatScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/EyesScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/ItvlScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	 
+		var body = document.getElementById('Body');
+		var table = document.getElementById('Table');
+		showObject(body, table);
+
+        var video = document.getElementById("player");
+
+        var handleSuccess = function(stream) {
+            video.srcObject = stream;
+        };
+        var constraints = {
+            audio: false,
+            video: {
+                width: 1920,
+                height: 1080,
+                facingMode: ("environment")
+            }
+        };
+        navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
+
+        initHcanvas();
+        initCanvas();
+        initMcanvas();
+        
+        //Stops the program
+        var stop = false;
+        const kill = ()=>{
+        	stop = true;
+        }
+
+        var updateInfo = displayInformation();
+
+        boardV = new VisionProgram_BoardReader();
+        numberV = new VisionProgram_numberReader();
+
+    </script>
+
+</body>
+
+
+</html>

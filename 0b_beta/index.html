@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+<head>
+	<title>Projects</title>
+	<link rel="icon" type="image/png" href="icon.png">
+	<link rel="stylesheet" href="rayStyle.css" type="text/css">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table class="main" id="Table">
+	
+		<tr>
+			<td colspan="2" align="center">
+				<Font size="10px" Font color="black">
+					Little Projects
+				</Font>
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="11_clock_zero_a/index.html"><img src="11_clock_zero_a/thumbnail.png" style="width:80%;" title="The Clock_A Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='11_clock_zero_a/index.html'>Clock ZERO A</a>:<br>
+				 An Analog Clock with base 12 number system. Works fine but...but why?
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+		
+		<tr>
+			<td width="25%">
+				<a href="13_sudoku_solver_3/index.html"><img src="13_sudoku_solver_3/thumbnail.png" style="width:80%;" title="Sudoku_Solver_3 Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='13_sudoku_solver_3/index.html'>Sudoku Solver 3</a>:<br>
+				 Now you don't have to type each number to solve a sudoku. All you need is a camera on a smart phone!
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td width="25%">
+				<a href="08_fractal_tree/index.html"><img src="08_fractal_tree/thumbnail.png" style="width:80%;" title="Fractal_Tree Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='08_fractal_tree/index.html'>Fractal Tree</a>:<br>
+				 Create your own fractal tree! You can adjust three parameters (Repetition, Split Angle, and Length Scaling)to change its shape.
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="07_checker_shadow/index.html"><img src="07_checker_shadow/thumbnail.png" style="width:80%;" title="Checker_Shadow Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='07_checker_shadow/index.html'>Checker Shadow</a>:<br>
+				 It tells you how much your bain is messing with your vision on a scale from 0% to 100%.
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="06_swipe_or_tap/index.html"><img src="06_swipe_or_tap/thumbnail.png" style="width:80%;" title="SwipeOrTap Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='06_swipe_or_tap/index.html'>Swipe or Tap</a>:<br>
+				 This game is ridiculously boring. Oh well, it's designed by RayKaito.
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="05_dog_fight/index.html"><img src="05_dog_fight/thumbnail.png" style="width:80%;" title="Dog Fight Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='05_dog_fight/index.html'>The Dog Fight</a>:<br>
+				 It's a simple shooting game. Too simple that even I don't wanna play. I wanted it to be like Ace Combat.
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="04_clock_zero/index.html"><img src="04_clock_zero/thumbnail.png" style="width:80%;" title="The Clock Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='04_clock_zero/index.html'>Clock ZERO</a>:<br>
+				 A Clock with base 12 number system. Works fine but...but why?
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="03_catan_tracker/index.html"><img src="03_catan_tracker/thumbnail.png" style="width:80%;" title="Catan Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='03_catan_tracker/index.html'>Catan Tracker</a>:<br>
+				 How unlucky were you when you played Catan? Use this program to find out. It tracks your "Luckyness Index" and the amount of "Expected Resources."
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr>
+			<td>
+				<a href="02_five_in_row/index.html"><img src="02_five_in_row/thumbnail.png" style="width:80%;" title="FiveInRow Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='02_five_in_row/index.html'>Five In a Row</a>:<br>
+				 Simple board game with AI you can play aginst.
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+		
+		<tr>
+			<td>
+				<a href="01_sudoku_solver/index.html"><img src="01_sudoku_solver/thumbnail.png" style="width:80%;" title="S_Solver Thumbnail" alt="thumbnail"></a>
+			</td>
+			<td>
+				<a href='01_sudoku_solver/index.html'>Sudoku Solver</a>:<br>
+				It solves sudoku puzzles. It can crack any Sudoku as long as it has a unique solution to it, but it takes forever to input numbers.  
+				 
+			</td>
+		</tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+
+	</table>
+
+	<script src="00_JavaScripts/opacityController.js"></script>
+	<script>
+		var table = document.getElementById('Table');
+		var body = document.getElementById('Body');
+
+		showByRow(body, table);
+
+
+		function flyToUrl(youarel){
+			leavepage(table, youarel);
+		}
+
+	</script>
+</body>
+
+
+</html>

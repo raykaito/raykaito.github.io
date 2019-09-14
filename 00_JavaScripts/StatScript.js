@@ -5,6 +5,8 @@ const calculateVariance = (array)=>{
 	return Math.sqrt(std);
 }
 
+const getAve = (array)=>{return array.reduce(function(a,b,c){return a+b;})/array.length;}
+
 const getAveStd = (array)=>{
 	const total = array.length;
 	const ave = array.reduce(function(a,b,c){return a+b; })/total;

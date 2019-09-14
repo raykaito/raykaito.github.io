@@ -1,0 +1,69 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Solver 2</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()">
+
+	<table class="main" id="Table">
+
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Sudoku Solver 2
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+	
+		<tr>
+			<td align="center">
+				<input type="file" id="inp" accept="image/*">
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="canvas" width="20" height="20"></canvas>
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="hcanvas.js"></script>
+	<script type="text/javascript" src="sudoku.js"></script>
+	<script type="text/javascript" src="javascript.js"></script>
+	<script type="text/javascript" src="visionLibrary_old.js"></script>
+	<script type="text/javascript" src="visionLibrary.js"></script>
+	<script type="text/javascript" src="visionSudoku.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/CommonFunction.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		var body = document.getElementById('Body');
+		var table = document.getElementById('Table');
+		var canvas = document.getElementById('canvas');
+
+		showObject(body, table);
+
+		function init(){
+			initCanvas();
+			initHcanvas();
+			initJS();
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

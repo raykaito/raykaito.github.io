@@ -65,7 +65,6 @@
         };
         navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
 
-        animationStartTime = Date.now();
         initHcanvas();
         initCanvas();
         initMcanvas();
@@ -75,6 +74,8 @@
         const kill = ()=>{
         	stop = true;
         }
+
+        var updateFPS = showFPS();
 
         boardV = new VisionProgram_BoardReader();
         numberV = new VisionProgram_numberReader();

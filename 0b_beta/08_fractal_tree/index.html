@@ -1,0 +1,88 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Fractal Tree</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()" class="untouchable">
+
+	<table class="main" id="Table">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Fractal Tree
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+	
+		<tr>
+			<td align="center">
+				<input type="button" width="20%" value="Preset 1" onclick="autoSlideStart(1)">
+				<input type="button" width="20%" value="Preset 2" onclick="autoSlideStart(2)">
+				<input type="button" width="20%" value="Preset 3" onclick="autoSlideStart(3)">
+				<input type="button" width="20%" value="Preset 4" onclick="autoSlideStart(4)">
+			</td>
+		</tr>
+
+		<tr>
+			<td align="right" onchange="changeParameter()" oninput="changeParameter()">
+				<div>
+					Repetition:<input class="slider" type="range" min="1" max="15" id="branch">
+				</div>
+
+				<div>
+					Split Angle:<input class="slider" type="range" min="0" max="90" id="angle">
+				</div>
+
+				<div>
+					Length Scaling:<input class="slider" type="range" min="50" max="100" id="drate">
+				</div>
+
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="Canvas" width="400" height="400" class="untouchable"></canvas>
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="javascript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/CommonFunction.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		var table = document.getElementById('Table');
+		var body = document.getElementById('Body');
+		var canvas = document.getElementById('Canvas');
+		var here = document.getElementById('here');
+
+		var branchS = document.getElementById('branch');
+		var angleS  = document.getElementById('angle' );
+		var drateS  = document.getElementById('drate' );
+
+		showObject(body, table);
+
+		function init(){
+			initCanvas();
+			initJS();
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

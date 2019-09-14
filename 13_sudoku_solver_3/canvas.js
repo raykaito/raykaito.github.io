@@ -12,6 +12,8 @@ function initHcanvas(){
 }
 function initCanvas(){
     canvas = document.getElementById("displayCanvas");
+    canvas.addEventListener('click', clicked, false);
+    canvas.addEventListener('touchcancel', clicked, false);
     ct = canvas.getContext("2d");
     resize(400);
     ct.fillRect(0,0,canvas.width,canvas.height);
@@ -50,6 +52,15 @@ function resizeM(){
     mcanvas.style.width  = mcanvas.width/pixelRatio +"px";
     mcanvas.style.height = mcanvas.height/pixelRatio+"px";
     mct.fillRect(0,0,mcanvas.width,mcanvas.height);
+}
+
+function clicked(event){
+    const rect = event.target.getBoundingClientRect();
+    let x = event.pageX-rect.left-document.body.scrollLeft;
+    let y = event.pageY-rect.top-document.body.scrollTop;
+    x *= pixelRatio;
+    y *= pixelRatio;
+    kill();
 }
 
 function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16)/4, width = mcanvas.width-4){
@@ -95,7 +106,6 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
 
 function draw() {
     if(stop) return;
-    animationStartTime = Date.now();
     ct.restore();
     ct.save();
     //debut
@@ -117,6 +127,7 @@ function draw() {
         }
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
+        text([0,10],("FPS: "+updateFPS()),"lime");
         boardV.startScan();
         numberV.startScan(boardV);
         //setTimeout(draw,1000);
@@ -128,7 +139,21 @@ function draw() {
     mct.restore();
 }
 
-const line=([xi,yi],[xii,yii],w=1, color = "black")=>{
+function showFPS(){
+    const length = 100;
+    let timeList = new Array(length).fill(0);
+    let index = 0;
+
+    return function(){
+        const now = Date.now();
+        timeList[index] = now - animationStartTime;
+        index = (index+1)%length;
+        animationStartTime = now;
+        return Math.floor(1000/getAve(timeList));
+    }
+}
+
+const line=([xi,yi],[xii,yii],w=1, color="black")=>{
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
@@ -137,7 +162,9 @@ const line=([xi,yi],[xii,yii],w=1, color = "black")=>{
     ct.stroke();
 }
 
-const circle=(x,y,rad)=>{
+const circle=(x,y,rad,color="black",w=1)=>{
+    ct.strokeStyle = color;
+    ct.lineWidth = w;
     ct.beginPath();
     ct.arc(x/canvasScale,y/canvasScale,pixelRatio*rad/canvasScale,0,2*Math.PI);
     ct.stroke();
