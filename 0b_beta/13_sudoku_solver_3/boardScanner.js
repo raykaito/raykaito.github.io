@@ -63,21 +63,24 @@ class VisionProgram_BoardReader{
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
-		const numberOfLines = 5;
+		const SearchLength = hcanvas.width;
+		const numberOfLines = 10;
 		const xCorner = (hcanvas.width - rangeOfSearch)/2;
 		const yCorner = (hcanvas.height- rangeOfSearch)/2;
 		let inH = new Array(numberOfLines+1);
 		let inV = new Array(numberOfLines+1);
 		//Gather Circles
 		for(let i=0;i<=numberOfLines;i++){
-			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), rangeOfSearch, 1);
-			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, rangeOfSearch);
-			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);//((i==0||i==numberOfLines)?1:0));
-			const scannerV = new IntersectionDetector(imgV.passdata, 1, 0);//((i==0||i==numberOfLines)?1:0));
+			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), SearchLength, 1);
+			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, SearchLength);
+			const scannerH = new IntersectionDetector(imgH.passdata, 0, 1);//((i==0||i==numberOfLines)?1:0));
+			const scannerV = new IntersectionDetector(imgV.passdata, 1, 1);//((i==0||i==numberOfLines)?1:0));
 
 			inH[i] = scannerH.intersections;
 			inV[i] = scannerV.intersections;
 		}
+		this.abort();
+		return;
 		//Analyze intersections horizontal
 		const acceptableError = rangeOfSearch/100;
 		const minInterCounter = numberOfLines*0.7;
