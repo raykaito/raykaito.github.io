@@ -152,12 +152,12 @@ class VisionProgram_BoardReader{
 		this.xc = xy1[0];
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
-		/*
+		
 		line(xy1,xy2,1,"cyan"); //Top line
 		line(xy2,xy3,1,"cyan"); // Right line
 		line(xy3,xy4,1,"cyan"); //bottom line
 		line(xy4,xy1,1,"cyan"); //left line
-		*/
+		
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -191,14 +191,14 @@ class VisionProgram_BoardReader{
 		const sideLength4 = getDist(xy4,xy1);//lefto side
 		this.cellCountX = Math.round(sideLength1/this.cellLength);
 		this.cellCountY = Math.round(sideLength4/this.cellLength);
-		
+		/*
 		ct.fillStyle = "cyan";
 		ct.font = "40px Arial";
 		ct.fillText(Math.round((sideLength2/this.cellLength)*100)/100,300/canvasScale,200/canvasScale);
 		ct.fillText(Math.round((sideLength4/this.cellLength)*100)/100,100/canvasScale,200/canvasScale);
 		ct.fillText(Math.round((sideLength1/this.cellLength)*100)/100,200/canvasScale,100/canvasScale);
 		ct.fillText(Math.round((sideLength3/this.cellLength)*100)/100,200/canvasScale,400/canvasScale);
-		
+		*/
 		this.vAngle= getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
 		this.dx = Math.pow((sideLength2/sideLength4),(1/this.cellCountX));
 		this.dy = Math.pow((sideLength3/sideLength1),(1/this.cellCountY));
