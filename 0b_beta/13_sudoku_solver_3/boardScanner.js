@@ -173,7 +173,7 @@ class VisionProgram_BoardReader{
 			gapList[gapList.length] = xyH[i+1][1]-xyH[i][1];
 		}
 		//Analyze the gapList
-		const acceptableErrorPercentage = 3;
+		const acceptableErrorPercentage = 5;
 		const minCounter = 3;
 		let counter;
 		for(let i=0;i<gapList.length;i++){
@@ -282,7 +282,7 @@ class VisionProgram_BoardReader{
 		const width = verticalScan?1:(getDist(xy1,xy2));
 		const height= verticalScan?(getDist(xy1,xy2)):1;
 		if(width*height<1){
-			this.abort("unknow error has occured");
+			this.abort("unknown error has occured");
 			return;
 		}
 		//Scan the appropriate section
@@ -331,14 +331,14 @@ class VisionProgram_BoardReader{
 					*/
 				}else{
 					this.emptyCells[xi+9*yi] = 0;
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
-					line(this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
-					line(this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
+					line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",3*pixelRatio]);
+					line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",3*pixelRatio]);
+					line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",3*pixelRatio]);
+					line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",3*pixelRatio]);
 				}
 			}
 		}

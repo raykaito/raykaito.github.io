@@ -67,7 +67,17 @@ class VisionProgram_numberReader{
 			if(this.emptyCells[i]==0) this.resetBoard();
 		}
 		if(matched==false) return;
-		//Board info confirmed, and ready to update 
+		//Check if MinMax corner locations record was broken or not
+		const xy1 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin  );
+		const xy2 = br.getXYfromIndex(br.xIndexMin+8, br.yIndexMin  );
+		const xy3 = br.getXYfromIndex(br.xIndexMin+8, br.yIndexMin+8);
+		const xy4 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin+8);
+		circle([xy1[0],xy1[1],3]);
+		circle([xy2[0],xy2[1],3]);
+		circle([xy3[0],xy3[1],3]);
+		circle([xy4[0],xy4[1],3]);
+		return;
+		//Board info confirmed, and ready to update
 		this.boardRead = true;
 		this.dx = br.dx;
 		this.dy = br.dy;
