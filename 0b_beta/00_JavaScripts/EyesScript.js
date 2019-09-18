@@ -176,11 +176,23 @@ class LinearScanner extends ImageData{
 		return line;
 	}
 	getboun(){
-		const std = getAveStd(this.line)[1];
+		let lines = new Array();
+		for(let i=0;i<this.line.length;i++){
+			if(this.line[i]!=0){
+				lines[lines.length] = this.line[i];
+			}
+		}
+		lines.sort(function(a,b){
+			if(a<b) return -1;
+			if(a>b) return  1;
+			return 0;
+		});
+		lines.splice(Math.floor(lines.length*0.8));
+		const [ave,std] = getAveStd(lines);
 		let boun = new Array(this.line.length).fill(0);
 		for(let i=0;i<this.line.length;i++){
 			const line = this.line[i];
-			if(line>std) boun[i] = line;
+			if(line>ave+6*std) boun[i] = line;
 		}
 		return boun;
 	}
