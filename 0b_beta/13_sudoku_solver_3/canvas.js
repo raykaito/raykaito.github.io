@@ -151,32 +151,35 @@ function displayInformation(){
         timeList[index] = now - fpsTrackTime;
         index = (index+1)%length;
         fpsTrackTime = now;
-        text([0,16*canvasScale],("FPS: "+Math.floor(1000/getAve(timeList))),"lime","16pt Arial");
-        text([0,32*canvasScale],("DIM: "+hcanvas.width+"x"+hcanvas.height),"lime","16pt Arial");
+        text([0,16,("FPS: "+Math.floor(1000/getAve(timeList)))],["lime","16pt Arial"],1);
+        text([0,32,("DIM: "+hcanvas.width+"x"+hcanvas.height)],["lime","16pt Arial"],1);
     }
 }
 
-const line=([xi,yi],[xii,yii],w=1, color="black")=>{
+const line=([xi,yi,xii,yii],[color,w]=["black", 1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.moveTo(xi/canvasScale ,yi /canvasScale);
-    ct.lineTo(xii/canvasScale,yii/canvasScale);
+    ct.moveTo(xi/cs ,yi /cs);
+    ct.lineTo(xii/cs,yii/cs);
     ct.stroke();
 }
 
-const circle=(x,y,rad,color="black",w=1)=>{
+const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.arc(x/canvasScale,y/canvasScale,pixelRatio*rad/canvasScale,0,2*Math.PI);
+    ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
     ct.stroke();
 }
 
-const text=([x,y],string, color = "black", font = "16pt Arial")=>{
+const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.fillStyle = color;
     ct.font = font;
-    ct.fillText(string,x/canvasScale,y/canvasScale);
+    ct.fillText(string,x/cs,y/cs);
 }
 
 const startSolving = (time = 100)=>{

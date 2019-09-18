@@ -70,11 +70,6 @@ class VisionProgram_BoardReader{
 		let inH = new Array(numberOfLines+1);
 		let inV = new Array(numberOfLines+1);
 		//--Debug
-		const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(10/numberOfLines), SearchLength, 1);
-		const scannerH = new IntersectionDetector(imgH.passdata, 0, 1);//((i==0||i==numberOfLines)?1:0));
-		this.abort();
-		return;
-		//--Debug
 		//Gather Circles
 		for(let i=0;i<=numberOfLines;i++){
 			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), SearchLength, 1);
@@ -85,7 +80,7 @@ class VisionProgram_BoardReader{
 			inH[i] = scannerH.intersections;
 			inV[i] = scannerV.intersections;
 		}
-		this.abort();
+		this.abort("e");
 		return;
 		//Analyze intersections horizontal
 		const acceptableError = rangeOfSearch/100;
