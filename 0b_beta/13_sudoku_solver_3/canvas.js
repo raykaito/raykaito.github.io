@@ -71,7 +71,7 @@ function displayArray(array, index = 0, autoMin = 0, height = (400-16)/4, width 
     mct.fillStyle = "rgb(255,255,255)";
     mct.fillRect(2,dy+2,width,height);
     mct.fillStyle = "rgb(  0,  0,  0)";
-    const arrayMax = getAbsoluteMinMax(array)[1];
+    const arrayMax = 255;//getAbsoluteMinMax(array)[1];
     const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
     for(let i=0;i<array.length;i++){
         const x = 2+(i/array.length)*width;

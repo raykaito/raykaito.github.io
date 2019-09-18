@@ -71,7 +71,8 @@
         //Stops the program
         var stop = false;
         const kill = ()=>{
-        	stop = true;
+        	stop = !stop;
+        	requestAnimationFrame(draw);
         }
 
         var updateInfo = displayInformation();

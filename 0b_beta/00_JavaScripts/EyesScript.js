@@ -102,7 +102,7 @@ class ImageData{
 	}
 }
 
-class IntersectionDetector extends ImageData{
+class LineScanner extends ImageData{
 	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
 		super([imgIn, xpos, ypos]);
 		this.vertical = vertical;
@@ -115,8 +115,8 @@ class IntersectionDetector extends ImageData{
 		this.lineIntensityFiltered;
 		this.updateLineIntensity();
 		if(display){
-			//this.displayLineIntensity();
-			//this.display(0);
+			this.displayLineIntensity();
+			this.display(0);
 			this.displayIntersections();
 		}
 	}
