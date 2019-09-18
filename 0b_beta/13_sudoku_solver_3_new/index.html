@@ -28,15 +28,13 @@
 				<canvas id="displayCanvas" width="100" height="100"></canvas><br>
 		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><br>
 				<canvas id="monitorCanvas" width="100" height="100"></canvas><br>
-				<canvas id="hugeCanvas" hidden width="10" height="10"></canvas>
+				<canvas id="hugeCanvas" width="10" height="10"></canvas>
 			</td>
 		</tr>
 	</table>
 
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="boardScanner.js"></script>
-	<script type="text/javascript" src="numberScanner.js"></script>
-	<script type="text/javascript" src="sudokuSolver.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/DataScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/StatScript.js"></script>
@@ -54,13 +52,12 @@
         var handleSuccess = function(stream) {
             video.srcObject = stream;
         };
-        var front = false;
         var constraints = {
             audio: false,
             video: {
                 width: 1920,
                 height: 1080,
-                facingMode: (front ? "user" : "environment")
+                facingMode: ("environment")
             }
         };
         navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess);
@@ -72,13 +69,13 @@
         //Stops the program
         var stop = false;
         const kill = ()=>{
-        	stop = true;
+        	stop = !stop;
+        	requestAnimationFrame(draw);
         }
 
-        var updateFPS = showFPS();
+        var updateInfo = displayInformation();
 
         boardV = new VisionProgram_BoardReader();
-        numberV = new VisionProgram_numberReader();
 
     </script>
 

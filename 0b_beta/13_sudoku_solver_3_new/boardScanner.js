@@ -17,8 +17,6 @@ class VisionProgram_BoardReader{
 		//Index of the corners
 		this.xIndexMin;
 		this.yIndexMin;
-		this.scanInterval = 1;
-		this.lastTime = Date.now();
 		//Info about empty cells
 		this.emptyCells = new Array(64);
 	}
@@ -43,11 +41,6 @@ class VisionProgram_BoardReader{
 		return true;
 	}
 	init(){
-		if((Date.now()-this.lastTime)<this.scanInterval){
-			this.abort("not time to scan yet");
-			return false;
-		}
-		this.lastTime = Date.now();
 		this.cellLength = -1;
 		this.failed=false;
 	}
@@ -70,20 +63,25 @@ class VisionProgram_BoardReader{
 	}
 	getXYangle(){
 		const rangeOfSearch = hcanvas.width/2;
+		const SearchLength = hcanvas.width;
 		const numberOfLines = 10;
 		const xCorner = (hcanvas.width - rangeOfSearch)/2;
 		const yCorner = (hcanvas.height- rangeOfSearch)/2;
 		let inH = new Array(numberOfLines+1);
 		let inV = new Array(numberOfLines+1);
+		//--Debug
 		//Gather Circles
 		for(let i=0;i<=numberOfLines;i++){
-			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), rangeOfSearch, 1);
-			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, rangeOfSearch);
-			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);//((i==0||i==numberOfLines)?1:0));
-			const scannerV = new IntersectionDetector(imgV.passdata, 1, 0);//((i==0||i==numberOfLines)?1:0));
+			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), SearchLength, 1);
+			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, SearchLength);
+			const scannerH = new IntersectionDetector(imgH.passdata, 0, 1);//((i==0||i==numberOfLines)?1:0));
+			const scannerV = new IntersectionDetector(imgV.passdata, 1, 1);//((i==0||i==numberOfLines)?1:0));
+
 			inH[i] = scannerH.intersections;
 			inV[i] = scannerV.intersections;
 		}
+		this.abort("e");
+		return;
 		//Analyze intersections horizontal
 		const acceptableError = rangeOfSearch/100;
 		const minInterCounter = numberOfLines*0.7;
@@ -158,12 +156,12 @@ class VisionProgram_BoardReader{
 		this.xc = xy1[0];
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
-		/*
-		line(xy1,xy2,1,"cyan"); //Top line
-		line(xy2,xy3,1,"cyan"); // Right line
-		line(xy3,xy4,1,"cyan"); //bottom line
-		line(xy4,xy1,1,"cyan"); //left line
-		*/
+		
+		line(xy1,xy2,1*pixelRatio,"cyan"); //Top line
+		line(xy2,xy3,1*pixelRatio,"cyan"); // Right line
+		line(xy3,xy4,1*pixelRatio,"cyan"); //bottom line
+		line(xy4,xy1,1*pixelRatio,"cyan"); //left line
+		
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -323,26 +321,20 @@ class VisionProgram_BoardReader{
 			for(let yi=0;yi<9;yi++){
 				if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin)){
 					this.emptyCells[xi+9*yi] = 1;
-					/*
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
-					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
-					*/
 				}else{
 					this.emptyCells[xi+9*yi] = 0;
+					
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),1*pixelRatio,"red");
 					line(this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),1*pixelRatio,"red");
 					line(this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),1*pixelRatio,"red");
 					line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),1*pixelRatio,"red");
 				}
 			}
 		}
-		console.log("success: "+(Date.now()-animationStartTime));
 		return;
 	}
 	checkEmpty(xi,yi){

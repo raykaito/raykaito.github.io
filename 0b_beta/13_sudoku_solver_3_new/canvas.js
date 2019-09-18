@@ -1,7 +1,7 @@
 var ct, hct, mct;
 var canvas, hcanvas, mcanvas;
 var pixelRatio, canvasScale;
-var animationStartTime;
+var animationStartTime, fpsTrackTime;
 var interval,sudoku;
 
 function initHcanvas(){
@@ -63,7 +63,7 @@ function clicked(event){
     kill();
 }
 
-function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16)/4, width = mcanvas.width-4){
+function displayArray(array, index = 0, autoMin = 0, height = (400-16)/4, width = mcanvas.width-4){
     const dy = (height+4)*index;
     if(array.length<width) width = array.length;
     mct.fillStyle = "rgb(255,  0,255)";
@@ -71,7 +71,7 @@ function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16
     mct.fillStyle = "rgb(255,255,255)";
     mct.fillRect(2,dy+2,width,height);
     mct.fillStyle = "rgb(  0,  0,  0)";
-    const arrayMax = getAbsoluteMinMax(array)[1];
+    const arrayMax = 255;//getAbsoluteMinMax(array)[1];
     const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
     for(let i=0;i<array.length;i++){
         const x = 2+(i/array.length)*width;
@@ -106,11 +106,12 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
 
 function draw() {
     if(stop) return;
+    animationStartTime = Date.now();
     ct.restore();
     ct.save();
     //debut
     mct.save()
-    mct.translate(0,40);
+    //mct.translate(0,40);
     const vLength = Math.min(video.videoWidth,video.videoHeight,640);
     if(hcanvas.width!=vLength){
         resizeH(vLength);
@@ -127,8 +128,9 @@ function draw() {
         }
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
-        text([0,10],("FPS: "+updateFPS()),"lime");
+        updateInfo();
         boardV.startScan();
+        animationStartTime = Date.now();
         //numberV.startScan(boardV);
         //setTimeout(draw,1000);
         //return;
@@ -139,41 +141,45 @@ function draw() {
     mct.restore();
 }
 
-function showFPS(){
+function displayInformation(){
     const length = 100;
     let timeList = new Array(length).fill(0);
     let index = 0;
 
     return function(){
         const now = Date.now();
-        timeList[index] = now - animationStartTime;
+        timeList[index] = now - fpsTrackTime;
         index = (index+1)%length;
-        animationStartTime = now;
-        return Math.floor(1000/getAve(timeList));
+        fpsTrackTime = now;
+        text([0,16,("FPS: "+Math.floor(1000/getAve(timeList)))],["lime","16pt Arial"],1);
+        text([0,32,("DIM: "+hcanvas.width+"x"+hcanvas.height)],["lime","16pt Arial"],1);
     }
 }
 
-const line=([xi,yi],[xii,yii],w=1, color="black")=>{
+const line=([xi,yi,xii,yii],[color,w]=["black", 1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.moveTo(xi/canvasScale ,yi /canvasScale);
-    ct.lineTo(xii/canvasScale,yii/canvasScale);
+    ct.moveTo(xi/cs ,yi /cs);
+    ct.lineTo(xii/cs,yii/cs);
     ct.stroke();
 }
 
-const circle=(x,y,rad,color="black",w=1)=>{
+const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.arc(x/canvasScale,y/canvasScale,pixelRatio*rad/canvasScale,0,2*Math.PI);
+    ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
     ct.stroke();
 }
 
-const text=([x,y],string, color = "black", font = "16px Arial")=>{
+const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.fillStyle = color;
     ct.font = font;
-    ct.fillText(string,x/canvasScale,y/canvasScale);
+    ct.fillText(string,x/cs,y/cs);
 }
 
 const startSolving = (time = 100)=>{
