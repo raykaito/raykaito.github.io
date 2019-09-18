@@ -187,7 +187,7 @@ class LinearScanner extends ImageData{
 			if(a>b) return  1;
 			return 0;
 		});
-		lines.splice(Math.floor(lines.length*0.8));
+		lines.splice(Math.floor(lines.length*0.5));
 		const [ave,std] = getAveStd(lines);
 		let boun = new Array(this.line.length).fill(0);
 		for(let i=0;i<this.line.length;i++){
