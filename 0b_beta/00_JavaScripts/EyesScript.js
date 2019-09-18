@@ -108,6 +108,7 @@ class LinearScanner extends ImageData{
 		this.vertical = vertical;
 		this.data;
 		this.deri;
+		this.line;
 		this.boun;
 		this.updateLineIntensity();
 		if(display){
@@ -118,6 +119,7 @@ class LinearScanner extends ImageData{
 	updateLineIntensity(){
 		this.data = this.getdata();
 		this.deri = this.getderi();
+		this.line = this.getline();
 		this.boun = this.getboun();
 	}
 	getdata(){
@@ -152,37 +154,41 @@ class LinearScanner extends ImageData{
 		}
 		return deri;
 	}
-	getboun(){
-		const std = getAveStd(this.deri)[1];
-		let boun = new Array(this.deri.length).fill(0);
-		let inPhase = false;
-		let max, maxIndex;
-		for(let i=0;i<this.deri.length;i++){
-			const deri = Math.abs(this.deri[i]);
-			if(inPhase){
-				if(deri<std){
-					//old phase have ended
-					inPhase = false;
-					boun[maxIndex] = this.deri[maxIndex];
-				}else if(deri>max){
-					max = deri;
-					maxIndex = i;
+	getline(){
+		let line = new Array(this.deri.length).fill(0);
+		let goingUp = false;
+		let min, minIndex;
+		for(let i=0;i<this.deri.length-1;i++){
+			const deri = this.deri[i];
+			if(goingUp){
+				if(this.deri[i+1]<deri){
+					goingUp = false;
+					line[Math.floor((minIndex+i)/2)] = deri - min;
 				}
 			}else{
-				if(deri>std){
-					//new phase have started
-					inPhase = true;
-					max = 0;
-					maxIndex = 0;
+				if(this.deri[i+1]>deri){
+					goingUp = true;
+					min = deri;
+					minIndex = i;
 				}
 			}
+		}
+		return line;
+	}
+	getboun(){
+		const std = getAveStd(this.line)[1];
+		let boun = new Array(this.line.length).fill(0);
+		for(let i=0;i<this.line.length;i++){
+			const line = this.line[i];
+			if(line>std) boun[i] = line;
 		}
 		return boun;
 	}
 	displayLineIntensity(){
 		displayArray(this.data,0,0);
 		displayArray(this.deri,1,1);
-		displayArray(this.boun,2,1);
+		displayArray(this.line,2,0);
+		displayArray(this.boun,3,0);
 	}
 }
 
