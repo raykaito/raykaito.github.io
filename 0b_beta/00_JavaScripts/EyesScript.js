@@ -102,6 +102,62 @@ class ImageData{
 	}
 }
 
+class LinearScanner extends ImageData{
+	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
+		super([imgIn, xpos, ypos]);
+		this.vertical = vertical;
+		this.data;
+		this.deri;
+		this.boun;
+		this.updateLineIntensity();
+		if(display){
+			this.displayLineIntensity();
+			this.display(0);
+		}
+	}
+	updateLineIntensity(){
+		this.data = this.getdata();
+		this.deri = this.getderi();
+	}
+	getdata(){
+		let data = new Array();
+		if(this.vertical)	for(let i=0;i<this.height;i++)	data[i] = this.getPix(this.imgIn,[0,i],"all");
+		else				for(let i=0;i<this.width;i++)	data[i] = this.getPix(this.imgIn,[i,0],"all");
+		return data;
+	}
+	getderi(){
+		const maxWidth = 5;
+		let pSum = new Array(maxWidth).fill(0),
+			nSum = new Array(maxWidth).fill(0);
+		let deri = new Array();
+		let data = new Array(this.data.length+maxWidth*2);
+		for(let i=0;i<data.length;i++){
+			if(i-maxWidth<0){
+				data[i] = this.data[0];
+			}else if(i-maxWidth>=this.data.length){
+				data[i]=this.data[this.data.length-1];
+			}else{
+				data[i] = this.data[i-maxWidth];
+			}
+		}
+		for(let i=0+maxWidth;i<this.data.length+maxWidth;i++){
+			let maxDeri = 0;
+			for(let j=0;j<maxWidth;j++){
+				pSum[j]+=data[i+1+j]-data[i];
+				nSum[j]+=data[i-1]-data[i-2-j];
+				if(Math.abs(pSum[j]-nSum[j])>Math.abs(maxDeri))maxDeri = pSum[j]-nSum[j];
+			}
+			deri[i-maxWidth] = maxDeri;
+		}
+		return deri;
+	}
+	
+	displayLineIntensity(){
+		displayArray(this.data,0,0);
+		displayArray(this.deri,1,1);
+	}
+}
+
 class IntersectionDetector extends ImageData{
 	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
 		super([imgIn, xpos, ypos]);
