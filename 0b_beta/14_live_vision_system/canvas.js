@@ -70,8 +70,10 @@ function displayArray(array, index = 0, autoMin = 0, height = (400-16)/4, width 
     mct.fillStyle = "rgb(255,255,255)";
     mct.fillRect(2,dy+2,width,height);
     mct.fillStyle = "rgb(  0,  0,  0)";
-    const arrayMax = getAbsoluteMinMax(array)[1];
-    const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
+    let arrayMax = getAbsoluteMinMax(array)[1];
+    let arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
+    //arrayMax = Math.max(Math.abs(arrayMax),Math.abs(arrayMin));
+    //arrayMin = -arrayMax;
     for(let i=0;i<array.length;i++){
         const x = 2+(i/array.length)*width;
         const y = dy+height+2-Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin));
@@ -122,7 +124,7 @@ function displayInformation(){
 }
 
 const line=([xi,yi,xii,yii],[color,w]=["black", 1],absolute=false)=>{
-    cs = (absolute?1/pixelRatio:canvasScale);
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
@@ -132,7 +134,7 @@ const line=([xi,yi,xii,yii],[color,w]=["black", 1],absolute=false)=>{
 }
 
 const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
-    cs = (absolute?1/pixelRatio:canvasScale);
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
@@ -141,7 +143,7 @@ const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
-    cs = (absolute?1/pixelRatio:canvasScale);
+    cs = (absolute?1:canvasScale);
     ct.fillStyle = color;
     ct.font = font;
     ct.fillText(string,x/cs,y/cs);

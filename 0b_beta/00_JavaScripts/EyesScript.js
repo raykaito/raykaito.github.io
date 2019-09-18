@@ -118,6 +118,7 @@ class LinearScanner extends ImageData{
 	updateLineIntensity(){
 		this.data = this.getdata();
 		this.deri = this.getderi();
+		this.boun = this.getboun();
 	}
 	getdata(){
 		let data = new Array();
@@ -151,7 +152,15 @@ class LinearScanner extends ImageData{
 		}
 		return deri;
 	}
-	
+	getboun(){
+		const std = getAveStd(this.deri)[1];
+		for(let i=0;i<this.deri.length;i++){
+			if(this.deri[i]>-std&&this.deri[i]<0)
+				this.deri[i] = -std;
+			if(this.deri[i]<std&&this.deri[i]>=0)
+				this.deri[i] = -std;
+		}
+	}
 	displayLineIntensity(){
 		displayArray(this.data,0,0);
 		displayArray(this.deri,1,1);
