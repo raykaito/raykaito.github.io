@@ -5,51 +5,23 @@ class VisionProgram_numberReader{
 		this.oct = this.originalCanvas.getContext("2d");
 		this.canvas = document.createElement("canvas");
 		this.ct = this.canvas.getContext("2d");
-		this.boardRead = false;
-		this.dx;
-		this.dy;
-		this.xc;
-		this.yc;
-		this.vAngle;
-		this.cellLength;
-		this.cellLengthy;
-		this.rotationAngle;
-		this.xIndexMin;
-		this.yIndexMin;
+		this.numberCanvas = document.createElement("canvas");
+		this.nct = this.numberCanvas.getContext("2d");
+		this.sideLength = 16;
+		this.numberCanvas.width = this.sideLength*81;
+		this.numberCanvas.height = this.sideLength;
 		//emptyCells
 		this.emptyCells = new Array(81).fill(0);
 		this.ECClimit = 5;//Empty cells counter upper limit
-		//Time Keeping stuff
-		this.scanInterval = 1;
-		this.timeIsUp = false;
-		this.lastState = 0;
-		//-------------Pre List--------------//
-		this.xy1;
-		this.xy2;
-		this.xy3;
-		this.xy4;
-		this.minmaxCornerLocation;
-		this.boardReadTime;
-		this.timeToList = false;
-		//---------------List----------------//
-		this.unknwnIndex = new Array();
-		this.numbersListed = false;
-		this.listedCounter = 0;
-		//----------Similarity Array---------//
-		this.similarityAcquired = false;
-		this.similarity;
-		//-----------Sudoku Matrix-----------//
-		this.sudokuCreated = false;
-		this.sameNumberIndex = new Array();
-		this.sudoku = new Array(81).fill(0);
+		this.resetBoard();
 	}
 	get sudokuArray(){return this.sudoku;}
 	startScan(br){
 		//---------Init Section Start---------//
+		if(br.failed) return;
 		this.lastTime = Date.now();
 		this.timeIsUp = false;
-		if(br.failed==false)	this.handleNewBoard(br);
-		else 					rotateCanvas(this.xc, this.yc, this.rotationAngle);
+		this.handleNewBoard(br);
 		if(this.timeToList==false) return;
 		//----------List the Numbers-----------//
 		if(this.numbersListed==false) this.listNumbers();
@@ -79,9 +51,9 @@ class VisionProgram_numberReader{
 			this.boardReadTime = Date.now();
 			this.minmaxCornerLocation = hcanvas.width;
 			this.boardRead = true;
-		}else if((Date.now()-this.boardReadTime)>1000){
+		}else if((Date.now()-this.boardReadTime)>3000){
+			//Now it is time to start listing
 			this.timeToList = true;
-			console.log("time to list");
 		}
 		if(this.timeToList) return;
 		const xy1 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin  );
@@ -93,7 +65,6 @@ class VisionProgram_numberReader{
 		this.xy2 = xy2;
 		this.xy3 = xy3;
 		this.xy4 = xy4;
-		console.log(round(newMinmaxCornerLocation),(round(this.minmaxCornerLocation)));
 		if(newMinmaxCornerLocation<this.minmaxCornerLocation){
 			this.minmaxCornerLocation = newMinmaxCornerLocation;
 			//New minMax and ready to update the board
@@ -113,12 +84,7 @@ class VisionProgram_numberReader{
 
 			this.originalCanvas.width = canvas.width;
 			this.originalCanvas.height= canvas.height;
-			this.oct.save();
-		    this.oct.translate(this.xc/canvasScale,this.yc/canvasScale);
-		    this.oct.rotate( +deg2rad(this.rotationAngle) );
-		    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
 			this.oct.drawImage(canvas,0,0);
-			this.oct.restore();
 			console.log("Number Scanner Canavs Updated");
 		}
 	}
@@ -142,8 +108,8 @@ class VisionProgram_numberReader{
 		this.sudokuCreated = false;
 		this.sameNumberIndex = new Array();
 		this.sudoku = new Array(81).fill(0);
-		mct.fillStyle = "black";
-		mct.fillRect(0,-40,mcanvas.width,mcanvas.height-40);
+		this.nct.fillStyle = "black";
+		this.nct.fillRect(0,0,this.numberCanvas.width,this.numberCanvas.height);
 	}
 	listNumbers(){
 		for(;this.lastState<81;this.lastState++){
@@ -153,10 +119,12 @@ class VisionProgram_numberReader{
 				this.list(this.lastState%9,Math.floor(this.lastState/9));
 			}
 		}
+		//Now the numbers are listed
 		this.numbersListed = true;
 		this.lastState = 0;
 		this.similarity = new Array(this.listedCounter*this.listedCounter).fill(0);
 		this.sameNumberIndex = new Array(this.listedCounter).fill(-1);
+		mct.drawImage(this.numberCanvas,0,0);
 	}
 	list(xi,yi){
 		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
@@ -167,22 +135,23 @@ class VisionProgram_numberReader{
 		blobFinder.eraseSmallerBlobs();
 		const image = blobFinder.blob;
 		const imgBN = img.updateDisplayImage();
-		mct.drawImage(image,0, this.listedCounter*17,16,16);
-		mct.drawImage(imgBN,17, this.listedCounter*17,16,16);
-		mct.drawImage(imgBN,this.listedCounter*19+31, -17,16,16);
+		this.nct.drawImage(image,this.listedCounter*16,0,16,16);
+		//mct.drawImage(imgBN,17, this.listedCounter*17,16,16);
+		//mct.drawImage(imgBN,this.listedCounter*19+31, -17,16,16);
 		//Distance Transform
 		/*
 		const imgWindow = newWindow(mct).cornerWidthHeight(0, this.listedCounter*17,16,16);
 		const imgDT = new DistanceTransform(imgWindow.passdata);
 		mct.drawImage(imgDT.canvas,0, this.listedCounter*17,16,16);
 		*/
+		/*
 		mct.strokeStyle = "gray";
 	    mct.lineWidth = 1;
 	    mct.beginPath();
 	    mct.moveTo(0, this.listedCounter*17);
 	    mct.lineTo(mcanvas.width, this.listedCounter*17);
 	    mct.stroke();
-
+	    */
 		this.listedCounter++;
 	}
 	getSimilarity(){
@@ -197,17 +166,17 @@ class VisionProgram_numberReader{
 		this.lastState = 0;
 	}
 	compare(xi, yi){
-		const imgDataXi = mct.getImageData(0, xi*17+40,16,16);
-		const imgDataYi = mct.getImageData(0, yi*17+40,16,16);
+		const imgDataXi = this.nct.getImageData(xi*16,0,16,16);
+		const imgDataYi = this.nct.getImageData(yi*16,0,16,16);
 		//Count Error
 		let similarity = 0;
 		for(let i=0;i<256;i++){
 			similarity -= Math.abs(imgDataXi.data[4*i+1]-imgDataYi.data[4*i+1]);
 		}
 		this.similarity[this.lastState] = similarity;
-		mct.fillStyle = "white";
-		mct.font = "bold 12px Arial";
-		mct.fillText(Math.floor(-similarity/400),xi*19+32,yi*17+12);
+		//mct.fillStyle = "white";
+		//mct.font = "bold 12px Arial";
+		//mct.fillText(Math.floor(-similarity/400),xi*19+32,yi*17+12);
 		return;
 	}
 	createSudokuMatrix(){
@@ -235,9 +204,11 @@ class VisionProgram_numberReader{
 					numberToErase--;
 				}
 				this.sameNumberIndex[x] = y;
+				/*
 				mct.strokeStyle = "lime";
 				mct.lineWidth = 1;
 				mct.strokeRect(x*19+32,y*17,19,16);
+				*/
 				if(numberToErase==0) break;
 			}
 		}
@@ -263,11 +234,18 @@ class VisionProgram_numberReader{
 		//Compensate for the different canvas size
 		const numList = [0,1,7,8,4,9,5,6,2,3];
 		const numListNot = [0,1,2,3,4,5,6,7,8,9];
-		sudoku = new Sudoku(corners,newWindow(this.oct).cornerToCorner(0,0,this.originalCanvas.width,this.originalCanvas.height).updateDisplayImage());
+		sudoku = new Sudoku(corners,newWindow(this.oct).cornerToCorner(0,0,this.originalCanvas.width,this.originalCanvas.height).updateDisplayImage(),[this.xc,this.yc,-this.rotationAngle]);
 		for(let i=0;i<this.sudoku.length;i++){
 			if(this.sudoku[i]!=0) sudoku.setNumber(i%9,Math.floor(i/9),this.sudoku[i],true);
 		}
 		let index = 1;
+		//Rotate Board
+		this.oct.save();
+	    this.oct.translate(this.xc/canvasScale,this.yc/canvasScale);
+	    this.oct.rotate( +deg2rad(this.rotationAngle) );
+	    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
+		this.oct.drawImage(this.originalCanvas,0,0);
+		this.oct.restore();
 		for(let i=0;i<81;i++){
 			if(this.sudoku[i]!=index) continue;
 			const xi = i%9;

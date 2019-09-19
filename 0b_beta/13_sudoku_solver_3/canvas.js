@@ -96,9 +96,7 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
     hct.fillRect(100,100,100,100);
     hct.drawImage( tcanvas, 0, 0 );
     hct.restore();
-
-    ct.restore();
-    ct.save();
+    
     ct.translate(x/canvasScale,y/canvasScale);
     ct.rotate( -r );
     ct.translate( -x/canvasScale, -y/canvasScale );
@@ -109,9 +107,6 @@ function draw() {
     animationStartTime = Date.now();
     ct.restore();
     ct.save();
-    //debut
-    mct.save()
-    mct.translate(0,40);
     const vLength = Math.min(video.videoWidth,video.videoHeight,640);
     if(hcanvas.width!=vLength){
         resizeH(vLength);
@@ -133,7 +128,6 @@ function draw() {
         numberV.startScan(boardV);
     }
     requestAnimationFrame(draw);
-    mct.restore();
 }
 
 function showFPS(){

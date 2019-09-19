@@ -1,7 +1,8 @@
 class Sudoku{
-constructor(cornersIn, imgIn){
+constructor(cornersIn, imgIn, [x,y,r]){
 	//Transfer oriented image data
 	this.imgO = imgIn;
+	[this.x,this.y,this.r] = [x,y,r];
 
 	//Transfer Corner locations
 	this.corners = cornersIn;
@@ -69,7 +70,13 @@ setNumber(x,y,number,original=false){
 	}
 }
 updateCanvas(){
+    ct.restore();
+    ct.save();
 	ct.drawImage(this.imgO, 0, 0,this.imgO.width,this.imgO.height,0,0,canvas.width,canvas.height);
+    ct.translate(this.x/canvasScale,this.y/canvasScale);
+    ct.rotate( deg2rad(this.r) );
+    ct.translate( -this.x/canvasScale, -this.y/canvasScale );
+
 	ct.textAlign = "center"; 
 	ct.textBaseline = "middle"; 
 	for(let x=0;x<9;x++){
