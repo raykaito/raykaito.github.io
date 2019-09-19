@@ -81,6 +81,7 @@ class VisionProgram_numberReader{
 			this.boardRead = true;
 		}else if((Date.now()-this.boardReadTime)>1000){
 			this.timeToList = true;
+			console.log("time to list");
 		}
 		if(this.timeToList) return;
 		const xy1 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin  );
@@ -92,7 +93,7 @@ class VisionProgram_numberReader{
 		this.xy2 = xy2;
 		this.xy3 = xy3;
 		this.xy4 = xy4;
-		console.log(round(newMinmaxCornerLocation),(round(this.minmaxCornerLocation));
+		console.log(round(newMinmaxCornerLocation),(round(this.minmaxCornerLocation)));
 		if(newMinmaxCornerLocation<this.minmaxCornerLocation){
 			this.minmaxCornerLocation = newMinmaxCornerLocation;
 			//New minMax and ready to update the board
@@ -122,6 +123,7 @@ class VisionProgram_numberReader{
 		}
 	}
 	resetBoard(){
+		console.log("resetBoard");
 		this.boardRead = false;
 		//Time Keeping stuff
 		this.scanInterval = 30;
