@@ -138,12 +138,13 @@ class VisionProgram_numberReader{
 		const img_number = img_blob.blob;
 		this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
 		//Display Filtered, Binarized, etced Images
+		/*
 		mct.drawImage(img_original.updateDisplayImage() ,32, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_binarize.updateDisplayImage()	,64, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_filtered.updateDisplayImage()	,96, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_binarized.updateDisplayImage(),128, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_number						,160, (1+this.listedCounter)*32,31,31);
-
+		*/
 
 		//Distance Transform
 		/*
