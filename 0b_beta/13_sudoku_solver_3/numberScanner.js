@@ -18,7 +18,6 @@ class VisionProgram_numberReader{
 	get sudokuArray(){return this.sudoku;}
 	startScan(br){
 		//---------Init Section Start---------//
-		if(br.failed) return;
 		this.lastTime = Date.now();
 		this.timeIsUp = false;
 		this.handleNewBoard(br);
@@ -33,6 +32,7 @@ class VisionProgram_numberReader{
 		if(this.sudokuCreated==false) this.createSudokuMatrix();
 	}
 	handleNewBoard(br){
+		if(br.failed||this.timeToList) return;
 		//Check if empty cell info matches
 		let matched = true;
 		for(let i=0;i<81;i++){
@@ -51,7 +51,7 @@ class VisionProgram_numberReader{
 			this.boardReadTime = Date.now();
 			this.minmaxCornerLocation = hcanvas.width;
 			this.boardRead = true;
-		}else if((Date.now()-this.boardReadTime)>1000){
+		}else if((Date.now()-this.boardReadTime)>2000){
 			//Now it is time to start listing
 			this.timeToList = true;
 		}
@@ -138,13 +138,13 @@ class VisionProgram_numberReader{
 		const img_number = img_blob.blob;
 		this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
 		//Display Filtered, Binarized, etced Images
-		/*
+		
 		mct.drawImage(img_original.updateDisplayImage() ,32, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_binarize.updateDisplayImage()	,64, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_filtered.updateDisplayImage()	,96, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_binarized.updateDisplayImage(),128, (1+this.listedCounter)*32,31,31);
 		mct.drawImage(img_number						,160, (1+this.listedCounter)*32,31,31);
-		*/
+		
 
 		//Distance Transform
 		/*
