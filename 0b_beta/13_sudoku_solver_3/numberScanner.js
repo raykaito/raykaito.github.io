@@ -23,6 +23,14 @@ class VisionProgram_numberReader{
 		this.scanInterval = 1;
 		this.timeIsUp = false;
 		this.lastState = 0;
+		//-------------Pre List--------------//
+		this.xy1;
+		this.xy2;
+		this.xy3;
+		this.xy4;
+		this.minmaxCornerLocation;
+		this.boardReadTime;
+		this.timeToList = false;
 		//---------------List----------------//
 		this.unknwnIndex = new Array();
 		this.numbersListed = false;
@@ -42,12 +50,7 @@ class VisionProgram_numberReader{
 		this.timeIsUp = false;
 		if(br.failed==false)	this.handleNewBoard(br);
 		else 					rotateCanvas(this.xc, this.yc, this.rotationAngle);
-		if(this.boardRead==false) return;
-		//----------Display the Frame----------//
-		line(this.getXYfromIndex(-0.5,-0.5),this.getXYfromIndex( 8.5,-0.5),3, "lime");
-		line(this.getXYfromIndex( 8.5,-0.5),this.getXYfromIndex( 8.5, 8.5),3, "lime");
-		line(this.getXYfromIndex( 8.5, 8.5),this.getXYfromIndex(-0.5, 8.5),3, "lime");
-		line(this.getXYfromIndex(-0.5, 8.5),this.getXYfromIndex(-0.5,-0.5),3, "lime");
+		if(this.timeToList==false) return;
 		//----------List the Numbers-----------//
 		if(this.numbersListed==false) this.listNumbers();
 		if(this.numbersListed==false) return;
@@ -68,39 +71,49 @@ class VisionProgram_numberReader{
 		}
 		if(matched==false) return;
 		//Check if MinMax corner locations record was broken or not
+		if(this.boardRead==false){
+			this.xy1=[0,0];
+			this.xy2=[0,0];
+			this.xy3=[0,0];
+			this.xy4=[0,0];
+			this.boardReadTime = Date.now();
+			this.minmaxCornerLocation = hcanvas.width;
+			this.boardRead = true;
+		}else if((Date.now()-this.boardReadTime)>1000){
+			this.timeToList = true;
+		}
+		if(this.timeToList) return;
 		const xy1 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin  );
 		const xy2 = br.getXYfromIndex(br.xIndexMin+8, br.yIndexMin  );
 		const xy3 = br.getXYfromIndex(br.xIndexMin+8, br.yIndexMin+8);
 		const xy4 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin+8);
-		circle([xy1[0],xy1[1],3]);
-		circle([xy2[0],xy2[1],3]);
-		circle([xy3[0],xy3[1],3]);
-		circle([xy4[0],xy4[1],3]);
-		return;
-		//Board info confirmed, and ready to update
-		this.boardRead = true;
-		this.dx = br.dx;
-		this.dy = br.dy;
-		this.xc = br.xc;
-		this.yc = br.yc;
-		this.vAngle = br.vAngle;
-		this.cellLength = br.cellLength;
-		this.cellLengthy = br.cellLengthy
-		this.rotationAngle = br.rotationAngle;
-		this.xIndexMin = br.xIndexMin;
-		this.yIndexMin = br.yIndexMin;
-		this.canvas.width = hcanvas.width;
-		this.canvas.height= hcanvas.height;
-		this.ct.drawImage(hcanvas,0,0);
+		const newMinmaxCornerLocation = Math.max(getDist(this.xy1,xy1),getDist(this.xy2,xy2),getDist(this.xy3,xy3),getDist(this.xy4,xy4));
+		if(newMinmaxCornerLocation<this.minmaxCornerLocation){
+			this.minmaxCornerLocation = newMinmaxCornerLocation;
+			//New minMax and ready to update the board
+			this.dx = br.dx;
+			this.dy = br.dy;
+			this.xc = br.xc;
+			this.yc = br.yc;
+			this.vAngle = br.vAngle;
+			this.cellLength = br.cellLength;
+			this.cellLengthy = br.cellLengthy
+			this.rotationAngle = br.rotationAngle;
+			this.xIndexMin = br.xIndexMin;
+			this.yIndexMin = br.yIndexMin;
+			this.canvas.width = hcanvas.width;
+			this.canvas.height= hcanvas.height;
+			this.ct.drawImage(hcanvas,0,0);
 
-		this.originalCanvas.width = canvas.width;
-		this.originalCanvas.height= canvas.height;
-		this.oct.save();
-	    this.oct.translate(this.xc/canvasScale,this.yc/canvasScale);
-	    this.oct.rotate( +deg2rad(this.rotationAngle) );
-	    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
-		this.oct.drawImage(canvas,0,0);
-		this.oct.restore();
+			this.originalCanvas.width = canvas.width;
+			this.originalCanvas.height= canvas.height;
+			this.oct.save();
+		    this.oct.translate(this.xc/canvasScale,this.yc/canvasScale);
+		    this.oct.rotate( +deg2rad(this.rotationAngle) );
+		    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
+			this.oct.drawImage(canvas,0,0);
+			this.oct.restore();
+		}
 	}
 	resetBoard(){
 		this.boardRead = false;
@@ -108,6 +121,8 @@ class VisionProgram_numberReader{
 		this.scanInterval = 30;
 		this.timeIsUp = false;
 		this.lastState = 0;
+		//-------------Pre List--------------//
+		this.timeToList = false;
 		//---------------List----------------//
 		this.unknwnIndex = new Array();
 		this.numbersListed = false;
