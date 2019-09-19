@@ -88,6 +88,11 @@ class VisionProgram_numberReader{
 		const xy3 = br.getXYfromIndex(br.xIndexMin+8, br.yIndexMin+8);
 		const xy4 = br.getXYfromIndex(br.xIndexMin  , br.yIndexMin+8);
 		const newMinmaxCornerLocation = Math.max(getDist(this.xy1,xy1),getDist(this.xy2,xy2),getDist(this.xy3,xy3),getDist(this.xy4,xy4));
+		this.xy1 = xy1;
+		this.xy2 = xy2;
+		this.xy3 = xy3;
+		this.xy4 = xy4;
+		console.log(round(newMinmaxCornerLocation),(round(this.minmaxCornerLocation));
 		if(newMinmaxCornerLocation<this.minmaxCornerLocation){
 			this.minmaxCornerLocation = newMinmaxCornerLocation;
 			//New minMax and ready to update the board
@@ -113,6 +118,7 @@ class VisionProgram_numberReader{
 		    this.oct.translate( -this.xc/canvasScale, -this.yc/canvasScale );
 			this.oct.drawImage(canvas,0,0);
 			this.oct.restore();
+			console.log("Number Scanner Canavs Updated");
 		}
 	}
 	resetBoard(){
