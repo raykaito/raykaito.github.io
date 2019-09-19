@@ -129,29 +129,28 @@ class VisionProgram_numberReader{
 	list(xi,yi){
 		const xy1 = this.getXYfromIndex(xi-0.4,yi-0.4);
 		const xy2 = this.getXYfromIndex(xi+0.4,yi+0.4);
-		const img = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
-		const binarizedImg = new Binarize(img.passdata);
-		const blobFinder = new FindBlob(binarizedImg.passdata,1);
-		blobFinder.eraseSmallerBlobs();
-		const image = blobFinder.blob;
-		const imgBN = img.updateDisplayImage();
-		this.nct.drawImage(image,this.listedCounter*16,0,16,16);
-		//mct.drawImage(imgBN,17, this.listedCounter*17,16,16);
-		//mct.drawImage(imgBN,this.listedCounter*19+31, -17,16,16);
+		const img_original  = newWindow(this.ct).cornerToCorner(xy1[0], xy1[1], xy2[0], xy2[1]);
+		const img_binarize  = new Binarize(img_original.passdata);
+		const img_filtered  = new Filter(  img_original.passdata,2);
+		const img_binarized = new Binarize(img_filtered.passdata);
+		const img_blob      = new FindBlob(img_binarized.passdata,1);
+		img_blob.eraseSmallerBlobs();
+		const img_number = img_blob.blob;
+		this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
+		//Display Filtered, Binarized, etced Images
+		mct.drawImage(img_original.updateDisplayImage() ,32, (1+this.listedCounter)*32,31,31);
+		mct.drawImage(img_binarize.updateDisplayImage()	,64, (1+this.listedCounter)*32,31,31);
+		mct.drawImage(img_filtered.updateDisplayImage()	,96, (1+this.listedCounter)*32,31,31);
+		mct.drawImage(img_binarized.updateDisplayImage(),128, (1+this.listedCounter)*32,31,31);
+		mct.drawImage(img_number						,160, (1+this.listedCounter)*32,31,31);
+
+
 		//Distance Transform
 		/*
 		const imgWindow = newWindow(mct).cornerWidthHeight(0, this.listedCounter*17,16,16);
 		const imgDT = new DistanceTransform(imgWindow.passdata);
 		mct.drawImage(imgDT.canvas,0, this.listedCounter*17,16,16);
 		*/
-		/*
-		mct.strokeStyle = "gray";
-	    mct.lineWidth = 1;
-	    mct.beginPath();
-	    mct.moveTo(0, this.listedCounter*17);
-	    mct.lineTo(mcanvas.width, this.listedCounter*17);
-	    mct.stroke();
-	    */
 		this.listedCounter++;
 	}
 	getSimilarity(){
@@ -258,7 +257,7 @@ class VisionProgram_numberReader{
 			sudoku.saveNumberPlate(index,binarizedImg.updateDisplayImage());
 			index++;
 		}
-		startSolving(100);
+		sudoku.startSolving(100);
 		//------------display sudoku for test
 		console.log("-------------");
 		const stringList = [" ",1,2,3,4,5,6,7,8,9];

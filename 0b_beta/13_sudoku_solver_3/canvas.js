@@ -186,24 +186,4 @@ const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
     ct.fillText(string,x/cs,y/cs);
 }
 
-
-const startSolving = (time = 100)=>{
-    interval = setInterval(solve, time);
-}
-
-const solve = ()=>{
-    var status = sudoku.makeaProgress();
-    if(status=="UNSOLVABLE"){
-        clearInterval(interval);
-        alert("Failed");
-        numberV.resetBoard();
-        stop = false;
-        requestAnimationFrame(draw);
-    }
-    if(status=="SOLVED"){
-        clearInterval(interval);
-        alert("Success!");
-    }
-}
-
 console.log("Loaded: canvas.js");

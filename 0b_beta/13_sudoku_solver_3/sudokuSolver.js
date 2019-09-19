@@ -36,6 +36,23 @@ constructor(cornersIn, imgIn, [x,y,r]){
 
 	this.numberPlates = new Array(9);
 }
+startSolving(time = 100){
+    interval = setInterval(sudoku.solve, time);
+}
+solve(){
+    var status = sudoku.makeaProgress();
+    if(status=="UNSOLVABLE"){
+        clearInterval(interval);
+        alert("Failed");
+        numberV.resetBoard();
+        stop = false;
+        requestAnimationFrame(draw);
+    }
+    if(status=="SOLVED"){
+        clearInterval(interval);
+        alert("Success!");
+    }
+}
 saveNumberPlate(index,imgDataIn){
 	this.numberPlates[index-1] = imgDataIn;
 	console.log(index);
@@ -147,7 +164,7 @@ drawTile(x,y){
 			dx = (i%3-1)*cl*2/3;
 			dy = Math.floor(i/3-1)*cl*2/3+cl/15;
 			const imgd = this.numberPlates[cell[i+1]-1];
-			ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc+dx-cl*0.2,yc+dy-cl*0.2,cl*0.4,cl*0.4);
+			ct.drawImage(imgd,0,0,imgd.width,imgd.height,xc+dx-cl*0.35,yc+dy-cl*0.35,cl*0.7,cl*0.7);
 		}
 	}
 }
@@ -174,7 +191,7 @@ runDummy(){
 	if(this.displayEachStep){
 		this.displayEachStep = false;
 		clearInterval(interval);
-		startSolving(5);
+		sudoku.startSolving(5);
 	}
 	let validCandidateFound, candNum, minCandidate, minIndex, theCandidate;
 	for(let limit=100;limit>0;limit--) {

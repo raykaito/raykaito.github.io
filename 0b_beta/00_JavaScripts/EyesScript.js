@@ -101,108 +101,6 @@ class ImageData{
 		return rgbValue;
 	}
 }
-class LinearScanner extends ImageData{
-	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
-		super([imgIn, xpos, ypos]);
-		this.vertical = vertical;
-		this.data;
-		this.deri;
-		this.line;
-		this.boun;
-		this.updateLineIntensity();
-		if(display){
-			this.displayLineIntensity();
-			this.display(0);
-		}
-	}
-	updateLineIntensity(){
-		this.data = this.getdata();
-		this.deri = this.getderi();
-		this.line = this.getline();
-		this.boun = this.getboun();
-	}
-	getdata(){
-		let data = new Array();
-		if(this.vertical)	for(let i=0;i<this.height;i++)	data[i] = this.getPix(this.imgIn,[0,i],"all");
-		else				for(let i=0;i<this.width;i++)	data[i] = this.getPix(this.imgIn,[i,0],"all");
-		return data;
-	}
-	getderi(){
-		const maxWidth = 5;
-		let pSum = new Array(maxWidth).fill(0),
-			nSum = new Array(maxWidth).fill(0);
-		let deri = new Array();
-		let data = new Array(this.data.length+maxWidth*2);
-		for(let i=0;i<data.length;i++){
-			if(i-maxWidth<0){
-				data[i] = this.data[0];
-			}else if(i-maxWidth>=this.data.length){
-				data[i]=this.data[this.data.length-1];
-			}else{
-				data[i] = this.data[i-maxWidth];
-			}
-		}
-		for(let i=0+maxWidth;i<this.data.length+maxWidth;i++){
-			let maxDeri = 0;
-			for(let j=0;j<maxWidth;j++){
-				pSum[j]+=data[i+1+j]-data[i];
-				nSum[j]+=data[i-1]-data[i-2-j];
-				if(Math.abs(pSum[j]-nSum[j])>Math.abs(maxDeri))maxDeri = pSum[j]-nSum[j];
-			}
-			deri[i-maxWidth] = maxDeri;
-		}
-		return deri;
-	}
-	getline(){
-		let line = new Array(this.deri.length).fill(0);
-		let goingUp = false;
-		let min, minIndex;
-		for(let i=0;i<this.deri.length-1;i++){
-			const deri = this.deri[i];
-			if(goingUp){
-				if(this.deri[i+1]<deri){
-					goingUp = false;
-					line[Math.floor((minIndex+i)/2)] = deri - min;
-				}
-			}else{
-				if(this.deri[i+1]>deri){
-					goingUp = true;
-					min = deri;
-					minIndex = i;
-				}
-			}
-		}
-		return line;
-	}
-	getboun(){
-		let lines = new Array();
-		for(let i=0;i<this.line.length;i++){
-			if(this.line[i]!=0){
-				lines[lines.length] = this.line[i];
-			}
-		}
-		lines.sort(function(a,b){
-			if(a<b) return -1;
-			if(a>b) return  1;
-			return 0;
-		});
-		lines.splice(Math.floor(lines.length*0.5));
-		const std = getAveStd(lines)[1];
-		const thresh = lines[lines.length-1]+6*std;
-		let boun = new Array(this.line.length).fill(0);
-		for(let i=0;i<this.line.length;i++){
-			const line = this.line[i];
-			if(line>thresh) boun[i] = line;
-		}
-		return boun;
-	}
-	displayLineIntensity(){
-		displayArray(this.data,0,0);
-		displayArray(this.deri,1,1);
-		displayArray(this.line,2,0);
-		displayArray(this.boun,3,0);
-	}
-}
 
 class IntersectionDetector extends ImageData{
 	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
@@ -349,6 +247,112 @@ class Binarize extends ImageData{
 			brightness+= this.imgIn.data[4*i+2];
 			for(let c=0;c<3;c++){
 				this.imgOut.data[4*i+c] = (brightness<=3*this.threshold)?0:255;
+			}
+		}
+	}
+}
+
+class Filter extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
+		super([imgIn, xpos, ypos]);
+		if(preset!=false) this.fuzzyR(preset);
+	}
+	fuzzyR(range = 1){
+		if(range==0) return;
+		let imgHolder = {data: new Array(this.area*4)};
+		let counter, tempR, index;
+		for(let y=0;y<this.height;y++){
+			counter = tempR = 0;
+			for(let x=-range;x<this.width+range;x++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(x+range<this.width){
+					counter++;
+					tempR += this.getPix(this.imgIn, index+range, 0);
+				}
+				
+				if(x-range>=0){
+					counter--;
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+				}
+				if(x>=0&&x<this.width){
+					imgHolder.data[4*index] = tempR/counter;
+				}
+			}
+		}
+		for(let x=0;x<this.width;x++){
+			counter = tempR = 0;
+			for(let y=-range;y<this.height+range;y++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(y+range<this.height){
+					counter++;
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
+				}
+				
+				if(y-range>=0){
+					counter--;
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
+				}
+				if(y>=0&&y<this.height){
+					this.setPix(index, Math.floor(tempR/counter), "all");
+				}
+			}
+		}
+	}
+	fuzzy(range = 1){
+		if(range==0) return;
+		let imgHolder = {data: new Array(this.area*4)};
+		//let imgHolder.data = new Array(this.area*4);
+		let counter, tempR, tempG, tempB, index;
+		for(let y=0;y<this.height;y++){
+			counter = tempR = tempG = tempB = 0;
+			for(let x=-range;x<this.width+range;x++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(x+range<this.width){
+					counter++;
+					tempR += this.getPix(this.imgIn, index+range, 0);
+					tempG += this.getPix(this.imgIn, index+range, 1);
+					tempB += this.getPix(this.imgIn, index+range, 2);
+				}
+				
+				if(x-range>=0){
+					counter--;
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+					tempG -= this.getPix(this.imgIn, index-range, 1);
+					tempB -= this.getPix(this.imgIn, index-range, 2);
+				}
+				if(x>=0&&x<this.width){
+					imgHolder.data[4*index  ] = tempR/counter;
+					imgHolder.data[4*index+1] = tempG/counter;
+					imgHolder.data[4*index+2] = tempB/counter;
+				}
+			}
+		}
+		for(let x=0;x<this.width;x++){
+			counter = tempR = tempG = tempB = 0;
+			for(let y=-range;y<this.height+range;y++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(y+range<this.height){
+					counter++;
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
+					tempG += this.getPix(imgHolder, index+range*this.width, 1);
+					tempB += this.getPix(imgHolder, index+range*this.width, 2);
+				}
+				
+				if(y-range>=0){
+					counter--;
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
+					tempG -= this.getPix(imgHolder, index-range*this.width, 1);
+					tempB -= this.getPix(imgHolder, index-range*this.width, 2);
+				}
+				if(y>=0&&y<this.height){
+					this.imgOut.data[4*index  ] = tempR/counter;
+					this.imgOut.data[4*index+1] = tempG/counter;
+					this.imgOut.data[4*index+2] = tempB/counter;
+				}
 			}
 		}
 	}
