@@ -115,7 +115,7 @@ class IntersectionDetector extends ImageData{
 		this.lineIntensityFiltered;
 		this.updateLineIntensity();
 		if(display){
-			this.displayLineIntensity();
+			//this.displayLineIntensity();
 			this.display(0);
 			this.displayIntersections();
 		}
@@ -165,7 +165,7 @@ class IntersectionDetector extends ImageData{
 	}
 	displayIntersections(){
 		for(let i=0;i<this.indexList.length;i++){
-			circle((this.xpos+(this.indexList[i]*(!this.vertical))),(this.ypos+(this.indexList[i]*this.vertical)),3);
+			circle([(this.xpos+(this.indexList[i]*(!this.vertical))),(this.ypos+(this.indexList[i]*this.vertical)),3]);
 		}
 	}
 }
@@ -247,6 +247,112 @@ class Binarize extends ImageData{
 			brightness+= this.imgIn.data[4*i+2];
 			for(let c=0;c<3;c++){
 				this.imgOut.data[4*i+c] = (brightness<=3*this.threshold)?0:255;
+			}
+		}
+	}
+}
+
+class Filter extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0], preset = false){
+		super([imgIn, xpos, ypos]);
+		if(preset!=false) this.fuzzyR(preset);
+	}
+	fuzzyR(range = 1){
+		if(range==0) return;
+		let imgHolder = {data: new Array(this.area*4)};
+		let counter, tempR, index;
+		for(let y=0;y<this.height;y++){
+			counter = tempR = 0;
+			for(let x=-range;x<this.width+range;x++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(x+range<this.width){
+					counter++;
+					tempR += this.getPix(this.imgIn, index+range, 0);
+				}
+				
+				if(x-range>=0){
+					counter--;
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+				}
+				if(x>=0&&x<this.width){
+					imgHolder.data[4*index] = tempR/counter;
+				}
+			}
+		}
+		for(let x=0;x<this.width;x++){
+			counter = tempR = 0;
+			for(let y=-range;y<this.height+range;y++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(y+range<this.height){
+					counter++;
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
+				}
+				
+				if(y-range>=0){
+					counter--;
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
+				}
+				if(y>=0&&y<this.height){
+					this.setPix(index, Math.floor(tempR/counter), "all");
+				}
+			}
+		}
+	}
+	fuzzy(range = 1){
+		if(range==0) return;
+		let imgHolder = {data: new Array(this.area*4)};
+		//let imgHolder.data = new Array(this.area*4);
+		let counter, tempR, tempG, tempB, index;
+		for(let y=0;y<this.height;y++){
+			counter = tempR = tempG = tempB = 0;
+			for(let x=-range;x<this.width+range;x++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(x+range<this.width){
+					counter++;
+					tempR += this.getPix(this.imgIn, index+range, 0);
+					tempG += this.getPix(this.imgIn, index+range, 1);
+					tempB += this.getPix(this.imgIn, index+range, 2);
+				}
+				
+				if(x-range>=0){
+					counter--;
+					tempR -= this.getPix(this.imgIn, index-range, 0);
+					tempG -= this.getPix(this.imgIn, index-range, 1);
+					tempB -= this.getPix(this.imgIn, index-range, 2);
+				}
+				if(x>=0&&x<this.width){
+					imgHolder.data[4*index  ] = tempR/counter;
+					imgHolder.data[4*index+1] = tempG/counter;
+					imgHolder.data[4*index+2] = tempB/counter;
+				}
+			}
+		}
+		for(let x=0;x<this.width;x++){
+			counter = tempR = tempG = tempB = 0;
+			for(let y=-range;y<this.height+range;y++){
+				index = this.xy2i([x,y], this.width);
+				
+				if(y+range<this.height){
+					counter++;
+					tempR += this.getPix(imgHolder, index+range*this.width, 0);
+					tempG += this.getPix(imgHolder, index+range*this.width, 1);
+					tempB += this.getPix(imgHolder, index+range*this.width, 2);
+				}
+				
+				if(y-range>=0){
+					counter--;
+					tempR -= this.getPix(imgHolder, index-range*this.width, 0);
+					tempG -= this.getPix(imgHolder, index-range*this.width, 1);
+					tempB -= this.getPix(imgHolder, index-range*this.width, 2);
+				}
+				if(y>=0&&y<this.height){
+					this.imgOut.data[4*index  ] = tempR/counter;
+					this.imgOut.data[4*index+1] = tempG/counter;
+					this.imgOut.data[4*index+2] = tempB/counter;
+				}
 			}
 		}
 	}

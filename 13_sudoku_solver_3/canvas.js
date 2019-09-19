@@ -1,7 +1,7 @@
 var ct, hct, mct;
 var canvas, hcanvas, mcanvas;
 var pixelRatio, canvasScale;
-var animationStartTime;
+var animationStartTime, fpsTrackTime;
 var interval,sudoku;
 
 function initHcanvas(){
@@ -97,8 +97,6 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
     hct.drawImage( tcanvas, 0, 0 );
     hct.restore();
 
-    ct.restore();
-    ct.save();
     ct.translate(x/canvasScale,y/canvasScale);
     ct.rotate( -r );
     ct.translate( -x/canvasScale, -y/canvasScale );
@@ -106,12 +104,11 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
 
 function draw() {
     if(stop) return;
+    animationStartTime = Date.now();
     ct.restore();
     ct.save();
-    //debut
-    mct.save()
-    mct.translate(0,40);
     const vLength = Math.min(video.videoWidth,video.videoHeight,640);
+    let sx,sy;
     if(hcanvas.width!=vLength){
         resizeH(vLength);
         resize();
@@ -127,16 +124,11 @@ function draw() {
         }
         hct.drawImage(video,sx,sy,vLength,vLength,0,0,hcanvas.width,hcanvas.height);
         ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
-        text([0,10],("FPS: "+updateFPS()),"lime");
+        updateInfo();
         boardV.startScan();
         numberV.startScan(boardV);
-        //setTimeout(draw,1000);
-        //return;
-        requestAnimationFrame(draw);
-    }else{
-        requestAnimationFrame(draw);
     }
-    mct.restore();
+    requestAnimationFrame(draw);
 }
 
 function showFPS(){
@@ -153,46 +145,45 @@ function showFPS(){
     }
 }
 
-const line=([xi,yi],[xii,yii],w=1, color="black")=>{
+function displayInformation(){
+    const length = 100;
+    let timeList = new Array(length).fill(0);
+    let index = 0;
+
+    return function(){
+        const now = Date.now();
+        timeList[index] = now - fpsTrackTime;
+        index = (index+1)%length;
+        fpsTrackTime = now;
+        text([0,16,("FPS: "+Math.floor(1000/getAve(timeList)))],["lime","16pt Arial"],1);
+        text([0,32,("DIM: "+hcanvas.width+"x"+hcanvas.height)],["lime","16pt Arial"],1);
+    }
+}
+
+const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.moveTo(xi/canvasScale ,yi /canvasScale);
-    ct.lineTo(xii/canvasScale,yii/canvasScale);
+    ct.moveTo(xi/cs ,yi /cs);
+    ct.lineTo(xii/cs,yii/cs);
     ct.stroke();
 }
 
-const circle=(x,y,rad,color="black",w=1)=>{
+const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
     ct.beginPath();
-    ct.arc(x/canvasScale,y/canvasScale,pixelRatio*rad/canvasScale,0,2*Math.PI);
+    ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
     ct.stroke();
 }
 
-const text=([x,y],string, color = "black", font = "16px Arial")=>{
+const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
     ct.fillStyle = color;
     ct.font = font;
-    ct.fillText(string,x/canvasScale,y/canvasScale);
-}
-
-const startSolving = (time = 100)=>{
-    interval = setInterval(solve, time);
-}
-
-const solve = ()=>{
-    var status = sudoku.makeaProgress();
-    if(status=="UNSOLVABLE"){
-        clearInterval(interval);
-        alert("Failed");
-        numberV.resetBoard();
-        stop = false;
-        requestAnimationFrame(draw);
-    }
-    if(status=="SOLVED"){
-        clearInterval(interval);
-        alert("Success!");
-    }
+    ct.fillText(string,x/cs,y/cs);
 }
 
 console.log("Loaded: canvas.js");
