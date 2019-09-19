@@ -51,7 +51,7 @@ class VisionProgram_numberReader{
 			this.boardReadTime = Date.now();
 			this.minmaxCornerLocation = hcanvas.width;
 			this.boardRead = true;
-		}else if((Date.now()-this.boardReadTime)>3000){
+		}else if((Date.now()-this.boardReadTime)>1000){
 			//Now it is time to start listing
 			this.timeToList = true;
 		}

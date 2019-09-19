@@ -96,7 +96,7 @@ function rotateCanvas(x=hcanvas.width/2, y=hcanvas.height/2, deg=20){
     hct.fillRect(100,100,100,100);
     hct.drawImage( tcanvas, 0, 0 );
     hct.restore();
-    
+
     ct.translate(x/canvasScale,y/canvasScale);
     ct.rotate( -r );
     ct.translate( -x/canvasScale, -y/canvasScale );
@@ -108,6 +108,7 @@ function draw() {
     ct.restore();
     ct.save();
     const vLength = Math.min(video.videoWidth,video.videoHeight,640);
+    let sx,sy;
     if(hcanvas.width!=vLength){
         resizeH(vLength);
         resize();

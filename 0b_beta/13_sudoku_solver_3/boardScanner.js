@@ -332,13 +332,13 @@ class VisionProgram_BoardReader{
 				}else{
 					this.emptyCells[xi+9*yi] = 0;
 					line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",3*pixelRatio]);
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",3]);
 					line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",3*pixelRatio]);
+						 this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",3]);
 					line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",3*pixelRatio]);
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",3]);
 					line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",3*pixelRatio]);
+						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",3]);
 				}
 			}
 		}
