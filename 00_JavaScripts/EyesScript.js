@@ -103,7 +103,7 @@ class ImageData{
 }
 
 class IntersectionDetector extends ImageData{
-	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=false){
+	constructor([imgIn,xpos,ypos]=[hct.getImageData(0,0,hcanvas.width,hcanvas.height), 0, 0],vertical=false, display=0){
 		super([imgIn, xpos, ypos]);
 		this.vertical = vertical;
 		this.dataArray;
@@ -114,11 +114,9 @@ class IntersectionDetector extends ImageData{
 		this.indexList;
 		this.lineIntensityFiltered;
 		this.updateLineIntensity();
-		if(display){
-			//this.displayLineIntensity();
-			this.display(0);
-			this.displayIntersections();
-		}
+		if(display!=0)this.display(0);
+		if(display==1)this.displayIntersections();
+		if(display==2)this.displayLineIntensity(0);
 	}
 	get data(){return this.dataArray;}
 	get dataSmooth(){return this.dataSmoothArray;}
@@ -157,11 +155,16 @@ class IntersectionDetector extends ImageData{
 		this.lineIntensityFiltered = tempArray;
 		return indexList;
 	}
-	displayLineIntensity(){
-		displayArray(this.dataArray,0);
-		displayArray(this.dataSmoothArray,1);
-		displayArray(this.lineIntensityArray,2);
-		displayArray(this.lineIntensityFiltered,3);
+	displayLineIntensity(input = 0){
+		if(input==0){
+			displayArray(this.dataArray,0);
+		}else if(input==1){
+			displayArray(this.dataSmoothArray,1);
+		}else if(input==2){
+			displayArray(this.lineIntensityArray,2);
+		}else if(input==3){
+			displayArray(this.lineIntensityFiltered,3);
+		}
 	}
 	displayIntersections(){
 		for(let i=0;i<this.indexList.length;i++){

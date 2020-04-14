@@ -63,20 +63,21 @@ function clicked(event){
     kill();
 }
 
-function displayArray(array, index = 0, autoMin = 0, height = (mcanvas.height-16)/4, width = mcanvas.width-4){
+function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4){
     const dy = (height+4)*index;
+    const dx = width-array.length;
     if(array.length<width) width = array.length;
-    mct.fillStyle = "rgb(255,  0,255)";
-    mct.fillRect(1,dy+1,width+2,height+2);
-    mct.fillStyle = "rgb(255,255,255)";
-    mct.fillRect(2,dy+2,width,height);
-    mct.fillStyle = "rgb(  0,  0,  0)";
+    ct.fillStyle = "rgb(255,  0,255)";
+    ct.fillRect(dx+1,dy+1,width+2,height+2);
+    ct.fillStyle = "rgb(255,255,255)";
+    ct.fillRect(dx+2,dy+2,width,height);
+    ct.fillStyle = "rgb(  0,  0,  0)";
     const arrayMax = getAbsoluteMinMax(array)[1];
     const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
     for(let i=0;i<array.length;i++){
-        const x = 2+(i/array.length)*width;
+        const x = dx+2+(i/array.length)*width;
         const y = dy+height+2-Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin));
-        mct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
+        ct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
     }
 }
 
@@ -157,6 +158,7 @@ function displayInformation(){
         fpsTrackTime = now;
         text([0,16,("FPS: "+Math.floor(1000/getAve(timeList)))],["lime","16pt Arial"],1);
         text([0,32,("DIM: "+hcanvas.width+"x"+hcanvas.height)],["lime","16pt Arial"],1);
+        text([0,48,("MODE:"+mode)],["lime","16pt Arial"],1);
     }
 }
 

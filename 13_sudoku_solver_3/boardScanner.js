@@ -75,14 +75,25 @@ class VisionProgram_BoardReader{
 		const yCorner = (hcanvas.height- rangeOfSearch)/2;
 		let inH = new Array(numberOfLines+1);
 		let inV = new Array(numberOfLines+1);
+		const disp = (mode==4?1:0);
+		if(mode==5){
+			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(0.5), rangeOfSearch, 1);
+			const scannerH = new IntersectionDetector(imgH.passdata, 0, 2);//((i==0||i==numberOfLines)?1:0));
+			this.abort("mode==5");
+			return;
+		}
 		//Gather Circles
 		for(let i=0;i<=numberOfLines;i++){
 			const imgH = newWindow().centerWidthHeight(hcanvas.width/2,  yCorner+rangeOfSearch*(i/numberOfLines), rangeOfSearch, 1);
 			const imgV = newWindow().centerWidthHeight(xCorner+rangeOfSearch*(i/numberOfLines), hcanvas.height/2, 1, rangeOfSearch);
-			const scannerH = new IntersectionDetector(imgH.passdata, 0, 0);//((i==0||i==numberOfLines)?1:0));
-			const scannerV = new IntersectionDetector(imgV.passdata, 1, 0);//((i==0||i==numberOfLines)?1:0));
+			const scannerH = new IntersectionDetector(imgH.passdata, 0, disp);//((i==0||i==numberOfLines)?1:0));
+			const scannerV = new IntersectionDetector(imgV.passdata, 1, disp);//((i==0||i==numberOfLines)?1:0));
 			inH[i] = scannerH.intersections;
 			inV[i] = scannerV.intersections;
+		}
+		if(mode==4){
+			this.abort("mode==4");
+			return;
 		}
 		//Analyze intersections horizontal
 		const acceptableError = rangeOfSearch/100;
@@ -158,12 +169,14 @@ class VisionProgram_BoardReader{
 		this.xc = xy1[0];
 		this.yc = xy1[1];
 		this.rotationAngle = -getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
-		/*
-		line(xy1,xy2,1,"cyan"); //Top line
-		line(xy2,xy3,1,"cyan"); // Right line
-		line(xy3,xy4,1,"cyan"); //bottom line
-		line(xy4,xy1,1,"cyan"); //left line
-		*/
+		if(mode==3){
+			line([xy1,xy2,1],["red",4]); //Top line
+			line([xy2,xy3,1],["red",4]); // Right line
+			line([xy3,xy4,1],["red",4]); //bottom line
+			line([xy4,xy1,1],["red",4]); //left line
+			this.abort("mode==3");
+			return;
+		}
 		//Calculate cell length
 		let gapList = new Array();
 		for(let i=0;i<xyV.length-1;i++){
@@ -264,10 +277,10 @@ class VisionProgram_BoardReader{
 		const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
 		const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
 		/*
-		circle(xyc1[0],xyc1[1],9);
-		circle(xyc2[0],xyc2[1],9);
-		circle(xyc3[0],xyc3[1],9);
-		circle(xyc4[0],xyc4[1],9);
+		circle([xyc1[0],xyc1[1],9]);
+		circle([xyc2[0],xyc2[1],9]);
+		circle([xyc3[0],xyc3[1],9]);
+		circle([xyc4[0],xyc4[1],9]);
 		*/
 		return;
 	}
@@ -341,6 +354,10 @@ class VisionProgram_BoardReader{
 						 this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",3]);
 				}
 			}
+		}
+		if(mode==2){
+			this.abort("mode==2");
+			return;
 		}
 		console.log("success: "+(Date.now()-animationStartTime));
 		return;
