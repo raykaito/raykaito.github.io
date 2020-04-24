@@ -1,0 +1,75 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Teacher</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=520, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center" width="512">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Sudoku Teacher
+				</Font></TNR>
+				<hr>
+				<input type="button" value="Solve" onclick="sudoku.startSolving()">
+				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="swicch">
+				</br>Progress:<input class="slider" type="range" min="0" max="15" value="0" id="slider" onchange="draw()" oninput="draw()">
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		let table   = document.getElementById('Table' );
+		let body    = document.getElementById('Body'  );
+		let canvas  = document.getElementById('Canvas');
+		let slider  = document.getElementById('slider');
+		let swicch  = document.getElementById('swicch');
+		showObject(body, table);
+
+		sudoku = new Sudoku();
+		initCanvas();
+		initEventlistener();
+		/*
+		sudoku.setTile(1,2,1);
+		sudoku.setTile(7,4,1);
+		sudoku.setTile(5,8,1);
+		sudoku.setTile(2,4,2);
+		sudoku.setTile(7,5,3);
+		sudoku.setTile(5,7,3);
+		sudoku.setTile(0,6,4);
+		sudoku.setTile(4,0,4);
+		sudoku.setTile(2,2,5);
+		sudoku.setTile(4,3,5);
+		sudoku.setTile(6,4,5);
+		sudoku.setTile(0,7,6);
+		sudoku.setTile(8,6,6);
+		sudoku.setTile(7,7,8);
+		sudoku.setTile(4,4,8);
+		sudoku.setTile(8,0,9);
+		sudoku.setTile(0,3,9);*/	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>
