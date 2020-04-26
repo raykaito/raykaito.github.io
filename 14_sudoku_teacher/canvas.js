@@ -55,9 +55,20 @@ function drawGrids(nineByNine=true){
     }
 }
 
+function drawNotes(xi,yi,n){
+    const size = side/3.5;
+    let x=Math.floor((xi+0.5)*side)+((n-1)%3-1)*size;
+    let y=Math.floor((yi+0.55)*side)+(Math.floor((n-1)/3)-1)*size;
+    ct.fillStyle = "darkGray";
+    ct.font = ""+Math.floor(size*0.8)+"px Arial";
+    ct.textAlign = "center";
+    ct.textBaseline = "middle";
+    ct.fillText(n,x,y);
+}
+
 function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
-    const y=Math.floor((yi+0.6)*side);
+    const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
     ct.font = ""+Math.floor(size*0.8)+"px Arial";
     ct.textAlign = "center";

@@ -93,22 +93,13 @@ function setNum(xi,yi,xl,yl){
 		draw();
 		return;
 	}
-	//Clear the number if the last position is out of region
-	if(xil<1||xil>9||yil<1||yil>9){
-		console.log("clear input");
-		sudoku.resetTile(xii-1,yii-1);
-		draw();
-		return;
-	}
-	//Input the number to the cell
-	//const newNum = Math.floor((xil+4)/3)+Math.floor((10-yil)/3);
-	const newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
-	sudoku.setTile(xii-1,yii-1,newNum);
+	let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+	if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
+	sudoku.userInput(xii-1,yii-1,newNum);
 	draw();
 }
 
 function XYtoIndex([x,y]){	return [Math.floor(11*x/width),Math.floor(11*y/height)];}
 function indexToBox([xi,yi]){	return Math.floor(xi/3)+Math.floor(yi/3)*3;}
-//function indexToXY(index){	return [index%9,Math.floor(index/9)];}
 
 console.log("Loaded: inputManager.js");
