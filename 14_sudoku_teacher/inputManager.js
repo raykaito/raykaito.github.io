@@ -57,7 +57,7 @@ function touch(event){
 	lastX = x;
 	lastY = y;
 	event.preventDefault();
-	showInputs(getIndex(x,y));
+	showInputs(XYtoIndex([x,y]));
 }
 
 function release(event){
@@ -71,31 +71,44 @@ function release(event){
 }
 
 function showInputs([xi,yi]){
-	drawGrids();
-	for(let i=0;i<9;i++){
-		let x=xi+i%3-1;
-		let y=yi-(Math.floor(i/3)-1);
-		drawNumber(x,y,i+1,"gray");
-	}
+	drawGrids(false);
+	drawNumber(2,8,1,"gray",side*3);
+	drawNumber(5,8,2,"gray",side*3);
+	drawNumber(8,8,3,"gray",side*3);
+	drawNumber(2,5,4,"gray",side*3);
+	drawNumber(5,5,5,"gray",side*3);
+	drawNumber(8,5,6,"gray",side*3);
+	drawNumber(2,2,7,"gray",side*3);
+	drawNumber(5,2,8,"gray",side*3);
+	drawNumber(8,2,9,"gray",side*3);
 }
 
 function setNum(xi,yi,xl,yl){
 	//get x and y index for initial and last position
-	const [xii,yii] = getIndex(xi,yi);
-	const [xil,yil] = getIndex(xl,yl);
+	const [xii,yii] = XYtoIndex([xi,yi]);
+	const [xil,yil] = XYtoIndex([xl,yl]);
+	//Return if the initial position is invalid
 	if(xii<1||xii>9||yii<1||yii>9){
 		console.log("invalid region");
 		draw();
 		return;
 	}
-	
-	//valid x = [1,2,3] valid y = [1,2,3]
-	const x = (xil+2)-xii;
-	const y = (yii+2)-yil;
-
-	if(x<1||x>3||y<1||y>3) 	sudoku.resetTile(xii-1,yii-1);
-	else 					sudoku.setTile(xii-1,yii-1,x+(y-1)*3);
+	//Clear the number if the last position is out of region
+	if(xil<1||xil>9||yil<1||yil>9){
+		console.log("clear input");
+		sudoku.resetTile(xii-1,yii-1);
+		draw();
+		return;
+	}
+	//Input the number to the cell
+	//const newNum = Math.floor((xil+4)/3)+Math.floor((10-yil)/3);
+	const newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+	sudoku.setTile(xii-1,yii-1,newNum);
 	draw();
 }
+
+function XYtoIndex([x,y]){	return [Math.floor(11*x/width),Math.floor(11*y/height)];}
+function indexToBox([xi,yi]){	return Math.floor(xi/3)+Math.floor(yi/3)*3;}
+//function indexToXY(index){	return [index%9,Math.floor(index/9)];}
 
 console.log("Loaded: inputManager.js");

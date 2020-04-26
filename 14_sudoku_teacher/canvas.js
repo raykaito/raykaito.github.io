@@ -40,7 +40,7 @@ function draw(){
     sudoku.draw();
 }
 
-function drawGrids(){
+function drawGrids(nineByNine=true){
     //Fill with White
     ct.fillStyle = "white";
     ct.fillRect(0, 0, width, height);
@@ -48,18 +48,20 @@ function drawGrids(){
     //Draw Borders
     ct.strokeStyle = "black";
     for(let i=1;i<11;i++){
+        if((i-1)%3!=0&&!nineByNine) continue;
         let w = ((i-1)%3==0?3:1)*pixelRatio;
         line(side*i,side*1,side*i ,side*10,w);
         line(side*1,side*i,side*10,side*i ,w);
     }
 }
 
-function drawNumber(xi,yi,n,color="black"){
+function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
-    const y=Math.floor((yi+0.8)*side);
+    const y=Math.floor((yi+0.6)*side);
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(side*0.8)+"px Arial";
+    ct.font = ""+Math.floor(size*0.8)+"px Arial";
     ct.textAlign = "center";
+    ct.textBaseline = "middle";
     ct.fillText(n,x,y);
 }
 

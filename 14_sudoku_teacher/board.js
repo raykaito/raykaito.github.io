@@ -1,8 +1,3 @@
-function getIndex(xi,yi){	return [Math.floor(11*xi/width),Math.floor(11*yi/height)];}
-function indexToBox(xi,yi){	return Math.floor(xi/3)+Math.floor(yi/3)*3;}
-function indexToXY(index){	return [index%9,Math.floor(index/9)];}
-
-
 class Sudoku{
 constructor(){
 	//Init tiles
@@ -131,7 +126,7 @@ singleCandidate(){
 					//By row
 					candidate[x+9*i][this.tiles[x][y][0]]=0;
 					//By box
-					let box = indexToBox(x,y);//0~9
+					let box = indexToBox([x,y]);//0~9
 					box = (box%3)*3+Math.floor(box/3)*3*9;//upper left of 0~81
 					candidate[box+i%3+Math.floor(i/3)*9][this.tiles[x][y][0]]=0;
 				}
@@ -173,7 +168,7 @@ singlePosition(){
 						//By row
 						candidate[x+9*i]=0;
 						//By box
-						let box = indexToBox(x,y);//0~9
+						let box = indexToBox([x,y]);//0~9
 						box = (box%3)*3+Math.floor(box/3)*3*9;//upper left of 0~81
 						candidate[box+i%3+Math.floor(i/3)*9]=0;
 					}
