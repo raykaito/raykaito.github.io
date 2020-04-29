@@ -23,7 +23,7 @@
 				<input type="button" value="Solve" onclick="sudoku.startSolving()">
 				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
 				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
-				</br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
+				</br>Progress:<input class="slider" type="range" min="0" max="15" value="0" id="slider" onchange="draw()" oninput="draw()">
 			</td>
 		</tr>
 		<tr>
@@ -35,7 +35,6 @@
 	<script type="text/javascript" src="inputManager.js"></script>
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="board.js"></script>
-	<script type="text/javascript" src="sudoku.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
@@ -50,7 +49,7 @@
 
 		sudoku = new Sudoku();
 		initCanvas();
-		initEventlistener();/*
+		initEventlistener();
 		sudoku.userInput(1,2,1);
 		sudoku.userInput(7,4,1);
 		sudoku.userInput(5,8,1);
@@ -67,7 +66,7 @@
 		sudoku.userInput(7,7,8);
 		sudoku.userInput(4,4,8);
 		sudoku.userInput(8,0,9);
-		sudoku.userInput(0,3,9);*/
+		sudoku.userInput(0,3,9);
 	//--> 
 	</script>
 

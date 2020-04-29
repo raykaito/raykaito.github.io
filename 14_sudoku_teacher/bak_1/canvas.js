@@ -55,15 +55,16 @@ function drawGrids(nineByNine=true){
     }
 }
 
-function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
+function drawNotes(xi,yi,n,color="black",slash=false){
     const size = side/3.5;
-    let x=Math.floor((xi+0.5)*side)+((pos-1)%3-1)*size;
-    let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
+    let x=Math.floor((xi+0.5)*side)+((n-1)%3-1)*size;
+    let y=Math.floor((yi+0.55)*side)+(Math.floor((n-1)/3)-1)*size;
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(size*factor)+"px Arial";
+    ct.font = ""+Math.floor(size*(slash?1.2:0.8))+"px Arial";
     ct.textAlign = "center";
     ct.textBaseline = "middle";
-    ct.fillText(str,x,y);
+    if(slash)   n = "/";
+    ct.fillText(n,x,y);
 }
 
 function drawNumber(xi,yi,n,color="black",size=side){
@@ -77,10 +78,10 @@ function drawNumber(xi,yi,n,color="black",size=side){
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime"){
-    const xi =Math.floor((xii+0.05)*side); 
-    const xl =Math.floor((xil+0.95)*side); 
-    const yi =Math.floor((yii+0.05)*side); 
-    const yl =Math.floor((yil+0.95)*side);
+    const xi =Math.floor((xii+0.1)*side); 
+    const xl =Math.floor((xil+0.9)*side); 
+    const yi =Math.floor((yii+0.1)*side); 
+    const yl =Math.floor((yil+0.9)*side);
     ct.strokeStyle = color;
     line(xi,yi,xl,yi,3);
     line(xi,yi,xi,yl,3);
