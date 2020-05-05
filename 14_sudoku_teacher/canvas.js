@@ -49,7 +49,7 @@ function drawGrids(nineByNine=true){
     ct.strokeStyle = "black";
     for(let i=1;i<11;i++){
         if((i-1)%3!=0&&!nineByNine) continue;
-        let w = ((i-1)%3==0?3:1)*pixelRatio;
+        let w = ((i-1)%3==0?3:1);
         line(side*i,side*1,side*i ,side*10,w);
         line(side*1,side*i,side*10,side*i ,w);
     }

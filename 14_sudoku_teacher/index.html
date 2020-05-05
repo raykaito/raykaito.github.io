@@ -20,9 +20,11 @@
 			       Sudoku Teacher
 				</Font></TNR>
 				<hr>
+		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><br>
 				<input type="button" value="Solve" onclick="sudoku.startSolving()">
 				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
 				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
+				<input type="button" value="StartCamera" onclick="startVideo()">
 				</br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
 			</td>
 		</tr>
@@ -37,6 +39,7 @@
 	<script type="text/javascript" src="board.js"></script>
 	<script type="text/javascript" src="sudoku.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/cameScript.js"></script>
 	<script type="text/javascript">
 	<!--
 	 
@@ -46,9 +49,10 @@
 		let slider = document.getElementById('slider');
 		let metho  = document.getElementById('metho');
 		let phase  = document.getElementById('phase');
+		let camera;
 		showObject(body, table);
 
-		sudoku = new Sudoku();
+		const sudoku = new Sudoku();
 		initCanvas();
 		initEventlistener();/*
 		sudoku.userInput(0,0,2);
@@ -78,6 +82,27 @@
 		sudoku.userInput(2,7,6);
 		sudoku.userInput(0,7,7);
 		sudoku.userInput(0,8,3);*/
+		const startVideo = () => {
+			camera = new Camera(document.getElementById("player"));
+			drawVideo();
+		}
+		function drawVideo() {
+		    const vLength = Math.min(camera.video.videoWidth,camera.video.videoHeight,width);
+		    let sx,sy;
+		    if(vLength!=0){
+		        if(camera.video.videoWidth>camera.video.videoHeight){
+		            sx = (camera.video.videoWidth - camera.video.videoHeight)/2;
+		            sy = 0;
+		        }else{
+		            sx = 0;
+		            sy = (camera.video.videoHeight - camera.video.videoWidth)/2;
+		        }
+		        ct.drawImage(camera.video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
+		        drawNumber(5,5,camera.video.videoWidth);
+		        drawNumber(5,6,camera.video.videoHeight);
+		    }
+		    requestAnimationFrame(drawVideo);
+		}
 	//--> 
 	</script>
 

@@ -1,6 +1,6 @@
 class VisionProgram_BoardReader{
 	constructor(){
-		//tells if the program as failed or not
+		//tells if the program has failed or not
 		this.failed;
 		//Orientation of the board
 		this.xc;
