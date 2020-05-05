@@ -59,9 +59,337 @@ solve(){
 	if(this.singlePosition (board)) return true;
 	if(this.singleCandidate(board)) return true;
 	if(this.addNotes       (board)) return true;
+	if(this.noCandidate    (board)) return true;
 	if(this.candidateLine  (board)) return true;
 	if(this.deleteNotes    (board)) return true;
-	if(this.noCandidate    (board)) return true;
+	if(this.nakedPair      (board)) return true;
+	return false;
+}
+nakedPair(board){
+	//Check of pairs or triples in each box
+	for(let box=0;box<9;box++){
+		//Aquire important parameters first
+		let numOpen = 9;
+		let candidates_temp = new Array(9).fill(1);
+		let candidates = new Array(0);
+		//Count Open Tiles and Check Candidates
+		for(let i=0;i<9;i++){
+			const [x,y]=this.biToXY([box,i]);
+			if(board.tile[x][y]!=0){
+				numOpen--;
+				candidates_temp[Math.abs(board.tile[x][y])-1]=0;
+			}
+		}
+		//Organize Candidates
+		for(let i=0;i<9;i++) if(candidates_temp[i]) candidates.splice(candidates.length,0,i+1);
+		for(let pair=2;pair<numOpen;pair++){
+			let combi = new Array(pair);
+			for(let i=0;i<pair;i++) combi[i]=pair-i-1;
+			while(1){
+				//Check for Condition
+				let onlyCombiIndex = new Array();
+				let mixedCombiIndex = new Array();
+				for(let i=0;i<9;i++){
+					const [x,y]=this.biToXY([box,i]);
+					if(board.tile[x][y]!=0)continue;
+					//Duplicates the notes from board 0:erased 1:possible
+					let tempNotes = new Array();
+					for(let j=0;j<9;j++){
+						tempNotes[j]=(board.note[x][y][j]?1:0);
+					}
+					//Inverts the notes if its one of the candidates -1:candidate 0:erased 1: nonCand.
+					for(let j=0;j<pair;j++){
+						tempNotes[candidates[combi[j]]-1] *=-1;
+					}
+					let nonCombiFound = false;
+					let combiFound = false;
+					//Check if the tile only consists of candidates or there is a mixture
+					for(let j=0;j<9;j++){
+						if(tempNotes[j]== 1) nonCombiFound = true;
+						if(tempNotes[j]==-1) combiFound = true;
+					}
+					if(combiFound){
+						if(nonCombiFound){
+							mixedCombiIndex[mixedCombiIndex.length]=this.XYToin([x,y]);
+						}else{
+							onlyCombiIndex[onlyCombiIndex.length]=this.XYToin([x,y]);
+						}
+					}
+				}
+				if(onlyCombiIndex.length>=pair&&mixedCombiIndex.length>0){
+					//Get Array of X's and Y's
+					let x = new Array();
+					let y = new Array();
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						[x[i],y[i]] = this.inToXY(mixedCombiIndex[i]);
+					}
+					//Get notes to erase
+					let nums = new Array(pair);
+					for(let i=0;i<pair;i++)nums[i]=candidates[combi[i]];
+					//Get the message
+					const msg = "Naked Pair/Triple Found in";
+					const hiliNum = null;
+					//Prepare Notes to hilight
+					let hiliNote = new Array(0);
+					for(let i=0;i<onlyCombiIndex.length;i++){
+						const [x,y] = this.inToXY(onlyCombiIndex[i]);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+							}
+						}
+					}
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						const [x,y] = this.inToXY(mixedCombiIndex[i]);
+						console.log(x,y);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];
+							}
+						}
+					}
+					const [xii,yii] = this.biToXY([box,0]);
+					const [xil,yil] = this.biToXY([box,8]);
+					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					return true;
+				}
+				//update combi
+				let resetDigitCounter = 0;
+				for(let i=0;i<pair;i++){
+					if(combi[i]==numOpen-1-i) resetDigitCounter++;
+				}
+				if(resetDigitCounter==pair) break;
+				if(resetDigitCounter==0){
+					combi[0]++;
+				}else{
+					for(let i=0;i<=resetDigitCounter;i++){
+						combi[i]=combi[resetDigitCounter]+resetDigitCounter-i+1;
+					}
+				}
+					
+			}
+		}
+	}
+	//Check of pairs or triples in each row
+	for(let row=0;row<9;row++){
+		//Aquire important parameters first
+		let numOpen = 9;
+		let candidates_temp = new Array(9).fill(1);
+		let candidates = new Array(0);
+		//Count Open Tiles and Check Candidates
+		for(let i=0;i<9;i++){
+			const [x,y]=[i,row];
+			if(board.tile[x][y]!=0){
+				numOpen--;
+				candidates_temp[Math.abs(board.tile[x][y])-1]=0;
+			}
+		}
+		//Organize Candidates
+		for(let i=0;i<9;i++) if(candidates_temp[i]) candidates.splice(candidates.length,0,i+1);
+		for(let pair=2;pair<numOpen;pair++){
+			let combi = new Array(pair);
+			for(let i=0;i<pair;i++) combi[i]=pair-i-1;
+			while(1){
+				//Check for Condition
+				let onlyCombiIndex = new Array();
+				let mixedCombiIndex = new Array();
+				for(let i=0;i<9;i++){
+					const [x,y]=[i,row];
+					if(board.tile[x][y]!=0)continue;
+					//Duplicates the notes from board 0:erased 1:possible
+					let tempNotes = new Array();
+					for(let j=0;j<9;j++){
+						tempNotes[j]=(board.note[x][y][j]?1:0);
+					}
+					//Inverts the notes if its one of the candidates -1:candidate 0:erased 1: nonCand.
+					for(let j=0;j<pair;j++){
+						tempNotes[candidates[combi[j]]-1] *=-1;
+					}
+					let nonCombiFound = false;
+					let combiFound = false;
+					//Check if the tile only consists of candidates or there is a mixture
+					for(let j=0;j<9;j++){
+						if(tempNotes[j]== 1) nonCombiFound = true;
+						if(tempNotes[j]==-1) combiFound = true;
+					}
+					if(combiFound){
+						if(nonCombiFound){
+							mixedCombiIndex[mixedCombiIndex.length]=this.XYToin([x,y]);
+						}else{
+							onlyCombiIndex[onlyCombiIndex.length]=this.XYToin([x,y]);
+						}
+					}
+				}
+				if(onlyCombiIndex.length>=pair&&mixedCombiIndex.length>0){
+					//Get Array of X's and Y's
+					let x = new Array();
+					let y = new Array();
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						[x[i],y[i]] = this.inToXY(mixedCombiIndex[i]);
+					}
+					//Get notes to erase
+					let nums = new Array(pair);
+					for(let i=0;i<pair;i++)nums[i]=candidates[combi[i]];
+					//Get the message
+					const msg = "Naked Pair/Triple Found in Row";
+					const hiliNum = null;
+					//Prepare Notes to hilight
+					let hiliNote = new Array(0);
+					for(let i=0;i<onlyCombiIndex.length;i++){
+						const [x,y] = this.inToXY(onlyCombiIndex[i]);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+							}
+						}
+					}
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						const [x,y] = this.inToXY(mixedCombiIndex[i]);
+						console.log(x,y);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];
+							}
+						}
+					}
+					const [xii,yii] = [0,row];
+					const [xil,yil] = [8,row];
+					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					return true;
+				}
+				//update combi
+				let resetDigitCounter = 0;
+				for(let i=0;i<pair;i++){
+					if(combi[i]==numOpen-1-i) resetDigitCounter++;
+				}
+				if(resetDigitCounter==pair) break;
+				if(resetDigitCounter==0){
+					combi[0]++;
+				}else{
+					for(let i=0;i<=resetDigitCounter;i++){
+						combi[i]=combi[resetDigitCounter]+resetDigitCounter-i+1;
+					}
+				}
+					
+			}
+		}
+	}
+	//Check of pairs or triples in each col
+	for(let col=0;col<9;col++){
+		//Aquire important parameters first
+		let numOpen = 9;
+		let candidates_temp = new Array(9).fill(1);
+		let candidates = new Array(0);
+		//Count Open Tiles and Check Candidates
+		for(let i=0;i<9;i++){
+			const [x,y]=[col,i];
+			if(board.tile[x][y]!=0){
+				numOpen--;
+				candidates_temp[Math.abs(board.tile[x][y])-1]=0;
+			}
+		}
+		//Organize Candidates
+		for(let i=0;i<9;i++) if(candidates_temp[i]) candidates.splice(candidates.length,0,i+1);
+		for(let pair=2;pair<numOpen;pair++){
+			let combi = new Array(pair);
+			for(let i=0;i<pair;i++) combi[i]=pair-i-1;
+			while(1){
+				//Check for Condition
+				let onlyCombiIndex = new Array();
+				let mixedCombiIndex = new Array();
+				for(let i=0;i<9;i++){
+					const [x,y]=[i,col];
+					if(board.tile[x][y]!=0)continue;
+					//Duplicates the notes from board 0:erased 1:possible
+					let tempNotes = new Array();
+					for(let j=0;j<9;j++){
+						tempNotes[j]=(board.note[x][y][j]?1:0);
+					}
+					//Inverts the notes if its one of the candidates -1:candidate 0:erased 1: nonCand.
+					for(let j=0;j<pair;j++){
+						tempNotes[candidates[combi[j]]-1] *=-1;
+					}
+					let nonCombiFound = false;
+					let combiFound = false;
+					//Check if the tile only consists of candidates or there is a mixture
+					for(let j=0;j<9;j++){
+						if(tempNotes[j]== 1) nonCombiFound = true;
+						if(tempNotes[j]==-1) combiFound = true;
+					}
+					if(combiFound){
+						if(nonCombiFound){
+							mixedCombiIndex[mixedCombiIndex.length]=this.XYToin([x,y]);
+						}else{
+							onlyCombiIndex[onlyCombiIndex.length]=this.XYToin([x,y]);
+						}
+					}
+				}
+				if(onlyCombiIndex.length>=pair&&mixedCombiIndex.length>0){
+					//Get Array of X's and Y's
+					let x = new Array();
+					let y = new Array();
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						[x[i],y[i]] = this.inToXY(mixedCombiIndex[i]);
+					}
+					//Get notes to erase
+					let nums = new Array(pair);
+					for(let i=0;i<pair;i++)nums[i]=candidates[combi[i]];
+					//Get the message
+					const msg = "Naked Pair/Triple Found in Col";
+					const hiliNum = null;
+					//Prepare Notes to hilight
+					let hiliNote = new Array(0);
+					for(let i=0;i<onlyCombiIndex.length;i++){
+						const [x,y] = this.inToXY(onlyCombiIndex[i]);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+							}
+						}
+					}
+					for(let i=0;i<mixedCombiIndex.length;i++){
+						const [x,y] = this.inToXY(mixedCombiIndex[i]);
+						console.log(x,y);
+						for(let j=0;j<pair;j++){
+							const num = candidates[combi[j]];
+							if(board.note[x][y][num-1]){
+								hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
+								hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];
+							}
+						}
+					}
+					const [xii,yii] = [col,0];
+					const [xil,yil] = [col,8];
+					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					return true;
+				}
+				//update combi
+				let resetDigitCounter = 0;
+				for(let i=0;i<pair;i++){
+					if(combi[i]==numOpen-1-i) resetDigitCounter++;
+				}
+				if(resetDigitCounter==pair) break;
+				if(resetDigitCounter==0){
+					combi[0]++;
+				}else{
+					for(let i=0;i<=resetDigitCounter;i++){
+						combi[i]=combi[resetDigitCounter]+resetDigitCounter-i+1;
+					}
+				}
+					
+			}
+		}
+	}
 	return false;
 }
 noCandidate(board){
@@ -151,7 +479,7 @@ candidateLine(board){
 						hiliNote[hiliNoteCounter] = [xCandidateLine+1,i+1,num,num,"darkGray"];
 						hiliNote[hiliNoteCounter+1] = [xCandidateLine+1,i+1,num,"/","red",1.2];
 						const hiliBox = [[xCandidateLine+1,1,xCandidateLine+1,9,"lime"]];
-						this.action("programProgressedNote",xCandidateLine,i,num,[msg,hiliNum,hiliNote,hiliBox]);
+						this.action("programProgressedNote",[xCandidateLine],[i],[num],[msg,hiliNum,hiliNote,hiliBox]);
 						return true;
 					}
 				}
@@ -166,7 +494,7 @@ candidateLine(board){
 						hiliNote[hiliNoteCounter]= [i+1,yCandidateLine+1,num,num,"darkGray"];
 						hiliNote[hiliNoteCounter+1]= [i+1,yCandidateLine+1,num,"/","red",1.2];
 						const hiliBox = [[1,yCandidateLine+1,9,yCandidateLine+1,"lime"]];
-						this.action("programProgressedNote",i,yCandidateLine,num,[msg,hiliNum,hiliNote,hiliBox]);
+						this.action("programProgressedNote",[i],[yCandidateLine],[num],[msg,hiliNum,hiliNote,hiliBox]);
 						return true;
 					}
 				}
@@ -354,6 +682,12 @@ singlePosition(board){
 }
 biToXY([box,i]){
 	const index = (box%3)*3+Math.floor(box/3)*3*9+i%3+Math.floor(i/3)*9;//upper left of 0~81
-	return [index%9,Math.floor(index/9)]
+	return [index%9,Math.floor(index/9)];
+}
+inToXY(index){
+	return [index%9,Math.floor(index/9)];
+}
+XYToin([x,y]){
+	return x+y*9;
 }
 }

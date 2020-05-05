@@ -33,6 +33,7 @@ addOriginalNumber(x,y,num){
 	this.tile[x][y] = -num;
 	this.msg = "Original Number Added";
 	this.par = [x,y];
+	console.log("sudoku.userInput("+x+","+y+","+num+");");
 }
 addUserInputNumber(x,y,num){
 	this.tile[x][y] = num;
@@ -52,7 +53,11 @@ programProgressed(x,y,num,[msg,hiliNum,hiliNote,hiliBox]){
 	this.hiliBox = hiliBox;
 }
 programProgressedNote(x,y,num,[msg,hiliNum,hiliNote,hiliBox]){
-	this.note[x][y][num-1] = false;
+	for(let j=0;j<x.length;j++){
+		for(let i=0;i<num.length;i++){
+			this.note[x[j]][y[j]][num[i]-1] = false;
+		}
+	}
 	this.msg = msg;
 	this.hiliNum = hiliNum;
 	this.hiliNote= hiliNote;
