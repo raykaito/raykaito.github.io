@@ -15,7 +15,7 @@ function resize(){
     
     canvas.width = Math.floor(window.innerWidth-20);
     if(Math.floor(window.innerWidth)>800)   canvas.width = 780;
-    if(Math.floor(window.innerWidth)<520)   canvas.width = 500;                                    
+    if(Math.floor(window.innerWidth)<320)   canvas.width = 300;                                    
     canvas.height = canvas.width;
 
     canvas.style.width  = canvas.width +"px";
