@@ -61,6 +61,7 @@ solve(){
 	if(this.addNotes       (board)) return true;
 	if(this.noCandidate    (board)) return true;
 	if(this.candidateLine  (board)) return true;
+	if(this.candidateBox   (board)) return true;
 	if(this.deleteNotes    (board)) return true;
 	if(this.nakedPair      (board)) return true;
 	return false;
@@ -142,7 +143,6 @@ nakedPair(board){
 					}
 					for(let i=0;i<mixedCombiIndex.length;i++){
 						const [x,y] = this.inToXY(mixedCombiIndex[i]);
-						console.log(x,y);
 						for(let j=0;j<pair;j++){
 							const num = candidates[combi[j]];
 							if(board.note[x][y][num-1]){
@@ -392,27 +392,8 @@ nakedPair(board){
 	}
 	return false;
 }
-noCandidate(board){
-	for(let x=0;x<9;x++){
-		for(let y=0;y<9;y++){
-			if(board.tile[x][y]!=0) continue;
-			let candidateCounter = 0;
-			let number = -1;
-			for(let i=0;i<9;i++){
-				if(board.note[x][y][i]){
-					candidateCounter++;
-					number = i+1;
-				}
-			}
-			if(candidateCounter==1){
-				this.action("programProgressed",x,y,number,["No Other Candidate",x+y*9]);
-				return true;
-			}
-		}
-	}
-	return false;
-}
 deleteNotes(board){
+	let changed = false;
 	let newNote = new Array(9);
 	for(let x=0;x<9;x++){
 		newNote[x] = new Array(9);
@@ -433,11 +414,156 @@ deleteNotes(board){
 					const box = indexToBox([x,y]);//0~9
 					const [xtemp,ytemp] = this.biToXY([box,i]);
 					newNote[xtemp][ytemp][num-1]=false;
+					if(board.note[xtemp][ytemp][num-1]) changed=true;
 				}
 			}
 		}
 	}
 	this.action("deleteNotes",newNote);
+	return changed;
+}
+candidateBox(board){
+	//Check for row
+	for(let row=0;row<9;row++){
+		//-3:TileFound -2:Found in Multi Boxes -1:Initial >=0:Box Number
+		let liveNotes = new Array(9).fill(-1);
+		for(let i=0;i<9;i++){
+			const [x,y] = [i,row];
+			if(board.tile[x][y]!=0){
+				liveNotes[Math.abs(board.tile[x][y]-1)]=-3;
+			}else{
+				for(let note=0;note<9;note++){
+					if(board.note[x][y][note]){
+						if(liveNotes[note]==-1){
+							//First Box Found
+							liveNotes[note] = this.XYToBi([x,y])[0];
+						}else if(liveNotes[note]>=0){
+							if(liveNotes[note]!=this.XYToBi([x,y])[0]){
+								//Second Box Did not Match the first
+								liveNotes[note] = -2;
+							}
+						}
+					}
+				}
+			}
+		}
+		for(let note=0;note<9;note++){
+			if(liveNotes[note]<=0) continue;
+			let xs = new Array(0);
+			let ys = new Array(0);
+			const box = liveNotes[note];
+			for(let i=0;i<9;i++){
+				const [x,y] = this.biToXY([box,i]);
+				if(y==row) continue;
+				if(board.tile[x][y]!=0) continue;
+				if(board.note[x][y][note]){
+					xs[xs.length] = x;
+					ys[ys.length] = y;
+				}
+			}
+			if(xs.length>0){
+				const num = note+1;
+				//Get the message
+				const msg = "Candidate Box";
+				const hiliNum = null;
+				//Prepare Notes to hilight
+				let hiliNote = new Array(0);
+				//Notes to hilight
+				for(let i=0;i<9;i++){
+					const [x,y] = [i,row];
+					if(board.tile[x][y]!=0) continue;
+					if(board.note[x][y][note]){
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+					}
+				}
+				//Notes to eleminate
+				for(let i=0;i<9;i++){
+					const [x,y] = this.biToXY([box,i]);
+					if(board.tile[x][y]!=0) continue;
+					if(y==row)continue;
+					if(board.note[x][y][note]){
+						hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];					}
+				}
+				const [xii,yii] = [0,row];
+				const [xil,yil] = [8,row];
+				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox]);
+				return true;
+			}
+		}
+	}
+	//return false;
+	//Check for col
+	for(let col=0;col<9;col++){
+		//-3:TileFound -2:Found in Multi Boxes -1:Initial >=0:Box Number
+		let liveNotes = new Array(9).fill(-1);
+		for(let i=0;i<9;i++){
+			const [x,y] = [col,i];
+			if(board.tile[x][y]!=0){
+				liveNotes[Math.abs(board.tile[x][y]-1)]=-3;
+			}else{
+				for(let note=0;note<9;note++){
+					if(board.note[x][y][note]){
+						if(liveNotes[note]==-1){
+							//First Box Found
+							liveNotes[note] = this.XYToBi([x,y])[0];
+						}else if(liveNotes[note]>=0){
+							if(liveNotes[note]!=this.XYToBi([x,y])[0]){
+								//Second Box Did not Match the first
+								liveNotes[note] = -2;
+							}
+						}
+					}
+				}
+			}
+		}
+		for(let note=0;note<9;note++){
+			if(liveNotes[note]<=0) continue;
+			let xs = new Array(0);
+			let ys = new Array(0);
+			const box = liveNotes[note];
+			for(let i=0;i<9;i++){
+				const [x,y] = this.biToXY([box,i]);
+				if(x==col) continue;
+				if(board.tile[x][y]!=0) continue;
+				if(board.note[x][y][note]){
+					xs[xs.length] = x;
+					ys[ys.length] = y;
+				}
+			}
+			if(xs.length>0){
+				const num = note+1;
+				//Get the message
+				const msg = "Candidate Box";
+				const hiliNum = null;
+				//Prepare Notes to hilight
+				let hiliNote = new Array(0);
+				//Notes to hilight
+				for(let i=0;i<9;i++){
+					const [x,y] = [col,i];
+					if(board.tile[x][y]!=0) continue;
+					if(board.note[x][y][note]){
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+					}
+				}
+				//Notes to eleminate
+				for(let i=0;i<9;i++){
+					const [x,y] = this.biToXY([box,i]);
+					if(board.tile[x][y]!=0) continue;
+					if(x==col)continue;
+					if(board.note[x][y][note]){
+						hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];					}
+				}
+				const [xii,yii] = [col,0];
+				const [xil,yil] = [col,8];
+				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox]);
+				return true;
+			}
+		}
+	}
 	return false;
 }
 candidateLine(board){
@@ -478,7 +604,9 @@ candidateLine(board){
 						const hiliNum = null;
 						hiliNote[hiliNoteCounter] = [xCandidateLine+1,i+1,num,num,"darkGray"];
 						hiliNote[hiliNoteCounter+1] = [xCandidateLine+1,i+1,num,"/","red",1.2];
-						const hiliBox = [[xCandidateLine+1,1,xCandidateLine+1,9,"lime"]];
+						const [xii,yii] = this.biToXY([box,0]);
+						const [xil,yil] = this.biToXY([box,8]);
+						const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
 						this.action("programProgressedNote",[xCandidateLine],[i],[num],[msg,hiliNum,hiliNote,hiliBox]);
 						return true;
 					}
@@ -493,12 +621,34 @@ candidateLine(board){
 						const hiliNum = null;
 						hiliNote[hiliNoteCounter]= [i+1,yCandidateLine+1,num,num,"darkGray"];
 						hiliNote[hiliNoteCounter+1]= [i+1,yCandidateLine+1,num,"/","red",1.2];
-						const hiliBox = [[1,yCandidateLine+1,9,yCandidateLine+1,"lime"]];
+						const [xii,yii] = this.biToXY([box,0]);
+						const [xil,yil] = this.biToXY([box,8]);
+						const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
 						this.action("programProgressedNote",[i],[yCandidateLine],[num],[msg,hiliNum,hiliNote,hiliBox]);
 						return true;
 					}
 				}
 			}		
+		}
+	}
+	return false;
+}
+noCandidate(board){
+	for(let x=0;x<9;x++){
+		for(let y=0;y<9;y++){
+			if(board.tile[x][y]!=0) continue;
+			let candidateCounter = 0;
+			let number = -1;
+			for(let i=0;i<9;i++){
+				if(board.note[x][y][i]){
+					candidateCounter++;
+					number = i+1;
+				}
+			}
+			if(candidateCounter==1){
+				this.action("programProgressed",x,y,number,["No Other Candidate",x+y*9]);
+				return true;
+			}
 		}
 	}
 	return false;
@@ -679,6 +829,11 @@ singlePosition(board){
 		}
 	}
 	return false;
+}
+XYToBi([x,y]){
+	const box = Math.floor(x/3)+Math.floor(y/3)*3;
+	const i   = Math.floor(x%3)+Math.floor(y%3)*3;
+	return [box,i];
 }
 biToXY([box,i]){
 	const index = (box%3)*3+Math.floor(box/3)*3*9+i%3+Math.floor(i/3)*9;//upper left of 0~81
