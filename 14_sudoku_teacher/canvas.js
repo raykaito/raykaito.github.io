@@ -60,7 +60,7 @@ function drawGrids(nineByNine=true){
     if(nineByNine){
         for(let i=0;i<images.length;i++){
             ct.drawImage(images[i][0],0,0,images[i][0].width,images[i][0].height,(images[i][1]+1.1)*side,(images[i][2]+1.1)*side,side*0.8,side*0.8);
-            //ct.drawImage(images[i]);
+            //ct.drawImage(images[i][0],(images[i][1]+1.1)*side,(images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
     }
 }

@@ -425,6 +425,8 @@ class FindBlob extends ImageData{
 		for(let i=0;i<this.area;i++){
 			if(this.getPix(this.imgOut,i,1)==0&&this.blobMap[i]!=(10*(this.maxAreaIndex+1))){
 				this.setPix(i, 255, "all");
+			}else if(this.getPix(this.imgOut,i,1)==0){
+				this.setPix(i, 0, "all");
 			}
 		}
 	}
