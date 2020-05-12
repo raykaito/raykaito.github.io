@@ -21,7 +21,8 @@ class VisionProgram_BoardReader{
         this.scanInterval = 1;
         this.lastTime = Date.now();
         //Info about empty cells
-        this.emptyCells = new Array(64);
+        this.emptyCell = new Array(81).fill(0);
+        this.cellMatchCounter = 0;
     }
     startScan(canvas,ct){
         //Initialize the scanner
@@ -342,20 +343,8 @@ class VisionProgram_BoardReader{
     scanEmptyCells(ct){
         for(let xi=0;xi<9;xi++){
             for(let yi=0;yi<9;yi++){
-                if(this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)){
-                    this.emptyCells[xi+9*yi] = 1;
-                    /*
-                    line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),3*pixelRatio,"red");
-                    line(this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),3*pixelRatio,"red");
-                    */
-                }else{
-                    this.emptyCells[xi+9*yi] = 0;
-                    //Create the Image for each number
-                    const [x,y] = this.getXYfromIndex(xi+this.xIndexMin,yi+this.yIndexMin);
-                    const imgData = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
-                    images[images.length]=[imgData.updateDisplayImage(),xi,yi];
+                const newCell = (this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)?1:-1);
+                if(newCell==-1){
                     //Draw Rectangle to show which cell has a number in it
                     line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
                          this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
@@ -366,13 +355,40 @@ class VisionProgram_BoardReader{
                     line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
                          this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
                 }
+                if(newCell*this.emptyCell[xi+yi*9]<0){
+                    this.resetCellMatchCounter();
+                    this.abort("Empty Cell Not Match");
+                    return;
+                }else{
+                    this.emptyCell[xi+yi*9] = newCell;
+                }
             }
         }
         if(this.mode==2){
             this.abort("mode==2");
             return;
         }
+        this.cellMatchCounter++;
+        if(this.cellMatchCounter<15){
+            this.abort("cell match counter didn't meet the req.");
+            return;
+        }
+        for(let xi=0;xi<9;xi++){
+            for(let yi=0;yi<9;yi++){
+                if(!this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)){
+                    //Create the Image for each number
+                    const [x,y] = this.getXYfromIndex(xi+this.xIndexMin,yi+this.yIndexMin);
+                    const imgData = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
+                    images[images.length]=[imgData.updateDisplayImage(),xi,yi];
+                }
+            }
+        }
         console.log("success: "+(Date.now()-animationStartTime));
+        return;
+    }
+    resetCellMatchCounter(){
+        this.emptyCell = new Array(81).fill(0);
+        this.cellMatchCounter = 0;
         return;
     }
     checkEmpty(xi,yi,ct){
