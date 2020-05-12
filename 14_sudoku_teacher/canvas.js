@@ -1,8 +1,10 @@
 let pixelRatio;
 let width;
 let height;
-let side;
+let side;//Cell Length = Width/11
 let ct;
+let canvasScale;
+let images = new Array();
 
 function initCanvas(){
     ct = canvas.getContext("2d");
@@ -35,6 +37,8 @@ function resize(){
 }
 
 function draw(){
+    ct.restore();
+    ct.save();
     drawGrids();
     //Draw Sudoku
     sudoku.draw();
@@ -50,8 +54,12 @@ function drawGrids(nineByNine=true){
     for(let i=1;i<11;i++){
         if((i-1)%3!=0&&!nineByNine) continue;
         let w = ((i-1)%3==0?3:1);
-        line(side*i,side*1,side*i ,side*10,w);
-        line(side*1,side*i,side*10,side*i ,w);
+        drawLine(side*i,side*1,side*i ,side*10,w);
+        drawLine(side*1,side*i,side*10,side*i ,w);
+    }
+    for(let i=0;i<images.length;i++){
+        ct.drawImage(images[i][0],0,0,images[i][0].width,images[i][0].height,(images[i][1]+1.1)*side,(images[i][2]+1.1)*side,side*0.8,side*0.8);
+        //ct.drawImage(images[i]);
     }
 }
 
@@ -67,6 +75,10 @@ function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
 }
 
 function drawNumber(xi,yi,n,color="black",size=side){
+    //fill with white first
+    ct.fillStyle = "white";
+    ct.fillRect((xi+0.05)*side,(yi+0.05)*side,side*0.9,side*0.9);
+    //Draw Number
     const x=Math.floor((xi+0.5)*side);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
@@ -82,13 +94,13 @@ function drawRectIndex(xii,yii,xil,yil,color="lime"){
     const yi =Math.floor((yii+0.05)*side); 
     const yl =Math.floor((yil+0.95)*side);
     ct.strokeStyle = color;
-    line(xi,yi,xl,yi,3);
-    line(xi,yi,xi,yl,3);
-    line(xl,yi,xl,yl,3);
-    line(xi,yl,xl,yl,3);
+    drawLine(xi,yi,xl,yi,3);
+    drawLine(xi,yi,xi,yl,3);
+    drawLine(xl,yi,xl,yl,3);
+    drawLine(xi,yl,xl,yl,3);
 }
 
-function line(xi,yi,xii,yii,w){
+function drawLine(xi,yi,xii,yii,w){
     ct.lineWidth = Math.floor(w);
     xi = Math.floor(xi );
     xii= Math.floor(xii);
@@ -98,6 +110,71 @@ function line(xi,yi,xii,yii,w){
     ct.moveTo(xi ,yi );
     ct.lineTo(xii,yii);
     ct.stroke();
+}
+
+function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4){
+    const dy = (height+4)*index;
+    const dx = width-array.length;
+    if(array.length<width) width = array.length;
+    ct.fillStyle = "rgb(255,  0,255)";
+    ct.fillRect(dx+1,dy+1,width+2,height+2);
+    ct.fillStyle = "rgb(255,255,255)";
+    ct.fillRect(dx+2,dy+2,width,height);
+    ct.fillStyle = "rgb(  0,  0,  0)";
+    const arrayMax = getAbsoluteMinMax(array)[1];
+    const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
+    for(let i=0;i<array.length;i++){
+        const x = dx+2+(i/array.length)*width;
+        const y = dy+height+2-Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin));
+        ct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
+    }
+}
+const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
+    ct.strokeStyle = color;
+    ct.lineWidth = w;
+    ct.beginPath();
+    ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
+    ct.stroke();
+}
+
+function rotateCanvas(x=ocanvas.width/2, y=ocanvas.height/2, deg=20,ocanvas,oct){
+    const r = deg2rad(deg);
+
+    const tcanvas = document.createElement("canvas");
+    tcanvas.width = ocanvas.width;
+    tcanvas.height= ocanvas.height;
+    const tct = tcanvas.getContext("2d");
+    tct.drawImage(ocanvas,0,0);
+
+    oct.save();
+    oct.translate(x,y);
+    oct.rotate( r );
+    oct.translate( -x, -y );
+    oct.fillRect(100,100,100,100);
+    oct.drawImage( tcanvas, 0, 0 );
+    oct.restore();
+
+    ct.translate(x/canvasScale,y/canvasScale);
+    ct.rotate( -r );
+    ct.translate( -x/canvasScale, -y/canvasScale );
+}
+
+const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
+    ct.strokeStyle = color;
+    ct.lineWidth = w;
+    ct.beginPath();
+    ct.moveTo(xi/cs ,yi /cs);
+    ct.lineTo(xii/cs,yii/cs);
+    ct.stroke();
+}
+
+const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{
+    cs = (absolute?1:canvasScale);
+    ct.fillStyle = color;
+    ct.font = font;
+    ct.fillText(string,x/cs,y/cs);
 }
 
 console.log("Loaded: canvas.js");

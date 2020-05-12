@@ -24,7 +24,7 @@
 				<input type="button" value="Solve" onclick="sudoku.startSolving()">
 				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
 				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
-				<input type="button" value="StartCamera" onclick="startCamera()">
+				<input type="button" value="Scan" onclick="startScan()">
 				</br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
 			</td>
 		</tr>
@@ -38,7 +38,12 @@
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="board.js"></script>
 	<script type="text/javascript" src="sudoku.js"></script>
-	<script type="text/javascript" src="scanner.js"></script>
+	<script type="text/javascript" src="reader.js"></script>
+	<script type="text/javascript" src="camera.js"></script>
+	<script type="text/javascript" src="functions/TrigScript.js"></script>
+	<script type="text/javascript" src="functions/DataScript.js"></script>
+	<script type="text/javascript" src="functions/StatScript.js"></script>
+	<script type="text/javascript" src="functions/EyesScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
@@ -54,7 +59,16 @@
 
 		const sudoku = new Sudoku();
 		initCanvas();
-		initEventlistener();/*
+		initEventlistener();
+
+		let scanner,animationStartTime;
+		const startScan = () => {
+			scanner = new Scanner();
+		}
+		const handleSuccess = (stream) => {scanner.handleSuccess(stream);}
+		const drawVideo   = () => {scanner.drawVideo();}
+		const scanNumbers = () => {scanner.scanNumbers();}
+		/*
 		sudoku.userInput(0,0,2);
 		sudoku.userInput(1,2,7);
 		sudoku.userInput(2,2,3);
@@ -82,23 +96,6 @@
 		sudoku.userInput(2,7,6);
 		sudoku.userInput(0,7,7);
 		sudoku.userInput(0,8,3);*/
-		const drawVideo = () => {
-		    const vLength = Math.min(video.videoWidth,video.videoHeight,width);
-		    let sx,sy;
-		    if(vLength!=0){
-		        if(video.videoWidth>video.videoHeight){
-		            sx = (video.videoWidth - video.videoHeight)/2;
-		            sy = 0;
-		        }else{
-		            sx = 0;
-		            sy = (video.videoHeight - video.videoWidth)/2;
-		        }
-		        ct.drawImage(video,sx,sy,vLength,vLength,0,0,canvas.width,canvas.height);
-		        drawNumber(5,5,video.videoWidth);
-		        drawNumber(5,6,video.videoHeight);
-		    }
-		    requestAnimationFrame(drawVideo);
-		}
 	//--> 
 	</script>
 
