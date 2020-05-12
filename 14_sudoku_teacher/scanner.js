@@ -4,10 +4,10 @@ class Scanner{
         this.ocanvas = document.createElement("canvas");
         this.oct = this.ocanvas.getContext("2d");
         this.vLength = 0;
-        images = new Array()
 
         //Initialize Board Reader Class
         this.boardV = new VisionProgram_BoardReader();
+        this.numberV= new VisionProgram_NumberReader();
 
         this.front=false;
         this.constraints = {
@@ -45,19 +45,21 @@ class Scanner{
         if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
         ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,0,0,width,height);
-        const result = this.boardV.startScan(this.ocanvas,this.oct);
-        //drawNumber(5,5,video.videoWidth);
-        //drawNumber(5,6,video.videoHeight);
+        const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
         else{
             this.stopVideo();
-            requestAnimationFrame(draw);
+            requestAnimationFrame(scanNumbers);
         }
     }
-    scanNumbers(){
+    drawProgress(){
         animationStartTime = Date.now();
-        this.boardV.startReading();
-        requestAnimationFrame(scanNumbers);
+        draw();
+        const result = this.numberV.makeProgress();
+        if(!result) requestAnimationFrame(scanNumbers);
+        else{
+            //draw();
+        }
     }
     resizeOcanvas(newVlength){
         this.vLength = newVlength;

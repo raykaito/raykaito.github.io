@@ -4,7 +4,6 @@ let height;
 let side;//Cell Length = Width/11
 let ct;
 let canvasScale;
-let images = new Array();
 
 function initCanvas(){
     ct = canvas.getContext("2d");
@@ -56,12 +55,6 @@ function drawGrids(nineByNine=true){
         let w = ((i-1)%3==0?3:1);
         drawLine(side*i,side*1,side*i ,side*10,w);
         drawLine(side*1,side*i,side*10,side*i ,w);
-    }
-    if(nineByNine){
-        for(let i=0;i<images.length;i++){
-            ct.drawImage(images[i][0],0,0,images[i][0].width,images[i][0].height,(images[i][1]+1.1)*side,(images[i][2]+1.1)*side,side*0.8,side*0.8);
-            //ct.drawImage(images[i][0],(images[i][1]+1.1)*side,(images[i][2]+1.1)*side);//,side*0.8,side*0.8);
-        }
     }
 }
 

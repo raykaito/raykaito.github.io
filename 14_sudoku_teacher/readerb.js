@@ -24,7 +24,7 @@ class VisionProgram_BoardReader{
         this.emptyCell = new Array(81).fill(0);
         this.cellMatchCounter = 0;
     }
-    startScan(canvas,ct){
+    startScan(canvas,ct,numberV){
         //Initialize the scanner
         this.init();
         if(this.failed) return false;
@@ -41,7 +41,7 @@ class VisionProgram_BoardReader{
         if(this.failed) return false;
 
         //scan the numbers
-        this.scanEmptyCells(ct);
+        this.scanEmptyCells(ct,numberV);
         if(this.failed) return false;
         return true;
     }
@@ -340,7 +340,7 @@ class VisionProgram_BoardReader{
         
         return [x,y];
     }
-    scanEmptyCells(ct){
+    scanEmptyCells(ct,numberV){
         for(let xi=0;xi<9;xi++){
             for(let yi=0;yi<9;yi++){
                 const newCell = (this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)?1:-1);
@@ -373,6 +373,7 @@ class VisionProgram_BoardReader{
             this.abort("cell match counter didn't meet the req.");
             return;
         }
+        numberV.reset();
         for(let xi=0;xi<9;xi++){
             for(let yi=0;yi<9;yi++){
                 if(!this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)){
@@ -387,7 +388,7 @@ class VisionProgram_BoardReader{
                     //const img_number = img_blob.blob;
                     //this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
                     //images[images.length]=[img_original.updateDisplayImage(),xi,yi];
-                    images[images.length]=[img_original.updateDisplayImage(),xi,yi];
+                    numberV.images[numberV.images.length]=[img_original,xi,yi];
                 }
             }
         }

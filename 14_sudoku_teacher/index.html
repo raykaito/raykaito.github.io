@@ -38,8 +38,9 @@
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="board.js"></script>
 	<script type="text/javascript" src="sudoku.js"></script>
-	<script type="text/javascript" src="reader.js"></script>
-	<script type="text/javascript" src="camera.js"></script>
+	<script type="text/javascript" src="readerb.js"></script>
+	<script type="text/javascript" src="readern.js"></script>
+	<script type="text/javascript" src="scanner.js"></script>
 	<script type="text/javascript" src="functions/TrigScript.js"></script>
 	<script type="text/javascript" src="functions/DataScript.js"></script>
 	<script type="text/javascript" src="functions/StatScript.js"></script>
@@ -67,7 +68,8 @@
 		}
 		const handleSuccess = (stream) => {scanner.handleSuccess(stream);}
 		const drawVideo   = () => {scanner.drawVideo();}
-		const scanNumbers = () => {scanner.scanNumbers();}
+		const scanNumbers = () => {scanner.drawProgress();}
+
 		/*
 		sudoku.userInput(0,0,2);
 		sudoku.userInput(1,2,7);
