@@ -25,6 +25,14 @@ class Scanner{
         this.resizeOcanvas(0);
         drawVideo();
     }
+    stopVideo(){
+        let stream = video.srcObject;
+        let tracks = stream.getTracks();
+        tracks.forEach(function(track) {
+            track.stop();
+        });
+        video.srcObject = null;
+    }
     drawVideo(){
         animationStartTime = Date.now();
         const newVlength = Math.min(video.videoWidth,video.videoHeight,width);
@@ -41,7 +49,10 @@ class Scanner{
         //drawNumber(5,5,video.videoWidth);
         //drawNumber(5,6,video.videoHeight);
         if(!result) requestAnimationFrame(drawVideo);
-        else requestAnimationFrame(draw);
+        else{
+            this.stopVideo();
+            requestAnimationFrame(draw);
+        }
     }
     scanNumbers(){
         animationStartTime = Date.now();
