@@ -25,6 +25,7 @@ class VisionProgram_NumberReader{
             ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
             //ct.drawImage(this.images[i][0],(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
+        console.log(this.images[0][0].updateDisplayImage().height);
         if(this.stepOnTheCurrentImage==3){
             this.currentImageWorkingOn++;
             this.stepOnTheCurrentImage=0;

@@ -565,4 +565,16 @@ class DistanceTransform extends ImageData{
 		}
 	}
 }
+class Resize extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0],newWidth, newHeight){
+		super([imgIn, xpos, ypos]);
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = newWidth;
+		tcanvas.height= newHeight;
+		const tct = tcanvas.getContext("2d");
+		const canvasIn = super.updateDisplayImage(); 
+		tct.drawImage(canvasIn,0,0,canvasIn.width,canvasIn.height,0,0,newWidth,newHeight);
+		return newWindow(tct).cornerWidthHeight(0,0,newWidth,newHeight);
+	}
+}
 console.log("Loaded: EyesScript.js");

@@ -379,7 +379,8 @@ class VisionProgram_BoardReader{
                 if(!this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)){
                     //Create the Image for each number
                     const [x,y] = this.getXYfromIndex(xi+this.xIndexMin,yi+this.yIndexMin);
-                    const img_original  = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
+                    const img_original = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
+                    const img_resized  = new Resize(img_original.passdata,32,32);
                     //const img_binarize  = new Binarize(img_original.passdata);
                     //const img_filtered  = new Filter(  img_original.passdata,2);
                     //const img_binarized = new Binarize(img_filtered.passdata);
@@ -388,7 +389,7 @@ class VisionProgram_BoardReader{
                     //const img_number = img_blob.blob;
                     //this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
                     //images[images.length]=[img_original.updateDisplayImage(),xi,yi];
-                    numberV.images[numberV.images.length]=[img_original,xi,yi];
+                    numberV.images[numberV.images.length]=[img_resized,xi,yi];
                 }
             }
         }
