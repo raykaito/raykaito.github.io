@@ -369,7 +369,7 @@ class VisionProgram_BoardReader{
             return;
         }
         this.cellMatchCounter++;
-        if(this.cellMatchCounter<15){
+        if(this.cellMatchCounter<5){
             this.abort("cell match counter didn't meet the req.");
             return;
         }
