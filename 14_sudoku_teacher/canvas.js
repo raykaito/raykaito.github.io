@@ -57,9 +57,11 @@ function drawGrids(nineByNine=true){
         drawLine(side*i,side*1,side*i ,side*10,w);
         drawLine(side*1,side*i,side*10,side*i ,w);
     }
-    for(let i=0;i<images.length;i++){
-        ct.drawImage(images[i][0],0,0,images[i][0].width,images[i][0].height,(images[i][1]+1.1)*side,(images[i][2]+1.1)*side,side*0.8,side*0.8);
-        //ct.drawImage(images[i]);
+    if(nineByNine){
+        for(let i=0;i<images.length;i++){
+            ct.drawImage(images[i][0],0,0,images[i][0].width,images[i][0].height,(images[i][1]+1.1)*side,(images[i][2]+1.1)*side,side*0.8,side*0.8);
+            //ct.drawImage(images[i]);
+        }
     }
 }
 
