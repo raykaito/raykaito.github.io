@@ -13,8 +13,10 @@ class Scanner{
         this.constraints = {
             audio:false,
             video:{
-                width:640,
-                height:640,
+                //width:1920,
+                //height:1080,
+                width:480,
+                height:480,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -83,5 +85,6 @@ class Scanner{
         this.ocanvas.width = this.vLength;
         this.ocanvas.height= this.vLength;
         canvasScale = this.ocanvas.width/width;
+        console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height);
     }
 }

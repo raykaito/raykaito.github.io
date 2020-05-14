@@ -23,6 +23,8 @@ class VisionProgram_NumberReader{
             case 5: this.images[ci][0] = new Skeltonize(this.images[ci][0].passdata); break;
             case 6: this.images[ci][0] = new NumberReader(this.images[ci][0].passdata); break;
         }
+        const img = this.images[ci][0].updateDisplayImage();
+        ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+1.1)*side,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         if(this.stepOnTheCurrentImage==6){
             sudoku.userInput(this.images[ci][1],this.images[ci][2],this.images[ci][0].recognizeNumber());
             console.log(this.images[ci][0].recognizeNumber());
