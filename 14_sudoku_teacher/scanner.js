@@ -45,6 +45,11 @@ class Scanner{
         if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
         ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,0,0,width,height);
+        
+        //const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
+        //draw();
+        //this.oct.drawImage(canvas,0,0,width,height,0,0,this.vLength,this.vLength);
+        
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
         else{

@@ -4,6 +4,7 @@ let height;
 let side;//Cell Length = Width/11
 let ct;
 let canvasScale;
+const fontList = ["Arial","Times New Roman","ＭＳ ゴシック","Georgia","Palatino Linotype","Comic Sans MS","Impact","Arial Black","Arial Black"];
 
 function initCanvas(){
     ct = canvas.getContext("2d");
@@ -77,7 +78,8 @@ function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(size*0.8)+"px Arial";
+    //ct.font = ""+Math.floor(size*0.8)+"px "+fontList[yi];
+    ct.font = ""+Math.floor(size*0.8)+"px "+fontList[0];
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(n,x,y);
@@ -97,10 +99,10 @@ function drawRectIndex(xii,yii,xil,yil,color="lime"){
 
 function drawLine(xi,yi,xii,yii,w){
     ct.lineWidth = Math.floor(w);
-    xi = Math.floor(xi );
-    xii= Math.floor(xii);
-    yi = Math.floor(yi );
-    yii= Math.floor(yii);
+    xi = Math.floor(xi )+0.5;
+    xii= Math.floor(xii)+0.5;
+    yi = Math.floor(yi )+0.5;
+    yii= Math.floor(yii)+0.5;
     ct.beginPath();
     ct.moveTo(xi ,yi );
     ct.lineTo(xii,yii);
@@ -159,10 +161,7 @@ const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
-    ct.beginPath();
-    ct.moveTo(xi/cs ,yi /cs);
-    ct.lineTo(xii/cs,yii/cs);
-    ct.stroke();
+    drawLine(xi/cs,yi/cs,xii/cs,yii/cs,w)
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Arial"],absolute=false)=>{

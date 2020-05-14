@@ -12,7 +12,7 @@ const newWindow = (xct = hct) => {
 			return new ImageData([xct.getImageData(xpos, ypos, widthIn, heightIn), xpos, ypos]);
 		},
 		cornerToCorner : (xmin, ymin, xmax, ymax) => {
-			return new ImageData([xct.getImageData(xmin, ymin, (xmax-xmin), (ymax-ymin)), xmin, ymin]);
+			return new ImageData([xct.getImageData(xmin, ymin, (xmax-xmin+1), (ymax-ymin+1)), xmin, ymin]);
 		}
 	};
 }
@@ -52,7 +52,7 @@ class ImageData{
 
 		ct.beginPath();
 		ct.strokeStyle = "rgb(0,255,0)";
-		ct.lineWidth = 0;
+		ct.lineWidth = 1;
 		ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
 
 		//ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
@@ -530,39 +530,587 @@ class DistanceTransform extends ImageData{
 		return tcanvas;
 	}
 	distanceTransfrom(){
-		let brightness;
+		let brightness=255;
 		for(let i=0;i<this.area;i++){
 			const [x,y] = this.i2xy(i);
 			const pixelAt = this.getPix(this.imgIn,i,1);
+			//If white, reset brightness and continue;
+			if(pixelAt==255){
+				brightness = 255;
+				continue;
+			}
 			//If it is at the edge
 			if(x==0||y==0){
-				this.setPix(i,127+128*(pixelAt>127));
+				brightness = 254;
+				this.setPix(i,brightness);
 				continue;
 			}
+			//Check brightness above
 			const pixelUp = this.getPix(this.imgOut,[x,y-1],1);
-			const pixelLe = this.getPix(this.imgOut,[x-1,y],1);
-			if(pixelAt>127){
-				this.setPix(i,255);
-			}else{
-				this.setPix(i,Math.max(pixelUp,pixelLe)-128);
-			}
+			brightness = Math.max(brightness,pixelUp);
+			//Set brightness and continue
+			brightness--;
+			this.setPix(i,brightness);
 		}
+		brightness=255;
 		for(let i=this.area-1;i>=0;i--){
 			const [x,y] = this.i2xy(i);
-			const pixelAt = this.getPix(this.imgOut,i);
-			//If it is at the edge
-			if(x==this.width-1||y==this.height-1){
-				this.setPix(i,127+128*(pixelAt>127));
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			//If white, reset brightness and continue;
+			if(pixelAt==255){
+				brightness = 255;
 				continue;
 			}
-			const pixelDo = this.getPix(this.imgOut,[x,y+1]);
-			const pixelRi = this.getPix(this.imgOut,[x+1,y]);
-			if(pixelAt>127){
-				this.setPix(i,255);
-			}else{
-				this.setPix(i,Math.max(Math.max(pixelDo,pixelRi)-128,pixelAt));
+			//If it is at the edge
+			if(x==this.width-1||y==this.height-1){
+				brightness = 254;
+				if(brightness>pixelAt) this.setPix(i,brightness);
+				continue;
+			}
+			//Check brightness below
+			const pixelDo = this.getPix(this.imgOut,[x,y+1],1);
+			brightness = Math.max(brightness,pixelDo);
+			//Set brightness and continue
+			brightness--;
+			if(brightness>pixelAt) this.setPix(i,brightness);
+		}
+	}
+}
+class NumberReader extends ImageData{//After Skeltonize
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		//Cell Info
+		this.xMax;
+		this.yMax;
+		this.xMin;
+		this.yMin;
+		this.map = new Array(this.area).fill(-3);//(-3):White (-4~):joint (-1):doesn't belong to edge(0~):edge number
+		//Original Edge/Joint Info
+		this.resetMap();
+		this.edges = new Array();//[i,toEdge,connected_Edge/Joint_Index,length]
+		this.joints= new Array();//[i,numOfNeighbor]
+		this.gatherEdgeInfo();
+		this.updateMapBasedOnEdgeJoint(this.edges,this.joints);
+		//Survived Edge/Joint Info
+		this.sedges = new Array();
+		this.sjoints= new Array();
+		for(let ei=0;ei<this.edges.length;ei++){ this.sedges[ei] = this.edges[ei];}
+		for(let ji=0;ji<this.joints.length;ji++){ this.sjoints[ji] = this.joints[ji];}
+		while(true){
+			const changed = this.gatherSEdgeInfo();
+			this.resetMap();
+			this.updateMapBasedOnEdgeJoint(this.sedges,this.sjoints,!changed);
+			if(changed==false) break;
+		}
+	}
+	get canvas(){
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = this.width;
+		tcanvas.height= this.height;
+		const tct = tcanvas.getContext("2d");
+		tct.drawImage(super.updateDisplayImage(),0,0,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		return tcanvas;
+	}
+	resetMap(){
+	//Gather Index for Live Cells. Also window Size
+		this.liveCells = new Array();
+		this.xMax = 0;
+		this.xMin = this.width;
+		this.yMax = 0;
+		this.yMin = this.height;
+		for(let i=0;i<this.area;i++){
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			if(pixelAt<255){
+				this.liveCells[this.liveCells.length] = i;
+				const [x,y] = this.i2xy(i);
+				this.map[i] = -1;
+				this.xMax = Math.max(this.xMax,x);
+				this.xMin = Math.min(this.xMin,x);
+				this.yMax = Math.max(this.yMax,y);
+				this.yMin = Math.min(this.yMin,y);
 			}
 		}
+	}
+	gatherEdgeInfo(){
+		//Gather edge/joint info.
+		for(let i=0;i<this.liveCells.length;i++){
+			const [x,y] = this.i2xy(this.liveCells[i]);
+			let switchCounter = 0;
+			let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
+			for(let j=0;j<8;j++){
+				let pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
+				//Check if it exceeds the boundary
+				if((x+dx[j])<0||(x+dx[j])>=this.width||(y+dy[j])<0||(y+dy[j])>=this.height){
+					pixelNeighbor = (255==255);
+				}
+				if(pixelNeighbor!=lastNeighbor){
+					switchCounter++;
+					lastNeighbor = pixelNeighbor;
+				}
+			}
+			if(switchCounter==2) this.edges[this.edges.length] = [this.liveCells[i],-1,-1,-1];
+			if(switchCounter==6) this.joints[this.joints.length] = [this.liveCells[i],3];
+			if(switchCounter==8) this.joints[this.joints.length] = [this.liveCells[i],4];
+		}
+	}
+	gatherSEdgeInfo(){
+		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
+		//Joints[i,numOfNeighbor]
+		//get joints with 2,3 edges
+		let edges = new Array();
+		let joints= new Array();
+		for(let ei=0;ei<this.sedges.length;ei++){ edges[ei] = this.sedges[ei];}
+		for(let ji=0;ji<this.sjoints.length;ji++){ joints[ji] = this.sjoints[ji];}
+		this.sedges = new Array();
+		this.sjoints= new Array();
+		let jointList = new Array(joints.length).fill([0,-1,0]);//[Num of Edges,Shortest Edge Len., Shortest Edge I]
+		//search each edge and reflect them to Joints
+		for(let edgei=0;edgei<edges.length;edgei++){
+			const edge = edges[edgei];
+			if(edge[1]==false){
+				if(jointList[edge[2]][0]==0){
+					jointList[edge[2]]=[1,edge[3],edgei];
+					continue;
+				}else{
+					jointList[edge[2]][0]++;
+					const newLength = edge[3];
+					if(newLength<jointList[edge[2]][1]){
+						jointList[edge[2]][1]=newLength;
+						jointList[edge[2]][2]=edgei;
+					}
+				}
+			}
+		}
+		//Determine which joint&Edge to remove
+		let removeEdgeIndex  = new Array();
+		let removeJointIndex = new Array();
+		for(let jli=0;jli<jointList.length;jli++){
+			const joint = jointList[jli];
+			if(joint[0]>=2&&joints[jli][1]!=4){
+				removeJointIndex[removeJointIndex.length] = jli;
+				removeEdgeIndex [removeEdgeIndex.length]  = joint[2];
+			}
+		}
+		let changed = false;
+		for(let edgei=0;edgei<edges.length;edgei++){
+			let itwasREI = false;
+			for(let reiI=0;reiI<removeEdgeIndex.length;reiI++){
+				if(edgei==removeEdgeIndex[reiI]){
+					itwasREI = true;
+					changed = true;
+					break;
+				}
+			}
+			if(itwasREI==false) this.sedges[this.sedges.length] = edges[edgei];
+		}
+		for(let jointi=0;jointi<joints.length;jointi++){
+			let itwasRJI = false;
+			for(let rjiI=0;rjiI<removeJointIndex.length;rjiI++){
+				if(jointi==removeJointIndex[rjiI]){
+					itwasRJI = true;
+					changed = true;
+					break;
+				}
+			}
+			if(itwasRJI==false) this.sjoints[this.sjoints.length] = joints[jointi];
+		}
+		return changed;
+	}
+	updateMapBasedOnEdgeJoint(edges,joints,color=false){
+		//map each map index based on the edge number
+		for(let i=0;i<edges.length;i++){
+			this.map[edges[i][0]] = i;
+			if(color) this.setPix(edges[i][0],255,0);
+		}
+		for(let i=0;i<joints.length;i++){
+			this.map[joints[i][0]] = -4-i;
+			if(color) this.setPix(joints[i][0],255,2);
+		}
+		//For each Edge, Find its destination [joint or another edge];
+		for(let edgei=0;edgei<edges.length;edgei++){
+			let changed = true;
+			let counter = 1;
+			while(changed){
+				changed=false;
+				for(let liveCelli=0;liveCelli<this.liveCells.length;liveCelli++){
+					//if not -1, continue
+					const mapi = this.liveCells[liveCelli];
+					const [x,y] = this.i2xy(mapi);
+					if(this.map[mapi]==edgei) continue;
+					//if neighbor is edge, then become the edge
+					for(let i=0;i<8;i+=2){
+						const dmapi = this.xy2i([(x+dx[i]),(y+dy[i])]);
+						//If neibor is the Edge
+						if(this.map[dmapi]==edgei){
+							if(this.map[mapi]!=-1){//Current Position is not NoBelonger
+								if(this.map[mapi]<=-4){//Current Position is Joint
+									edges[edgei][1] = false;
+									edges[edgei][2] = -this.map[mapi]-4;
+								}else{					//Current Position is Edge
+									edges[edgei][1] = true;
+									edges[edgei][2] = this.map[mapi];
+								}
+							}else{//Current Position is NoBelonger
+								counter++;
+								this.map[mapi]=edgei;
+								edges[edgei][3] = counter;
+								changed=true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	recognizeNumber(){
+		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
+		//Joints[i,numOfNeighbor]
+		for(let edgei=0;edgei<this.edges.length;edgei++){
+			const [x,y] = this.i2xy(this.edges[edgei][0]);
+			const e = this.edges[edgei][1];
+			const l = this.edges[edgei][3];
+		}
+		const edgeCount = this.edges.length;
+		let jointCount = 0;
+		for(let jointsi=0;jointsi<this.joints.length;jointsi++){
+			if(this.joints[jointsi][1]==4) jointCount+=2;
+			else jointCount++;
+		}
+		if(jointCount-edgeCount==2){return 8;}
+		if(jointCount-edgeCount==0){//4,6or9;
+			//getLongestSedge [i_sedge,length,i_sjoint]
+			let longest = [-1,0,-1];
+			for(let ei=0;ei<this.sedges.length;ei++){
+				const sedge = this.sedges[ei];
+				if(sedge[3]>longest[1]){
+					longest[0]=sedge[0];
+					longest[1]=sedge[3];
+					longest[2]=this.sjoints[sedge[2]][0];
+				}
+			}
+			const [xe,ye] = this.i2xy(longest[0])//get xy of the longest sedge
+			const [xj,yj] = this.i2xy(longest[2])//get xy of the joint
+			if(ye<yj) return 6;
+
+			//Get xmax edge(not Sedge)
+			let xmax = [-1,-1];//[i_edge,xmax]
+			for(let ei=0;ei<this.edges.length;ei++){
+				const edge = this.edges[ei];
+				const [x,y]= this.i2xy(edge[0]);
+				if(x>xmax[1]){
+					xmax[0]=edge[0];
+					xmax[1]=x;
+				}
+			}
+			if(xmax[1]==this.xMax) return 4;
+			return 9;
+		}
+		if(jointCount-edgeCount==-2){//1,2,3,5 or 7
+			//Get xy up and xy down
+			let [xu,yu] = this.i2xy(this.sedges[0][0]);
+			let [xd,yd] = this.i2xy(this.sedges[1][0]);
+			if(yu>yd){
+				const yt=yu;
+				const xt=xy;
+				yu=yd;
+				xu=xd;
+				xd=xt;
+				yd=yt;
+			}
+			const width = this.xMax-this.xMin;
+			const height= this.yMax-this.yMin;
+			xu-=this.xMin;
+			xd-=this.xMin;
+			yu-=this.uMin;
+			yd-=this.yMin;
+			//Scan vertically and count (Black/White) switch
+			let minSwitchDist = this.height;
+			let lastSwitchY = 0;
+			let threeSwitchFound = false;
+			let lessThanHalfSwitchDistFound = false;
+			for(let x=0;x<this.width;x++){
+				let switchCounter=0;
+				let currentValueNegThree = true;
+				for(let y=0;y<this.height;y++){
+					const mapValueNegThree = (this.map[this.xy2i([x,y])]==-3);
+					if(currentValueNegThree!=mapValueNegThree){
+						if(currentValueNegThree){
+							switchCounter++;
+							if(switchCounter>=2){
+								minSwitchDist = Math.min(minSwitchDist,(y-lastSwitchY));
+								if(minSwitchDist<height/2) lessThanHalfSwitchDistFound = true;
+							}
+							lastSwitchY = y;
+						}
+						currentValueNegThree = !currentValueNegThree;
+					}
+					if(switchCounter>=3){
+						threeSwitchFound = true;
+					}
+				}
+			}
+			if(threeSwitchFound){//2,3 or 5
+				if(xu<width/2&&xd>width/2) return 2;
+				if(xu>width/2&&xd<width/2) return 5;
+				return 3;
+			}else{
+				if(lessThanHalfSwitchDistFound) return 7;
+				return 1;
+			}
+		}
+		else return "";
+	}
+}
+class NumberReader_bak extends ImageData{//After Skeltonize
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		//Cell Info
+		this.xMax;
+		this.yMax;
+		this.xMin;
+		this.yMin;
+		this.map = new Array(this.area).fill(-3);//(-3):White (-4~):joint (-1):doesn't belong to edge(0~):edge number
+		//Original Edge/Joint Info
+		this.resetMap();
+		this.edges = new Array();//[i,toEdge,connected_Edge/Joint_Index,length]
+		this.joints= new Array();//[i,numOfNeighbor]
+		this.gatherEdgeInfo();
+		this.updateMapBasedOnEdgeJoint(this.edges,this.joints);
+		//Survived Edge/Joint Info
+		this.resetMap();
+		this.sedges = new Array();
+		this.sjoints= new Array();
+		this.gatherSEdgeInfo();
+		this.updateMapBasedOnEdgeJoint(this.sedges,this.sjoints,1);
+	}
+	get canvas(){
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = this.width;
+		tcanvas.height= this.height;
+		const tct = tcanvas.getContext("2d");
+		tct.drawImage(super.updateDisplayImage(),0,0,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		return tcanvas;
+	}
+	resetMap(){
+	//Gather Index for Live Cells. Also window Size
+		this.liveCells = new Array();
+		this.xMax = 0;
+		this.xMin = this.width;
+		this.yMax = 0;
+		this.yMin = this.height;
+		for(let i=0;i<this.area;i++){
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			if(pixelAt<255){
+				this.liveCells[this.liveCells.length] = i;
+				const [x,y] = this.i2xy(i);
+				this.map[i] = -1;
+				this.xMax = Math.max(this.xMax,x);
+				this.xMin = Math.min(this.xMin,x);
+				this.yMax = Math.max(this.yMax,y);
+				this.yMin = Math.min(this.yMin,y);
+			}
+		}
+	}
+	gatherEdgeInfo(){
+		//Gather edge/joint info.
+		for(let i=0;i<this.liveCells.length;i++){
+			const [x,y] = this.i2xy(this.liveCells[i]);
+			let switchCounter = 0;
+			let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
+			for(let j=0;j<8;j++){
+				let pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
+				//Check if it exceeds the boundary
+				if((x+dx[j])<0||(x+dx[j])>=this.width||(y+dy[j])<0||(y+dy[j])>=this.height){
+					pixelNeighbor = (255==255);
+				}
+				if(pixelNeighbor!=lastNeighbor){
+					switchCounter++;
+					lastNeighbor = pixelNeighbor;
+				}
+			}
+			if(switchCounter==2) this.edges[this.edges.length] = [this.liveCells[i],-1,-1,-1];
+			if(switchCounter==6) this.joints[this.joints.length] = [this.liveCells[i],3];
+			if(switchCounter==8) this.joints[this.joints.length] = [this.liveCells[i],4];
+		}
+	}
+	gatherSEdgeInfo(){
+		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
+		//Joints[i,numOfNeighbor]
+		//get joints with 2,3 edges
+		let jointList = new Array(this.joints.length).fill([0,-1,0]);//[Num of Edges,Shortest Edge Len., Shortest Edge I]
+		for(let edgei=0;edgei<this.edges.length;edgei++){
+			const edge = this.edges[edgei];
+			if(edge[1]==false){
+				console.log(edge[2])
+				if(jointList[edge[2]][0]==0){
+					jointList[edge[2]]=[1,edge[3],edgei];
+					continue;
+				}else{
+					jointList[edge[2]][0]++;
+					const newLength = edge[3];
+					if(newLength<jointList[edge[2]][1]){
+						jointList[edge[2]][1]=newLength;
+						jointList[edge[2]][2]=edgei;
+					}
+				}
+			}
+		}
+		console.log(jointList);
+		let removeEdgeIndex  = new Array();
+		let removeJointIndex = new Array();
+		for(let jli=0;jli<jointList.length;jli++){
+			const joint = jointList[jli];
+			if(joint[0]>=2){
+				removeJointIndex[removeJointIndex.length] = jli;
+				removeEdgeIndex [removeEdgeIndex.length]  = joint[2];
+				console.log("jli");
+			}
+		}
+		for(let edgei=0;edgei<this.edges.length;edgei++){
+			let itwasREI = false;
+			for(let reiI=0;reiI<removeEdgeIndex.length;reiI++){
+				if(edgei==removeEdgeIndex[reiI]){
+					itwasREI = true;
+					break;
+				}
+			}
+			if(itwasREI==false) this.sedges[this.sedges.length] = this.edges[edgei];
+		}
+		for(let jointi=0;jointi<this.joints.length;jointi++){
+			let itwasRJI = false;
+			for(let rjiI=0;rjiI<removeJointIndex.length;rjiI++){
+				if(jointi==removeJointIndex[rjiI]){
+					itwasRJI = true;
+					break;
+				}
+			}
+			if(itwasRJI==false) this.sjoints[this.sjoints.length] = this.joints[jointi];
+		}
+	}
+	updateMapBasedOnEdgeJoint(edges,joints,color=false){
+		//map each map index based on the edge number
+		for(let i=0;i<edges.length;i++){
+			this.map[edges[i][0]] = i;
+			if(color) this.setPix(edges[i][0],255,0);
+		}
+		for(let i=0;i<joints.length;i++){
+			this.map[joints[i][0]] = -4-i;
+			if(color) this.setPix(joints[i][0],255,2);
+		}
+		//For each Edge, Find its destination [joint or another edge];
+		for(let edgei=0;edgei<edges.length;edgei++){
+			let changed = true;
+			let counter = 1;
+			while(changed){
+				changed=false;
+				for(let liveCelli=0;liveCelli<this.liveCells.length;liveCelli++){
+					//if not -1, continue
+					const mapi = this.liveCells[liveCelli];
+					const [x,y] = this.i2xy(mapi);
+					if(this.map[mapi]==edgei) continue;
+					//if neighbor is edge, then become the edge
+					for(let i=0;i<8;i+=2){
+						const dmapi = this.xy2i([(x+dx[i]),(y+dy[i])]);
+						//If neibor is the Edge
+						if(this.map[dmapi]==edgei){
+							if(this.map[mapi]!=-1){//Current Position is not NoBelonger
+								if(this.map[mapi]<=-4){//Current Position is Joint
+									edges[edgei][1] = false;
+									edges[edgei][2] = -this.map[mapi]-4;
+								}else{					//Current Position is Edge
+									edges[edgei][1] = true;
+									edges[edgei][2] = this.map[mapi];
+								}
+							}else{//Current Position is NoBelonger
+								counter++;
+								this.map[mapi]=edgei;
+								edges[edgei][3] = counter;
+								changed=true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	recognizeNumber(){
+		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
+		//Joints[i,numOfNeighbor]
+		for(let edgei=0;edgei<this.edges.length;edgei++){
+			const [x,y] = this.i2xy(this.edges[edgei][0]);
+			const e = this.edges[edgei][1];
+			const l = this.edges[edgei][3];
+		}
+		const edgeCount = this.edges.length;
+		let jointCount = 0;
+		for(let jointsi=0;jointsi<this.joints.length;jointsi++){
+			if(this.joints[jointsi][1]==4) jointCount+=2;
+			else jointCount++;
+		}
+		if(jointCount-edgeCount==2) return 8;
+		if(jointCount-edgeCount==0){
+			//4,6or9;
+		}
+		else return "";
+	}
+}
+class Skeltonize extends ImageData{//After the distance Transformation
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		this.skeltonize();
+	}
+	get canvas(){
+		const tcanvas = document.createElement("canvas");
+		tcanvas.width = this.width;
+		tcanvas.height= this.height;
+		const tct = tcanvas.getContext("2d");
+		tct.drawImage(super.updateDisplayImage(),0,0,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
+		return tcanvas;
+	}
+	skeltonize(){
+		//Gather Index for Live Cells[brightness][number] = index
+		let liveCells = new Array(255);
+		let minBrightness = 255;
+		let maxBrightness = 0;
+		for(let i=0;i<liveCells.length;i++){
+			liveCells[i] = new Array();
+		}
+		for(let i=0;i<this.area;i++){
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			if(pixelAt<255){
+				minBrightness = Math.min(minBrightness,pixelAt);
+				maxBrightness = Math.max(maxBrightness,pixelAt);
+				liveCells[pixelAt][liveCells[pixelAt].length] = i;
+			}
+		}
+		for(let brightness=254;brightness>=0;brightness--){
+			for(let i=0;i<liveCells[brightness].length;i++){
+				const [x,y] = this.i2xy(liveCells[brightness][i]);
+				let switchCounter = 0;
+				let neighborCounter = 0;
+				let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
+				for(let j=0;j<8;j++){
+					const pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
+					if(!pixelNeighbor) neighborCounter++;
+					if(pixelNeighbor!=lastNeighbor){
+						switchCounter++;
+						lastNeighbor = pixelNeighbor;
+					}
+				}
+				if(switchCounter>=4||neighborCounter==1){
+					//Dont Kill
+					continue;
+				}else{
+					this.setPix([x,y],255);
+				}
+			}
+		}
+		for(let i=0;i<this.area;i++){
+			if(this.getPix(this.imgIn,i,1)!=255) this.setPix(i,0);
+		}
+		return;
 	}
 }
 class Resize extends ImageData{
@@ -575,6 +1123,22 @@ class Resize extends ImageData{
 		const canvasIn = super.updateDisplayImage(); 
 		tct.drawImage(canvasIn,0,0,canvasIn.width,canvasIn.height,0,0,newWidth,newHeight);
 		return newWindow(tct).cornerWidthHeight(0,0,newWidth,newHeight);
+	}
+}
+class EdgeFree extends ImageData{
+	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
+		super([imgIn, xpos, ypos]);
+		this.clearEdge();
+	}
+	clearEdge(){
+		for(let x=0;x<this.width;x++){
+			this.setPix([x,0],255);
+			this.setPix([x,this.height-1],255);
+		}
+		for(let y=0;y<this.height;y++){
+			this.setPix([0,y],255);
+			this.setPix([this.width-1,y],255);
+		}
 	}
 }
 console.log("Loaded: EyesScript.js");

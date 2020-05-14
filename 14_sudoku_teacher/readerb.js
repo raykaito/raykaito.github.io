@@ -346,14 +346,20 @@ class VisionProgram_BoardReader{
                 const newCell = (this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)?1:-1);
                 if(newCell==-1){
                     //Draw Rectangle to show which cell has a number in it
-                    line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
-                    line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
-                    line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
-                    line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-                         this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
+                    //line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
+                         //this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
+                    //line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
+                         //this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
+                    //line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
+                         //this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
+                    //line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
+                         //this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
+                    const [x1,y1] = this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4);
+                    const [x2,y2] = this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4);
+                    line([[x1,y1],[x1,y2]],["red",1*pixelRatio]);
+                    line([[x1,y1],[x2,y1]],["red",1*pixelRatio]);
+                    line([[x1,y2],[x2,y2]],["red",1*pixelRatio]);
+                    line([[x2,y1],[x2,y2]],["red",1*pixelRatio]);
                 }
                 if(newCell*this.emptyCell[xi+yi*9]<0){
                     this.resetCellMatchCounter();
@@ -377,19 +383,17 @@ class VisionProgram_BoardReader{
         for(let xi=0;xi<9;xi++){
             for(let yi=0;yi<9;yi++){
                 if(!this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)){
+                    const [x1,y1] = this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4);
+                    const [x2,y2] = this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4);
                     //Create the Image for each number
                     const [x,y] = this.getXYfromIndex(xi+this.xIndexMin,yi+this.yIndexMin);
-                    const img_original = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
-                    const img_resized  = new Resize(img_original.passdata,32,32);
-                    //const img_binarize  = new Binarize(img_original.passdata);
-                    //const img_filtered  = new Filter(  img_original.passdata,2);
-                    //const img_binarized = new Binarize(img_filtered.passdata);
-                    //const img_blob      = new FindBlob(img_binarize.passdata,1);
-                    //img_blob.eraseSmallerBlobs();
-                    //const img_number = img_blob.blob;
-                    //this.nct.drawImage(img_number,this.listedCounter*16,0,16,16);
-                    //images[images.length]=[img_original.updateDisplayImage(),xi,yi];
-                    numberV.images[numberV.images.length]=[img_resized,xi,yi];
+                    //const img_original = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
+                    const img_original = newWindow(ct).cornerToCorner(x1,y1,x2,y2);
+                    const img_edgeFree = new EdgeFree(img_original.passdata);
+                    //const img_resized  = new Resize(img_original.passdata,32,32);
+                    //const img_edgeFree = new EdgeFree(img_resized.passdata);
+                    //numberV.images[imgIndex]=[img_edgeFree,xi,yi];
+                    numberV.images[numberV.images.length]=[img_original,xi,yi];
                 }
             }
         }
