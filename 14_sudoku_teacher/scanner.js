@@ -13,8 +13,8 @@ class Scanner{
         this.constraints = {
             audio:false,
             video:{
-                width:1920,
-                height:1080,
+                width:640,
+                height:640,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -60,10 +60,10 @@ class Scanner{
     drawProgress(){
         animationStartTime = Date.now();
         const result = this.numberV.makeProgress();
-        draw();
+        //draw();
         if(!result) requestAnimationFrame(scanNumbers);
         else{
-            //draw();
+            draw();
         }
     }
     draw(){
