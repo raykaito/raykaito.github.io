@@ -360,6 +360,17 @@ class VisionProgram_BoardReader{
                     line([[x1,y1],[x2,y1]],["red",1*pixelRatio]);
                     line([[x1,y2],[x2,y2]],["red",1*pixelRatio]);
                     line([[x2,y1],[x2,y2]],["red",1*pixelRatio]);
+
+                    /*
+                    //Create the Image for each number
+                    const [x,y] = this.getXYfromIndex(xi+this.xIndexMin,yi+this.yIndexMin);
+                    //const img_original = newWindow(ct).centerWidthHeight(x,y,this.cellLength*0.8,this.cellLength*0.8);
+                    const img_original = newWindow(ct).cornerToCorner(x1,y1,x2,y2);
+                    //const img_edgeFree = new EdgeFree(img_original.passdata);
+                    const img_resized  = new Resize(img_original.passdata,32,32);
+                    const img_edgeFree = new EdgeFree(img_resized.passdata);
+                    const img_binarized = new Binarize(img_edgeFree.passdata);
+                    img_binarized.display();*/
                 }
                 if(newCell*this.emptyCell[xi+yi*9]<0){
                     this.resetCellMatchCounter();
@@ -375,7 +386,7 @@ class VisionProgram_BoardReader{
             return;
         }
         this.cellMatchCounter++;
-        if(this.cellMatchCounter<5){
+        if(this.cellMatchCounter<10){
             this.abort("cell match counter didn't meet the req.");
             return;
         }

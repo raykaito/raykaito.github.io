@@ -866,200 +866,6 @@ class NumberReader extends ImageData{//After Skeltonize
 		else return "";
 	}
 }
-class NumberReader_bak extends ImageData{//After Skeltonize
-	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
-		super([imgIn, xpos, ypos]);
-		//Cell Info
-		this.xMax;
-		this.yMax;
-		this.xMin;
-		this.yMin;
-		this.map = new Array(this.area).fill(-3);//(-3):White (-4~):joint (-1):doesn't belong to edge(0~):edge number
-		//Original Edge/Joint Info
-		this.resetMap();
-		this.edges = new Array();//[i,toEdge,connected_Edge/Joint_Index,length]
-		this.joints= new Array();//[i,numOfNeighbor]
-		this.gatherEdgeInfo();
-		this.updateMapBasedOnEdgeJoint(this.edges,this.joints);
-		//Survived Edge/Joint Info
-		this.resetMap();
-		this.sedges = new Array();
-		this.sjoints= new Array();
-		this.gatherSEdgeInfo();
-		this.updateMapBasedOnEdgeJoint(this.sedges,this.sjoints,1);
-	}
-	get canvas(){
-		const tcanvas = document.createElement("canvas");
-		tcanvas.width = this.width;
-		tcanvas.height= this.height;
-		const tct = tcanvas.getContext("2d");
-		tct.drawImage(super.updateDisplayImage(),0,0,tcanvas.width,tcanvas.height,0,0,tcanvas.width,tcanvas.height);
-		return tcanvas;
-	}
-	resetMap(){
-	//Gather Index for Live Cells. Also window Size
-		this.liveCells = new Array();
-		this.xMax = 0;
-		this.xMin = this.width;
-		this.yMax = 0;
-		this.yMin = this.height;
-		for(let i=0;i<this.area;i++){
-			const pixelAt = this.getPix(this.imgIn,i,1);
-			if(pixelAt<255){
-				this.liveCells[this.liveCells.length] = i;
-				const [x,y] = this.i2xy(i);
-				this.map[i] = -1;
-				this.xMax = Math.max(this.xMax,x);
-				this.xMin = Math.min(this.xMin,x);
-				this.yMax = Math.max(this.yMax,y);
-				this.yMin = Math.min(this.yMin,y);
-			}
-		}
-	}
-	gatherEdgeInfo(){
-		//Gather edge/joint info.
-		for(let i=0;i<this.liveCells.length;i++){
-			const [x,y] = this.i2xy(this.liveCells[i]);
-			let switchCounter = 0;
-			let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
-			for(let j=0;j<8;j++){
-				let pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
-				//Check if it exceeds the boundary
-				if((x+dx[j])<0||(x+dx[j])>=this.width||(y+dy[j])<0||(y+dy[j])>=this.height){
-					pixelNeighbor = (255==255);
-				}
-				if(pixelNeighbor!=lastNeighbor){
-					switchCounter++;
-					lastNeighbor = pixelNeighbor;
-				}
-			}
-			if(switchCounter==2) this.edges[this.edges.length] = [this.liveCells[i],-1,-1,-1];
-			if(switchCounter==6) this.joints[this.joints.length] = [this.liveCells[i],3];
-			if(switchCounter==8) this.joints[this.joints.length] = [this.liveCells[i],4];
-		}
-	}
-	gatherSEdgeInfo(){
-		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
-		//Joints[i,numOfNeighbor]
-		//get joints with 2,3 edges
-		let jointList = new Array(this.joints.length).fill([0,-1,0]);//[Num of Edges,Shortest Edge Len., Shortest Edge I]
-		for(let edgei=0;edgei<this.edges.length;edgei++){
-			const edge = this.edges[edgei];
-			if(edge[1]==false){
-				console.log(edge[2])
-				if(jointList[edge[2]][0]==0){
-					jointList[edge[2]]=[1,edge[3],edgei];
-					continue;
-				}else{
-					jointList[edge[2]][0]++;
-					const newLength = edge[3];
-					if(newLength<jointList[edge[2]][1]){
-						jointList[edge[2]][1]=newLength;
-						jointList[edge[2]][2]=edgei;
-					}
-				}
-			}
-		}
-		console.log(jointList);
-		let removeEdgeIndex  = new Array();
-		let removeJointIndex = new Array();
-		for(let jli=0;jli<jointList.length;jli++){
-			const joint = jointList[jli];
-			if(joint[0]>=2){
-				removeJointIndex[removeJointIndex.length] = jli;
-				removeEdgeIndex [removeEdgeIndex.length]  = joint[2];
-				console.log("jli");
-			}
-		}
-		for(let edgei=0;edgei<this.edges.length;edgei++){
-			let itwasREI = false;
-			for(let reiI=0;reiI<removeEdgeIndex.length;reiI++){
-				if(edgei==removeEdgeIndex[reiI]){
-					itwasREI = true;
-					break;
-				}
-			}
-			if(itwasREI==false) this.sedges[this.sedges.length] = this.edges[edgei];
-		}
-		for(let jointi=0;jointi<this.joints.length;jointi++){
-			let itwasRJI = false;
-			for(let rjiI=0;rjiI<removeJointIndex.length;rjiI++){
-				if(jointi==removeJointIndex[rjiI]){
-					itwasRJI = true;
-					break;
-				}
-			}
-			if(itwasRJI==false) this.sjoints[this.sjoints.length] = this.joints[jointi];
-		}
-	}
-	updateMapBasedOnEdgeJoint(edges,joints,color=false){
-		//map each map index based on the edge number
-		for(let i=0;i<edges.length;i++){
-			this.map[edges[i][0]] = i;
-			if(color) this.setPix(edges[i][0],255,0);
-		}
-		for(let i=0;i<joints.length;i++){
-			this.map[joints[i][0]] = -4-i;
-			if(color) this.setPix(joints[i][0],255,2);
-		}
-		//For each Edge, Find its destination [joint or another edge];
-		for(let edgei=0;edgei<edges.length;edgei++){
-			let changed = true;
-			let counter = 1;
-			while(changed){
-				changed=false;
-				for(let liveCelli=0;liveCelli<this.liveCells.length;liveCelli++){
-					//if not -1, continue
-					const mapi = this.liveCells[liveCelli];
-					const [x,y] = this.i2xy(mapi);
-					if(this.map[mapi]==edgei) continue;
-					//if neighbor is edge, then become the edge
-					for(let i=0;i<8;i+=2){
-						const dmapi = this.xy2i([(x+dx[i]),(y+dy[i])]);
-						//If neibor is the Edge
-						if(this.map[dmapi]==edgei){
-							if(this.map[mapi]!=-1){//Current Position is not NoBelonger
-								if(this.map[mapi]<=-4){//Current Position is Joint
-									edges[edgei][1] = false;
-									edges[edgei][2] = -this.map[mapi]-4;
-								}else{					//Current Position is Edge
-									edges[edgei][1] = true;
-									edges[edgei][2] = this.map[mapi];
-								}
-							}else{//Current Position is NoBelonger
-								counter++;
-								this.map[mapi]=edgei;
-								edges[edgei][3] = counter;
-								changed=true;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	recognizeNumber(){
-		//Edges [i,toEdge,connected_Edge/Joint_Index,length]
-		//Joints[i,numOfNeighbor]
-		for(let edgei=0;edgei<this.edges.length;edgei++){
-			const [x,y] = this.i2xy(this.edges[edgei][0]);
-			const e = this.edges[edgei][1];
-			const l = this.edges[edgei][3];
-		}
-		const edgeCount = this.edges.length;
-		let jointCount = 0;
-		for(let jointsi=0;jointsi<this.joints.length;jointsi++){
-			if(this.joints[jointsi][1]==4) jointCount+=2;
-			else jointCount++;
-		}
-		if(jointCount-edgeCount==2) return 8;
-		if(jointCount-edgeCount==0){
-			//4,6or9;
-		}
-		else return "";
-	}
-}
 class Skeltonize extends ImageData{//After the distance Transformation
 	constructor([imgIn = hct.getImageData(0,0,hcanvas.width,hcanvas.height), xpos = 0, ypos = 0]){
 		super([imgIn, xpos, ypos]);
@@ -1126,7 +932,23 @@ class Resize extends ImageData{
 		const tct = tcanvas.getContext("2d");
 		const canvasIn = super.updateDisplayImage(); 
 		tct.drawImage(canvasIn,0,0,canvasIn.width,canvasIn.height,0,0,newWidth,newHeight);
-		return newWindow(tct).cornerWidthHeight(0,0,newWidth,newHeight);
+		this.imgIn = tct.getImageData(0,0,newWidth,newHeight);
+		
+		this.width  = this.imgIn.width;
+		this.height = this.imgIn.height;
+		this.area   = this.width*this.height;
+		this.dwidth = Math.ceil(this.width/canvasScale);
+		this.dheight= Math.ceil(this.height/canvasScale);
+		this.darea  = this.dwidth*this.dheight;
+		
+		this.imgOut = this.imgIn;
+		this.dimgOut = ct.createImageData(this.dwidth, this.dheight);
+
+		//Initialize dimgOut
+		for(let i=0;i<this.imgIn.data.length;i++){
+			this.imgOut.data[i] = this.imgIn.data[i];
+		}
+		return this;
 	}
 }
 class EdgeFree extends ImageData{
