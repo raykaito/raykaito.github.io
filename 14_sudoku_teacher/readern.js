@@ -30,8 +30,6 @@ class VisionProgram_NumberReader{
             console.log(this.images[ci][0].recognizeNumber());
             this.currentImageWorkingOn++;
             this.stepOnTheCurrentImage=0;
-        }else if(this.stepOnTheCurrentImage==1){
-            console.log("XXXXXXXX     "+(this.images[ci][1]+1)+"     XXXXXXXX");
         }
         if(this.currentImageWorkingOn==this.images.length) return true;
         return false;

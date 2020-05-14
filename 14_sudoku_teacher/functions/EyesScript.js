@@ -827,8 +827,8 @@ class NumberReader extends ImageData{//After Skeltonize
 			//Scan vertically and count (Black/White) switch
 			let minSwitchDist = this.height;
 			let lastSwitchY = 0;
-			let threeSwitchFound = false;
-			let lessThanHalfSwitchDistFound = false;
+			let threeSwitchCount = 0;
+			let lessThanHalfSwitchDistXmax = 0;
 			for(let x=0;x<this.width;x++){
 				let switchCounter=0;
 				let currentValueNegThree = true;
@@ -839,23 +839,23 @@ class NumberReader extends ImageData{//After Skeltonize
 							switchCounter++;
 							if(switchCounter>=2){
 								minSwitchDist = Math.min(minSwitchDist,(y-lastSwitchY));
-								if(minSwitchDist<height/2) lessThanHalfSwitchDistFound = true;
+								if(minSwitchDist<height/2) lessThanHalfSwitchDistXmax = x;
 							}
 							lastSwitchY = y;
 						}
 						currentValueNegThree = !currentValueNegThree;
 					}
 					if(switchCounter>=3){
-						threeSwitchFound = true;
+						threeSwitchCount++;
 					}
 				}
 			}
-			if(threeSwitchFound){//2,3 or 5
+			if(threeSwitchCount>width*0.2){//2,3 or 5
 				if(xu<width/2&&xd>width/2) return 2;
 				if(xu>width/2&&xd<width/2) return 5;
 				return 3;
 			}else{
-				if(lessThanHalfSwitchDistFound) return 7;
+				if(lessThanHalfSwitchDistXmax-this.xMin>width/2) return 7;
 				return 1;
 			}
 		}
