@@ -509,8 +509,12 @@ class FindBlob extends ImageData{
 			}
 			this.blobInfo[this.blobNumber-1] = [area, xMin, yMin, xMax, yMax];
 			if(area>this.maxArea){
-				this.maxArea = area;
-				this.maxAreaIndex = this.blobNumber-1;
+				if(xMax-xMin>=this.width-3||yMax-yMin>=this.height-3){
+					console.log("EdgeFound");
+				}else{
+					this.maxArea = area;
+					this.maxAreaIndex = this.blobNumber-1;
+				}
 			}
 		}
 	}
