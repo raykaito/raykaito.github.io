@@ -59,12 +59,15 @@ class Scanner{
     }
     drawProgress(){
         animationStartTime = Date.now();
-        draw();
         const result = this.numberV.makeProgress();
+        draw();
         if(!result) requestAnimationFrame(scanNumbers);
         else{
             //draw();
         }
+    }
+    draw(){
+        this.numberV.draw();
     }
     resizeOcanvas(newVlength){
         this.vLength = newVlength;

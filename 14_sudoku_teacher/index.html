@@ -58,14 +58,15 @@
 		let video = document.getElementById("player");
 		showObject(body, table);
 
-		const sudoku = new Sudoku();
-		initCanvas();
-		initEventlistener();
-
-		let scanner,animationStartTime;
+		let scanner = false;
+		let animationStartTime;
 		const startScan = () => {
 			scanner = new Scanner();
 		}
+
+		const sudoku = new Sudoku();
+		initCanvas();
+		initEventlistener();
 		const handleSuccess = (stream) => {scanner.handleSuccess(stream);}
 		const drawVideo   = () => {scanner.drawVideo();}
 		const scanNumbers = () => {scanner.drawProgress();}

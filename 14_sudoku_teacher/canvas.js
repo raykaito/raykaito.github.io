@@ -42,6 +42,7 @@ function draw(){
     drawGrids();
     //Draw Sudoku
     sudoku.draw();
+    if(scanner) scanner.draw();
 }
 
 function drawGrids(nineByNine=true){
