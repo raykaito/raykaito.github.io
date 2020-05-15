@@ -31,7 +31,6 @@ class VisionProgram_NumberReader{
         ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+1.1)*side,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         if(this.stepOnTheCurrentImage==7){
             sudoku.userInput(this.images[ci][1],this.images[ci][2],this.images[ci][0].recognizeNumber());
-            console.log(this.images[ci][0].recognizeNumber());
             this.currentImageWorkingOn++;
             this.stepOnTheCurrentImage=0;
         }

@@ -72,7 +72,12 @@ class Scanner{
     }
     drawProgress(){
         animationStartTime = Date.now();
-        const result = this.numberV.makeProgress();
+        let result = false;
+        //console.log("slider"+(slider.value+1));
+        for(let i=0;i<Number(slider.value)+1;i++){
+            result=this.numberV.makeProgress();
+            if(result) break;
+        }
         if(!result){requestAnimationFrame(scanNumbers);}
         else{       draw();}
     }
