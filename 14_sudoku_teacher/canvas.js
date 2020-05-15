@@ -29,6 +29,9 @@ function resize(){
     if(Math.floor(window.innerWidth)<320)   canvas.width = 280;                                    
     canvas.height = canvas.width;
 
+    rcanvas.width = canvas.width;
+    rcanvas.height= (recordMode?(33*81+1):1);
+
     canvas.style.width  = canvas.width +"px";
     canvas.style.height = canvas.height+"px";
 
@@ -41,9 +44,7 @@ function resize(){
 
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px");
-
-    rcanvas.width = width;
-    rcanvas.height= (recordMode?(33*81+1):1);
+    
     rcanvas.style.width  = rcanvas.width +"px";
     rcanvas.style.height = rcanvas.height+"px";
     rcanvas.width *= pixelRatio;
