@@ -12,12 +12,28 @@ function initCanvas(){
     ct = canvas.getContext("2d");
     rct= rcanvas.getContext("2d");
     resize();
+    rresize();
     if(!recordMode){
-        //rct.clearRect(0,0,rcanvas.width,rcanvas.height);
+        rct.clearRect(0,0,rcanvas.width,rcanvas.height);
     }else{
-        rct.fillStyle = "darkGray";
+        rct.fillStyle = "black";
         rct.fillRect(0, 0, rcanvas.width, rcanvas.height);
     }
+}
+
+rresize = () => {
+    rcanvas.width = Math.floor(window.innerWidth-40);
+    if(Math.floor(window.innerWidth)>800)   rcanvas.width = 760;
+    if(Math.floor(window.innerWidth)<320)   rcanvas.width = 280;
+    rcanvas.height= (recordMode?(33*81+1):1);
+
+    rcanvas.style.width  = rcanvas.width +"px";
+    rcanvas.style.height = rcanvas.height+"px";
+    rcanvas.width *= pixelRatio;
+    rcanvas.height*= pixelRatio;
+
+    console.log("RCanvas  Width: "+rcanvas.width+"pt, " +rcanvas.style.width+"px");
+    console.log("RCanvas Height: "+rcanvas.height+"pt, "+rcanvas.style.height+"px");
 }
 
 function resize(){
@@ -28,9 +44,6 @@ function resize(){
     if(Math.floor(window.innerWidth)>800)   canvas.width = 760;
     if(Math.floor(window.innerWidth)<320)   canvas.width = 280;                                    
     canvas.height = canvas.width;
-
-    rcanvas.width = canvas.width;
-    rcanvas.height= (recordMode?(33*81+1):1);
 
     canvas.style.width  = canvas.width +"px";
     canvas.style.height = canvas.height+"px";
@@ -44,14 +57,6 @@ function resize(){
 
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px");
-
-    rcanvas.style.width  = rcanvas.width +"px";
-    rcanvas.style.height = rcanvas.height+"px";
-    rcanvas.width *= pixelRatio;
-    rcanvas.height*= pixelRatio;
-
-    console.log("RCanvas  Width: "+rcanvas.width+"pt, " +rcanvas.style.width+"px");
-    console.log("RCanvas Height: "+rcanvas.height+"pt, "+rcanvas.style.height+"px");
 
     draw();
 }
