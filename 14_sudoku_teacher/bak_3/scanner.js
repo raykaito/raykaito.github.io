@@ -79,7 +79,7 @@ class Scanner{
             if(result) break;
         }
         if(!result){requestAnimationFrame(scanNumbers);}
-        else{       sudoku.startSolving();}
+        else{       draw();}
     }
     draw(){
         this.numberV.draw();

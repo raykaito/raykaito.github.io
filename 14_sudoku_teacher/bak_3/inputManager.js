@@ -5,14 +5,16 @@ let downKey  = false;
 let spaceKey = false;
 let ctrKey   = false;
 
-let touchX, touchY;
+let lastX, lastY;
 
 function initEventlistener(){    
     addEventListener('keydown',keyPressed,false);
     addEventListener('keyup',keyReleased,false);
 
     window.addEventListener('resize', resize, false);
-
+    
+    //canvas.addEventListener('click', clicked, false);
+    //canvas.addEventListener('touchcancel', clicked, false);
     canvas.addEventListener('mousedown', touch, false);
     canvas.addEventListener('touchstart', touch, false);
     
@@ -21,7 +23,8 @@ function initEventlistener(){
 
 	console.log("    - Eventlistener initialized.");
 }
-keyPressed=(event)=>{
+
+function keyPressed(event){
 	switch(event.keyCode){
 		case  17:   ctrKey = true; break;
 		case  32: spaceKey = true; break;
@@ -33,7 +36,7 @@ keyPressed=(event)=>{
 		//default : alert("keyCode: "+event.keyCode);
 	}
 }
-keyReleased=(event)=>{
+function keyReleased(event){
 	switch(event.keyCode){
 		case  17:   ctrKey = false; break;
 		case  32: spaceKey = false; break;
@@ -43,39 +46,31 @@ keyReleased=(event)=>{
 		case  40:  downKey = false; break;
 	}
 }
-touch=(event)=>{
-	const rect = event.target.getBoundingClientRect();
-	let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
-	let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
+
+function touch(event){
+	rect = event.target.getBoundingClientRect();
+	x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+	y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
 
-	touchX = x;
-	touchY = y;
+	lastX = x;
+	lastY = y;
 	event.preventDefault();
-	const [xi,yi]=XYtoIndex([x,y]);
-	if(xi<1||xi>9||yi<1||yi>9){
-		console.log("invalid touch region");
-		return;
-	}
-	showInputs([xi,yi]);
+	showInputs(XYtoIndex([x,y]));
 }
-release=(event)=>{
-	//Check if the touch start position if valid or not
-	if(touchX==undefined||touchY==undefined){
-		console.log("invalid touch region (out of canvas)");
-		draw();
-		return;
-	}
-	const rect = event.target.getBoundingClientRect();
-	let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
-	let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
+
+function release(event){
+	rect = event.target.getBoundingClientRect();
+	x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+	y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
 
-	setNum(touchX, touchY, x, y);
+	setNum(lastX, lastY, x, y);
 }
-showInputs=([xi,yi])=>{
+
+function showInputs([xi,yi]){
 	drawGrids(false);
 	drawNumber(2,8,1,"gray",side*3);
 	drawNumber(5,8,2,"gray",side*3);
@@ -87,16 +82,17 @@ showInputs=([xi,yi])=>{
 	drawNumber(5,2,8,"gray",side*3);
 	drawNumber(8,2,9,"gray",side*3);
 }
-setNum=(xi,yi,xl,yl)=>{
+
+function setNum(xi,yi,xl,yl){
+	if(xi==undefined||yi==undefined){
+		console.log("invalid region");
+		return;
+	}
 	//get x and y index for initial and last position
 	const [xii,yii] = XYtoIndex([xi,yi]);
 	const [xil,yil] = XYtoIndex([xl,yl]);
 	//Return if the initial position is invalid
 	if(yii>9){
-		if(xii>9){
-			startScan();
-			return;
-		}
 		if(rcanvas.style.display=="none")   rcanvas.style.display="block";
 		else								rcanvas.style.display="none";
 		//User Input
@@ -112,7 +108,7 @@ setNum=(xi,yi,xl,yl)=>{
 	draw();
 }
 
-XYtoIndex=([x,y])=>{	return [Math.floor(11*x/width),Math.floor(11*y/height)];}
-indexToBox=([xi,yi])=>{	return Math.floor(xi/3)+Math.floor(yi/3)*3;}
+function XYtoIndex([x,y]){	return [Math.floor(11*x/width),Math.floor(11*y/height)];}
+function indexToBox([xi,yi]){	return Math.floor(xi/3)+Math.floor(yi/3)*3;}
 
 console.log("Loaded: inputManager.js");

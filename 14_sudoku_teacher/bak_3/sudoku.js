@@ -9,8 +9,8 @@ constructor(){
 	this.board = new Array();
 	this.board[0] = new Board();
 }
-showHideMethod(showMethod = !this.showMethod){
-	this.showMethod = showMethod;
+showHideMethod(){
+	this.showMethod=!this.showMethod;
 	metho.value = this.showMethod?"Hide Method":"Show Method";
 	draw();
 }
@@ -43,7 +43,6 @@ action(type,x,y,num,par){
 		case "programProgressedNote"	: this.board[step+1].programProgressedNote 	(x,y,num,par);break;
 		case "addNotes"		 			: this.board[step+1].addNotes				(x); break;
 		case "deleteNotes"		 		: this.board[step+1].deleteNotes			(x); break;
-		case "solved"		 			: this.board[step+1].solved					(x); break;
 		default: break;
 	}
 	this.step		= step+1;
@@ -52,6 +51,7 @@ action(type,x,y,num,par){
 	draw();
 }
 startSolving(){
+	//this.reloadSudoku();
 	while(this.solve());
 }
 solve(){
@@ -64,49 +64,7 @@ solve(){
 	if(this.candidateBox   (board)) return true;
 	if(this.deleteNotes    (board)) return true;
 	if(this.nakedPair      (board)) return true;
-	if(this.checkStatus    (board)) return true;
 	return false;
-}
-checkStatus(board){
-	let solved = true;
-	//Check each box
-	for(let box=0;box<9;box++){
-		let numberFound = new Array(9).fill(false);
-		for(let i=0;i<9;i++){
-			const [x,y] = this.biToXY([box,i]);
-			const tileNum = Math.abs(board.tile[x][y]);
-			numberFound[tileNum-1]=true;
-		}
-		for(let i=0;i<9;i++){
-			if(numberFound[i]==false) solved = false;
-		}
-	}
-	//Check each row
-	for(let y=0;y<9;y++){
-		let numberFound = new Array(9).fill(false);
-		for(let x=0;x<9;x++){
-			const tileNum = Math.abs(board.tile[x][y]);
-			numberFound[tileNum-1]=true;
-		}
-		for(let i=0;i<9;i++){
-			if(numberFound[i]==false) solved = false;
-		}
-	}
-	//Check each col
-	for(let x=0;x<9;x++){
-		let numberFound = new Array(9).fill(false);
-		for(let y=0;y<9;y++){
-			const tileNum = Math.abs(board.tile[x][y]);
-			numberFound[tileNum-1]=true;
-		}
-		for(let i=0;i<9;i++){
-			if(numberFound[i]==false) solved = false;
-		}
-	}
-	//Make action based on the result
-	this.showHideMethod(true);
-	this.action("solved",solved);
-	console.log("Here:" + solved);
 }
 nakedPair(board){
 	//Check of pairs or triples in each box

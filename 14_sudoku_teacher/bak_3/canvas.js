@@ -4,7 +4,6 @@ let height;
 let side;//Cell Length = Width/11
 let ct;
 let canvasScale;
-let icon_camera=false;
 const fontList = ["Arial","Times New Roman",
                   "ＭＳ ゴシック","Georgia","Palatino Linotype",
                   "Comic Sans MS","Impact","Arial Black"];
@@ -20,9 +19,6 @@ function initCanvas(){
         rct.fillStyle = "black";
         rct.fillRect(0, 0, rcanvas.width, rcanvas.height);
     }
-    icon_camera = new Image();
-    icon_camera.src = "icon_camera.png";
-    icon_camera.onload = draw;
 }
 
 rresize = () => {
@@ -87,10 +83,6 @@ function drawGrids(nineByNine=true){
         drawLine(side*i,side*1,side*i ,side*10,w);
         drawLine(side*1,side*i,side*10,side*i ,w);
     }
-    //Draw Camera Icon
-    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*10.1,side*10.1,side*0.8,side*0.8);
-    //Draw Solve
-    drawNumber(5,10.1,"SOLVE","Black");
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){

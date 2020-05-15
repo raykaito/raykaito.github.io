@@ -83,10 +83,6 @@ deleteNotes(note){
 	}
 	this.msg = "Note Updated";
 }
-solved(solved){
-	//console.log("here");
-	this.msg = solved?"SUDOKU SOLVED!":"SUDOKU UNSOLVED...";
-}
 draw(showMsg=false){
 	//Draw Original Numbers
 	for(let x=0;x<9;x++){
