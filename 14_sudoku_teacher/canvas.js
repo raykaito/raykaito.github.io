@@ -13,7 +13,7 @@ function initCanvas(){
     rct= rcanvas.getContext("2d");
     resize();
     if(!recordMode){
-        rct.clearRect(0,0,rcanvas.width,rcanvas.height);
+        //rct.clearRect(0,0,rcanvas.width,rcanvas.height);
     }else{
         rct.fillStyle = "black";
         rct.fillRect(0, 0, rcanvas.width, rcanvas.height);
@@ -44,7 +44,7 @@ function resize(){
 
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px");
-    
+
     rcanvas.style.width  = rcanvas.width +"px";
     rcanvas.style.height = rcanvas.height+"px";
     rcanvas.width *= pixelRatio;
