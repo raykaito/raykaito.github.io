@@ -4,20 +4,29 @@ let height;
 let side;//Cell Length = Width/11
 let ct;
 let canvasScale;
-const fontList = ["Arial","Times New Roman","ＭＳ ゴシック","Georgia","Palatino Linotype","Comic Sans MS","Impact","Arial Black","Arial Black"];
+const fontList = ["Arial","Times New Roman",
+                  "ＭＳ ゴシック","Georgia","Palatino Linotype",
+                  "Comic Sans MS","Impact","Arial Black"];
 
 function initCanvas(){
     ct = canvas.getContext("2d");
+    rct= rcanvas.getContext("2d");
     resize();
+    if(!recordMode){
+        rct.clearRect(0,0,rcanvas.width,rcanvas.height);
+    }else{
+        rct.fillStyle = "black";
+        rct.fillRect(0, 0, rcanvas.width, rcanvas.height);
+    }
 }
 
 function resize(){
     rect = canvas.getBoundingClientRect();
     pixelRatio = window.devicePixelRatio;
     
-    canvas.width = Math.floor(window.innerWidth-20);
-    if(Math.floor(window.innerWidth)>800)   canvas.width = 780;
-    if(Math.floor(window.innerWidth)<320)   canvas.width = 300;                                    
+    canvas.width = Math.floor(window.innerWidth-40);
+    if(Math.floor(window.innerWidth)>800)   canvas.width = 760;
+    if(Math.floor(window.innerWidth)<320)   canvas.width = 280;                                    
     canvas.height = canvas.width;
 
     canvas.style.width  = canvas.width +"px";
@@ -30,8 +39,18 @@ function resize(){
     height = canvas.height;
     side = Math.floor(width/11);
 
-    console.log("Canvas  Width: "+width+"pt, " +canvas.width+"px");
-    console.log("Canvas Height: "+height+"pt, "+canvas.height+"px");
+    console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px");
+    console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px");
+
+    rcanvas.width = width;
+    rcanvas.height= (recordMode?(33*81+1):1);
+    rcanvas.style.width  = rcanvas.width +"px";
+    rcanvas.style.height = rcanvas.height+"px";
+    rcanvas.width *= pixelRatio;
+    rcanvas.height*= pixelRatio;
+
+    console.log("RCanvas  Width: "+rcanvas.width+"pt, " +rcanvas.style.width+"px");
+    console.log("RCanvas Height: "+rcanvas.height+"pt, "+rcanvas.style.height+"px");
 
     draw();
 }
@@ -79,23 +98,23 @@ function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
-    //ct.font = ""+Math.floor(size*0.8)+"px "+fontList[yi];
-    ct.font = ""+Math.floor(size*0.8)+"px "+fontList[0];
+    if(presetMode){ct.font = ""+Math.floor(size*0.8)+"px "+fontList[yi];}
+    else         {ct.font = ""+Math.floor(size*0.8)+"px "+fontList[0];}
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(n,x,y);
 }
 
-function drawRectIndex(xii,yii,xil,yil,color="lime"){
+function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
     const xi =Math.floor((xii+0.05)*side); 
     const xl =Math.floor((xil+0.95)*side); 
     const yi =Math.floor((yii+0.05)*side); 
     const yl =Math.floor((yil+0.95)*side);
     ct.strokeStyle = color;
-    drawLine(xi,yi,xl,yi,3);
-    drawLine(xi,yi,xi,yl,3);
-    drawLine(xl,yi,xl,yl,3);
-    drawLine(xi,yl,xl,yl,3);
+    drawLine(xi,yi,xl,yi,3,w);
+    drawLine(xi,yi,xi,yl,3,w);
+    drawLine(xl,yi,xl,yl,3,w);
+    drawLine(xi,yl,xl,yl,3,w);
 }
 
 function drawLine(xi,yi,xii,yii,w){

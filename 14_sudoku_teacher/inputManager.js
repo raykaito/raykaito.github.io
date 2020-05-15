@@ -88,6 +88,9 @@ function setNum(xi,yi,xl,yl){
 	const [xii,yii] = XYtoIndex([xi,yi]);
 	const [xil,yil] = XYtoIndex([xl,yl]);
 	//Return if the initial position is invalid
+	if(yii>9){
+		//User Input
+	}
 	if(xii<1||xii>9||yii<1||yii>9){
 		console.log("invalid region");
 		draw();

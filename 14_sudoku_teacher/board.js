@@ -118,7 +118,7 @@ draw(showMsg=false){
 	}
 	if(this.hiliBox!=null){
 		for(let i=0;i<this.hiliBox.length;i++){
-			drawRectIndex(this.hiliBox[i][0],this.hiliBox[i][1],this.hiliBox[i][2],this.hiliBox[i][3],this.hiliBox[i][4]);
+			drawRectIndex(this.hiliBox[i][0],this.hiliBox[i][1],this.hiliBox[i][2],this.hiliBox[i][3],this.hiliBox[i][4],3);
 		}
 	}
 	return;

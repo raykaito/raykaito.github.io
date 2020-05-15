@@ -33,13 +33,18 @@
 				<canvas id="Canvas"></canvas>
 			</td>
 		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="RCanvas"></canvas>
+			</td>
+		</tr>
 	</table>
 	<script type="text/javascript" src="inputManager.js"></script>
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="board.js"></script>
 	<script type="text/javascript" src="sudoku.js"></script>
-	<script type="text/javascript" src="readerb.js"></script>
-	<script type="text/javascript" src="readern.js"></script>
+	<script type="text/javascript" src="board_reader.js"></script>
+	<script type="text/javascript" src="number_reader.js"></script>
 	<script type="text/javascript" src="scanner.js"></script>
 	<script type="text/javascript" src="functions/TrigScript.js"></script>
 	<script type="text/javascript" src="functions/DataScript.js"></script>
@@ -48,10 +53,13 @@
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
+		let presetMode = false;
+		let recordMode= true;
 	 
 		let table  = document.getElementById('Table' );
 		let body   = document.getElementById('Body'  );
 		let canvas = document.getElementById('Canvas');
+		let rcanvas= document.getElementById('RCanvas');
 		let slider = document.getElementById('slider');
 		let metho  = document.getElementById('metho');
 		let phase  = document.getElementById('phase');
@@ -61,22 +69,24 @@
 		let scanner = false;
 		let animationStartTime;
 		const startScan = () => {
-			slider.value=0;
+			if(!presetMode)slider.value=0;
 			scanner = new Scanner();
 		}
 
 		const sudoku = new Sudoku();
 		initCanvas();
 		initEventlistener();
-		const handleSuccess = (stream) => {scanner.handleSuccess(stream);}
-		const drawVideo   = () => {scanner.drawVideo();}
-		const scanNumbers = () => {scanner.drawProgress();}
+		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
+		const drawVideo   = () => {scanner.drawVideo();};
+		const drawImage   = () => {scanner.drawImage();};
+		const scanNumbers = () => {scanner.drawProgress();};
 
-		/*
-		for(let x=0;x<9;x++){
-			for(let i=0;i<9;i++){
-				//if(i!=4) continue;
-				sudoku.userInput(x,i,(x+1));
+		if(presetMode){
+			for(let x=0;x<9;x++){
+				for(let i=0;i<9;i++){
+					//if(i!=4) continue;
+					sudoku.userInput(x,i,(x+1));
+				}
 			}
 		}/*
 		sudoku.userInput(0,0,2);

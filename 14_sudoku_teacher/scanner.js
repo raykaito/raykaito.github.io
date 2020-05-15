@@ -20,7 +20,11 @@ class Scanner{
                 facingMode:(this.front?"user":"environment")
             }
         };
-        navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
+        if(presetMode){
+            this.drawImage();
+        }else{
+            navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
+        }
     }
     handleSuccess(stream){
         video.srcObject = stream;
@@ -35,6 +39,17 @@ class Scanner{
         });
         video.srcObject = null;
     }
+    drawImage(){
+        animationStartTime = Date.now();
+        ct.restore();
+        ct.save();
+        if(width!=this.vLength) this.resizeOcanvas(width);
+        draw();
+        this.oct.drawImage(canvas,0,0,width,height,0,0,this.vLength,this.vLength);
+        const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
+        if(!result){requestAnimationFrame(drawImage);}
+        else{       requestAnimationFrame(scanNumbers);}
+    }
     drawVideo(){
         animationStartTime = Date.now();
         const newVlength = Math.min(video.videoWidth,video.videoHeight,width);
@@ -46,11 +61,7 @@ class Scanner{
         ct.save();
         if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
-        ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,0,0,width,height);
-        
-        //const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        //draw();
-        //this.oct.drawImage(canvas,0,0,width,height,0,0,this.vLength,this.vLength);
+              ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,0,0,width,height);
         
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
@@ -62,11 +73,8 @@ class Scanner{
     drawProgress(){
         animationStartTime = Date.now();
         const result = this.numberV.makeProgress();
-        //draw();
-        if(!result) requestAnimationFrame(scanNumbers);
-        else{
-            draw();
-        }
+        if(!result){requestAnimationFrame(scanNumbers);}
+        else{       draw();}
     }
     draw(){
         this.numberV.draw();
