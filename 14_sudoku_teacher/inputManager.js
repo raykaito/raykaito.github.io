@@ -49,8 +49,8 @@ function keyReleased(event){
 
 function touch(event){
 	rect = event.target.getBoundingClientRect();
-	x = event.pageX-rect.left-document.body.scrollLeft;
-	y = event.pageY-rect.top-document.body.scrollTop;
+	x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+	y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
 
@@ -62,8 +62,8 @@ function touch(event){
 
 function release(event){
 	rect = event.target.getBoundingClientRect();
-	x = event.pageX-rect.left-document.body.scrollLeft;
-	y = event.pageY-rect.top-document.body.scrollTop;
+	x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+	y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
 
@@ -84,11 +84,17 @@ function showInputs([xi,yi]){
 }
 
 function setNum(xi,yi,xl,yl){
+	if(xi==undefined||yi==undefined){
+		console.log("invalid region");
+		return;
+	}
 	//get x and y index for initial and last position
 	const [xii,yii] = XYtoIndex([xi,yi]);
 	const [xil,yil] = XYtoIndex([xl,yl]);
 	//Return if the initial position is invalid
 	if(yii>9){
+		if(rcanvas.style.display=="none")   rcanvas.style.display="block";
+		else								rcanvas.style.display="none";
 		//User Input
 	}
 	if(xii<1||xii>9||yii<1||yii>9){

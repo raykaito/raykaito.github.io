@@ -186,26 +186,29 @@ class Binarize extends ImageData{
 		this.threshold = threshIn;
 	}
 	getThreshold(){
-		const factor = 7;
-		const countLimit = this.area/factor;
+		const minBlackArea = Math.ceil(this.area*0.15);
+		const maxBlackArea = Math.floor(this.area*0.45);
 		let lowerCount = 0;
 		let upperCount = 0;
 		let lowerFound = -1;
 		let upperFound = -1;
+		//Find Lower Limit of Threshhold
 		for(let i=0;i<this.histogram.length;i++){
 			lowerCount += this.histogram[i];
-			if(lowerCount>countLimit){
-				lowerFound = i;
+			if(lowerCount>minBlackArea){
+				lowerFound = i-1;
 				break;
 			}
 		}
-		for(let i=this.histogram.length-1;i>=0;i--){
+		//Find Upper Limit of Threshhold
+		for(let i=0;i<this.histogram.length;i++){
 			upperCount += this.histogram[i];
-			if(upperCount>countLimit){
+			if(upperCount>maxBlackArea){
 				upperFound = i;
 				break;
 			}
 		}
+		//Find the optimal thresh
 		let record = 0;
 		let king = -1;
 		for(let t=lowerFound;t<=upperFound;t++){
@@ -534,7 +537,20 @@ class DistanceTransform extends ImageData{
 		return tcanvas;
 	}
 	distanceTransfrom(){
+		//Fill Holes
+		for(let i=0;i<this.area;i++){
+			const [x,y] = this.i2xy(i);
+			if(x==0||y==0||x==this.width-1||y==this.height-1) continue;
+			const pixelAt = this.getPix(this.imgIn,i,1);
+			if(pixelAt==0) continue;
+			for(let di=0;di<8;di+=2){
+				const dpixel = this.getPix(this.imgOut,[x+dx[di],y+dy[di]],1);
+				if(dpixel!=0) break;
+				if(di==6) this.setPix(i,0);
+			}
+		}
 		let brightness=255;
+		//Scan from Top Left to Bottom Right
 		for(let i=0;i<this.area;i++){
 			const [x,y] = this.i2xy(i);
 			const pixelAt = this.getPix(this.imgIn,i,1);
@@ -556,6 +572,7 @@ class DistanceTransform extends ImageData{
 			brightness--;
 			this.setPix(i,brightness);
 		}
+		//Scan from Bottom Right to Top Left
 		brightness=255;
 		for(let i=this.area-1;i>=0;i--){
 			const [x,y] = this.i2xy(i);
@@ -849,11 +866,12 @@ class NumberReader extends ImageData{//After Skeltonize
 						}
 						currentValueNegThree = !currentValueNegThree;
 					}
-					if(switchCounter>=3){
-						threeSwitchCount++;
-					}
+				}
+				if(switchCounter>=3){
+					threeSwitchCount++;
 				}
 			}
+			//return threeSwitchCount+","+width;
 			if(threeSwitchCount>width*0.2){//2,3 or 5
 				if(xu<width/2&&xd>width/2) return 2;
 				if(xu>width/2&&xd<width/2) return 5;
@@ -896,24 +914,27 @@ class Skeltonize extends ImageData{//After the distance Transformation
 			}
 		}
 		for(let brightness=254;brightness>=0;brightness--){
-			for(let i=0;i<liveCells[brightness].length;i++){
-				const [x,y] = this.i2xy(liveCells[brightness][i]);
-				let switchCounter = 0;
-				let neighborCounter = 0;
-				let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
-				for(let j=0;j<8;j++){
-					const pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
-					if(!pixelNeighbor) neighborCounter++;
-					if(pixelNeighbor!=lastNeighbor){
-						switchCounter++;
-						lastNeighbor = pixelNeighbor;
+			for(let lag=3;lag>=0;lag--){
+				if(brightness+lag>254) continue;
+				for(let i=0;i<liveCells[brightness+lag].length;i++){
+					const [x,y] = this.i2xy(liveCells[brightness+lag][i]);
+					let switchCounter = 0;
+					let neighborCounter = 0;
+					let lastNeighbor = (this.getPix(this.imgIn,[x+dx[7],y+dy[7]],1)==255);
+					for(let j=0;j<8;j++){
+						const pixelNeighbor = (this.getPix(this.imgIn,[x+dx[j],y+dy[j]],1)==255);
+						if(!pixelNeighbor) neighborCounter++;
+						if(pixelNeighbor!=lastNeighbor){
+							switchCounter++;
+							lastNeighbor = pixelNeighbor;
+						}
 					}
-				}
-				if(switchCounter>=4||neighborCounter==1){
-					//Dont Kill
-					continue;
-				}else{
-					this.setPix([x,y],255);
+					if(switchCounter>=4||neighborCounter==1){
+						//Dont Kill
+						continue;
+					}else{
+						this.setPix([x,y],255);
+					}
 				}
 			}
 		}
