@@ -15,7 +15,7 @@ function initCanvas(){
     if(!recordMode){
         //rct.clearRect(0,0,rcanvas.width,rcanvas.height);
     }else{
-        rct.fillStyle = "black";
+        rct.fillStyle = "darkGray";
         rct.fillRect(0, 0, rcanvas.width, rcanvas.height);
     }
 }
