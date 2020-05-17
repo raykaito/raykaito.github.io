@@ -8,6 +8,8 @@ constructor(){
 	this.showMethod = false;//If true, show the method
 	this.board = new Array();
 	this.board[0] = new Board();
+	//brute force parameters
+	this.bruteForceParameter = new Array();//[step at guess, candidateNum]
 }
 showHideMethod(showMethod = !this.showMethod){
 	this.showMethod = showMethod;
@@ -52,6 +54,7 @@ action(type,x,y,num,par){
 	draw();
 }
 startSolving(){
+	this.bruteForceParameter = new Array();
 	while(this.solve());
 }
 solve(){
@@ -64,7 +67,85 @@ solve(){
 	if(this.candidateBox   (board)) return true;
 	if(this.deleteNotes    (board)) return true;
 	if(this.nakedPair      (board)) return true;
+	if(this.bruteForce     (board)) return true;
 	if(this.checkStatus    (board)) return true;
+	return false;
+}
+bruteForce(board){
+	//Select Tile with least candidate
+	let minNumCandidate = 9;
+	let minNumCandidateXY =[-1,-1];
+	for(let x=0;x<9;x++){
+		for(let y=0;y<9;y++){
+			//Skip if Tile has a Number
+			if(board.tile[x][y]!=0) continue;
+			//Check num of candidate
+			let numCandidate = 0;
+			for(let i=0;i<9;i++){
+				if(board.note[x][y][i]){numCandidate++;}
+			}
+			if(numCandidate<minNumCandidate){
+				minNumCandidate = numCandidate;
+				minNumCandidateXY = [x,y];
+			}
+		}
+	}
+	if(minNumCandidateXY[0]==-1) return false;
+	//If ZERO, the sudoku failed...
+	if(minNumCandidate==0){
+		//if parameter length==0, then it failed.return false
+		if(this.bruteForceParameter.length==0) return false;
+		//Inclement CandidateNum and restore previous.
+		this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
+		slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
+	}
+	else if(this.bruteForceParameter.length==0){
+		this.bruteForceParameter[this.bruteForceParameter.length] = [slider.value,0];
+		this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board);
+	}
+	else{//Check if you were here before or not
+		const step = this.bruteForceParameter[this.bruteForceParameter.length-1][0];
+		if(step==Number(slider.value)){
+			//check the candidate Num
+			const candidateNum = this.bruteForceParameter[this.bruteForceParameter.length-1][1];
+			//If candidate Num > num of candidate, pop last brute Force, inclement previous, and restore
+			if(candidateNum>=minNumCandidate){
+				//Remove Last Element from this.bruteForceParameter
+				this.bruteForceParameter.splice(this.bruteForceParameter.length-1,1);
+				if(this.bruteForceParameter.length==0) return false;
+				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
+				slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
+			}
+			else{
+				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
+				this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],candidateNum,board);
+			}
+		}
+		else{
+			this.bruteForceParameter[this.bruteForceParameter.length] = [slider.value,0];
+			this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board);
+		}
+	}
+	return true;
+}
+BruteForce_TakeAGuess(x,y,candidateNum,board){
+	//select candidate based on the candidate Num;
+	let candidateCount = 0;
+	let candidate = -1;
+	for(let i=0;i<9;i++){
+		if(board.note[x][y][i]){
+			if(candidateCount==candidateNum){
+				candidate = i+1;
+				break;
+			}
+			candidateCount++;
+		}
+	}
+	const msg = "Took a Guess";
+	const hiliNum = null;
+	const hiliNote= null;
+	const hiliBox = [[x+1,y+1,x+1,y+1,"blue"]];;
+	this.action("programProgressed",x,y,candidate,[msg,hiliNum,hiliNote,hiliBox]);
 	return false;
 }
 checkStatus(board){
@@ -106,7 +187,6 @@ checkStatus(board){
 	//Make action based on the result
 	this.showHideMethod(true);
 	this.action("solved",solved);
-	console.log("Here:" + solved);
 }
 nakedPair(board){
 	//Check of pairs or triples in each box
@@ -292,7 +372,7 @@ nakedPair(board){
 					}
 					for(let i=0;i<mixedCombiIndex.length;i++){
 						const [x,y] = this.inToXY(mixedCombiIndex[i]);
-						console.log(x,y);
+						//console.log(x,y);
 						for(let j=0;j<pair;j++){
 							const num = candidates[combi[j]];
 							if(board.note[x][y][num-1]){
@@ -613,8 +693,10 @@ candidateLine(board){
 		for(let num=1;num<=9;num++){
 			let xCandidateLine = -1;
 			let yCandidateLine = -1;
-			let hiliNote = new Array;
-			let hiliNoteCounter = 0;
+			let hiliNote = new Array();
+			let nums = new Array();
+			let xs = new Array();
+			let ys = new Array();
 			for(let i=0;i<9;i++){
 				const [x,y] = this.biToXY([box,i]);
 				if(board.tile[x][y]==num){
@@ -624,8 +706,7 @@ candidateLine(board){
 				}
 				if(board.tile[x][y]!=0) continue;
 				if(!board.note[x][y][num-1]) continue;
-				hiliNote[hiliNoteCounter] = [x+1,y+1,num,"▢","red",1.4];
-				hiliNoteCounter++;
+				hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
 				if(xCandidateLine==-1){//This is the first one found
 					xCandidateLine=x;
 				}else{
@@ -637,20 +718,18 @@ candidateLine(board){
 					if(yCandidateLine!=y)yCandidateLine=-2;
 				}
 			}
+						const msg = "Candidate Line";
+						const hiliNum = null;
 			if(xCandidateLine>-1){
 				for(let i=0;i<9;i++){
 					if(indexToBox([xCandidateLine,i])==box) continue;
 					if(board.tile[xCandidateLine][i]!=0) continue;
 					if(board.note[xCandidateLine][i][num-1]){
-						const msg = "Candidate Line";
-						const hiliNum = null;
-						hiliNote[hiliNoteCounter] = [xCandidateLine+1,i+1,num,num,"darkGray"];
-						hiliNote[hiliNoteCounter+1] = [xCandidateLine+1,i+1,num,"/","red",1.2];
-						const [xii,yii] = this.biToXY([box,0]);
-						const [xil,yil] = this.biToXY([box,8]);
-						const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-						this.action("programProgressedNote",[xCandidateLine],[i],[num],[msg,hiliNum,hiliNote,hiliBox]);
-						return true;
+						hiliNote[hiliNote.length] = [xCandidateLine+1,i+1,num,num,"darkGray"];
+						hiliNote[hiliNote.length] = [xCandidateLine+1,i+1,num,"/","red",1.2];
+						xs[xs.length] = xCandidateLine;
+						ys[ys.length] = i;
+						nums[nums.length] = num;
 					}
 				}
 			}
@@ -661,16 +740,21 @@ candidateLine(board){
 					if(board.note[i][yCandidateLine][num-1]){
 						const msg = "Candidate Line";
 						const hiliNum = null;
-						hiliNote[hiliNoteCounter]= [i+1,yCandidateLine+1,num,num,"darkGray"];
-						hiliNote[hiliNoteCounter+1]= [i+1,yCandidateLine+1,num,"/","red",1.2];
-						const [xii,yii] = this.biToXY([box,0]);
-						const [xil,yil] = this.biToXY([box,8]);
-						const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-						this.action("programProgressedNote",[i],[yCandidateLine],[num],[msg,hiliNum,hiliNote,hiliBox]);
-						return true;
+						hiliNote[hiliNote.length]= [i+1,yCandidateLine+1,num,num,"darkGray"];
+						hiliNote[hiliNote.length]= [i+1,yCandidateLine+1,num,"/","red",1.2];
+						xs[xs.length] = i;
+						ys[ys.length] = yCandidateLine;
+						nums[nums.length] = num;
 					}
 				}
-			}		
+			}
+			if(nums.length>0){
+				const [xii,yii] = this.biToXY([box,0]);
+				const [xil,yil] = this.biToXY([box,8]);
+				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
+				this.action("programProgressedNote",xs,ys,nums,[msg,hiliNum,hiliNote,hiliBox]);
+				return true;				
+			}	
 		}
 	}
 	return false;

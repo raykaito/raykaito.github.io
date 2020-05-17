@@ -90,7 +90,6 @@ function drawGrids(nineByNine=true){
     //Draw Camera Icon
     if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*10.1,side*10.1,side*0.8,side*0.8);
     //Draw Solve
-    drawNumber(5,10.1,"SOLVE","Black");
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
@@ -120,10 +119,10 @@ function drawNumber(xi,yi,n,color="black",size=side){
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const xi =Math.floor((xii+0.05)*side); 
-    const xl =Math.floor((xil+0.95)*side); 
-    const yi =Math.floor((yii+0.05)*side); 
-    const yl =Math.floor((yil+0.95)*side);
+    const xi =Math.floor((xii  )*side)+1+w; 
+    const xl =Math.floor((xil+1)*side)-1-w; 
+    const yi =Math.floor((yii  )*side)+1+w; 
+    const yl =Math.floor((yil+1)*side)-1-w;
     ct.strokeStyle = color;
     drawLine(xi,yi,xl,yi,3,w);
     drawLine(xi,yi,xi,yl,3,w);
