@@ -61,7 +61,7 @@ function resize(){
 
     draw();
 }
-const draw=(type,par)=>{
+const draw=(type,par=[undefined])=>{
     if(phaseList[phasei]=="Input Sudoku Manualy"){
         drawGrids();
         if(type=="drawInputs"){
