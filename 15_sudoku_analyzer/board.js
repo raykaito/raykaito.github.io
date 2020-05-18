@@ -111,20 +111,20 @@ draw(showMsg=false){
 	//Draw Progress
 	const phase = phaseList[phasei];
 	if(showMsg&&(phase=="Solving_Number"||phase=="Solving_Note"||phase=="Solved"||phase=="UnSolved")){
-		drawNumber(5,0,this.msg);
+		drawNumber(5,0,this.msg,"black",side*0.6);
 		if(this.hiliNum!=null){
 			for(let i=0;i<this.hiliNum.length;i++){
 				drawNumber(this.hiliNum[i][0],this.hiliNum[i][1],this.hiliNum[i][2],this.hiliNum[i][3]);
 			}
 		}
-		if(this.hiliNote!=null){
-			for(let i=0;i<this.hiliNote.length;i++){
-				drawNotes(this.hiliNote[i][0],this.hiliNote[i][1],this.hiliNote[i][2],this.hiliNote[i][3],this.hiliNote[i][4],this.hiliNote[i][5]);
-			}
-		}
 		if(this.hiliBox!=null){
 			for(let i=0;i<this.hiliBox.length;i++){
 				drawRectIndex(this.hiliBox[i][0],this.hiliBox[i][1],this.hiliBox[i][2],this.hiliBox[i][3],this.hiliBox[i][4],3);
+			}
+		}
+		if(this.hiliNote!=null){
+			for(let i=0;i<this.hiliNote.length;i++){
+				drawNotes(this.hiliNote[i][0],this.hiliNote[i][1],this.hiliNote[i][2],this.hiliNote[i][3],this.hiliNote[i][4],this.hiliNote[i][5]);
 			}
 		}
 	}

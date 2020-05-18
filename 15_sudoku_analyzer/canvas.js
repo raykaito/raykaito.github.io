@@ -155,7 +155,7 @@ function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
     ct.fillText(str,x,y);
 }
 
-function drawNumber(xi,yi,n,color="black",size=side){
+function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Roman"){
     //fill with white first
     ct.fillStyle = "white";
     ct.fillRect((xi+0.05)*side,(yi+0.05)*side,side*0.9,side*0.9);
@@ -163,17 +163,23 @@ function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(size*0.8)+"px Times New Roman";
+    ct.font = ""+Math.floor(size*0.8)+"px "+fontFamily;
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(n,x,y);
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const xi =Math.floor((xii  )*side)+(LineWidthThick+1);
-    const xl =Math.floor((xil+1)*side)-(LineWidthThick+1);
-    const yi =Math.floor((yii  )*side)+(LineWidthThick+1);
-    const yl =Math.floor((yil+1)*side)-(LineWidthThick+1);
+    const lefEdgeThick = ((xii-1)%3==0);
+    const rigEdgeThick = ((xil  )%3==0);
+    const topEdgeThick = ((yii-1)%3==0);
+    const botEdgeThick = ((yil  )%3==0);
+    const offsetNeg    = Math.ceil (LineWidthThick/2)-Math.ceil (LineWidthThin/2);
+    const offsetPos    = Math.floor(LineWidthThick/2)-Math.floor(LineWidthThin/2); 
+    const xi =(xii  )*side+(LineWidthThick+1)-(lefEdgeThick?0:offsetNeg);
+    const xl =(xil+1)*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos);
+    const yi =(yii  )*side+(LineWidthThick+1)-(topEdgeThick?0:offsetNeg);
+    const yl =(yil+1)*side-(LineWidthThick+1)+(botEdgeThick?0:offsetPos);
     ct.strokeStyle = color;
     drawLine(xi,yi,xl,yi,w);
     drawLine(xi,yi,xi,yl,w);
