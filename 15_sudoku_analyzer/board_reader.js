@@ -356,10 +356,10 @@ class VisionProgram_BoardReader{
                          //this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
                     const [x1,y1] = this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4);
                     const [x2,y2] = this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4);
-                    line([[x1,y1],[x1,y2]],["red",1*pixelRatio]);
-                    line([[x1,y1],[x2,y1]],["red",1*pixelRatio]);
-                    line([[x1,y2],[x2,y2]],["red",1*pixelRatio]);
-                    line([[x2,y1],[x2,y2]],["red",1*pixelRatio]);
+                    line([[x1,y1],[x1,y2]],["red",1]);
+                    line([[x1,y1],[x2,y1]],["red",1]);
+                    line([[x1,y2],[x2,y2]],["red",1]);
+                    line([[x2,y1],[x2,y2]],["red",1]);
 
                     /*
                     //Create the Image for each number

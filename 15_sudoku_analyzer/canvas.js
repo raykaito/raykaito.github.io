@@ -184,10 +184,14 @@ function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
 function drawLine(xi,yi,xii,yii,w){
     ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
     const widthOdd = (ct.lineWidth%2==1);
-    xi = Math.floor(xi )+(widthOdd?0.5:0);
-    xii= Math.floor(xii)+(widthOdd?0.5:0);
-    yi = Math.floor(yi )+(widthOdd?0.5:0);
-    yii= Math.floor(yii)+(widthOdd?0.5:0);
+    const vertical = (xi==xii);
+    const horizontal = (yi==yii);
+    const xiBigger = (xi>xii);
+    const yiBigger = (yi>yii);
+    xi = Math.floor(xi )+(widthOdd?0.5:0)+(horizontal?(xiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
+    xii= Math.floor(xii)+(widthOdd?0.5:0)+(horizontal?(xiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
+    yi = Math.floor(yi )+(widthOdd?0.5:0)+(vertical?(yiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
+    yii= Math.floor(yii)+(widthOdd?0.5:0)+(vertical?(yiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
     ct.beginPath();
     ct.moveTo(xi ,yi );
     ct.lineTo(xii,yii);
