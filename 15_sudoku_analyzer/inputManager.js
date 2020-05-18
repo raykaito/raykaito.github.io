@@ -64,10 +64,10 @@ const touch=(event)=>{
 		console.log("invalid touch region");
 		return;
 	}
-	if(phaseList[phasei]=="InputSudokuManualy"){
+	if(phaseList[phasei]=="Input Sudoku Manualy"){
 		draw("drawInputs");
-	}else if(phaseList[phasei]=="ScannerCorrection"){
-		scanner.userInput("touch",x,y);
+	}else if(phaseList[phasei]=="Correct Scanning Error"){
+		scanner.userInput("touch",xi,yi);
 	}
 }
 const move=(event)=>{
@@ -81,7 +81,7 @@ const move=(event)=>{
 	x *= pixelRatio;
 	y *= pixelRatio;
 	
-	if(phaseList[phasei]=="ScannerCorrection"){
+	if(phaseList[phasei]=="Correct Scanning Error"){
 		scanner.userInput("move",x,y);
 	}
 }
@@ -98,34 +98,36 @@ const release=(event)=>{
 	x *= pixelRatio;
 	y *= pixelRatio;
 
-	if(phaseList[phasei]=="InputSudokuManualy"){
-		setNum(touchX, touchY, x, y);
-	}else if(phaseList[phasei]=="ScannerCorrection"){
-		scanner.userInput("release",x,y);
-	}
-}
-const setNum=(xi,yi,xl,yl)=>{
 	//get x and y index for initial and last position
-	const [xii,yii] = XYtoIndex([xi,yi]);
-	const [xil,yil] = XYtoIndex([xl,yl]);
-	//Return if the initial position is invalid
-	if(yii>9){
-		if(xii>9){
-			startScan();
-			return;
-		}
-		if(rcanvas.style.display=="none")   rcanvas.style.display="block";
-		else								rcanvas.style.display="none";
-		//User Input
-	}
-	if(xii<1||xii>9||yii<1||yii>9){
-		console.log("invalid region");
-		draw();
+	const [xii,yii] = XYtoIndex([touchX,touchY]);
+	const [xil,yil] = XYtoIndex([x,y]);
+
+	if(xii>9&&yii<1){
+		startScan();
 		return;
+	}else if(phaseList[phasei]=="Input Sudoku Manualy"){
+		if(yil>9&&yii>9){
+			sudoku.startSolving();
+		}
+		//Returns if Initial Position is invalid
+		if(xii<1||xii>9||yii<1||yii>9){
+			console.log("invalid region");
+		}else{
+			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
+			sudoku.userInput(xii-1,yii-1,newNum);
+		}
+	}else if(phaseList[phasei]=="Correct Scanning Error"){
+		if(yii<1){
+			if(rcanvas.style.display=="none")   rcanvas.style.display="block";
+			else								rcanvas.style.display="none";
+		}
+		if(yii>9){
+			scanner.numberV.endCorrection();
+		}else{
+			scanner.userInput("release",xil,yil);
+		}
 	}
-	let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
-	if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
-	sudoku.userInput(xii-1,yii-1,newNum);
 	draw();
 }
 

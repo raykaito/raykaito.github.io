@@ -20,7 +20,7 @@ class Scanner{
                 facingMode:(this.front?"user":"environment")
             }
         };
-        if(presetMode){
+        if(false){
             this.drawImage();
         }else{
             navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
@@ -79,14 +79,19 @@ class Scanner{
             result=this.numberV.makeProgress();
             if(result) break;
         }
-        if(!result){requestAnimationFrame(scanNumbers);}
-        else{
+        if(!result){
+            requestAnimationFrame(scanNumbers);
+        }else{
             const solvable = sudoku.startSolving();
-            if(solvable==false){this.numberV.userCheck();}
+            if(solvable==false){
+                alert("Scanning process might have failed. Drag and Drop to correct the mistake.");
+                changePhase("Correct Scanning Error");
+                this.numberV.startCorrection();
+            }
         }
     }
     userInput(inputType, x, y){
-        numberV.userInput(inputType, x, y);
+        this.numberV.userInput(inputType, x, y);
     }
     draw(){
         this.numberV.draw();

@@ -3,7 +3,7 @@
 <html>
 
 <head>
-	<title>Sudoku Teacher</title>
+	<title>Sudoku Analyzer</title>
 	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
 	<link rel="icon" type="image/png" href="../icon.png">
 	<meta name="viewport" content="width=320, initial-scale=1"/>
@@ -17,13 +17,9 @@
 		<tr>
 			<td align="center">
 				<Font size="10" Font color="black"><TNR>
-			       Sudoku Teacher
+			       Sudoku Analyzer
 				</Font></TNR>
-				<hr>
-				<input type="button" value="Solve" onclick="sudoku.startSolving()">
-				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
-				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
-				
+				<hr>				
 			</td>
 		</tr>
 		<tr>
@@ -53,25 +49,35 @@
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
-		let presetMode = false;
 		let recordMode = true;
-		const phaseList = ["InputSudokuManualy","ScannerCorrection"];
+		const phaseList = ["Input Sudoku Manualy","Scanning Board","Correct Scanning Error","Solving_Number","Solving_Note","Solved","UnSolved"];
 		let phasei = 0;
+		const changePhase=(newPhase)=>{
+			for(let phaseIndex = 0; phaseIndex<phaseList.length;phaseIndex++){
+				if(phaseList[phaseIndex]==newPhase){
+					phasei = phaseIndex;
+					draw();
+					return;
+				}
+			}
+			alert("Invalid Phase Change");
+		}
 	 
 		let table  = document.getElementById('Table' );
 		let body   = document.getElementById('Body'  );
 		let canvas = document.getElementById('Canvas');
 		let rcanvas= document.getElementById('RCanvas');
 		let slider = document.getElementById('slider');
-		let metho  = document.getElementById('metho');
-		let phase  = document.getElementById('phase');
 		let video  = document.getElementById("player");
 		showObject(body, table);
 
 		let scanner = false;
 		let animationStartTime;
 		const startScan = () => {
-			if(!presetMode)slider.value=0;
+			changePhase("Scanning Board");
+			draw();
+			slider.value=0;
+			sudoku.reset(0);
 			scanner = new Scanner();
 		}
 
@@ -82,14 +88,7 @@
 		const drawVideo   = () => {scanner.drawVideo();};
 		const drawImage   = () => {scanner.drawImage();};
 		const scanNumbers = () => {scanner.drawProgress();};
-
-		if(presetMode){
-			for(let x=0;x<9;x++){
-				for(let i=0;i<9;i++){
-					sudoku.userInput(x,i,(x+1));
-				}
-			}
-		}
+		/*
 		sudoku.userInput(0,1,8);
 		sudoku.userInput(0,3,4);
 		sudoku.userInput(1,2,7);
@@ -112,7 +111,7 @@
 		sudoku.userInput(7,5,8);
 		sudoku.userInput(7,7,3);
 		sudoku.userInput(8,4,6);
-		sudoku.userInput(8,6,9);
+		sudoku.userInput(8,6,9);*/
 	//--> 
 	</script>
 

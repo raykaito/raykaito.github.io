@@ -6,7 +6,11 @@ class VisionProgram_NumberReader{
         this.stepOnTheCurrentImage;
         this.reset();
         //Images and guessed numbers for User Check
-        this.imageAndNumber;//[Image(canvas),Number read]
+        this.imageAndNumber;//[Image(canvas),xi, yi (Number rea)]
+        this.imageCount;
+        this.dragging;
+        this.draggedImageIndex;
+        this.correctionList;
     }
     reset(){
         this.images = new Array();
@@ -38,12 +42,15 @@ class VisionProgram_NumberReader{
         ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+1.1)*side,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         if(this.stepOnTheCurrentImage==7){
             const readNumber = this.images[ci][0].recognizeNumber();
-            sudoku.userInput(this.images[ci][1],this.images[ci][2],readNumber);
-            this.imageAndNumber[ci][1] = readNumber;
+            sudoku.scannerInput(this.images[ci][1],this.images[ci][2],readNumber);
+            this.imageAndNumber[ci][2] = readNumber;
             this.currentImageWorkingOn++;
             this.stepOnTheCurrentImage=0;
         }
-        if(this.currentImageWorkingOn==this.images.length) return true;
+        if(this.currentImageWorkingOn==this.images.length){
+            this.resetImageAndNumberX();
+            return true;
+        }
         return false;
     }
     record(st,ci){
@@ -68,27 +75,47 @@ class VisionProgram_NumberReader{
             //ct.drawImage(img,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
     }
-    userInput(type,x,y){
-        if(type=="touch"){
-            //this
-        }else if(type=="move"){
-            //this
-        }else if(type=="release"){
-            //this
+    resetImageAndNumberX(){
+        this.imageCount = new Array(9).fill(0);
+        for(let imgI=0;imgI<this.imageAndNumber.length;imgI++){
+            const readNumber = this.imageAndNumber[imgI][2]
+            this.imageAndNumber[imgI][1] = this.imageCount[readNumber-1];
+            this.imageCount[readNumber-1]++;
         }
     }
-    userCheck(){
-        drawGrids();
-        alert("Scanning process might have failed. Drag and Drop to correct the mistake.");
-        let imageCount = new Array(9).fill(0);
-        for(let imgI=0;imgI<this.imageAndNumber.length;imgI++){
-            const readNumber = this.imageAndNumber[imgI][1];
-            const img = this.imageAndNumber[imgI][0];
-            const y=readNumber-1;
-            const x=imageCount[readNumber-1];
-            ct.drawImage(img,0,0,img.width,img.height,(x+1.1)*side,(y+1.1)*side,side*0.8,side*0.8);
-            imageCount[readNumber-1]++;
+    startCorrection(){
+        this.dragging = false;
+        this.correctionList = new Array();
+    }
+    endCorrection(){
+        sudoku.phase = 0;
+        slider.value = 0;
+        for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
+            sudoku.scannerInput(this.images[imgI][1],this.images[imgI][2],this.imageAndNumber[imgI][2]);
         }
-        for(let i=0;i<9;i++) drawNumber(0,i+1,i+1,"red");
+        sudoku.startSolving()
+    }
+    userInput(type,x,y){
+        if(type=="touch"){
+            if(y<1||y>9) return;
+            this.dragging = true;
+            let theImgIndex = undefined;
+            for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
+                if(this.imageAndNumber[imgI][1]==x-1&&this.imageAndNumber[imgI][2]==y){
+                    this.draggedImageIndex = imgI;
+                    draw("",[this.draggedImageIndex,x*side,y*side]);
+                }
+            }
+        }else if(type=="move"){
+            draw("",[this.draggedImageIndex,x-side/2,y-side/2]);
+        }else if(type=="release"){
+            if(this.draggedImageIndex==undefined) return;
+            if(y<1||y>9) return;
+            this.imageAndNumber[this.draggedImageIndex][2] = y;
+            this.resetImageAndNumberX();
+            this.dragging = false;
+            this.draggedImageIndex = undefined;
+            draw();
+        }
     }
 }

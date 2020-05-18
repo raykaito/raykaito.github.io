@@ -5,9 +5,6 @@ let side;//Cell Length = Width/11
 let ct;
 let canvasScale;
 let icon_camera=false;
-const fontList = ["Times New Roman","Arial",
-                  "ＭＳ ゴシック","Georgia","Palatino Linotype",
-                  "Comic Sans MS","Impact","Arial Black"];
 
 function initCanvas(){
     ct = canvas.getContext("2d");
@@ -64,25 +61,64 @@ function resize(){
 
     draw();
 }
-const draw=(type)=>{
-    if(type=="drawInputs"){
-        drawGrids(false);
-        drawNumber(2,8,1,"gray",side*3);
-        drawNumber(5,8,2,"gray",side*3);
-        drawNumber(8,8,3,"gray",side*3);
-        drawNumber(2,5,4,"gray",side*3);
-        drawNumber(5,5,5,"gray",side*3);
-        drawNumber(8,5,6,"gray",side*3);
-        drawNumber(2,2,7,"gray",side*3);
-        drawNumber(5,2,8,"gray",side*3);
-        drawNumber(8,2,9,"gray",side*3);
-    }else{
+const draw=(type,par)=>{
+    if(phaseList[phasei]=="Input Sudoku Manualy"){
+        drawGrids();
+        if(type=="drawInputs"){
+            drawGrids(false);
+            drawNumber(2,8,1,"gray",side*3);
+            drawNumber(5,8,2,"gray",side*3);
+            drawNumber(8,8,3,"gray",side*3);
+            drawNumber(2,5,4,"gray",side*3);
+            drawNumber(5,5,5,"gray",side*3);
+            drawNumber(8,5,6,"gray",side*3);
+            drawNumber(2,2,7,"gray",side*3);
+            drawNumber(5,2,8,"gray",side*3);
+            drawNumber(8,2,9,"gray",side*3);
+        }else{
+            sudoku.draw();
+        }
+        drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6);
+        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6);
+    }else if(phaseList[phasei]=="Scanning Board"){
         ct.restore();
         ct.save();
         drawGrids();
+        drawNumber(5,0,"Scanning Board","black",side*0.6);
+        sudoku.draw();
+        if(scanner) scanner.draw();
+    }else if(phaseList[phasei]=="Correct Scanning Error"){
+        drawGrids();
+        drawNumber(5,0,"Drag and Drop","black",side*0.6);
+        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6);
+        for(let imgI=0;imgI<scanner.numberV.imageAndNumber.length;imgI++){
+            const readNumber = scanner.numberV.imageAndNumber[imgI][2];
+            const img = scanner.numberV.imageAndNumber[imgI][0];
+            let y=(readNumber-1+1.1)*side;
+            let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side;
+            if(par!=undefined&&par[0]!=imgI){
+                ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
+            }
+        }
+        if(par!=undefined&&par[0]!=undefined){
+            const img =  scanner.numberV.imageAndNumber[par[0]][0];
+            ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
+        }
+        for(let i=0;i<9;i++) drawNumber(0,i+1,i+1,"red");
+    }else if(phaseList[phasei]=="Solved"){
+        drawGrids();
         //Draw Sudoku
         sudoku.draw();
-        if(scanner) scanner.draw();        
+    }else if(phaseList[phasei]=="UnSolved"){
+        drawGrids();
+        //Draw Sudoku
+        sudoku.draw();
+    }else{
+        drawGrids();
+        //Draw Sudoku
+        sudoku.draw();
+        drawNumber(5,0,phaseList[phasei]);
+        drawNumber(5,10,"Un Known Condition");
     }
 }
 
@@ -100,8 +136,7 @@ function drawGrids(nineByNine=true){
         drawLine(side*1,side*i,side*10,side*i ,w);
     }
     //Draw Camera Icon
-    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*10.1,side*10.1,side*0.8,side*0.8);
-    //Draw Solve
+    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*10.1,side*0.1,side*0.8,side*0.8);
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
@@ -123,8 +158,7 @@ function drawNumber(xi,yi,n,color="black",size=side){
     const x=Math.floor((xi+0.5)*side);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
-    if(presetMode){ct.font = ""+Math.floor(size*0.8)+"px "+fontList[yi];}
-    else         {ct.font = ""+Math.floor(size*0.8)+"px "+fontList[0];}
+    ct.font = ""+Math.floor(size*0.8)+"px Times New Roman";
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(n,x,y);

@@ -1,9 +1,6 @@
-const phases = ["InputProblem","SolveProblem","EditNote"];
-
 class Sudoku{
 constructor(){
 	//Init tiles
-	this.phase= 0;//["inputProblem,SolveProblem,editNote"]
 	this.step = 0;//Inclements everytime it solves a tile
 	this.showMethod = false;//If true, show the method
 	this.solvable = false;
@@ -12,14 +9,13 @@ constructor(){
 	//brute force parameters
 	this.bruteForceParameter = new Array();//[step at guess, candidateNum]
 }
+reset(step){
+	this.step = step;
+	slider.value = step;
+	this.board[step].initializeTileAndNote();
+}
 showHideMethod(showMethod = !this.showMethod){
 	this.showMethod = showMethod;
-	metho.value = this.showMethod?"Hide Method":"Show Method";
-	draw();
-}
-changePhase(){
-	this.phase = (this.phase+1)%3;
-	phase.value = phases[this.phase];
 	draw();
 }
 draw(){
@@ -27,37 +23,50 @@ draw(){
 	board.draw(this.showMethod);
 	return false;
 }
+scannerInput(xi,yi,newNum){
+	this.action("addOriginalNumber", xi,yi,newNum);
+}
 userInput(xi,yi,newNum){
-	switch(this.phase){
-		case 0:	this.action("addOriginalNumber", xi,yi,newNum);break;
-		case 1: this.action("addUserInputNumber",xi,yi,newNum);break;
-		case 2: this.action("userModifiedNote"  ,xi,yi,newNum);break;
-		default: break;
+	if(phaseList[phasei]=="Input Sudoku Manualy"){
+		this.action("addOriginalNumber", xi,yi,newNum);
+	}else if(phaseList[phasei]=="Solving_Number"){
+		this.action("addUserInputNumber",xi,yi,newNum);
+	}else if(phaseList[phasei]=="Solving_Note"){
+		this.action("userModifiedNote"  ,xi,yi,newNum);
 	}
 }
 action(type,x,y,num,par){
 	const step = Number(slider.value);
-	this.board[step+1] = new Board(this.board[step]);
-	switch(type){
-		case "addOriginalNumber" 		: this.board[step+1].addOriginalNumber 		(x,y,num);break;
-		case "addUserInputNumber"		: this.board[step+1].addUserInputNumber		(x,y,num);break;
-		case "userModifiedNote"  		: this.board[step+1].userModifiedNote  		(x,y,num);break;
-		case "programProgressed" 		: this.board[step+1].programProgressed 		(x,y,num,par);break;
-		case "programProgressedNote"	: this.board[step+1].programProgressedNote 	(x,y,num,par);break;
-		case "addNotes"		 			: this.board[step+1].addNotes				(x); break;
-		case "deleteNotes"		 		: this.board[step+1].deleteNotes			(x); break;
-		case "solved"		 			: this.board[step+1].solved					(x); break;
-		default: break;
+	if(type=="addOriginalNumber"){
+		this.board[step].addOriginalNumber(x,y,num);		
+	}else{
+		this.board[step+1] = new Board(this.board[step]);
+		switch(type){
+			case "addUserInputNumber"		: this.board[step+1].addUserInputNumber		(x,y,num);break;
+			case "userModifiedNote"  		: this.board[step+1].userModifiedNote  		(x,y,num);break;
+			case "programProgressed" 		: this.board[step+1].programProgressed 		(x,y,num,par);break;
+			case "programProgressedNote"	: this.board[step+1].programProgressedNote 	(x,y,num,par);break;
+			case "addNotes"		 			: this.board[step+1].addNotes				(x); break;
+			case "deleteNotes"		 		: this.board[step+1].deleteNotes			(x); break;
+			case "solved"		 			: this.board[step+1].solved					(x); break;
+			default: break;
+		}
+		this.step		= step+1;
+		slider.max 		= step+1;
+		slider.value 	= step+1;
 	}
-	this.step		= step+1;
-	slider.max 		= step+1;
-	slider.value 	= step+1;
 	draw();
 }
 startSolving(){
+	changePhase("Solving_Number");
 	this.solvable = false;
 	this.bruteForceParameter = new Array();
 	while(this.solve());
+	if(this.solvable){
+		changePhase("Solved");
+	}else{
+		changePhase("UnSolved");
+	}
 	return this.solvable;
 }
 solve(){
@@ -147,7 +156,7 @@ BruteForce_TakeAGuess(x,y,candidateNum,board){
 	const msg = "Took a Guess";
 	const hiliNum = null;
 	const hiliNote= null;
-	const hiliBox = [[x+1,y+1,x+1,y+1,"blue"]];;
+	const hiliBox = [[x+1,y+1,x+1,y+1,"blue"]];
 	this.action("programProgressed",x,y,candidate,[msg,hiliNum,hiliNote,hiliBox]);
 	return false;
 }
