@@ -165,10 +165,10 @@ function drawNumber(xi,yi,n,color="black",size=side){
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const xi =Math.floor((xii  )*side)+1+w; 
-    const xl =Math.floor((xil+1)*side)-1-w; 
-    const yi =Math.floor((yii  )*side)+1+w; 
-    const yl =Math.floor((yil+1)*side)-1-w;
+    const xi =Math.floor((xii  )*side)+Math.floor((1+w)*pixelRatio); 
+    const xl =Math.floor((xil+1)*side)-Math.floor((1+w)*pixelRatio);
+    const yi =Math.floor((yii  )*side)+Math.floor((1+w)*pixelRatio);
+    const yl =Math.floor((yil+1)*side)-Math.floor((1+w)*pixelRatio);
     ct.strokeStyle = color;
     drawLine(xi,yi,xl,yi,3,w);
     drawLine(xi,yi,xi,yl,3,w);
@@ -177,7 +177,7 @@ function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
 }
 
 function drawLine(xi,yi,xii,yii,w){
-    ct.lineWidth = Math.floor(w);
+    ct.lineWidth = Math.floor(w*pixelRatio);
     xi = Math.floor(xi )+0.5;
     xii= Math.floor(xii)+0.5;
     yi = Math.floor(yi )+0.5;
