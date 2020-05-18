@@ -2,6 +2,8 @@ let pixelRatio;
 let width;
 let height;
 let side;//Cell Length = Width/11
+let LineWidthThin;
+let LineWidthThick;
 let ct;
 let canvasScale;
 let icon_camera=false;
@@ -56,8 +58,11 @@ function resize(){
     height = canvas.height;
     side = Math.floor(width/11);
 
-    console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px");
-    console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px");
+    LineWidthThin = Math.ceil(width/500);
+    LineWidthThick = Math.ceil(width/150);
+
+    console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
+    console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
 
     draw();
 }
@@ -165,23 +170,24 @@ function drawNumber(xi,yi,n,color="black",size=side){
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const xi =Math.floor((xii  )*side)+Math.floor((1+w)*pixelRatio); 
-    const xl =Math.floor((xil+1)*side)-Math.floor((1+w)*pixelRatio);
-    const yi =Math.floor((yii  )*side)+Math.floor((1+w)*pixelRatio);
-    const yl =Math.floor((yil+1)*side)-Math.floor((1+w)*pixelRatio);
+    const xi =Math.floor((xii  )*side)+(LineWidthThick+1);
+    const xl =Math.floor((xil+1)*side)-(LineWidthThick+1);
+    const yi =Math.floor((yii  )*side)+(LineWidthThick+1);
+    const yl =Math.floor((yil+1)*side)-(LineWidthThick+1);
     ct.strokeStyle = color;
-    drawLine(xi,yi,xl,yi,3,w);
-    drawLine(xi,yi,xi,yl,3,w);
-    drawLine(xl,yi,xl,yl,3,w);
-    drawLine(xi,yl,xl,yl,3,w);
+    drawLine(xi,yi,xl,yi,w);
+    drawLine(xi,yi,xi,yl,w);
+    drawLine(xl,yi,xl,yl,w);
+    drawLine(xi,yl,xl,yl,w);
 }
 
 function drawLine(xi,yi,xii,yii,w){
-    ct.lineWidth = Math.floor(w*pixelRatio);
-    xi = Math.floor(xi )+0.5;
-    xii= Math.floor(xii)+0.5;
-    yi = Math.floor(yi )+0.5;
-    yii= Math.floor(yii)+0.5;
+    ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
+    const widthOdd = (ct.lineWidth%2==1);
+    xi = Math.floor(xi )+(widthOdd?0.5:0);
+    xii= Math.floor(xii)+(widthOdd?0.5:0);
+    yi = Math.floor(yi )+(widthOdd?0.5:0);
+    yii= Math.floor(yii)+(widthOdd?0.5:0);
     ct.beginPath();
     ct.moveTo(xi ,yi );
     ct.lineTo(xii,yii);
