@@ -115,7 +115,7 @@ class VisionProgram_NumberReader{
             this.resetImageAndNumberX();
             this.dragging = false;
             this.draggedImageIndex = undefined;
-            draw();
+            draw("",[undefined]);
         }
     }
 }
