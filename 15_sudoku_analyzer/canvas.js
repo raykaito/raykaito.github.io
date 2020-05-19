@@ -1,7 +1,8 @@
 let pixelRatio;
 let width;
 let height;
-let side;//Cell Length = Width/11
+let side;//Cell Length = Math.floor(Width/9)
+let offset;
 let LineWidthThin;
 let LineWidthThick;
 let ct;
@@ -25,9 +26,9 @@ function initCanvas(){
 }
 
 rresize = () => {
-    rcanvas.width = Math.floor(window.innerWidth-40);
+    rcanvas.width = Math.floor(window.innerWidth);
     if(Math.floor(window.innerWidth)>800)   rcanvas.width = 760;
-    if(Math.floor(window.innerWidth)<320)   rcanvas.width = 280;
+    if(Math.floor(window.innerWidth)<320)   rcanvas.width = 320;
     rcanvas.height= (recordMode?(33*81+1):1);
 
     rcanvas.style.width  = rcanvas.width +"px";
@@ -43,10 +44,10 @@ function resize(){
     rect = canvas.getBoundingClientRect();
     pixelRatio = window.devicePixelRatio;
     
-    canvas.width = Math.floor(window.innerWidth-40);
+    canvas.width = Math.floor(window.innerWidth);
     if(Math.floor(window.innerWidth)>800)   canvas.width = 760;
-    if(Math.floor(window.innerWidth)<320)   canvas.width = 280;                                    
-    canvas.height = canvas.width;
+    if(Math.floor(window.innerWidth)<320)   canvas.width = 320;                                    
+    canvas.height = Math.floor(canvas.width*11/9);
 
     canvas.style.width  = canvas.width +"px";
     canvas.style.height = canvas.height+"px";
@@ -56,10 +57,12 @@ function resize(){
 
     width  = canvas.width;
     height = canvas.height;
-    side = Math.floor(width/11);
 
     LineWidthThin = Math.ceil(width/500);
     LineWidthThick = Math.ceil(width/150);
+
+    side = Math.floor((width-LineWidthThick)/9);
+    offset = Math.floor((width-9*side)/2);
 
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
@@ -134,33 +137,33 @@ function drawGrids(nineByNine=true){
 
     //Draw Borders
     ct.strokeStyle = "black";
-    for(let i=1;i<11;i++){
-        if((i-1)%3!=0&&!nineByNine) continue;
-        let w = ((i-1)%3==0?3:1);
-        drawLine(side*i,side*1,side*i ,side*10,w);
-        drawLine(side*1,side*i,side*10,side*i ,w);
+    for(let i=0;i<=9;i++){
+        if(i%3!=0&&!nineByNine) continue;
+        let w = (((i%3)==0)?3:1);
+        drawLine(side*i+offset,side*1    ,side*i+offset,side*10    ,w);
+        drawLine(offset       ,side*(i+1),side*9+offset,side*(i+1) ,w);
     }
     //Draw Camera Icon
-    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*10.1,side*0.1,side*0.8,side*0.8);
+    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1,side*0.1,side*0.8,side*0.8);
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
     const size = side/3.5;
-    let x=Math.floor((xi+0.5)*side)+((pos-1)%3-1)*size;
+    let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
     let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
     ct.fillStyle = color;
     ct.font = ""+Math.floor(size*factor)+"px Times New Roman";
     ct.textAlign = "center";
     ct.textBaseline = "middle";
-    ct.fillText(str,x,y);
+    ct.fillText(str,x+offset,y);
 }
 
 function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Roman"){
     //fill with white first
     ct.fillStyle = "white";
-    ct.fillRect((xi+0.05)*side,(yi+0.05)*side,side*0.9,side*0.9);
+    ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
     //Draw Number
-    const x=Math.floor((xi+0.5)*side);
+    const x=Math.floor((xi-0.5)*side+offset);
     const y=Math.floor((yi+0.55)*side);
     ct.fillStyle = color;
     ct.font = ""+Math.floor(size*0.8)+"px "+fontFamily;
@@ -170,14 +173,14 @@ function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Rom
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const lefEdgeThick = ((xii-1)%3==0);
-    const rigEdgeThick = ((xil  )%3==0);
+    const lefEdgeThick = ((xii  )%3==0);
+    const rigEdgeThick = ((xil+1)%3==0);
     const topEdgeThick = ((yii-1)%3==0);
     const botEdgeThick = ((yil  )%3==0);
     const offsetNeg    = Math.ceil (LineWidthThick/2)-Math.ceil (LineWidthThin/2);
     const offsetPos    = Math.floor(LineWidthThick/2)-Math.floor(LineWidthThin/2); 
-    const xi =(xii  )*side+(LineWidthThick+1)-(lefEdgeThick?0:offsetNeg);
-    const xl =(xil+1)*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos);
+    const xi =(xii-1)*side+(LineWidthThick+1)-(lefEdgeThick?0:offsetNeg);
+    const xl =(xil  )*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos);
     const yi =(yii  )*side+(LineWidthThick+1)-(topEdgeThick?0:offsetNeg);
     const yl =(yil+1)*side-(LineWidthThick+1)+(botEdgeThick?0:offsetPos);
     ct.strokeStyle = color;
@@ -256,7 +259,7 @@ const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
-    drawLine(xi/cs,yi/cs,xii/cs,yii/cs,w)
+    drawLine((xi-side)/cs,yi/cs,(xii-side)/cs,yii/cs,w)
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=false)=>{
@@ -266,7 +269,7 @@ const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=
     ct.fillText(string,x/cs,y/cs);
 }
 
-const XYtoIndex=([x,y])=>{    return [Math.floor(11*x/width),Math.floor(11*y/height)];}
+const XYtoIndex=([x,y])=>{    return [Math.floor((x-offset)/side)+1,Math.floor(11*y/height)];}
 const indexToBox=([xi,yi])=>{ return Math.floor(xi/3)+Math.floor(yi/3)*3;}
 
 console.log("Loaded: canvas.js");

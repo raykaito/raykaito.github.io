@@ -1,0 +1,5 @@
+body, table, tr, td{
+    margin: 0;
+    padding:0;
+    border-spacing: 0;
+}

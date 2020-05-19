@@ -18,16 +18,14 @@ class VisionProgram_BoardReader{
         //Index of the corners
         this.xIndexMin;
         this.yIndexMin;
-        this.scanInterval = 1;
-        this.lastTime = Date.now();
         //Info about empty cells
         this.emptyCell = new Array(81).fill(0);
         this.cellMatchCounter = 0;
     }
     startScan(canvas,ct,numberV){
         //Initialize the scanner
-        this.init();
-        if(this.failed) return false;
+        this.cellLength = -1;
+        this.failed=false;
 
         //find angle, intersection and cell length
         this.getXYangle(canvas,ct);
@@ -44,28 +42,6 @@ class VisionProgram_BoardReader{
         this.scanEmptyCells(ct,numberV);
         if(this.failed) return false;
         return true;
-    }
-    init(){
-        if((Date.now()-this.lastTime)<this.scanInterval){
-            this.abort("not time to scan yet");
-            return false;
-        }
-        this.lastTime = Date.now();
-        this.cellLength = -1;
-        this.failed=false;
-    }
-    temp(canvas,ct){
-        const imgX = newWindow(ct).centerWidthHeight(canvas.width/2,canvas.height/2,canvas.width*0.8,1);
-        const scnX = new IntersectionDetector(imgX.passdata, 0,1);
-
-        ct.fillStyle = "cyan";
-        ct.font = "40px Arial";
-        const number1 = canvas.width;
-        const number2 = canvas.height;
-        const number3 = scnX.std;
-        ct.fillText(Math.round((number1)*100)/100,10/canvasScale,30/canvasScale);
-        ct.fillText(Math.round((number2)*100)/100,10/canvasScale,55/canvasScale);
-        ct.fillText(Math.round((number3)*100)/100,10/canvasScale,80/canvasScale);
     }
     abort(msg){
         this.failed=true;
@@ -139,15 +115,8 @@ class VisionProgram_BoardReader{
                     xyH[xyH.length] = [yCorner,xCorner+xup,yCorner+rangeOfSearch,xCorner+xlo];
                 }
             }
-        }/*
-        for(let i=0;i<xyV.length;i++){
-            circle(xyV[i][0],xyV[i][1],15);
-            circle(xyV[i][2],xyV[i][3],15);
         }
-        for(let i=0;i<xyH.length;i++){
-            circle(xyH[i][0],xyH[i][1],15);
-            circle(xyH[i][2],xyH[i][3],15);
-        }*/
+
         if(xyV.length*xyH.length==0){
             this.abort("unable to find lines");
             return;
@@ -171,10 +140,6 @@ class VisionProgram_BoardReader{
                                     [xyH[xyH.length-1][2],xyH[xyH.length-1][3]]);
         this.xc = xy1[0];
         this.yc = xy1[1];
-        //circle([xyV[0][0],xyV[0][1],10],["red",5]);
-        //circle([xyV[0][2],xyV[0][3],10],["green",5]);
-        //circle([xy1[0],xy1[1],10],["red",5]);
-        //circle([xy4[0],xy4[1],10],["green",5]);
         //Get Angular Porperties of the board
         this.rotationAngle  =-getDir([xyH[0][0],xyH[0][1]],[xyH[0][2],xyH[0][3]]);
         this.vAngle         = getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
@@ -279,12 +244,6 @@ class VisionProgram_BoardReader{
         const xyc2 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin  );
         const xyc3 = this.getXYfromIndex(this.xIndexMin+8,this.yIndexMin+8);
         const xyc4 = this.getXYfromIndex(this.xIndexMin  ,this.yIndexMin+8);
-        /*
-        circle([xyc1[0],xyc1[1],9]);
-        circle([xyc2[0],xyc2[1],9]);
-        circle([xyc3[0],xyc3[1],9]);
-        circle([xyc4[0],xyc4[1],9]);
-        */
         return;
     }
     checkForLine(xIndex1, yIndex1, xIndex2, yIndex2,ct){

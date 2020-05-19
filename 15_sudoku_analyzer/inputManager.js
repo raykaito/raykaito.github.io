@@ -102,7 +102,7 @@ const release=(event)=>{
 	const [xii,yii] = XYtoIndex([touchX,touchY]);
 	const [xil,yil] = XYtoIndex([x,y]);
 
-	if(xii>9&&yii<1){
+	if(xii>8&&yii<1){
 		startScan();
 		return;
 	}else if(phaseList[phasei]=="Input Sudoku Manualy"){
