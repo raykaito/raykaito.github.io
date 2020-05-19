@@ -58,8 +58,7 @@ function resize(){
     offset = Math.floor((width-9*side)/2);
                                 
     canvas.height = side*11;
-    canvas.style.height = canvas.height+"px";
-    canvas.height*= pixelRatio;
+    canvas.style.height = canvas.height/pixelRatio+"px";
     height = canvas.height;
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
