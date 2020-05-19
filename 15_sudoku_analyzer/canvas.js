@@ -99,7 +99,7 @@ const draw=(type,par=[undefined])=>{
             const readNumber = scanner.numberV.imageAndNumber[imgI][2];
             const img = scanner.numberV.imageAndNumber[imgI][0];
             let y=(readNumber-1+1.1)*side;
-            let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side;
+            let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side+offset;
             if(par!=undefined&&par[0]!=imgI){
                 ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
             }
@@ -108,7 +108,7 @@ const draw=(type,par=[undefined])=>{
             const img =  scanner.numberV.imageAndNumber[par[0]][0];
             ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
         }
-        for(let i=0;i<9;i++) drawNumber(0,i+1,i+1,"red");
+        for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
     }else if(phaseList[phasei]=="Solved"){
         drawGrids();
         //Draw Sudoku

@@ -101,9 +101,9 @@ class VisionProgram_NumberReader{
             this.dragging = true;
             let theImgIndex = undefined;
             for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
-                if(this.imageAndNumber[imgI][1]==x-1&&this.imageAndNumber[imgI][2]==y){
+                if(this.imageAndNumber[imgI][1]==x-2&&this.imageAndNumber[imgI][2]==y){
                     this.draggedImageIndex = imgI;
-                    draw("",[this.draggedImageIndex,x*side,y*side]);
+                    draw("",[this.draggedImageIndex,(x-1)*side,y*side]);
                 }
             }
         }else if(type=="move"){
