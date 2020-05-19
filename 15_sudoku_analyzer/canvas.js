@@ -45,25 +45,22 @@ function resize(){
     pixelRatio = window.devicePixelRatio;
     
     canvas.width = Math.floor(window.innerWidth);
-    if(Math.floor(window.innerWidth)>800)   canvas.width = 760;
-    if(Math.floor(window.innerWidth)<320)   canvas.width = 320;                                    
-    canvas.height = Math.floor(canvas.width*11/9);
-
+    if(Math.floor(window.innerWidth)>760)   canvas.width = 760;
+    if(Math.floor(window.innerWidth)<320)   canvas.width = 320;    
     canvas.style.width  = canvas.width +"px";
-    canvas.style.height = canvas.height+"px";
-
     canvas.width *= pixelRatio;
-    canvas.height*= pixelRatio;
-
     width  = canvas.width;
-    height = canvas.height;
 
     LineWidthThin = Math.ceil(width/500);
     LineWidthThick = Math.ceil(width/150);
 
-    side = Math.floor((width-LineWidthThick)/9);
+    side = Math.floor((width-LineWidthThick-1)/9);
     offset = Math.floor((width-9*side)/2);
-
+                                
+    canvas.height = side*11;
+    canvas.style.height = canvas.height+"px";
+    canvas.height*= pixelRatio;
+    height = canvas.height;
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
     console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
 
@@ -144,7 +141,7 @@ function drawGrids(nineByNine=true){
         drawLine(offset       ,side*(i+1),side*9+offset,side*(i+1) ,w);
     }
     //Draw Camera Icon
-    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1,side*0.1,side*0.8,side*0.8);
+    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
@@ -173,14 +170,14 @@ function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Rom
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
-    const lefEdgeThick = ((xii  )%3==0);
-    const rigEdgeThick = ((xil+1)%3==0);
+    const lefEdgeThick = ((xii-1)%3==0);
+    const rigEdgeThick = ((xil  )%3==0);
     const topEdgeThick = ((yii-1)%3==0);
     const botEdgeThick = ((yil  )%3==0);
     const offsetNeg    = Math.ceil (LineWidthThick/2)-Math.ceil (LineWidthThin/2);
     const offsetPos    = Math.floor(LineWidthThick/2)-Math.floor(LineWidthThin/2); 
-    const xi =(xii-1)*side+(LineWidthThick+1)-(lefEdgeThick?0:offsetNeg);
-    const xl =(xil  )*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos);
+    const xi =(xii-1)*side+(LineWidthThick+1)-(lefEdgeThick?0:offsetNeg)+offset;
+    const xl =(xil  )*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos)+offset;
     const yi =(yii  )*side+(LineWidthThick+1)-(topEdgeThick?0:offsetNeg);
     const yl =(yil+1)*side-(LineWidthThick+1)+(botEdgeThick?0:offsetPos);
     ct.strokeStyle = color;
@@ -259,7 +256,7 @@ const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
-    drawLine((xi-side)/cs,yi/cs,(xii-side)/cs,yii/cs,w)
+    drawLine((xi+offset)/cs,yi/cs,(xii+offset)/cs,yii/cs,w)
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=false)=>{
