@@ -62,7 +62,8 @@ class Scanner{
         ct.save();
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
-              ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+        //      ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+              ct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,width,height);
         alert("sx:"+this.sx+", sy:"+this.sy+",vwidth:"+this.vWidth+",vheight"+this.vHeight+", width:"+width+",height:"+height);
         
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
@@ -113,6 +114,6 @@ class Scanner{
         this.ocanvas.width = this.vWidth;
         this.ocanvas.height= this.vHeight;
         canvasScale = this.ocanvas.width/width;
-        alert("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height);
+        alert("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
     }
 }
