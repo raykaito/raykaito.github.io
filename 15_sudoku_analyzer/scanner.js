@@ -99,7 +99,7 @@ class Scanner{
     }
     resizeOcanvas(newWidth){
         this.vWidth = newWidth;
-        this.vHeight= newWidth*(height/width);
+        this.vHeight= Math.ceil(newWidth*(height/width));
         if(this.vWidth!=0){
             if(video.videoWidth>video.videoHeight*(width/height)){
                 this.sx = (video.videoWidth - video.videoHeight*(width/height))/2;
@@ -112,6 +112,6 @@ class Scanner{
         this.ocanvas.width = this.vWidth;
         this.ocanvas.height= this.vHeight;
         canvasScale = this.ocanvas.width/width;
-        console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height);
+        alert("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height);
     }
 }
