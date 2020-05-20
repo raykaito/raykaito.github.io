@@ -53,7 +53,7 @@ class Scanner{
     }
     drawVideo(){
         animationStartTime = Date.now();
-        const newWidth = Math.min(video.videoWidth,video.videoHeight*(width/height));
+        const newWidth = Math.min(video.videoWidth,Math.ceil(video.videoHeight*(width/height)));
         if(newWidth==0){
             requestAnimationFrame(drawVideo);
             return;
@@ -63,8 +63,7 @@ class Scanner{
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
               ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
-        alert(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
-        alert(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+        alert("sx:"+this.sx+", sy:"+this.sy+",vwidth:"+this.vWidth+",vheight"+this.vHeight+", width:"+width+",height:"+height);
         
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
@@ -104,11 +103,11 @@ class Scanner{
         this.vHeight= Math.ceil(newWidth*(height/width));
         if(this.vWidth!=0){
             if(video.videoWidth>video.videoHeight*(width/height)){
-                this.sx = (video.videoWidth - video.videoHeight*(width/height))/2;
+                this.sx = Math.ceil((video.videoWidth - video.videoHeight*(width/height))/2);
                 this.sy = 0;
             }else{
                 this.sx = 0;
-                this.sy = (video.videoHeight - video.videoWidth*(height/width))/2;
+                this.sy = Math.ceil((video.videoHeight - video.videoWidth*(height/width))/2);
             }
         }
         this.ocanvas.width = this.vWidth;
