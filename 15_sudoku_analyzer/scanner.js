@@ -16,8 +16,8 @@ class Scanner{
             video:{
                 //width:1920,
                 //height:1080,
-                width:480,
-                height:590,
+                width:640,
+                height:640,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -63,6 +63,8 @@ class Scanner{
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
               ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+        alert(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
+        alert(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
         
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
