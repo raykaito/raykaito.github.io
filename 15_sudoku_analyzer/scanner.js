@@ -53,7 +53,8 @@ class Scanner{
     }
     drawVideo(){
         animationStartTime = Date.now();
-        const newWidth = Math.min(video.videoWidth,Math.ceil(video.videoHeight*(width/height)));
+        const newWidth = Math.min(video.videoWidth,Math.floor(video.videoHeight*(width/height)));
+        console.log(newWidth+","+video.videoWidth+","+video.videoHeight);
         if(newWidth==0){
             requestAnimationFrame(drawVideo);
             return;
