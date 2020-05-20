@@ -54,7 +54,6 @@ class Scanner{
     drawVideo(){
         animationStartTime = Date.now();
         const newWidth = Math.min(video.videoWidth,Math.floor(video.videoHeight*(width/height)));
-        console.log(newWidth+","+video.videoWidth+","+video.videoHeight);
         if(newWidth==0){
             requestAnimationFrame(drawVideo);
             return;
@@ -62,12 +61,8 @@ class Scanner{
         ct.restore();
         ct.save();
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
-        ct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,width,height);
-        alert("sx:"+this.sx+", sy:"+this.sy+",vwidth:"+this.vWidth+",vheight"+this.vHeight+", width:"+width+",height:"+height);
-        /*
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
               ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
-        */
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
         else{
@@ -116,6 +111,6 @@ class Scanner{
         this.ocanvas.width = this.vWidth;
         this.ocanvas.height= this.vHeight;
         canvasScale = this.ocanvas.width/width;
-        alert("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
+        console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
     }
 }
