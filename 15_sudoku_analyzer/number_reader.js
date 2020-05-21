@@ -39,7 +39,7 @@ class VisionProgram_NumberReader{
         }
         if(recordMode) this.record(st,ci);
         const img = this.images[ci][0].updateDisplayImage();
-        ca.ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*side+offset,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
+        ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*side+offset,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         if(this.stepOnTheCurrentImage==7){
             const readNumber = this.images[ci][0].recognizeNumber();
             sudoku.scannerInput(this.images[ci][1],this.images[ci][2],readNumber);
@@ -71,7 +71,7 @@ class VisionProgram_NumberReader{
             if(i<this.currentImageWorkingOn) continue;
             const img = this.images[i][0].updateDisplayImage();
             //this.images[i][0].display(false);
-            ca.ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*side+offset,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
+            ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*side+offset,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
             //ct.drawImage(img,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
     }

@@ -24,7 +24,7 @@ class Scanner{
         if(false){
             this.drawImage();
         }else{
-            navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
+            navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{scanner.handleSuccess(stream);});
         }
     }
     handleSuccess(stream){
@@ -42,33 +42,33 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        ca.ct.restore();
-        ca.ct.save();
+        ct.restore();
+        ct.save();
         if(width!=this.vWidth) this.resizeOcanvas(width);
         draw();
         this.oct.drawImage(canvas,0,0,width,height,0,0,this.vWidth,this.vWidth);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result){requestAnimationFrame(drawImage);}
-        else{       requestAnimationFrame(scanNumbers);}
+        if(!result){requestAnimationFrame(()=>{scanner.drawImage();});}
+        else{       requestAnimationFrame(()=>{scanner.drawProgress();});}
     }
     drawVideo(){
         animationStartTime = Date.now();
         const newWidth = Math.min(video.videoWidth,Math.floor(video.videoHeight*(width/height)));
         if(newWidth==0){
-            requestAnimationFrame(drawVideo);
+            requestAnimationFrame(()=>{scanner.drawVideo();});
             return;
         }
-        ca.ct.restore();
-        ca.ct.save();
+        ct.restore();
+        ct.save();
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
-              ca.ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+              ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result) requestAnimationFrame(drawVideo);
+        if(!result) requestAnimationFrame(()=>{scanner.drawVideo();});
         else{
             this.stopVideo();
             //draw();
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }
     }
     drawProgress(){
@@ -80,7 +80,7 @@ class Scanner{
             if(result) break;
         }
         if(!result){
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }else{
             const solvable = sudoku.startSolving();
             if(solvable==false){

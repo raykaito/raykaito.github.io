@@ -13,7 +13,7 @@
 
 <body id="Body">
 
-	<table id="Table" border="0" align="center" width="320">
+	<table id="Table" border="0" align="center">
 	
 		<tr>
 			<td align="center">
@@ -66,7 +66,7 @@
 	 
 		let table  = document.getElementById('Table' );
 		let body   = document.getElementById('Body'  );
-		const ca = new Canvas(document.getElementById('Canvas'));
+		let canvas = document.getElementById('Canvas');
 		let rcanvas= document.getElementById('RCanvas');
 		let slider = document.getElementById('slider');
 		let video  = document.getElementById("player");
@@ -84,11 +84,7 @@
 
 		const sudoku = new Sudoku();
 		initCanvas();
-		initEventlistener(ca.canvas);
-		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
-		const drawVideo   = () => {scanner.drawVideo();};
-		const drawImage   = () => {scanner.drawImage();};
-		const scanNumbers = () => {scanner.drawProgress();};
+		initEventlistener();
 		/*
 		sudoku.userInput(0,1,8);
 		sudoku.userInput(0,3,4);

@@ -1,10 +1,3 @@
-class Canvas{
-    constructor(canvas){
-        this.canvas = canvas;
-        this.ct = canvas.getContext("2d");
-    }
-}
-
 let pixelRatio;
 let width;
 let height;
@@ -12,10 +5,12 @@ let side;//Cell Length = Math.floor(Width/9)
 let offset;
 let LineWidthThin;
 let LineWidthThick;
+let ct;
 let canvasScale;
 let icon_camera=false;
 
 function initCanvas(){
+    ct = canvas.getContext("2d");
     rct= rcanvas.getContext("2d");
     resize();
     rresize();
@@ -46,15 +41,15 @@ rresize = () => {
 }
 
 function resize(){
-    rect = ca.canvas.getBoundingClientRect();
+    rect = canvas.getBoundingClientRect();
     pixelRatio = window.devicePixelRatio;
     
-    ca.canvas.width = Math.floor(window.innerWidth);
-    if(Math.floor(window.innerWidth)>520)   ca.canvas.width = 520;
-    if(Math.floor(window.innerWidth)<320)   ca.canvas.width = 320;    
-    ca.canvas.style.width  = ca.canvas.width +"px";
-    ca.canvas.width *= pixelRatio;
-    width  = ca.canvas.width;
+    canvas.width = Math.floor(window.innerWidth);
+    if(Math.floor(window.innerWidth)>520)   canvas.width = 520;
+    if(Math.floor(window.innerWidth)<320)   canvas.width = 320;    
+    canvas.style.width  = canvas.width +"px";
+    canvas.width *= pixelRatio;
+    width  = canvas.width;
 
     LineWidthThin = Math.ceil(width/500);
     LineWidthThick = Math.ceil(width/150);
@@ -62,11 +57,11 @@ function resize(){
     side = Math.floor((width-LineWidthThick-2)/9);
     offset = Math.floor((width-9*side)/2);
                                 
-    ca.canvas.height = side*11;
-    ca.canvas.style.height = ca.canvas.height/pixelRatio+"px";
-    height = ca.canvas.height;
-    console.log("Canvas  Width: "+ca.canvas.style.width+"pt, " +ca.canvas.width+"px LineWidthThick" +LineWidthThick+"px");
-    console.log("Canvas Height: "+ca.canvas.style.height+"pt, "+ca.canvas.height+"px LineWidthThin" +LineWidthThin +"px");
+    canvas.height = side*11;
+    canvas.style.height = canvas.height/pixelRatio+"px";
+    height = canvas.height;
+    console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
+    console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
 
     draw();
 }
@@ -90,8 +85,8 @@ const draw=(type,par=[undefined])=>{
         drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6);
         drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6);
     }else if(phaseList[phasei]=="Scanning Board"){
-        ca.ct.restore();
-        ca.ct.save();
+        ct.restore();
+        ct.save();
         drawGrids();
         drawNumber(5,0,"Scanning Board","black",side*0.6);
         sudoku.draw();
@@ -106,12 +101,12 @@ const draw=(type,par=[undefined])=>{
             let y=(readNumber-1+1.1)*side;
             let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side+offset;
             if(par!=undefined&&par[0]!=imgI){
-                ca.ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
+                ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
             }
         }
         if(par!=undefined&&par[0]!=undefined){
             const img =  scanner.numberV.imageAndNumber[par[0]][0];
-            ca.ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
+            ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
         }
         for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
     }else if(phaseList[phasei]=="Solved"){
@@ -133,11 +128,11 @@ const draw=(type,par=[undefined])=>{
 
 function drawGrids(nineByNine=true){
     //Fill with White
-    ca.ct.fillStyle = "white";
-    ca.ct.fillRect(0, 0, width, height);
+    ct.fillStyle = "white";
+    ct.fillRect(0, 0, width, height);
 
     //Draw Borders
-    ca.ct.strokeStyle = "black";
+    ct.strokeStyle = "black";
     for(let i=0;i<=9;i++){
         if(i%3!=0&&!nineByNine) continue;
         let w = (((i%3)==0)?3:1);
@@ -145,32 +140,32 @@ function drawGrids(nineByNine=true){
         drawLine(offset       ,side*(i+1),side*9+offset,side*(i+1) ,w);
     }
     //Draw Camera Icon
-    if(icon_camera) ca.ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
+    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
 }
 
 function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
     const size = side/3.5;
     let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
     let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
-    ca.ct.fillStyle = color;
-    ca.ct.font = ""+Math.floor(size*factor)+"px Times New Roman";
-    ca.ct.textAlign = "center";
-    ca.ct.textBaseline = "middle";
-    ca.ct.fillText(str,x+offset,y);
+    ct.fillStyle = color;
+    ct.font = ""+Math.floor(size*factor)+"px Times New Roman";
+    ct.textAlign = "center";
+    ct.textBaseline = "middle";
+    ct.fillText(str,x+offset,y);
 }
 
 function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Roman"){
     //fill with white first
-    ca.ct.fillStyle = "white";
-    ca.ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
+    ct.fillStyle = "white";
+    ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
     //Draw Number
     const x=Math.floor((xi-0.5)*side+offset);
     const y=Math.floor((yi+0.55)*side);
-    ca.ct.fillStyle = color;
-    ca.ct.font = ""+Math.floor(size*0.8)+"px "+fontFamily;
-    ca.ct.textAlign = "center";
-    ca.ct.textBaseline = "middle";
-    ca.ct.fillText(n,x,y);
+    ct.fillStyle = color;
+    ct.font = ""+Math.floor(size*0.8)+"px "+fontFamily;
+    ct.textAlign = "center";
+    ct.textBaseline = "middle";
+    ct.fillText(n,x,y);
 }
 
 function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
@@ -184,7 +179,7 @@ function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
     const xl =(xil  )*side-(LineWidthThick+1)+(rigEdgeThick?0:offsetPos)+offset;
     const yi =(yii  )*side+(LineWidthThick+1)-(topEdgeThick?0:offsetNeg);
     const yl =(yil+1)*side-(LineWidthThick+1)+(botEdgeThick?0:offsetPos);
-    ca.ct.strokeStyle = color;
+    ct.strokeStyle = color;
     drawLine(xi,yi,xl,yi,w);
     drawLine(xi,yi,xi,yl,w);
     drawLine(xl,yi,xl,yl,w);
@@ -192,46 +187,46 @@ function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
 }
 
 function drawLine(xi,yi,xii,yii,w){
-    ca.ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
-    const widthOdd = (ca.ct.lineWidth%2==1);
+    ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
+    const widthOdd = (ct.lineWidth%2==1);
     const vertical = (xi==xii);
     const horizontal = (yi==yii);
     const xiBigger = (xi>xii);
     const yiBigger = (yi>yii);
-    xi = Math.floor(xi )+(widthOdd?0.5:0)+(horizontal?(xiBigger? ca.ct.lineWidth:-ca.ct.lineWidth):0)/2;
-    xii= Math.floor(xii)+(widthOdd?0.5:0)+(horizontal?(xiBigger?-ca.ct.lineWidth: ca.ct.lineWidth):0)/2;
-    yi = Math.floor(yi )+(widthOdd?0.5:0)+(vertical?(yiBigger? ca.ct.lineWidth:-ca.ct.lineWidth):0)/2;
-    yii= Math.floor(yii)+(widthOdd?0.5:0)+(vertical?(yiBigger?-ca.ct.lineWidth: ca.ct.lineWidth):0)/2;
-    ca.ct.beginPath();
-    ca.ct.moveTo(xi ,yi );
-    ca.ct.lineTo(xii,yii);
-    ca.ct.stroke();
+    xi = Math.floor(xi )+(widthOdd?0.5:0)+(horizontal?(xiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
+    xii= Math.floor(xii)+(widthOdd?0.5:0)+(horizontal?(xiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
+    yi = Math.floor(yi )+(widthOdd?0.5:0)+(vertical?(yiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
+    yii= Math.floor(yii)+(widthOdd?0.5:0)+(vertical?(yiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
+    ct.beginPath();
+    ct.moveTo(xi ,yi );
+    ct.lineTo(xii,yii);
+    ct.stroke();
 }
 
-function displayArray(array, index = 0, autoMin = 0, height = (ca.canvas.height-16)/6, width = ca.canvas.width-4){
+function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4){
     const dy = (height+4)*index;
     const dx = width-array.length;
     if(array.length<width) width = array.length;
-    ca.ct.fillStyle = "rgb(255,  0,255)";
-    ca.ct.fillRect(dx+1,dy+1,width+2,height+2);
-    ca.ct.fillStyle = "rgb(255,255,255)";
-    ca.ct.fillRect(dx+2,dy+2,width,height);
-    ca.ct.fillStyle = "rgb(  0,  0,  0)";
+    ct.fillStyle = "rgb(255,  0,255)";
+    ct.fillRect(dx+1,dy+1,width+2,height+2);
+    ct.fillStyle = "rgb(255,255,255)";
+    ct.fillRect(dx+2,dy+2,width,height);
+    ct.fillStyle = "rgb(  0,  0,  0)";
     const arrayMax = getAbsoluteMinMax(array)[1];
     const arrayMin = autoMin?getAbsoluteMinMax(array)[0]:0;
     for(let i=0;i<array.length;i++){
         const x = dx+2+(i/array.length)*width;
         const y = dy+height+2-Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin));
-        ca.ct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
+        ct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
     }
 }
 const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
-    ca.ct.strokeStyle = color;
-    ca.ct.lineWidth = w;
-    ca.ct.beginPath();
-    ca.ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
-    ca.ct.stroke();
+    ct.strokeStyle = color;
+    ct.lineWidth = w;
+    ct.beginPath();
+    ct.arc(x/cs,y/cs,pixelRatio*rad/cs,0,2*Math.PI);
+    ct.stroke();
 }
 
 function rotateCanvas(x=ocanvas.width/2, y=ocanvas.height/2, deg=20,ocanvas,oct){
@@ -251,23 +246,23 @@ function rotateCanvas(x=ocanvas.width/2, y=ocanvas.height/2, deg=20,ocanvas,oct)
     oct.drawImage( tcanvas, 0, 0 );
     oct.restore();
 
-    ca.ct.translate(x/canvasScale,y/canvasScale);
-    ca.ct.rotate( -r );
-    ca.ct.translate( -x/canvasScale, -y/canvasScale );
+    ct.translate(x/canvasScale,y/canvasScale);
+    ct.rotate( -r );
+    ct.translate( -x/canvasScale, -y/canvasScale );
 }
 
 const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
-    ca.ct.strokeStyle = color;
-    ca.ct.lineWidth = w;
+    ct.strokeStyle = color;
+    ct.lineWidth = w;
     drawLine((xi+offset)/cs,yi/cs,(xii+offset)/cs,yii/cs,w)
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=false)=>{
     cs = (absolute?1:canvasScale);
-    ca.ct.fillStyle = color;
-    ca.ct.font = font;
-    ca.ct.fillText(string,x/cs,y/cs);
+    ct.fillStyle = color;
+    ct.font = font;
+    ct.fillText(string,x/cs,y/cs);
 }
 
 const XYtoIndex=([x,y])=>{    return [Math.floor((x-offset)/side)+1,Math.floor(11*y/height)];}

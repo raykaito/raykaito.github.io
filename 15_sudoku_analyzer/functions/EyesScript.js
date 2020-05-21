@@ -34,7 +34,7 @@ class ImageData{
 		this.darea  = this.dwidth*this.dheight;
 		
 		this.imgOut = imgIn;
-		this.dimgOut = ca.ct.createImageData(this.dwidth, this.dheight);
+		this.dimgOut = ct.createImageData(this.dwidth, this.dheight);
 
 		//Initialize dimgOut
 		for(let i=0;i<imgIn.data.length;i++){
@@ -50,14 +50,14 @@ class ImageData{
 		
 		const timg = this.updateDisplayImage(actual);
 
-		ca.ct.beginPath();
-		ca.ct.strokeStyle = "rgb(0,255,0)";
-		ca.ct.lineWidth = 1;
-		ca.ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
+		ct.beginPath();
+		ct.strokeStyle = "rgb(0,255,0)";
+		ct.lineWidth = 1;
+		ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
 
 		//ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
-		ca.ct.drawImage(timg,dxpos, dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
-		ca.ct.stroke();
+		ct.drawImage(timg,dxpos, dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
+		ct.stroke();
 	}
 	updateDisplayImage(){
 		const tcanvas = document.createElement("canvas");
@@ -963,7 +963,7 @@ class Resize extends ImageData{
 		this.darea  = this.dwidth*this.dheight;
 		
 		this.imgOut = this.imgIn;
-		this.dimgOut = ca.ct.createImageData(this.dwidth, this.dheight);
+		this.dimgOut = ct.createImageData(this.dwidth, this.dheight);
 
 		//Initialize dimgOut
 		for(let i=0;i<this.imgIn.data.length;i++){
