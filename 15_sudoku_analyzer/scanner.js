@@ -42,8 +42,8 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        ct.restore();
-        ct.save();
+        ca.ct.restore();
+        ca.ct.save();
         if(width!=this.vWidth) this.resizeOcanvas(width);
         draw();
         this.oct.drawImage(canvas,0,0,width,height,0,0,this.vWidth,this.vWidth);
@@ -58,11 +58,11 @@ class Scanner{
             requestAnimationFrame(drawVideo);
             return;
         }
-        ct.restore();
-        ct.save();
+        ca.ct.restore();
+        ca.ct.save();
         if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
-              ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+              ca.ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
         else{
