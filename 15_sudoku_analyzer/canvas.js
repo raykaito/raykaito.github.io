@@ -9,7 +9,7 @@ let ct;
 let canvasScale;
 let icon_camera=false;
 
-function initCanvas(){
+const initCanvas = () => {
     ct = canvas.getContext("2d");
     rct= rcanvas.getContext("2d");
     resize();
@@ -40,7 +40,7 @@ rresize = () => {
     console.log("RCanvas Height: "+rcanvas.height+"pt, "+rcanvas.style.height+"px");
 }
 
-function resize(){
+const resize = () => {
     rect = canvas.getBoundingClientRect();
     pixelRatio = window.devicePixelRatio;
     
@@ -65,7 +65,7 @@ function resize(){
 
     draw();
 }
-const draw=(type,par=[undefined])=>{
+const draw = (type,par=[undefined])=>{
     if(phaseList[phasei]=="Input Sudoku Manualy"){
         drawGrids();
         if(type=="drawInputs"){
@@ -126,7 +126,7 @@ const draw=(type,par=[undefined])=>{
     }
 }
 
-function drawGrids(nineByNine=true){
+const drawGrids = (nineByNine=true) => {
     //Fill with White
     ct.fillStyle = "white";
     ct.fillRect(0, 0, width, height);
@@ -143,7 +143,7 @@ function drawGrids(nineByNine=true){
     if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
 }
 
-function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
+const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     const size = side/3.5;
     let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
     let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
@@ -154,7 +154,7 @@ function drawNotes(xi,yi,pos,str,color="black",factor=0.8){
     ct.fillText(str,x+offset,y);
 }
 
-function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Roman"){
+const drawNumber = (xi,yi,n,color="black",size=side, fontFamily = "Times New Roman") => {
     //fill with white first
     ct.fillStyle = "white";
     ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
@@ -168,7 +168,7 @@ function drawNumber(xi,yi,n,color="black",size=side, fontFamily = "Times New Rom
     ct.fillText(n,x,y);
 }
 
-function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
+const drawRectIndex = (xii,yii,xil,yil,color="lime",w=1) => {
     const lefEdgeThick = ((xii-1)%3==0);
     const rigEdgeThick = ((xil  )%3==0);
     const topEdgeThick = ((yii-1)%3==0);
@@ -186,7 +186,7 @@ function drawRectIndex(xii,yii,xil,yil,color="lime",w=1){
     drawLine(xi,yl,xl,yl,w);
 }
 
-function drawLine(xi,yi,xii,yii,w){
+const drawLine = (xi,yi,xii,yii,w) => {
     ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
     const widthOdd = (ct.lineWidth%2==1);
     const vertical = (xi==xii);
@@ -203,7 +203,7 @@ function drawLine(xi,yi,xii,yii,w){
     ct.stroke();
 }
 
-function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4){
+const displayArray = (array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4) => {
     const dy = (height+4)*index;
     const dx = width-array.length;
     if(array.length<width) width = array.length;
@@ -220,7 +220,7 @@ function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)
         ct.fillRect(x,y,1,Math.ceil((array[i]-arrayMin)*height/(arrayMax-arrayMin)));
     }
 }
-const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
+const circle = ([x,y,rad],[color,w]=["black",1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
@@ -229,7 +229,7 @@ const circle=([x,y,rad],[color,w]=["black",1],absolute=false)=>{
     ct.stroke();
 }
 
-function rotateCanvas(x=ocanvas.width/2, y=ocanvas.height/2, deg=20,ocanvas,oct){
+const rotateCanvas = (x=ocanvas.width/2, y=ocanvas.height/2, deg=20,ocanvas,oct) => {
     const r = deg2rad(deg);
 
     const tcanvas = document.createElement("canvas");
@@ -255,7 +255,7 @@ const line=([[xi,yi],[xii,yii]],[color,w]=["black", 1],absolute=false)=>{
     cs = (absolute?1:canvasScale);
     ct.strokeStyle = color;
     ct.lineWidth = w;
-    drawLine((xi+offset)/cs,yi/cs,(xii+offset)/cs,yii/cs,w)
+    drawLine((xi+offset)/cs,yi/cs+side,(xii+offset)/cs,yii/cs+side,w)
 }
 
 const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=false)=>{

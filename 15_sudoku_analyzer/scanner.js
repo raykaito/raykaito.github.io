@@ -57,8 +57,7 @@ class Scanner{
             requestAnimationFrame(()=>{scanner.drawVideo();});
             return;
         }
-        ct.restore();
-        ct.save();
+        draw();
         if(newWidth!=this.vLength) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
               ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,offset,side,side*9,side*9);
