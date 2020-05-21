@@ -25,21 +25,21 @@ draw(){
 		//Draw graph
 		const xRange = 7*side;
 		const yRange = 2*side;
-		const xStart = side+offset;
+		const xStart = side*1.5+offset;
 		const yStart = side*13;
 		ct.strokeStyle = "black";
 		ct.lineWidth = 1;
 	    ct.beginPath();
 	    ct.moveTo(xStart,yStart);
-		for(let i=1;i<this.board.length;i++){
-			const x = Math.floor(xRange*i/this.board.length);
+		for(let i=1;i<slider.max;i++){
+			const x = Math.floor(xRange*i/slider.max);
 			const y = Math.floor(yRange*this.board[i].level/4);
 	    	ct.lineTo(xStart+x,yStart-y);
 		}
 	    ct.stroke();
 	    //Draw Current Posistion
 	    const currentStep = slider.value;
-	    const xCurrent = xStart+Math.floor(xRange*currentStep/this.board.length);
+	    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
 	    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
 	    drawLine(xCurrent,yCurrent,xCurrent,yStart,1);
 	}
@@ -76,6 +76,8 @@ action(type,x,y,num,par){
 		this.step		= step+1;
 		slider.max 		= step+1;
 		slider.value 	= step+1;
+		if(slider.max!=0) slider.style.display = "inline-block";
+		else slider.style.display = "none";
 	}
 	draw();
 }
@@ -132,7 +134,6 @@ bruteForce(board,level){
 		//Inclement CandidateNum and restore previous.
 		this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
 		slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
-		this.board.splice(slider.value+1,this.board.length-slider.value);
 	}
 	else if(this.bruteForceParameter.length==0){
 		this.bruteForceParameter[this.bruteForceParameter.length] = [slider.value,0];
@@ -150,7 +151,6 @@ bruteForce(board,level){
 				if(this.bruteForceParameter.length==0) return false;
 				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
 				slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
-				this.board.splice(slider.value+1,this.board.length-slider.value);
 			}
 			else{
 				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;

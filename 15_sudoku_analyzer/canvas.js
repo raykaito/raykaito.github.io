@@ -56,8 +56,10 @@ const resize = () => {
 
     side = Math.floor((width-LineWidthThick-2)/9);
     offset = Math.floor((width-9*side)/2);
+    slider.style.width=10+Math.floor(side*7/pixelRatio)+"px";
+    slider.style.marginLeft=offset+Math.floor(side*1.5/pixelRatio)+"px";
                                 
-    canvas.height = side*14;
+    canvas.height = side*13;
     canvas.style.height = canvas.height/pixelRatio+"px";
     height = canvas.height;
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
@@ -131,17 +133,22 @@ const draw = (type,par=[undefined])=>{
 const drawGraph = () => {
     //SetBacgroundRegions
     ct.fillStyle = "red";
-    ct.fillRect(side+offset, side*11  , side*7, side/2);
+    ct.fillRect(side*1.5+offset, side*11  , side*7, side/2);
     ct.fillStyle = "orange";
-    ct.fillRect(side+offset, side*11.5, side*7, side/2);
+    ct.fillRect(side*1.5+offset, side*11.5, side*7, side/2);
     ct.fillStyle = "yellow";
-    ct.fillRect(side+offset, side*12  , side*7, side/2);
+    ct.fillRect(side*1.5+offset, side*12  , side*7, side/2);
     ct.fillStyle = "lightgreen";
-    ct.fillRect(side+offset, side*12.5, side*7, side/2);
+    ct.fillRect(side*1.5+offset, side*12.5, side*7, side/2);
     //Draw Axis
     ct.strokeStyle = "black";
-    drawLine(side+offset,side*11,side  +offset,side*13,1);
-    drawLine(side+offset,side*13,side*8+offset,side*13,1);
+    drawLine(side*1.5+offset,side*11,side*1.5+offset,side*13,1);
+    drawLine(side*1.5+offset,side*13,side*8.5+offset,side*13,1);
+    //Label Axis
+    drawNumber(1.25,12.25,"Easy Tech",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1.25,11.75,"Med. Tech",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1.25,11.25,"Hard Tech",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1.25,10.75,"Guessing" ,color="black",side*0.4,"Times New Roman",false);
 }
 
 const drawGrids = (nineByNine=true) => {
@@ -172,10 +179,12 @@ const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     ct.fillText(str,x+offset,y);
 }
 
-const drawNumber = (xi,yi,n,color="black",size=side, fontFamily = "Times New Roman") => {
+const drawNumber = (xi,yi,n,color="black",size=side, fontFamily = "Times New Roman",overWrite = true) => {
     //fill with white first
-    ct.fillStyle = "white";
-    ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
+    if(overWrite){
+        ct.fillStyle = "white";
+        ct.fillRect((xi-0.95)*side+offset,(yi+0.05)*side,side*0.9,side*0.9);
+    }
     //Draw Number
     const x=Math.floor((xi-0.5)*side+offset);
     const y=Math.floor((yi+0.55)*side);
