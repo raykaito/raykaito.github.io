@@ -3,7 +3,8 @@ class Scanner{
         //Create Canvas for Original Video Image
         this.ocanvas = document.createElement("canvas");
         this.oct = this.ocanvas.getContext("2d");
-        this.vLength = 0;
+        this.vWidth = 0;
+        this.vHeight = 0;
 
         //Initialize Board Reader Class
         this.boardV = new VisionProgram_BoardReader();
@@ -15,8 +16,8 @@ class Scanner{
             video:{
                 //width:1920,
                 //height:1080,
-                width:480,
-                height:480,
+                width:640,
+                height:640,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -41,26 +42,27 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        if(ca.canvas.width!=this.vLength) this.resizeOcanvas(ca.canvas.width);
-        ca.draw();
-        this.oct.drawImage(canvas,0,0,ca.canvas.width,ca.canvas.height,0,0,this.vLength,this.vLength);
+        ct.restore();
+        ct.save();
+        if(width!=this.vWidth) this.resizeOcanvas(width);
+        draw();
+        this.oct.drawImage(canvas,0,0,width,height,0,0,this.vWidth,this.vWidth);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result){requestAnimationFrame(drawImage);}
         else{       requestAnimationFrame(scanNumbers);}
     }
     drawVideo(){
         animationStartTime = Date.now();
-        ca.ct.restore();
-        ca.ct.save();
-        ca.drawGrids();
-        const newVlength = Math.min(video.videoWidth,video.videoHeight,ca.canvas.width);
-        if(newVlength==0){
+        const newWidth = Math.min(video.videoWidth,Math.floor(video.videoHeight*(width/height)));
+        if(newWidth==0){
             requestAnimationFrame(drawVideo);
             return;
         }
-        if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
-        this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
-              ca.ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,ca.offset,ca.side,ca.side*9,ca.side*9);
+        ct.restore();
+        ct.save();
+        if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
+        this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
+              ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(drawVideo);
         else{
@@ -94,20 +96,21 @@ class Scanner{
     draw(){
         this.numberV.draw();
     }
-    resizeOcanvas(newVlength){
-        this.vLength = newVlength;
-        if(this.vLength!=0){
-            if(video.videoWidth>video.videoHeight){
-                this.sx = (video.videoWidth - video.videoHeight)/2;
+    resizeOcanvas(newWidth){
+        this.vWidth = newWidth;
+        this.vHeight= Math.ceil(newWidth*(height/width));
+        if(this.vWidth!=0){
+            if(video.videoWidth>video.videoHeight*(width/height)){
+                this.sx = Math.ceil((video.videoWidth - video.videoHeight*(width/height))/2);
                 this.sy = 0;
             }else{
                 this.sx = 0;
-                this.sy = (video.videoHeight - video.videoWidth)/2;
+                this.sy = Math.ceil((video.videoHeight - video.videoWidth*(height/width))/2);
             }
         }
-        this.ocanvas.width = this.vLength;
-        this.ocanvas.height= this.vLength;
-        ca.canvasScale = this.ocanvas.width/ca.canvas.width;
+        this.ocanvas.width = this.vWidth;
+        this.ocanvas.height= this.vHeight;
+        canvasScale = this.ocanvas.width/width;
         console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
     }
 }

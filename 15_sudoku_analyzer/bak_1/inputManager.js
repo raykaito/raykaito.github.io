@@ -10,7 +10,7 @@ let moveIntervalTime = 15;
 
 let touchX, touchY;
 
-const  initEventlistener=(canvas=ca.canvas)=>{    
+const  initEventlistener=()=>{    
     addEventListener('keydown',keyPressed,false);
     addEventListener('keyup',keyReleased,false);
 
@@ -65,7 +65,7 @@ const touch=(event)=>{
 		return;
 	}
 	if(phaseList[phasei]=="Input Sudoku Manualy"){
-		ca.draw("drawInputs");
+		draw("drawInputs");
 	}else if(phaseList[phasei]=="Correct Scanning Error"){
 		scanner.userInput("touch",xi,yi);
 	}
@@ -89,7 +89,7 @@ const release=(event)=>{
 	//Check if the touch start position if valid or not
 	if(touchX==undefined||touchY==undefined){
 		console.log("invalid touch region (out of canvas)");
-		ca.draw();
+		draw();
 		return;
 	}
 	const rect = event.target.getBoundingClientRect();
@@ -128,7 +128,7 @@ const release=(event)=>{
 			scanner.userInput("release",xil,yil);
 		}
 	}
-	ca.draw();
+	draw();
 }
 
 console.log("Loaded: inputManager.js");

@@ -39,7 +39,7 @@ class VisionProgram_NumberReader{
         }
         if(recordMode) this.record(st,ci);
         const img = this.images[ci][0].updateDisplayImage();
-        ca.ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*ca.side+ca.offset,(this.images[ci][2]+1.1)*ca.side,ca.side*0.8,ca.side*0.8);
+        ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*side+offset,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         if(this.stepOnTheCurrentImage==7){
             const readNumber = this.images[ci][0].recognizeNumber();
             sudoku.scannerInput(this.images[ci][1],this.images[ci][2],readNumber);
@@ -55,15 +55,15 @@ class VisionProgram_NumberReader{
     }
     record(st,ci){
         const img = this.images[ci][0].updateDisplayImage();
-        ca.rct.drawImage(img,(st+1)*33+1,ci*33+1);
+        rct.drawImage(img,(st+1)*33+1,ci*33+1);
         if(st==7){
-            ca.rct.fillStyle = "white";
-            ca.rct.fillRect(1,ci*33+1,32,32);
-            ca.rct.font = "30px Arial";
-            ca.rct.fillStyle = "black";
-            ca.rct.textAlign = "center";
-            ca.rct.textBaseline = "middle";
-            ca.rct.fillText(this.images[ci][0].recognizeNumber(),16,ci*33+16);
+            rct.fillStyle = "white";
+            rct.fillRect(1,ci*33+1,32,32);
+            rct.font = "30px Arial";
+            rct.fillStyle = "black";
+            rct.textAlign = "center";
+            rct.textBaseline = "middle";
+            rct.fillText(this.images[ci][0].recognizeNumber(),16,ci*33+16);
         }
     }
     draw(){
@@ -71,8 +71,8 @@ class VisionProgram_NumberReader{
             if(i<this.currentImageWorkingOn) continue;
             const img = this.images[i][0].updateDisplayImage();
             //this.images[i][0].display(false);
-            ca.ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*ca.side+ca.offset,(this.images[i][2]+1.1)*ca.side,ca.side*0.8,ca.side*0.8);
-            //ca.ct.drawImage(img,(this.images[i][1]+1.1)*ca.side,(this.images[i][2]+1.1)*ca.side);//,ca.side*0.8,ca.side*0.8);
+            ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*side+offset,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
+            //ct.drawImage(img,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
     }
     resetImageAndNumberX(){
@@ -103,11 +103,11 @@ class VisionProgram_NumberReader{
             for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
                 if(this.imageAndNumber[imgI][1]==x-2&&this.imageAndNumber[imgI][2]==y){
                     this.draggedImageIndex = imgI;
-                    ca.draw("",[this.draggedImageIndex,(x-1)*ca.side,y*ca.side]);
+                    draw("",[this.draggedImageIndex,(x-1)*side,y*side]);
                 }
             }
         }else if(type=="move"){
-            ca.draw("",[this.draggedImageIndex,x-ca.side/2,y-ca.side/2]);
+            draw("",[this.draggedImageIndex,x-side/2,y-side/2]);
         }else if(type=="release"){
             if(this.draggedImageIndex==undefined) return;
             if(y<1||y>9) return;
@@ -115,7 +115,7 @@ class VisionProgram_NumberReader{
             this.resetImageAndNumberX();
             this.dragging = false;
             this.draggedImageIndex = undefined;
-            ca.draw("",[undefined]);
+            draw("",[undefined]);
         }
     }
 }
