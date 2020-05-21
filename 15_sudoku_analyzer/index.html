@@ -25,8 +25,8 @@
 		</tr>
 		<tr>
 			<td align="center">
-				<canvas id="Canvas"></canvas>
 		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video>
+				<canvas id="Canvas"></canvas>
 		        </br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
 			</td>
 		</tr>
@@ -50,7 +50,7 @@
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
-		let recordMode = true;
+		const recordMode = true;
 		const phaseList = ["Input Sudoku Manualy","Scanning Board","Correct Scanning Error","Solving_Number","Solving_Note","Solved","UnSolved"];
 		let phasei = 0;
 		const changePhase=(newPhase)=>{
@@ -85,7 +85,7 @@
 		const sudoku = new Sudoku();
 		initCanvas();
 		initEventlistener();
-		/*
+		
 		sudoku.userInput(0,1,8);
 		sudoku.userInput(0,3,4);
 		sudoku.userInput(1,2,7);
@@ -108,7 +108,7 @@
 		sudoku.userInput(7,5,8);
 		sudoku.userInput(7,7,3);
 		sudoku.userInput(8,4,6);
-		sudoku.userInput(8,6,9);*/
+		sudoku.userInput(8,6,9);
 	//--> 
 	</script>
 

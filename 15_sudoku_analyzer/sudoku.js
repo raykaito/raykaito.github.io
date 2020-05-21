@@ -21,6 +21,28 @@ showHideMethod(showMethod = !this.showMethod){
 draw(){
 	const board = this.board[slider.value];
 	board.draw(this.showMethod);
+	if(phaseList[phasei]=="Solved"){
+		//Draw graph
+		const xRange = 7*side;
+		const yRange = 2*side;
+		const xStart = side+offset;
+		const yStart = side*13;
+		ct.strokeStyle = "black";
+		ct.lineWidth = 1;
+	    ct.beginPath();
+	    ct.moveTo(xStart,yStart);
+		for(let i=1;i<this.board.length;i++){
+			const x = Math.floor(xRange*i/this.board.length);
+			const y = Math.floor(yRange*this.board[i].level/4);
+	    	ct.lineTo(xStart+x,yStart-y);
+		}
+	    ct.stroke();
+	    //Draw Current Posistion
+	    const currentStep = slider.value;
+	    const xCurrent = xStart+Math.floor(xRange*currentStep/this.board.length);
+	    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
+	    drawLine(xCurrent,yCurrent,xCurrent,yStart,1);
+	}
 	return false;
 }
 scannerInput(xi,yi,newNum){
@@ -71,19 +93,19 @@ startSolving(){
 }
 solve(){
 	const board = this.board[Number(slider.value)];
-	if(this.singlePosition (board)) return true;
-	if(this.singleCandidate(board)) return true;
-	if(this.addNotes       (board)) return true;
-	if(this.noCandidate    (board)) return true;
-	if(this.candidateLine  (board)) return true;
-	if(this.candidateBox   (board)) return true;
-	if(this.deleteNotes    (board)) return true;
-	if(this.nakedPair      (board)) return true;
-	if(this.bruteForce     (board)) return true;
-	if(this.checkStatus    (board)) return true;
+	if(this.singlePosition (board,0.25)) return true;//1-1:0.25
+	if(this.singleCandidate(board,0.5 )) return true;//1-2:0.50
+	if(this.addNotes       (board,1   )) return true;//1-4:1.00
+	if(this.noCandidate    (board,0.75)) return true;//1-3:0.75
+	if(this.candidateLine  (board,1.25)) return true;//2-1:1.25
+	if(this.candidateBox   (board,1.5 )) return true;//2-2:1.50
+	if(this.deleteNotes    (board,1   )) return true;//1-4:1.00
+	if(this.nakedPair      (board,2.25)) return true;//3-1:2.25
+	if(this.bruteForce     (board,3.25)) return true;//4-1:3.25
+	if(this.checkStatus    (board,0   )) return true;//1-
 	return false;
 }
-bruteForce(board){
+bruteForce(board,level){
 	//Select Tile with least candidate
 	let minNumCandidate = 9;
 	let minNumCandidateXY =[-1,-1];
@@ -110,10 +132,11 @@ bruteForce(board){
 		//Inclement CandidateNum and restore previous.
 		this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
 		slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
+		this.board.splice(slider.value+1,this.board.length-slider.value);
 	}
 	else if(this.bruteForceParameter.length==0){
 		this.bruteForceParameter[this.bruteForceParameter.length] = [slider.value,0];
-		this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board);
+		this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board,level);
 	}
 	else{//Check if you were here before or not
 		const step = this.bruteForceParameter[this.bruteForceParameter.length-1][0];
@@ -127,20 +150,21 @@ bruteForce(board){
 				if(this.bruteForceParameter.length==0) return false;
 				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
 				slider.value = this.bruteForceParameter[this.bruteForceParameter.length-1][0]-1;
+				this.board.splice(slider.value+1,this.board.length-slider.value);
 			}
 			else{
 				this.bruteForceParameter[this.bruteForceParameter.length-1][1]++;
-				this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],candidateNum,board);
+				this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],candidateNum,board,level);
 			}
 		}
 		else{
 			this.bruteForceParameter[this.bruteForceParameter.length] = [slider.value,0];
-			this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board);
+			this.BruteForce_TakeAGuess(minNumCandidateXY[0],minNumCandidateXY[1],0,board,level);
 		}
 	}
 	return true;
 }
-BruteForce_TakeAGuess(x,y,candidateNum,board){
+BruteForce_TakeAGuess(x,y,candidateNum,board,level){
 	//select candidate based on the candidate Num;
 	let candidateCount = 0;
 	let candidate = -1;
@@ -157,10 +181,10 @@ BruteForce_TakeAGuess(x,y,candidateNum,board){
 	const hiliNum = null;
 	const hiliNote= null;
 	const hiliBox = [[x+1,y+1,x+1,y+1,"blue"]];
-	this.action("programProgressed",x,y,candidate,[msg,hiliNum,hiliNote,hiliBox]);
+	this.action("programProgressed",x,y,candidate,[msg,hiliNum,hiliNote,hiliBox,level]);
 	return false;
 }
-checkStatus(board){
+checkStatus(board,level){
 	let solved = true;
 	//Check each box
 	for(let box=0;box<9;box++){
@@ -201,7 +225,7 @@ checkStatus(board){
 	this.action("solved",solved);
 	this.solvable = solved;
 }
-nakedPair(board){
+nakedPair(board,level){
 	//Check of pairs or triples in each box
 	for(let box=0;box<9;box++){
 		//Aquire important parameters first
@@ -289,7 +313,7 @@ nakedPair(board){
 					const [xii,yii] = this.biToXY([box,0]);
 					const [xil,yil] = this.biToXY([box,8]);
 					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox,level]);
 					return true;
 				}
 				//update combi
@@ -397,7 +421,7 @@ nakedPair(board){
 					const [xii,yii] = [0,row];
 					const [xil,yil] = [8,row];
 					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox,level]);
 					return true;
 				}
 				//update combi
@@ -505,7 +529,7 @@ nakedPair(board){
 					const [xii,yii] = [col,0];
 					const [xil,yil] = [col,8];
 					const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox]);
+					this.action("programProgressedNote",x,y,nums,[msg,hiliNum,hiliNote,hiliBox,level]);
 					return true;
 				}
 				//update combi
@@ -527,7 +551,7 @@ nakedPair(board){
 	}
 	return false;
 }
-deleteNotes(board){
+deleteNotes(board,level){
 	let changed = false;
 	let newNote = new Array(9);
 	for(let x=0;x<9;x++){
@@ -557,7 +581,7 @@ deleteNotes(board){
 	this.action("deleteNotes",newNote);
 	return changed;
 }
-candidateBox(board){
+candidateBox(board,level){
 	//Check for row
 	for(let row=0;row<9;row++){
 		//-3:TileFound -2:Found in Multi Boxes -1:Initial >=0:Box Number
@@ -618,12 +642,13 @@ candidateBox(board){
 					if(y==row)continue;
 					if(board.note[x][y][note]){
 						hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
-						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];					}
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];
+					}
 				}
 				const [xii,yii] = [0,row];
 				const [xil,yil] = [8,row];
 				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 		}
@@ -689,19 +714,20 @@ candidateBox(board){
 					if(x==col)continue;
 					if(board.note[x][y][note]){
 						hiliNote[hiliNote.length] = [x+1,y+1,num,num,"darkGray"];
-						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];					}
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"/","red",1.2];
+					}
 				}
 				const [xii,yii] = [col,0];
 				const [xil,yil] = [col,8];
 				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressedNote",xs,ys,[num],[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 		}
 	}
 	return false;
 }
-candidateLine(board){
+candidateLine(board,level){
 	for(let box=0;box<9;box++){
 		for(let num=1;num<=9;num++){
 			let xCandidateLine = -1;
@@ -765,14 +791,14 @@ candidateLine(board){
 				const [xii,yii] = this.biToXY([box,0]);
 				const [xil,yil] = this.biToXY([box,8]);
 				const hiliBox = [[xii+1,yii+1,xil+1,yil+1,"lime"]];
-				this.action("programProgressedNote",xs,ys,nums,[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressedNote",xs,ys,nums,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;				
 			}	
 		}
 	}
 	return false;
 }
-noCandidate(board){
+noCandidate(board,level){
 	for(let x=0;x<9;x++){
 		for(let y=0;y<9;y++){
 			if(board.tile[x][y]!=0) continue;
@@ -792,7 +818,7 @@ noCandidate(board){
 	}
 	return false;
 }
-addNotes(board){
+addNotes(board,level){
 	let newNote = new Array(9);
 	for(let x=0;x<9;x++){
 		newNote[x] = new Array(9);
@@ -826,7 +852,7 @@ addNotes(board){
 	this.action("addNotes",newNote);
 	return true;
 }
-singleCandidate(board){
+singleCandidate(board,level){
 	let candidate = new Array(81);
 	for(let i=0;i<81;i++) candidate[i]=[0,1,2,3,4,5,6,7,8,9];
 	for(let x=0;x<9;x++){
@@ -863,7 +889,7 @@ singleCandidate(board){
 				const hiliNum = [[x+1,y+1,n,"lime"]];
 				const hiliNote= null;
 				const hiliBox = [[x+1,y+1,x+1,y+1,"lime"]];
-				this.action("programProgressed",x,y,n,[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressed",x,y,n,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 			candidate[x+y*9][0]=count;
@@ -872,7 +898,7 @@ singleCandidate(board){
 	//console.log(candidate);
 	return false;
 }
-singlePosition(board){
+singlePosition(board,level){
 	for(let n=1;n<=9;n++){//Check based on Number first
 		let candidate = new Array(81).fill(1);
 		let hiliNum = new Array;
@@ -922,7 +948,7 @@ singlePosition(board){
 				const yil = 3+Math.floor(box/3)*3;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
 				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 		}
@@ -942,7 +968,7 @@ singlePosition(board){
 				const yil = row+1;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
 				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 		}
@@ -962,7 +988,7 @@ singlePosition(board){
 				const yil = 9;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
 				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox]);
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
 		}

@@ -3,6 +3,7 @@ constructor(board=false){
 	//Initialize
 	this.msg = "Not Modified";
 	this.par = 0;
+	this.level = 0;
 	this.initializeTileAndNote();
 	if(board!=false) this.dupulicateTileAndNote(board);
 }
@@ -45,14 +46,15 @@ userModifiedNote(x,y,num){
 	this.msg = "User Added/Removed a Note";
 	this.par = [x,y,num-1];
 }
-programProgressed(x,y,num,[msg,hiliNum,hiliNote,hiliBox]){
+programProgressed(x,y,num,[msg,hiliNum,hiliNote,hiliBox,level]){
 	this.tile[x][y] = num;
 	this.msg = msg;
 	this.hiliNum = hiliNum;
 	this.hiliNote= hiliNote;
 	this.hiliBox = hiliBox;
+	this.level = level
 }
-programProgressedNote(x,y,num,[msg,hiliNum,hiliNote,hiliBox]){
+programProgressedNote(x,y,num,[msg,hiliNum,hiliNote,hiliBox,level]){
 	for(let j=0;j<x.length;j++){
 		for(let i=0;i<num.length;i++){
 			this.note[x[j]][y[j]][num[i]-1] = false;
@@ -62,6 +64,7 @@ programProgressedNote(x,y,num,[msg,hiliNum,hiliNote,hiliBox]){
 	this.hiliNum = hiliNum;
 	this.hiliNote= hiliNote;
 	this.hiliBox = hiliBox;
+	this.level = level
 }
 addNotes(note){
 	for(let x=0;x<9;x++){
@@ -111,7 +114,7 @@ draw(showMsg=false){
 	//Draw Progress
 	const phase = phaseList[phasei];
 	if(showMsg&&(phase=="Solving_Number"||phase=="Solving_Note"||phase=="Solved"||phase=="UnSolved")){
-		drawNumber(5,0,this.msg,"black",side*0.6);
+		drawNumber(5,10,this.msg,"black",side*0.6);
 		if(this.hiliNum!=null){
 			for(let i=0;i<this.hiliNum.length;i++){
 				drawNumber(this.hiliNum[i][0],this.hiliNum[i][1],this.hiliNum[i][2],this.hiliNum[i][3]);

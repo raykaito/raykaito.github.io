@@ -25,7 +25,7 @@ const initCanvas = () => {
     icon_camera.onload = draw;
 }
 
-rresize = () => {
+const rresize = () => {
     rcanvas.width = Math.floor(window.innerWidth);
     if(Math.floor(window.innerWidth)>520)   rcanvas.width = 520;
     if(Math.floor(window.innerWidth)<320)   rcanvas.width = 320;
@@ -57,7 +57,7 @@ const resize = () => {
     side = Math.floor((width-LineWidthThick-2)/9);
     offset = Math.floor((width-9*side)/2);
                                 
-    canvas.height = side*11;
+    canvas.height = side*14;
     canvas.style.height = canvas.height/pixelRatio+"px";
     height = canvas.height;
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
@@ -111,12 +111,15 @@ const draw = (type,par=[undefined])=>{
         for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
     }else if(phaseList[phasei]=="Solved"){
         drawGrids();
+        drawGraph();
         //Draw Sudoku
         sudoku.draw();
+        drawNumber(5,0,"Sudoku Solved!!!","black",side*0.6);
     }else if(phaseList[phasei]=="UnSolved"){
         drawGrids();
         //Draw Sudoku
         sudoku.draw();
+        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6);
     }else{
         drawGrids();
         //Draw Sudoku
@@ -124,6 +127,21 @@ const draw = (type,par=[undefined])=>{
         drawNumber(5,0,phaseList[phasei]);
         drawNumber(5,10,"Un Known Condition");
     }
+}
+const drawGraph = () => {
+    //SetBacgroundRegions
+    ct.fillStyle = "red";
+    ct.fillRect(side+offset, side*11  , side*7, side/2);
+    ct.fillStyle = "orange";
+    ct.fillRect(side+offset, side*11.5, side*7, side/2);
+    ct.fillStyle = "yellow";
+    ct.fillRect(side+offset, side*12  , side*7, side/2);
+    ct.fillStyle = "lightgreen";
+    ct.fillRect(side+offset, side*12.5, side*7, side/2);
+    //Draw Axis
+    ct.strokeStyle = "black";
+    drawLine(side+offset,side*11,side  +offset,side*13,1);
+    drawLine(side+offset,side*13,side*8+offset,side*13,1);
 }
 
 const drawGrids = (nineByNine=true) => {
@@ -188,6 +206,7 @@ const drawRectIndex = (xii,yii,xil,yil,color="lime",w=1) => {
 
 const drawLine = (xi,yi,xii,yii,w) => {
     ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
+    if(w==0) ct.lineWidth=1;
     const widthOdd = (ct.lineWidth%2==1);
     const vertical = (xi==xii);
     const horizontal = (yi==yii);
@@ -265,7 +284,7 @@ const text=([x,y,string],[color,font]=["black","16pt Times New Roman"],absolute=
     ct.fillText(string,x/cs,y/cs);
 }
 
-const XYtoIndex=([x,y])=>{    return [Math.floor((x-offset)/side)+1,Math.floor(11*y/height)];}
+const XYtoIndex=([x,y])=>{    return [Math.floor((x-offset)/side)+1,Math.floor(y/side)];}
 const indexToBox=([xi,yi])=>{ return Math.floor(xi/3)+Math.floor(yi/3)*3;}
 
 console.log("Loaded: canvas.js");
