@@ -66,7 +66,7 @@
 	 
 		let table  = document.getElementById('Table' );
 		let body   = document.getElementById('Body'  );
-		let canvas = document.getElementById('Canvas');
+		const ca = new Canvas(document.getElementById('Canvas'));
 		let rcanvas= document.getElementById('RCanvas');
 		let slider = document.getElementById('slider');
 		let video  = document.getElementById("player");
@@ -84,7 +84,7 @@
 
 		const sudoku = new Sudoku();
 		initCanvas();
-		initEventlistener();
+		initEventlistener(ca.canvas);
 		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
 		const drawVideo   = () => {scanner.drawVideo();};
 		const drawImage   = () => {scanner.drawImage();};

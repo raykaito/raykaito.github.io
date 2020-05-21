@@ -10,7 +10,7 @@ let moveIntervalTime = 15;
 
 let touchX, touchY;
 
-const  initEventlistener=()=>{    
+const  initEventlistener=(canvas)=>{    
     addEventListener('keydown',keyPressed,false);
     addEventListener('keyup',keyReleased,false);
 

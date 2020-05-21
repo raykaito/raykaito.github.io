@@ -1,3 +1,9 @@
+class Canvas{
+    constructor(canvas){
+        this.canvas = canvas;
+    }
+}
+
 let pixelRatio;
 let width;
 let height;
@@ -10,7 +16,7 @@ let canvasScale;
 let icon_camera=false;
 
 function initCanvas(){
-    ct = canvas.getContext("2d");
+    ct = ca.canvas.getContext("2d");
     rct= rcanvas.getContext("2d");
     resize();
     rresize();
@@ -41,15 +47,15 @@ rresize = () => {
 }
 
 function resize(){
-    rect = canvas.getBoundingClientRect();
+    rect = ca.canvas.getBoundingClientRect();
     pixelRatio = window.devicePixelRatio;
     
-    canvas.width = Math.floor(window.innerWidth);
-    if(Math.floor(window.innerWidth)>520)   canvas.width = 520;
-    if(Math.floor(window.innerWidth)<320)   canvas.width = 320;    
-    canvas.style.width  = canvas.width +"px";
-    canvas.width *= pixelRatio;
-    width  = canvas.width;
+    ca.canvas.width = Math.floor(window.innerWidth);
+    if(Math.floor(window.innerWidth)>520)   ca.canvas.width = 520;
+    if(Math.floor(window.innerWidth)<320)   ca.canvas.width = 320;    
+    ca.canvas.style.width  = ca.canvas.width +"px";
+    ca.canvas.width *= pixelRatio;
+    width  = ca.canvas.width;
 
     LineWidthThin = Math.ceil(width/500);
     LineWidthThick = Math.ceil(width/150);
@@ -57,11 +63,11 @@ function resize(){
     side = Math.floor((width-LineWidthThick-2)/9);
     offset = Math.floor((width-9*side)/2);
                                 
-    canvas.height = side*11;
-    canvas.style.height = canvas.height/pixelRatio+"px";
-    height = canvas.height;
-    console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
-    console.log("Canvas Height: "+canvas.style.height+"pt, "+canvas.height+"px LineWidthThin" +LineWidthThin +"px");
+    ca.canvas.height = side*11;
+    ca.canvas.style.height = ca.canvas.height/pixelRatio+"px";
+    height = ca.canvas.height;
+    console.log("Canvas  Width: "+ca.canvas.style.width+"pt, " +ca.canvas.width+"px LineWidthThick" +LineWidthThick+"px");
+    console.log("Canvas Height: "+ca.canvas.style.height+"pt, "+ca.canvas.height+"px LineWidthThin" +LineWidthThin +"px");
 
     draw();
 }
@@ -203,7 +209,7 @@ function drawLine(xi,yi,xii,yii,w){
     ct.stroke();
 }
 
-function displayArray(array, index = 0, autoMin = 0, height = (canvas.height-16)/6, width = canvas.width-4){
+function displayArray(array, index = 0, autoMin = 0, height = (ca.canvas.height-16)/6, width = ca.canvas.width-4){
     const dy = (height+4)*index;
     const dx = width-array.length;
     if(array.length<width) width = array.length;
