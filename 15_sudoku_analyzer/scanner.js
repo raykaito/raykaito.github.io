@@ -23,13 +23,13 @@ class Scanner{
         if(false){
             this.drawImage();
         }else{
-            navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
+            navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
         }
     }
     handleSuccess(stream){
         video.srcObject = stream;
         this.resizeOcanvas(0);
-        drawVideo();
+        this.drawVideo();
     }
     stopVideo(){
         let stream = video.srcObject;
@@ -45,28 +45,26 @@ class Scanner{
         ca.draw();
         this.oct.drawImage(canvas,0,0,ca.canvas.width,ca.canvas.height,0,0,this.vLength,this.vLength);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result){requestAnimationFrame(drawImage);}
-        else{       requestAnimationFrame(scanNumbers);}
+        if(!result){requestAnimationFrame(()=>{scanner.drawImage();});}
+        else{       requestAnimationFrame(()=>{scanner.drawProgress();});}
     }
     drawVideo(){
         animationStartTime = Date.now();
-        ca.ct.restore();
-        ca.ct.save();
-        ca.drawGrids();
+        ca.draw();
         const newVlength = Math.min(video.videoWidth,video.videoHeight,ca.canvas.width);
         if(newVlength==0){
-            requestAnimationFrame(drawVideo);
+            requestAnimationFrame(()=>{scanner.drawVideo();});
             return;
         }
         if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
               ca.ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,ca.offset,ca.side,ca.side*9,ca.side*9);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result) requestAnimationFrame(drawVideo);
+        if(!result) requestAnimationFrame(()=>{scanner.drawVideo();});
         else{
             this.stopVideo();
             //draw();
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }
     }
     drawProgress(){
@@ -78,7 +76,7 @@ class Scanner{
             if(result) break;
         }
         if(!result){
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }else{
             const solvable = sudoku.startSolving();
             if(solvable==false){
@@ -107,7 +105,7 @@ class Scanner{
         }
         this.ocanvas.width = this.vLength;
         this.ocanvas.height= this.vLength;
-        ca.canvasScale = this.ocanvas.width/ca.canvas.width;
+        ca.canvasScale = this.ocanvas.width/(ca.side*9);
         console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
     }
 }

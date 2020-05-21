@@ -14,7 +14,7 @@ const  initEventlistener=(canvas=ca.canvas)=>{
     addEventListener('keydown',keyPressed,false);
     addEventListener('keyup',keyReleased,false);
 
-    window.addEventListener('resize', resize, false);
+    window.addEventListener('resize', ()=>{ca.resize();}, false);
 
     canvas.addEventListener('mousedown', touch, false);
     canvas.addEventListener('touchstart', touch, false);

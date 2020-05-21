@@ -72,12 +72,7 @@
         let pixelRatio = window.devicePixelRatio;
 		const sudoku = new Sudoku();
 		const ca = new Canvas(document.getElementById('Canvas'),document.getElementById('RCanvas'));
-
-		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
-		const drawVideo   = () => {scanner.drawVideo();};
-		const drawImage   = () => {scanner.drawImage();};
-		const scanNumbers = () => {scanner.drawProgress();};
-		const resize 	  = () => {ca.resize();};		initEventlistener();
+		initEventlistener();
 
 		let scanner = false;
 		let animationStartTime;
