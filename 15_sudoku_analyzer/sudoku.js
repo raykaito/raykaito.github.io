@@ -76,8 +76,7 @@ action(type,x,y,num,par){
 		this.step		= step+1;
 		slider.max 		= step+1;
 		slider.value 	= step+1;
-		if(slider.max!=0) slider.style.display = "inline-block";
-		else slider.style.display = "none";
+		slider.style.display = "inline-block";
 	}
 	draw();
 }
