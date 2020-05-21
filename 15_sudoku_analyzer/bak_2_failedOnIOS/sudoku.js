@@ -16,7 +16,7 @@ reset(step){
 }
 showHideMethod(showMethod = !this.showMethod){
 	this.showMethod = showMethod;
-	draw();
+	ca.draw();
 }
 draw(){
 	const board = this.board[slider.value];
@@ -55,7 +55,7 @@ action(type,x,y,num,par){
 		slider.max 		= step+1;
 		slider.value 	= step+1;
 	}
-	draw();
+	ca.draw();
 }
 startSolving(){
 	changePhase("Solving_Number");

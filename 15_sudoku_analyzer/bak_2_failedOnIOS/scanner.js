@@ -3,8 +3,7 @@ class Scanner{
         //Create Canvas for Original Video Image
         this.ocanvas = document.createElement("canvas");
         this.oct = this.ocanvas.getContext("2d");
-        this.vWidth = 0;
-        this.vHeight = 0;
+        this.vLength = 0;
 
         //Initialize Board Reader Class
         this.boardV = new VisionProgram_BoardReader();
@@ -16,21 +15,21 @@ class Scanner{
             video:{
                 //width:1920,
                 //height:1080,
-                width:640,
-                height:640,
+                width:480,
+                height:480,
                 facingMode:(this.front?"user":"environment")
             }
         };
         if(false){
             this.drawImage();
         }else{
-            navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess);
+            navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
         }
     }
     handleSuccess(stream){
         video.srcObject = stream;
         this.resizeOcanvas(0);
-        drawVideo();
+        this.drawVideo();
     }
     stopVideo(){
         let stream = video.srcObject;
@@ -42,33 +41,30 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        ct.restore();
-        ct.save();
-        if(width!=this.vWidth) this.resizeOcanvas(width);
-        draw();
-        this.oct.drawImage(canvas,0,0,width,height,0,0,this.vWidth,this.vWidth);
+        if(ca.canvas.width!=this.vLength) this.resizeOcanvas(ca.canvas.width);
+        ca.draw();
+        this.oct.drawImage(canvas,0,0,ca.canvas.width,ca.canvas.height,0,0,this.vLength,this.vLength);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result){requestAnimationFrame(drawImage);}
-        else{       requestAnimationFrame(scanNumbers);}
+        if(!result){requestAnimationFrame(()=>{scanner.drawImage();});}
+        else{       requestAnimationFrame(()=>{scanner.drawProgress();});}
     }
     drawVideo(){
         animationStartTime = Date.now();
-        const newWidth = Math.min(video.videoWidth,Math.floor(video.videoHeight*(width/height)));
-        if(newWidth==0){
-            requestAnimationFrame(drawVideo);
+        ca.draw();
+        const newVlength = Math.min(video.videoWidth,video.videoHeight,ca.canvas.width);
+        if(newVlength==0){
+            requestAnimationFrame(()=>{scanner.drawVideo();});
             return;
         }
-        ct.restore();
-        ct.save();
-        if(newWidth!=this.vWidth) this.resizeOcanvas(newWidth);
-        this.oct.drawImage(video,this.sx,this.sy,this.vWidth,this.vHeight,0,0,this.vWidth,this.vHeight);
-              ct.drawImage(this.ocanvas,0,0,this.vWidth,this.vHeight,0,0,width,height);
+        if(newVlength!=this.vLength) this.resizeOcanvas(newVlength);
+        this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
+              ca.ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,ca.offset,ca.side,ca.side*9,ca.side*9);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result) requestAnimationFrame(drawVideo);
+        if(!result) requestAnimationFrame(()=>{scanner.drawVideo();});
         else{
             this.stopVideo();
             //draw();
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }
     }
     drawProgress(){
@@ -80,7 +76,7 @@ class Scanner{
             if(result) break;
         }
         if(!result){
-            requestAnimationFrame(scanNumbers);
+            requestAnimationFrame(()=>{scanner.drawProgress();});
         }else{
             const solvable = sudoku.startSolving();
             if(solvable==false){
@@ -96,21 +92,20 @@ class Scanner{
     draw(){
         this.numberV.draw();
     }
-    resizeOcanvas(newWidth){
-        this.vWidth = newWidth;
-        this.vHeight= Math.ceil(newWidth*(height/width));
-        if(this.vWidth!=0){
-            if(video.videoWidth>video.videoHeight*(width/height)){
-                this.sx = Math.ceil((video.videoWidth - video.videoHeight*(width/height))/2);
+    resizeOcanvas(newVlength){
+        this.vLength = newVlength;
+        if(this.vLength!=0){
+            if(video.videoWidth>video.videoHeight){
+                this.sx = (video.videoWidth - video.videoHeight)/2;
                 this.sy = 0;
             }else{
                 this.sx = 0;
-                this.sy = Math.ceil((video.videoHeight - video.videoWidth*(height/width))/2);
+                this.sy = (video.videoHeight - video.videoWidth)/2;
             }
         }
-        this.ocanvas.width = this.vWidth;
-        this.ocanvas.height= this.vHeight;
-        canvasScale = this.ocanvas.width/width;
+        this.ocanvas.width = this.vLength;
+        this.ocanvas.height= this.vLength;
+        ca.canvasScale = this.ocanvas.width/(ca.side*9);
         console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
     }
 }

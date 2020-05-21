@@ -95,36 +95,36 @@ draw(showMsg=false){
 			const num = this.tile[x][y];
 			//Draw Original Numbers
 			if(num<0){
-				drawNumber(x+1,y+1,-num,"black");
+				ca.drawNumber(x+1,y+1,-num,"black");
 				continue;
 			}
 			//Draw Solved Numbers
 			if(num>0){
-				drawNumber(x+1,y+1, num,"darkGray");
+				ca.drawNumber(x+1,y+1, num,"darkGray");
 				continue;
 			}
 			for(let num=0;num<9;num++){
-				if(this.note[x][y][num]) drawNotes(x+1,y+1,num+1,num+1,"darkGray");
+				if(this.note[x][y][num]) ca.drawNotes(x+1,y+1,num+1,num+1,"darkGray");
 			}
 		}
 	}
 	//Draw Progress
 	const phase = phaseList[phasei];
 	if(showMsg&&(phase=="Solving_Number"||phase=="Solving_Note"||phase=="Solved"||phase=="UnSolved")){
-		drawNumber(5,0,this.msg,"black",side*0.6);
+		ca.drawNumber(5,0,this.msg,"black",ca.side*0.6);
 		if(this.hiliNum!=null){
 			for(let i=0;i<this.hiliNum.length;i++){
-				drawNumber(this.hiliNum[i][0],this.hiliNum[i][1],this.hiliNum[i][2],this.hiliNum[i][3]);
+				ca.drawNumber(this.hiliNum[i][0],this.hiliNum[i][1],this.hiliNum[i][2],this.hiliNum[i][3]);
 			}
 		}
 		if(this.hiliBox!=null){
 			for(let i=0;i<this.hiliBox.length;i++){
-				drawRectIndex(this.hiliBox[i][0],this.hiliBox[i][1],this.hiliBox[i][2],this.hiliBox[i][3],this.hiliBox[i][4],3);
+				ca.drawRectIndex(this.hiliBox[i][0],this.hiliBox[i][1],this.hiliBox[i][2],this.hiliBox[i][3],this.hiliBox[i][4],3);
 			}
 		}
 		if(this.hiliNote!=null){
 			for(let i=0;i<this.hiliNote.length;i++){
-				drawNotes(this.hiliNote[i][0],this.hiliNote[i][1],this.hiliNote[i][2],this.hiliNote[i][3],this.hiliNote[i][4],this.hiliNote[i][5]);
+				ca.drawNotes(this.hiliNote[i][0],this.hiliNote[i][1],this.hiliNote[i][2],this.hiliNote[i][3],this.hiliNote[i][4],this.hiliNote[i][5]);
 			}
 		}
 	}

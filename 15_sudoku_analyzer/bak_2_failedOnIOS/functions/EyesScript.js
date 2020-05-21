@@ -23,18 +23,18 @@ class ImageData{
 		this.imgIn= imgIn;
 		this.xpos = xpos;
 		this.ypos = ypos;
-		this.dxpos= Math.floor(xpos/canvasScale);
-		this.dypos= Math.floor(ypos/canvasScale);
+		this.dxpos= Math.floor(xpos/ca.canvasScale);
+		this.dypos= Math.floor(ypos/ca.canvasScale);
 		
 		this.width  = imgIn.width;
 		this.height = imgIn.height;
 		this.area   = this.width*this.height;
-		this.dwidth = Math.ceil(this.width/canvasScale);
-		this.dheight= Math.ceil(this.height/canvasScale);
+		this.dwidth = Math.ceil(this.width/ca.canvasScale);
+		this.dheight= Math.ceil(this.height/ca.canvasScale);
 		this.darea  = this.dwidth*this.dheight;
 		
 		this.imgOut = imgIn;
-		this.dimgOut = ct.createImageData(this.dwidth, this.dheight);
+		this.dimgOut = ca.ct.createImageData(this.dwidth, this.dheight);
 
 		//Initialize dimgOut
 		for(let i=0;i<imgIn.data.length;i++){
@@ -50,14 +50,14 @@ class ImageData{
 		
 		const timg = this.updateDisplayImage(actual);
 
-		ct.beginPath();
-		ct.strokeStyle = "rgb(0,255,0)";
-		ct.lineWidth = 1;
-		ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
+		ca.ct.beginPath();
+		ca.ct.strokeStyle = "rgb(0,255,0)";
+		ca.ct.lineWidth = 1;
+		ca.ct.rect(dxpos-0.5,dypos-0.5,actual?this.width+1:this.dwidth+1,actual?this.height+1:this.dheight+1);
 
-		//ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
-		ct.drawImage(timg,dxpos, dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
-		ct.stroke();
+		//ca.ct.clearRect(dxpos,dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
+		ca.ct.drawImage(timg,dxpos, dypos,actual?this.width:this.dwidth,actual?this.height:this.dheight);
+		ca.ct.stroke();
 	}
 	updateDisplayImage(){
 		const tcanvas = document.createElement("canvas");
@@ -157,18 +157,18 @@ class IntersectionDetector extends ImageData{
 	}
 	displayLineIntensity(input = 0){
 		if(input==0){
-			displayArray(this.dataArray,0);
+			ca.displayArray(this.dataArray,0);
 		}else if(input==1){
-			displayArray(this.dataSmoothArray,1);
+			ca.displayArray(this.dataSmoothArray,1);
 		}else if(input==2){
-			displayArray(this.lineIntensityArray,2);
+			ca.displayArray(this.lineIntensityArray,2);
 		}else if(input==3){
-			displayArray(this.lineIntensityFiltered,3);
+			ca.displayArray(this.lineIntensityFiltered,3);
 		}
 	}
 	displayIntersections(){
 		for(let i=0;i<this.indexList.length;i++){
-			circle([(this.xpos+(this.indexList[i]*(!this.vertical))),(this.ypos+(this.indexList[i]*this.vertical)),3]);
+			ca.circle([(this.xpos+(this.indexList[i]*(!this.vertical))),(this.ypos+(this.indexList[i]*this.vertical)),3]);
 		}
 	}
 }
@@ -412,8 +412,8 @@ class FindBlob extends ImageData{
 		let xy;
 		for(let i=0;i<this.darea;i++){
 			xy = this.i2xy(i, this.dwidth);
-			xy[0]*=canvasScale;
-			xy[1]*=canvasScale;
+			xy[0]*=ca.canvasScale;
+			xy[1]*=ca.canvasScale;
 			this.dblobMap[i] = this.blobMap[this.xy2i(xy,this.imgOut.width)];
 		}
 		for(let i=0;i<this.darea;i++){
@@ -958,12 +958,12 @@ class Resize extends ImageData{
 		this.width  = this.imgIn.width;
 		this.height = this.imgIn.height;
 		this.area   = this.width*this.height;
-		this.dwidth = Math.ceil(this.width/canvasScale);
-		this.dheight= Math.ceil(this.height/canvasScale);
+		this.dwidth = Math.ceil(this.width/ca.canvasScale);
+		this.dheight= Math.ceil(this.height/ca.canvasScale);
 		this.darea  = this.dwidth*this.dheight;
 		
 		this.imgOut = this.imgIn;
-		this.dimgOut = ct.createImageData(this.dwidth, this.dheight);
+		this.dimgOut = ca.ct.createImageData(this.dwidth, this.dheight);
 
 		//Initialize dimgOut
 		for(let i=0;i<this.imgIn.data.length;i++){

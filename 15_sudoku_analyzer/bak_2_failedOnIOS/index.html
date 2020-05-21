@@ -7,13 +7,13 @@
 	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
 	<link rel="stylesheet" href="noThickness.css" type="text/css">
 	<link rel="icon" type="image/png" href="../icon.png">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="viewport" content="width=320, initial-scale=1.0"/>
 </head>
 
 
 <body id="Body">
 
-	<table id="Table" border="0" align="center" width="320">
+	<table id="Table" border="0" align="center">
 	
 		<tr>
 			<td align="center">
@@ -27,7 +27,7 @@
 			<td align="center">
 				<canvas id="Canvas"></canvas>
 		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video>
-		        </br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
+		        </br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="ca.draw()" oninput="ca.draw()">
 			</td>
 		</tr>
 		<tr>
@@ -57,38 +57,32 @@
 			for(let phaseIndex = 0; phaseIndex<phaseList.length;phaseIndex++){
 				if(phaseList[phaseIndex]==newPhase){
 					phasei = phaseIndex;
-					draw();
+					ca.draw();
 					return;
 				}
 			}
 			alert("Invalid Phase Change");
 		}
-	 
-		let table  = document.getElementById('Table' );
-		let body   = document.getElementById('Body'  );
-		let canvas = document.getElementById('Canvas');
-		let rcanvas= document.getElementById('RCanvas');
-		let slider = document.getElementById('slider');
-		let video  = document.getElementById("player");
+		const  table  = document.getElementById('Table' );
+		const  body   = document.getElementById('Body'  );
+		const  slider = document.getElementById('slider');
+		const  video  = document.getElementById("player");
 		showObject(body, table);
+
+        let pixelRatio = window.devicePixelRatio;
+		const sudoku = new Sudoku();
+		const ca = new Canvas(document.getElementById('Canvas'),document.getElementById('RCanvas'));
+		initEventlistener();
 
 		let scanner = false;
 		let animationStartTime;
 		const startScan = () => {
 			changePhase("Scanning Board");
-			draw();
+			ca.draw();
 			slider.value=0;
 			sudoku.reset(0);
 			scanner = new Scanner();
 		}
-
-		const sudoku = new Sudoku();
-		initCanvas();
-		initEventlistener();
-		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
-		const drawVideo   = () => {scanner.drawVideo();};
-		const drawImage   = () => {scanner.drawImage();};
-		const scanNumbers = () => {scanner.drawProgress();};
 		/*
 		sudoku.userInput(0,1,8);
 		sudoku.userInput(0,3,4);

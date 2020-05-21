@@ -32,7 +32,7 @@ class VisionProgram_BoardReader{
         if(this.failed) return false;
 
         //rotate canvas
-        rotateCanvas(this.xc, this.yc, this.rotationAngle,canvas,ct);
+        ca.rotateCanvas(this.xc, this.yc, this.rotationAngle,canvas,ct);
 
         //locate the four corners
         this.getFourCorners(ct);
@@ -145,10 +145,10 @@ class VisionProgram_BoardReader{
         this.vAngle         = getDir([xyV[0][0],xyV[0][1]],[xyV[0][2],xyV[0][3]])+this.rotationAngle-90;
         //Display the rectangle
         if(this.mode==3){
-            line([xy1,xy2,1],["red",4]); //Top line
-            line([xy2,xy3,1],["red",4]); // Right line
-            line([xy3,xy4,1],["red",4]); //bottom line
-            line([xy4,xy1,1],["red",4]); //left line
+            ca.line([xy1,xy2,1],["red",4]); //Top line
+            ca.line([xy2,xy3,1],["red",4]); // Right line
+            ca.line([xy3,xy4,1],["red",4]); //bottom line
+            ca.line([xy4,xy1,1],["red",4]); //left line
             this.abort("mode==3");
             return;
         }
@@ -272,7 +272,7 @@ class VisionProgram_BoardReader{
         let counter = 0;
         for(let i=0;i<expectedLines;i++){
             const expectedPosition = this.getXYfromIndex(xIndex1+(verticalScan?-0.5:i),yIndex1+(verticalScan?i:-0.5));
-            circle([expectedPosition[0],expectedPosition[2],10],["red",3]);
+            //ca.circle([expectedPosition[0],expectedPosition[2],10],["red",3]);
             for(let j=0;j<inter.length;j++){
                 const actualPosition = (verticalScan?scanner.ypos:scanner.xpos)+inter[j];
                 const error = Math.abs(100*(expectedPosition[verticalScan?1:0]-actualPosition)/this.cellLength);
@@ -280,7 +280,7 @@ class VisionProgram_BoardReader{
                     ct.fillStyle = "red";
                     ct.font = "20px Arial";
                     //ct.fillText(Math.floor(100*findError(cellLength/2,(inter[i]%cellLength)))/100,xy1[0]/canvasScale,(scanner.ypos+inter[i])/canvasScale);
-                    if(v) ct.fillText(Math.floor(100*error)/100,expectedPosition[0]/canvasScale,expectedPosition[1]/canvasScale);
+                    if(v) ct.fillText(Math.floor(100*error)/100,expectedPosition[0]/ca.canvasScale,expectedPosition[1]/ca.canvasScale);
                     counter++;
                     break;
                 }
@@ -288,7 +288,7 @@ class VisionProgram_BoardReader{
         }
         //text([xy1[0],xy1[1],(""+xIndex1+","+yIndex1)]);
         //text([xy2[0],xy2[1],(""+xIndex2+","+yIndex2)]);
-        //line([xy1,xy2],[(counter>=minCounter)?"green":"red",3]);
+        //ca.line([xy1,xy2],[(counter>=minCounter)?"green":"red",3]);
         return (counter>=minCounter);
     }
     getXYfromIndex(xIndex, yIndex){
@@ -304,21 +304,12 @@ class VisionProgram_BoardReader{
             for(let yi=0;yi<9;yi++){
                 const newCell = (this.checkEmpty(xi+this.xIndexMin,yi+this.yIndexMin,ct)?1:-1);
                 if(newCell==-1){
-                    //Draw Rectangle to show which cell has a number in it
-                    //line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4),
-                         //this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
-                    //line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin-0.4),
-                         //this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
-                    //line([this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4),
-                         //this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4)],["red",1*pixelRatio]);
-                    //line([this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin+0.4),
-                         //this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4)],["red",1*pixelRatio]);
                     const [x1,y1] = this.getXYfromIndex(xi+this.xIndexMin-0.4,yi+this.yIndexMin-0.4);
                     const [x2,y2] = this.getXYfromIndex(xi+this.xIndexMin+0.4,yi+this.yIndexMin+0.4);
-                    line([[x1,y1],[x1,y2]],["red",1]);
-                    line([[x1,y1],[x2,y1]],["red",1]);
-                    line([[x1,y2],[x2,y2]],["red",1]);
-                    line([[x2,y1],[x2,y2]],["red",1]);
+                    ca.line([[x1+ca.offset,y1+ca.side],[x1+ca.offset,y2+ca.side]],["red",1]);
+                    ca.line([[x1+ca.offset,y1+ca.side],[x2+ca.offset,y1+ca.side]],["red",1]);
+                    ca.line([[x1+ca.offset,y2+ca.side],[x2+ca.offset,y2+ca.side]],["red",1]);
+                    ca.line([[x2+ca.offset,y1+ca.side],[x2+ca.offset,y2+ca.side]],["red",1]);
 
                     /*
                     //Create the Image for each number
