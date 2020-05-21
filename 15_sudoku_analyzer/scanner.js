@@ -65,15 +65,14 @@ class Scanner{
         if(!result) requestAnimationFrame(()=>{scanner.drawVideo();});
         else{
             this.stopVideo();
-            //draw();
+            draw();
             requestAnimationFrame(()=>{scanner.drawProgress();});
         }
     }
     drawProgress(){
         animationStartTime = Date.now();
         let result = false;
-        //console.log("slider"+(slider.value+1));
-        for(let i=0;i<Number(slider.value)+1;i++){
+        while(Date.now()-animationStartTime<60){
             result=this.numberV.makeProgress();
             if(result) break;
         }

@@ -51,10 +51,12 @@ scannerInput(xi,yi,newNum){
 userInput(xi,yi,newNum){
 	if(phaseList[phasei]=="Input Sudoku Manualy"){
 		this.action("addOriginalNumber", xi,yi,newNum);
-	}else if(phaseList[phasei]=="Solving_Number"){
+	}else if(phaseList[phasei]=="Solving Number"){
 		this.action("addUserInputNumber",xi,yi,newNum);
-	}else if(phaseList[phasei]=="Solving_Note"){
+	}else if(phaseList[phasei]=="Solving Note"){
 		this.action("userModifiedNote"  ,xi,yi,newNum);
+	}else if(phaseList[phasei]=="Solved"||phaseList[phasei]=="UnSolved"){
+		this.action("addUserInputNumber"  ,xi,yi,newNum);
 	}
 }
 action(type,x,y,num,par){
@@ -81,7 +83,7 @@ action(type,x,y,num,par){
 	draw();
 }
 startSolving(){
-	changePhase("Solving_Number");
+	changePhase("Solving Number");
 	this.solvable = false;
 	this.bruteForceParameter = new Array();
 	while(this.solve());
@@ -94,7 +96,7 @@ startSolving(){
 }
 solve(){
 	const board = this.board[Number(slider.value)];
-	if(this.singlePosition (board,0.25)) return true;//1-1:0.25
+	if(this.singlePosition (board,0.25)) return true;//1-1:0.25※RowCol:0.5
 	if(this.singleCandidate(board,0.5 )) return true;//1-2:0.50
 	if(this.addNotes       (board,1   )) return true;//1-4:1.00
 	if(this.noCandidate    (board,0.75)) return true;//1-3:0.75
@@ -967,7 +969,7 @@ singlePosition(board,level){
 				const yil = row+1;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
 				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,0.5]);
 				return true;
 			}
 		}
@@ -987,7 +989,7 @@ singlePosition(board,level){
 				const yil = 9;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
 				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,0.5]);
 				return true;
 			}
 		}

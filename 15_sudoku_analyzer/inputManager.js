@@ -64,10 +64,11 @@ const touch=(event)=>{
 		console.log("invalid touch region");
 		return;
 	}
-	if(phaseList[phasei]=="Input Sudoku Manualy"){
-		draw("drawInputs");
-	}else if(phaseList[phasei]=="Correct Scanning Error"){
+	if(phaseList[phasei]=="Correct Scanning Error"){
 		scanner.userInput("touch",xi,yi);
+	}else{
+		draw("drawInputs");
+		console.log("Drawing Inputs");
 	}
 }
 const move=(event)=>{
@@ -102,21 +103,12 @@ const release=(event)=>{
 	const [xii,yii] = XYtoIndex([touchX,touchY]);
 	const [xil,yil] = XYtoIndex([x,y]);
 
+	console.log("Touched  XY: ("+xii+","+yii+")");
+	console.log("Released XY: ("+xil+","+yil+")");
+
 	if(xii>8&&yii<1){
 		startScan();
 		return;
-	}else if(phaseList[phasei]=="Input Sudoku Manualy"){
-		if(yil>9&&yii>9){
-			sudoku.startSolving();
-		}
-		//Returns if Initial Position is invalid
-		if(xii<1||xii>9||yii<1||yii>9){
-			console.log("invalid region");
-		}else{
-			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
-			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
-			sudoku.userInput(xii-1,yii-1,newNum);
-		}
 	}else if(phaseList[phasei]=="Correct Scanning Error"){
 		if(yii<1){
 			if(rcanvas.style.display=="none")   rcanvas.style.display="block";
@@ -126,6 +118,18 @@ const release=(event)=>{
 			scanner.numberV.endCorrection();
 		}else{
 			scanner.userInput("release",xil,yil);
+		}
+	}else{
+		if(yil==10&&yii==10){
+			console.log("Start Solving")
+			sudoku.startSolving();
+		}else if(xii<0||xii>9||yii<1||yii>9){
+			console.log("invalid touch region");
+		}else{
+			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
+			console.log("Uer Input: "+newNum);
+			sudoku.userInput(xii-1,yii-1,newNum);
 		}
 	}
 	draw();

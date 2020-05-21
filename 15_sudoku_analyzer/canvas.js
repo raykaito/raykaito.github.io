@@ -68,22 +68,20 @@ const resize = () => {
     draw();
 }
 const draw = (type,par=[undefined])=>{
-    if(phaseList[phasei]=="Input Sudoku Manualy"){
+    if(type=="drawInputs"){
+        drawGrids(false);
+        drawNumber(2,8,1,"gray",side*3);
+        drawNumber(5,8,2,"gray",side*3);
+        drawNumber(8,8,3,"gray",side*3);
+        drawNumber(2,5,4,"gray",side*3);
+        drawNumber(5,5,5,"gray",side*3);
+        drawNumber(8,5,6,"gray",side*3);
+        drawNumber(2,2,7,"gray",side*3);
+        drawNumber(5,2,8,"gray",side*3);
+        drawNumber(8,2,9,"gray",side*3);
+    }else if(phaseList[phasei]=="Input Sudoku Manualy"){
         drawGrids();
-        if(type=="drawInputs"){
-            drawGrids(false);
-            drawNumber(2,8,1,"gray",side*3);
-            drawNumber(5,8,2,"gray",side*3);
-            drawNumber(8,8,3,"gray",side*3);
-            drawNumber(2,5,4,"gray",side*3);
-            drawNumber(5,5,5,"gray",side*3);
-            drawNumber(8,5,6,"gray",side*3);
-            drawNumber(2,2,7,"gray",side*3);
-            drawNumber(5,2,8,"gray",side*3);
-            drawNumber(8,2,9,"gray",side*3);
-        }else{
-            sudoku.draw();
-        }
+        sudoku.draw();
         drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6,"Times New Roman",false);
         drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
     }else if(phaseList[phasei]=="Scanning Board"){
@@ -114,14 +112,14 @@ const draw = (type,par=[undefined])=>{
     }else if(phaseList[phasei]=="Solved"){
         drawGrids();
         drawGraph();
-        //Draw Sudoku
-        sudoku.draw();
         drawNumber(5,0,"Sudoku Solved!!!","black",side*0.6,"Times New Roman",false);
+        //Canvas Touched. Draw Inputs
+        sudoku.draw();
     }else if(phaseList[phasei]=="UnSolved"){
         drawGrids();
+        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6,"Times New Roman",false);
         //Draw Sudoku
         sudoku.draw();
-        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6,"Times New Roman",false);
     }else{
         drawGrids();
         //Draw Sudoku

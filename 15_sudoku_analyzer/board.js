@@ -113,7 +113,7 @@ draw(showMsg=false){
 	}
 	//Draw Progress
 	const phase = phaseList[phasei];
-	if(showMsg&&(phase=="Solving_Number"||phase=="Solving_Note"||phase=="Solved"||phase=="UnSolved")){
+	if(showMsg&&(phase=="Solving Number"||phase=="Solving Note"||phase=="Solved"||phase=="UnSolved")){
 		drawNumber(5,10,this.msg,"black",side*0.6,"Times New Roman",false);
 		if(this.hiliNum!=null){
 			for(let i=0;i<this.hiliNum.length;i++){

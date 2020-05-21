@@ -38,14 +38,16 @@ class VisionProgram_NumberReader{
             case 7: this.images[ci][0] = new NumberReader(this.images[ci][0].passdata); break;
         }
         if(recordMode) this.record(st,ci);
-        const img = this.images[ci][0].updateDisplayImage();
-        ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*side+offset,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
-        if(this.stepOnTheCurrentImage==7){
+        if(st==7){
             const readNumber = this.images[ci][0].recognizeNumber();
             sudoku.scannerInput(this.images[ci][1],this.images[ci][2],readNumber);
             this.imageAndNumber[ci][2] = readNumber;
             this.currentImageWorkingOn++;
             this.stepOnTheCurrentImage=0;
+        }
+        if(st==4||st==7){
+            const img = this.images[ci][0].updateDisplayImage();
+            ct.drawImage(img,0,0,img.width,img.height,(this.images[ci][1]+0.1)*side+offset,(this.images[ci][2]+1.1)*side,side*0.8,side*0.8);
         }
         if(this.currentImageWorkingOn==this.images.length){
             this.resetImageAndNumberX();
