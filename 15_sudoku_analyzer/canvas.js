@@ -57,7 +57,7 @@ const resize = () => {
     side = Math.floor((width-LineWidthThick-2)/9);
     offset = Math.floor((width-9*side)/2);
     slider.style.width=10+Math.floor(side*7/pixelRatio)+"px";
-    slider.style.marginLeft=offset+Math.floor(side*1.5/pixelRatio)+"px";
+    slider.style.marginLeft=Math.floor(offset+side*1.5/pixelRatio)+"px";
                                 
     canvas.height = side*13;
     canvas.style.height = canvas.height/pixelRatio+"px";
