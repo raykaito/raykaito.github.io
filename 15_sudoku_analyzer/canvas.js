@@ -84,19 +84,19 @@ const draw = (type,par=[undefined])=>{
         }else{
             sudoku.draw();
         }
-        drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6);
-        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6);
+        drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6,"Times New Roman",false);
+        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
     }else if(phaseList[phasei]=="Scanning Board"){
         ct.restore();
         ct.save();
         drawGrids();
-        drawNumber(5,0,"Scanning Board","black",side*0.6);
+        drawNumber(5,0,"Scanning Board","black",side*0.6,"Times New Roman",false);
         sudoku.draw();
         if(scanner) scanner.draw();
     }else if(phaseList[phasei]=="Correct Scanning Error"){
         drawGrids();
-        drawNumber(5,0,"Drag and Drop","black",side*0.6);
-        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6);
+        drawNumber(5,0,"Drag and Drop","black",side*0.6,"Times New Roman",false);
+        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
         for(let imgI=0;imgI<scanner.numberV.imageAndNumber.length;imgI++){
             const readNumber = scanner.numberV.imageAndNumber[imgI][2];
             const img = scanner.numberV.imageAndNumber[imgI][0];
@@ -116,18 +116,18 @@ const draw = (type,par=[undefined])=>{
         drawGraph();
         //Draw Sudoku
         sudoku.draw();
-        drawNumber(5,0,"Sudoku Solved!!!","black",side*0.6);
+        drawNumber(5,0,"Sudoku Solved!!!","black",side*0.6,"Times New Roman",false);
     }else if(phaseList[phasei]=="UnSolved"){
         drawGrids();
         //Draw Sudoku
         sudoku.draw();
-        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6);
+        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6,"Times New Roman",false);
     }else{
         drawGrids();
         //Draw Sudoku
         sudoku.draw();
-        drawNumber(5,0,phaseList[phasei]);
-        drawNumber(5,10,"Un Known Condition");
+        drawNumber(5,0,phaseList[phasei],"black",side*0.6,"Times New Roman",false);
+        drawNumber(5,10,"Un Known Condition","black",side*0.6,"Times New Roman",false);
     }
 }
 const drawGraph = () => {
@@ -153,8 +153,9 @@ const drawGraph = () => {
 
 const drawGrids = (nineByNine=true) => {
     //Fill with White
+    ct.clearRect(0, 0, width, height);
     ct.fillStyle = "white";
-    ct.fillRect(0, 0, width, height);
+    ct.fillRect(offset, side, side*9, side*9);
 
     //Draw Borders
     ct.strokeStyle = "black";
