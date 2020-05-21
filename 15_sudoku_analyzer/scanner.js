@@ -30,7 +30,7 @@ class Scanner{
     handleSuccess(stream){
         video.srcObject = stream;
         this.resizeOcanvas(0);
-        drawVideo();
+        this.drawVideo();
     }
     stopVideo(){
         let stream = video.srcObject;
