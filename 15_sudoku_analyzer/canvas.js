@@ -54,7 +54,7 @@ const resize = () => {
     LineWidthThin = Math.ceil(width/500);
     LineWidthThick = Math.ceil(width/150);
 
-    side = Math.floor((width-LineWidthThick-2)/9);
+    side = Math.floor(Math.min((width-LineWidthThick-2)/9,50*pixelRatio));
     offset = Math.floor((width-9*side)/2);
     slider.style.width=10+Math.floor(side*7/pixelRatio)+"px";
     slider.style.marginLeft=Math.floor((offset+side*1.5)/pixelRatio)+"px";

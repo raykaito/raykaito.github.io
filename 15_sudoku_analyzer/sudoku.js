@@ -288,7 +288,7 @@ nakedPair(board,level){
 					let nums = new Array(pair);
 					for(let i=0;i<pair;i++)nums[i]=candidates[combi[i]];
 					//Get the message
-					const msg = "Naked Pair/Triple Found in";
+					const msg = "Naked Pair/Triple Found in Box";
 					const hiliNum = null;
 					//Prepare Notes to hilight
 					let hiliNote = new Array(0);
@@ -903,9 +903,9 @@ singlePosition(board,level){
 	for(let n=1;n<=9;n++){//Check based on Number first
 		let candidate = new Array(81).fill(1);
 		let hiliNum = new Array;
+		let hiliNumCan = new Array;
 		let hiliBox = null;
 		let hiliNote = null;
-		let hiliNumCounter = 0;
 		for(let x=0;x<9;x++){
 			for(let y=0;y<9;y++){
 				if(board.tile[x][y]==0) continue;
@@ -914,8 +914,7 @@ singlePosition(board,level){
 
 				//If the number on tile matches, then clear candidates by row,colum and box
 				if(board.tile[x][y]==n||board.tile[x][y]==-n){
-					hiliNum[hiliNumCounter]=[x+1,y+1,Math.abs(n),"red"];
-					hiliNumCounter++;
+					hiliNumCan[hiliNumCan.length]=[x+1,y+1,Math.abs(n),"red"];
 					for(let i=0;i<9;i++){
 						//By column
 						candidate[i+9*y]=0;
@@ -948,7 +947,13 @@ singlePosition(board,level){
 				const yii = 1+Math.floor(box/3)*3;
 				const yil = 3+Math.floor(box/3)*3;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
-				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
+				for(let i=0;i<hiliNumCan.length;i++){
+					const boxCan = this.XYToBi([hiliNumCan[i][0]-1,hiliNumCan[i][1]-1])[0];
+					if(box%3==boxCan%3||Math.floor(box/3)==Math.floor(boxCan/3)){
+						hiliNum[hiliNum.length] = hiliNumCan[i];
+					}
+				}
+				hiliNum[hiliNum.length]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
 				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,level]);
 				return true;
 			}
@@ -968,8 +973,8 @@ singlePosition(board,level){
 				const yii = row+1;
 				const yil = row+1;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
-				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,0.5]);
+				hiliNumCan[hiliNumCan.length]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNumCan,hiliNote,hiliBox,0.5]);
 				return true;
 			}
 		}
@@ -988,8 +993,8 @@ singlePosition(board,level){
 				const yii = 1;
 				const yil = 9;
 				const hiliBox = [[xii,yii,xil,yil,"lime"]];
-				hiliNum[hiliNumCounter]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
-				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNum,hiliNote,hiliBox,0.5]);
+				hiliNumCan[hiliNumCan.length]=[index%9+1,Math.floor(index/9)+1,n,"lime"];
+				this.action("programProgressed",index%9,Math.floor(index/9),n,[msg,hiliNumCan,hiliNote,hiliBox,0.5]);
 				return true;
 			}
 		}
