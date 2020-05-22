@@ -41,7 +41,7 @@ draw(){
 	    const currentStep = slider.value;
 	    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
 	    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
-	    drawLine(xCurrent,yCurrent,xCurrent,yStart,1);
+	    drawLine(xCurrent,yCurrent,xCurrent,yStart,0);
 	}
 	return false;
 }

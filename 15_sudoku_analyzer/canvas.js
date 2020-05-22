@@ -56,10 +56,10 @@ const resize = () => {
 
     side = Math.floor(Math.min((width-LineWidthThick-2)/9,50*pixelRatio));
     offset = Math.floor((width-9*side)/2);
-    slider.style.width=10+Math.floor(side*7/pixelRatio)+"px";
-    slider.style.marginLeft=Math.floor((offset+side*1.5)/pixelRatio)+"px";
+    slider.style.width=(Math.floor((side*7)/pixelRatio)+10)+"px";
+    slider.style.marginLeft=(Math.floor((offset+side*1.5)/pixelRatio)-5)+"px";
                                 
-    canvas.height = side*13;
+    canvas.height = side*13+Math.floor(LineWidthThin/2);
     canvas.style.height = canvas.height/pixelRatio+"px";
     height = canvas.height;
     console.log("Canvas  Width: "+canvas.style.width+"pt, " +canvas.width+"px LineWidthThick" +LineWidthThick+"px");
@@ -213,8 +213,8 @@ const drawRectIndex = (xii,yii,xil,yil,color="lime",w=1) => {
 }
 
 const drawLine = (xi,yi,xii,yii,w) => {
-    ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
     if(w==0) ct.lineWidth=1;
+    else ct.lineWidth = (w==1?LineWidthThin:LineWidthThick);
     const widthOdd = (ct.lineWidth%2==1);
     const vertical = (xi==xii);
     const horizontal = (yi==yii);
