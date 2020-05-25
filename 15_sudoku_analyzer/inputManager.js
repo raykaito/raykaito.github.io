@@ -58,10 +58,14 @@ const touch=(event)=>{
 
 	touchX = x;
 	touchY = y;
-	event.preventDefault();
 	const [xi,yi]=XYtoIndex([x,y]);
-	if(xi<1||xi>9||yi<1||yi>9){
+	console.log(xi,yi);
+	if(xi<1||xi>9||yi>10){
 		console.log("invalid touch region");
+		return;
+	}else if(yi<1||yi>9){
+		console.log("invalid touch region");
+		event.preventDefault();
 		return;
 	}
 	if(phaseList[phasei]=="Correct Scanning Error"){
@@ -123,8 +127,8 @@ const release=(event)=>{
 		if(yil==10&&yii==10){
 			console.log("Start Solving")
 			sudoku.startSolving();
-		}else if(xii<0||xii>9||yii<1||yii>9){
-			console.log("invalid touch region");
+		}else if(xii<1||xii>9||yii<1||yii>9){
+			console.log("invalid release region");
 		}else{
 			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
 			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
