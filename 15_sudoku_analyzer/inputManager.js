@@ -68,6 +68,7 @@ const touch=(event)=>{
 		event.preventDefault();
 		return;
 	}
+	event.preventDefault();
 	if(phaseList[phasei]=="Correct Scanning Error"){
 		scanner.userInput("touch",xi,yi);
 	}else{
