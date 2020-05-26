@@ -83,12 +83,14 @@ action(type,x,y,num,par){
 	draw();
 }
 startSolving(){
+	this.startTime = Date.now();
 	changePhase("Solving Number");
 	this.solvable = false;
 	this.bruteForceParameter = new Array();
 	while(this.solve());
 	if(this.solvable){
 		changePhase("Solved");
+		console.log("It took "+(Date.now()-this.startTime)+" ms to solve.");
 	}else{
 		changePhase("UnSolved");
 	}

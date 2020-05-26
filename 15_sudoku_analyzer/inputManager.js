@@ -31,7 +31,7 @@ const  initEventlistener=()=>{
 }
 const loadImage=(e)=>{
 	const fileData = e.target.files[0];
-	if(!fileData.type.match('image.*')){
+	if(fileData==undefined||!fileData.type.match('image.*')){
 		alert('Please upload Image file.');
 		return;
 	}

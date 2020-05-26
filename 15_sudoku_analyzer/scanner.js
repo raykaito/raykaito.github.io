@@ -42,7 +42,7 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        const newWidth = Math.min(this.img.width,this.img.height);
+        const newWidth = Math.min(this.img.width,this.img.height,640);
         draw();
         if(newWidth!=this.vLength) this.resizeOcanvas(newWidth);
         this.oct.drawImage(this.img,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
