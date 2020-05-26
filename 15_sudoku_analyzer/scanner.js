@@ -1,5 +1,5 @@
 class Scanner{
-    constructor(){
+    constructor(uploadImage = false,img){
         //Create Canvas for Original Video Image
         this.ocanvas = document.createElement("canvas");
         this.oct = this.ocanvas.getContext("2d");
@@ -9,20 +9,21 @@ class Scanner{
         this.boardV = new VisionProgram_BoardReader();
         this.numberV= new VisionProgram_NumberReader();
 
-        this.front=false;
-        this.constraints = {
-            audio:false,
-            video:{
-                //width:1920,
-                //height:1080,
-                width:640,
-                height:640,
-                facingMode:(this.front?"user":"environment")
-            }
-        };
-        if(false){
+        if(uploadImage){
+            this.img = img;
             this.drawImage();
         }else{
+            this.front=false;
+            this.constraints = {
+                audio:false,
+                video:{
+                    //width:1920,
+                    //height:1080,
+                    width:640,
+                    height:640,
+                    facingMode:(this.front?"user":"environment")
+                }
+            };
             navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
         }
     }
@@ -41,14 +42,17 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        ct.restore();
-        ct.save();
-        if(width!=this.vLength) this.resizeOcanvas(width);
+        const newWidth = Math.min(this.img.width,this.img.height);
         draw();
-        this.oct.drawImage(canvas,0,0,width,height,0,0,this.vLength,this.vLength);
+        if(newWidth!=this.vLength) this.resizeOcanvas(newWidth);
+        this.oct.drawImage(this.img,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
+              ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,offset,side,side*9,side*9);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
-        if(!result){requestAnimationFrame(()=>{this.drawImage();});}
-        else{       requestAnimationFrame(()=>{this.drawProgress();});}
+        if(!result) requestAnimationFrame(()=>{this.drawImage();});
+        else{
+            draw();
+            requestAnimationFrame(()=>{this.drawProgress();});
+        }
     }
     drawVideo(){
         animationStartTime = Date.now();

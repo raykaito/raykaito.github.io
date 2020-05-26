@@ -8,6 +8,7 @@ let LineWidthThick;
 let ct;
 let canvasScale;
 let icon_camera=false;
+let icon_folder=false;
 
 const initCanvas = () => {
     ct = canvas.getContext("2d");
@@ -23,6 +24,9 @@ const initCanvas = () => {
     icon_camera = new Image();
     icon_camera.src = "icon_camera.png";
     icon_camera.onload = draw;
+    icon_folder = new Image();
+    icon_folder.src = "icon_folder.png";
+    icon_folder.onload = draw;
 }
 
 const rresize = () => {
@@ -82,9 +86,9 @@ const draw = (type,par=[undefined])=>{
     }else if(phaseList[phasei]=="Input Sudoku Manualy"){
         drawGrids();
         sudoku.draw();
-        drawNumber(5,0,"Input Sudoku or Scan with →","black",side*0.6,"Times New Roman",false);
+        drawNumber(5,0,"Input Sudoku or Upload →","black",side*0.6,"Times New Roman",false);
         drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
-    }else if(phaseList[phasei]=="Scanning Board"){
+    }else if(phaseList[phasei]=="Scanning Board"||phaseList[phasei]=="Uploading Image"){
         ct.restore();
         ct.save();
         drawGrids();
@@ -165,6 +169,7 @@ const drawGrids = (nineByNine=true) => {
     }
     //Draw Camera Icon
     if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
+    if(icon_folder) ct.drawImage(icon_folder,0,0,100,100,side*7.1+offset,side*0.1,side*0.8,side*0.8);
 }
 
 const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {

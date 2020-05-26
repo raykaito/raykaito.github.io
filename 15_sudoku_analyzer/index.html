@@ -16,7 +16,7 @@
 	<table id="Table" border="0" align="center">
 		<tr>
 			<td align="left">
-		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video>
+		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><input type="file" id="folder" style="display:none;">
 				</br><canvas id="Canvas"></canvas>
 		        </br><input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()" style="display:none;margin:0">
 			</td>
@@ -42,7 +42,7 @@
 	<script type="text/javascript">
 	<!--
 		const recordMode = true;
-		const phaseList = ["Input Sudoku Manualy","Scanning Board","Correct Scanning Error","Solving Number","Solving Note","Solved","UnSolved"];
+		const phaseList = ["Input Sudoku Manualy","Scanning Board","Uploading Image","Correct Scanning Error","Solving Number","Solving Note","Solved","UnSolved"];
 		let phasei = 0;
 		const changePhase=(newPhase)=>{
 			for(let phaseIndex = 0; phaseIndex<phaseList.length;phaseIndex++){
@@ -61,6 +61,7 @@
 		let rcanvas= document.getElementById('RCanvas');
 		let slider = document.getElementById('slider');
 		let video  = document.getElementById("player");
+		let file   = document.getElementById("folder");
 		showObject(body, table);
 
 		let scanner = false;
@@ -72,6 +73,14 @@
 			slider.style.display = "none";
 			sudoku.reset(0);
 			scanner = new Scanner();
+		}
+		const uploadImage = () => {
+			changePhase("Uploading Image");
+			draw();
+			slider.value=0;
+			slider.style.display = "none";
+			sudoku.reset(0);
+            file.click();
 		}
 
 		const sudoku = new Sudoku();

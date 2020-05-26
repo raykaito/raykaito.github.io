@@ -25,7 +25,23 @@ const  initEventlistener=()=>{
     canvas.addEventListener('mouseup', release, false);
     canvas.addEventListener('touchend', release, false);
 
+    file.addEventListener('change', loadImage, false);
+
 	console.log("    - Eventlistener initialized.");
+}
+const loadImage=(e)=>{
+	const fileData = e.target.files[0];
+	if(!fileData.type.match('image.*')){
+		alert('Please upload Image file.');
+		return;
+	}
+	const reader = new FileReader();
+	reader.onload = function(){
+		const fileImage = document.createElement('img');
+		fileImage.src = reader.result;
+		fileImage.onload = (fileImage)=>{scanner = new Scanner(true,fileImage.target);};
+	}
+	reader.readAsDataURL(fileData);
 }
 const keyPressed=(event)=>{
 	switch(event.keyCode){
@@ -111,9 +127,14 @@ const release=(event)=>{
 	console.log("Touched  XY: ("+xii+","+yii+")");
 	console.log("Released XY: ("+xil+","+yil+")");
 
-	if(xii>8&&yii<1){
-		startScan();
-		return;
+	if(yii<1){
+		if(xii==9){
+			startScan();
+			return;
+		}else if(xii==8){
+			uploadImage();
+			return;
+		}
 	}else if(phaseList[phasei]=="Correct Scanning Error"){
 		if(yii<1){
 			if(rcanvas.style.display=="none")   rcanvas.style.display="block";
