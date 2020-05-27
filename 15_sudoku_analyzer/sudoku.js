@@ -9,6 +9,22 @@ constructor(){
 	//brute force parameters
 	this.bruteForceParameter = new Array();//[step at guess, candidateNum]
 }
+checkSolvability(changePhaseAutomatically = true){
+	let array = new Array(81);
+	const board = this.board[Number(slider.value)];
+	for(let i=0;i<81;i++){
+		const [x,y] = this.inToXY(i);
+		array[i] = Math.abs(board.tile[x][y]);
+	}
+	const solver = new Solver(array);
+	const solvable = solver.checkSolvability();
+	if(changePhaseAutomatically){
+		if(solvable) changePhase("User Solving");
+		else 		 changePhase("Unsolvable");
+	}else{
+		return solvable;
+	}
+}
 reset(step){
 	this.step = step;
 	slider.value = step;
@@ -19,44 +35,51 @@ showHideMethod(showMethod = !this.showMethod){
 	draw();
 }
 draw(){
-	const board = this.board[slider.value];
-	board.draw(this.showMethod);
-	if(phaseList[phasei]=="Solved"){
-		//Draw graph
-		const xRange = 7*side;
-		const yRange = 2*side;
-		const xStart = side*1.5+offset;
-		const yStart = side*13;
-		ct.strokeStyle = "black";
-		ct.lineWidth = 1;
-	    ct.beginPath();
-	    ct.moveTo(xStart,yStart);
-		for(let i=1;i<slider.max;i++){
-			const x = Math.floor(xRange*i/slider.max);
-			const y = Math.floor(yRange*this.board[i].level/4);
-	    	ct.lineTo(xStart+x,yStart-y);
+	if(phaseList[phasei]=="Checking Solvability"){
+		this.solver.draw();
+	}else{
+		const board = this.board[slider.value];
+		board.draw(this.showMethod);
+		if(phaseList[phasei]=="Solvable"){
+			//Draw graph
+			const xRange = 7*side;
+			const yRange = 2*side;
+			const xStart = side*1.5+offset;
+			const yStart = side*13;
+			ct.strokeStyle = "black";
+			ct.lineWidth = 1;
+		    ct.beginPath();
+		    ct.moveTo(xStart,yStart);
+			for(let i=1;i<slider.max;i++){
+				const x = Math.floor(xRange*i/slider.max);
+				const y = Math.floor(yRange*this.board[i].level/4);
+		    	ct.lineTo(xStart+x,yStart-y);
+			}
+		    ct.stroke();
+		    //Draw Current Posistion
+		    const currentStep = slider.value;
+		    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
+		    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
+		    drawLine(xCurrent,yCurrent,xCurrent,yStart,0);
 		}
-	    ct.stroke();
-	    //Draw Current Posistion
-	    const currentStep = slider.value;
-	    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
-	    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
-	    drawLine(xCurrent,yCurrent,xCurrent,yStart,0);
 	}
 	return false;
 }
 scannerInput(xi,yi,newNum){
 	this.action("addOriginalNumber", xi,yi,newNum);
 }
-userInput(xi,yi,newNum){
+userInput(xi,yi,newNum,note=false){
 	if(phaseList[phasei]=="Input Sudoku Manualy"){
 		this.action("addOriginalNumber", xi,yi,newNum);
-	}else if(phaseList[phasei]=="Solving Number"){
-		this.action("addUserInputNumber",xi,yi,newNum);
-	}else if(phaseList[phasei]=="Solving Note"){
-		this.action("userModifiedNote"  ,xi,yi,newNum);
-	}else if(phaseList[phasei]=="Solved"||phaseList[phasei]=="UnSolved"){
-		this.action("addUserInputNumber"  ,xi,yi,newNum);
+	}else if(phaseList[phasei]=="User Solving"){
+		if(note){
+			if(this.board[slider.value].tile[xi][yi]!=0) return;
+			this.action("userModifiedNote"  ,xi,yi,newNum);
+		}else{
+			if(this.board[slider.value].tile[xi][yi]<0) return;
+			this.action("addUserInputNumber",xi,yi,newNum);
+		}
+		
 	}
 }
 action(type,x,y,num,par){
@@ -82,19 +105,16 @@ action(type,x,y,num,par){
 	}
 	draw();
 }
-startSolving(){
-	this.startTime = Date.now();
-	changePhase("Solving Number");
+startAnalysis(){
+	changePhase("Analyzing Sudoku");
 	this.solvable = false;
 	this.bruteForceParameter = new Array();
 	while(this.solve());
 	if(this.solvable){
-		changePhase("Solved");
-		console.log("It took "+(Date.now()-this.startTime)+" ms to solve.");
+		changePhase("Analyzed");
 	}else{
-		changePhase("UnSolved");
+		changePhase("Unsolvable");
 	}
-	return this.solvable;
 }
 solve(){
 	const board = this.board[Number(slider.value)];

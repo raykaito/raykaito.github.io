@@ -31,6 +31,7 @@
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="board.js"></script>
 	<script type="text/javascript" src="sudoku.js"></script>
+	<script type="text/javascript" src="quickSolver.js"></script>
 	<script type="text/javascript" src="board_reader.js"></script>
 	<script type="text/javascript" src="number_reader.js"></script>
 	<script type="text/javascript" src="scanner.js"></script>
@@ -42,7 +43,7 @@
 	<script type="text/javascript">
 	<!--
 		const recordMode = true;
-		const phaseList = ["Input Sudoku Manualy","Scanning Board","Uploading Image","Correct Scanning Error","Solving Number","Solving Note","Solved","UnSolved"];
+		const phaseList = ["Input Sudoku Manualy","Scanning Board","Uploading Image","Correct Scanning Error","Checking Solvability","User Solving","Analyzing Sudoku","Analyzed","Unsolvable"];
 		let phasei = 0;
 		const changePhase=(newPhase)=>{
 			for(let phaseIndex = 0; phaseIndex<phaseList.length;phaseIndex++){

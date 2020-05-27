@@ -147,15 +147,16 @@ const release=(event)=>{
 		}
 	}else{
 		if(yil==10&&yii==10){
-			console.log("Start Solving")
-			sudoku.startSolving();
+			//Start "User Solving" phase
+			sudoku.checkSolvability();
 		}else if(xii<1||xii>9||yii<1||yii>9){
 			console.log("invalid release region");
 		}else{
 			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+			const index = sudoku.XYToBi([xil-1,yil-1])[1];
 			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
 			console.log("Uer Input: "+newNum);
-			sudoku.userInput(xii-1,yii-1,newNum);
+			sudoku.userInput(xii-1,yii-1,newNum,index==8);
 		}
 	}
 	draw();

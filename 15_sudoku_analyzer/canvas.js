@@ -23,10 +23,10 @@ const initCanvas = () => {
     }
     icon_camera = new Image();
     icon_camera.src = "icon_camera.png";
-    icon_camera.onload = draw;
+    icon_camera.onload = ()=>{draw();};
     icon_folder = new Image();
     icon_folder.src = "icon_folder.png";
-    icon_folder.onload = draw;
+    icon_folder.onload = ()=>{draw();};
 }
 
 const rresize = () => {
@@ -71,65 +71,103 @@ const resize = () => {
 
     draw();
 }
-const draw = (type,par=[undefined])=>{
-    if(type=="drawInputs"){
-        drawGrids(false);
-        drawNumber(2,8,1,"gray",side*3);
-        drawNumber(5,8,2,"gray",side*3);
-        drawNumber(8,8,3,"gray",side*3);
-        drawNumber(2,5,4,"gray",side*3);
-        drawNumber(5,5,5,"gray",side*3);
-        drawNumber(8,5,6,"gray",side*3);
-        drawNumber(2,2,7,"gray",side*3);
-        drawNumber(5,2,8,"gray",side*3);
-        drawNumber(8,2,9,"gray",side*3);
-    }else if(phaseList[phasei]=="Input Sudoku Manualy"){
-        drawGrids();
-        sudoku.draw();
-        drawNumber(5,0,"Input Sudoku or Upload →","black",side*0.6,"Times New Roman",false);
-        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
-    }else if(phaseList[phasei]=="Scanning Board"||phaseList[phasei]=="Uploading Image"){
-        ct.restore();
-        ct.save();
-        drawGrids();
-        drawNumber(5,0,"Scanning Board","black",side*0.6,"Times New Roman",false);
-        sudoku.draw();
-        if(scanner) scanner.draw();
-    }else if(phaseList[phasei]=="Correct Scanning Error"){
-        drawGrids();
-        drawNumber(5,0,"Drag and Drop","black",side*0.6,"Times New Roman",false);
-        drawNumber(5,10,"Tap HERE to start Analysis.","black",side*0.6,"Times New Roman",false);
-        for(let imgI=0;imgI<scanner.numberV.imageAndNumber.length;imgI++){
-            const readNumber = scanner.numberV.imageAndNumber[imgI][2];
-            const img = scanner.numberV.imageAndNumber[imgI][0];
-            let y=(readNumber-1+1.1)*side;
-            let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side+offset;
-            if(par!=undefined&&par[0]!=imgI){
-                ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
+const draw = (type=undefined,par=[undefined])=>{
+    if(type!=undefined){
+        if(type=="drawInputs"){
+            drawGrids(false);
+            //Draw Inputs for Solved Number
+            drawNumber(2,8,1,"gray",side*3);
+            drawNumber(5,8,2,"gray",side*3);
+            drawNumber(8,8,3,"gray",side*3);
+            drawNumber(2,5,4,"gray",side*3);
+            drawNumber(5,5,5,"gray",side*3);
+            drawNumber(8,5,6,"gray",side*3);
+            drawNumber(2,2,7,"gray",side*3);
+            drawNumber(5,2,8,"gray",side*3);
+            drawNumber(8,2,9,"gray",side*3);
+            if(phaseList[phasei]=="User Solving"){
+                //Draw Inputs for Notes
+                drawNumber(3,9,1,"gray",side);
+                drawNumber(6,9,2,"gray",side);
+                drawNumber(9,9,3,"gray",side);
+                drawNumber(3,6,4,"gray",side);
+                drawNumber(6,6,5,"gray",side);
+                drawNumber(9,6,6,"gray",side);
+                drawNumber(3,3,7,"gray",side);
+                drawNumber(6,3,8,"gray",side);
+                drawNumber(9,3,9,"gray",side);
             }
         }
-        if(par!=undefined&&par[0]!=undefined){
-            const img =  scanner.numberV.imageAndNumber[par[0]][0];
-            ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
-        }
-        for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
-    }else if(phaseList[phasei]=="Solved"){
-        drawGrids();
-        drawGraph();
-        drawNumber(5,0,"Sudoku Solved!!!","black",side*0.6,"Times New Roman",false);
-        //Canvas Touched. Draw Inputs
-        sudoku.draw();
-    }else if(phaseList[phasei]=="UnSolved"){
-        drawGrids();
-        drawNumber(5,0,"Sudoku Unolved...","black",side*0.6,"Times New Roman",false);
-        //Draw Sudoku
-        sudoku.draw();
     }else{
-        drawGrids();
-        //Draw Sudoku
-        sudoku.draw();
-        drawNumber(5,0,phaseList[phasei],"black",side*0.6,"Times New Roman",false);
-        drawNumber(5,10,"Un Known Condition","black",side*0.6,"Times New Roman",false);
+        if(phaseList[phasei]=="Input Sudoku Manualy"){
+            drawGrids();
+            sudoku.draw();
+            drawNumber(5,0,"Input Sudoku or Upload →","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"Tap HERE to start Solving.","black",side*0.6,"Times New Roman",false);
+        }else if(phaseList[phasei]=="Scanning Board"||phaseList[phasei]=="Uploading Image"){
+            ct.restore();
+            ct.save();
+            drawGrids();
+            drawNumber(5,0,"Scanning Sudoku...","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+            if(scanner) scanner.draw();
+        }else if(phaseList[phasei]=="Correct Scanning Error"){
+            drawGrids();
+            drawNumber(5,0,"Drag and Drop","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"Tap HERE When Done.","black",side*0.6,"Times New Roman",false);
+            for(let imgI=0;imgI<scanner.numberV.imageAndNumber.length;imgI++){
+                const readNumber = scanner.numberV.imageAndNumber[imgI][2];
+                const img = scanner.numberV.imageAndNumber[imgI][0];
+                let y=(readNumber-1+1.1)*side;
+                let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side+offset;
+                if(par!=undefined&&par[0]!=imgI){
+                    ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
+                }
+            }
+            if(par!=undefined&&par[0]!=undefined){
+                const img =  scanner.numberV.imageAndNumber[par[0]][0];
+                ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
+            }
+            for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
+        }else if(phaseList[phasei]=="Checking Solvability"){
+            drawGrids();
+            drawNumber(5,0,"Checking Solvability","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+        }else if(phaseList[phasei]=="User Solving"){
+            drawGrids();
+            drawNumber(5,0,"User Solving","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Analyzing Sudoku"){
+            drawGrids();
+            drawGraph();
+            drawNumber(5,0,"Analyzing Sudoku...","black",side*0.6,"Times New Roman",false);
+            //Canvas Touched. Draw Inputs
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Analyzed"){
+            drawGrids();
+            drawGraph();
+            drawNumber(5,0,"Analysis Complete!!!","black",side*0.6,"Times New Roman",false);
+            //Canvas Touched. Draw Inputs
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Unsolvable"){
+            drawGrids();
+            drawNumber(5,0,"This sudoku was Unsolvable","black",side*0.6,"Times New Roman",false);
+            //Draw Sudoku
+            sudoku.draw();
+            alert("This sudoku was unsolvable. Please input sudoku Manually");
+            changePhase("Input Sudoku Manualy");
+        }else if(phaseList[phasei]=="Checking Solvability"){
+            drawGrids();
+            drawNumber(5,0,"Checking Solvability","black",side*0.6,"Times New Roman",false);
+            //Draw Sudoku
+            sudoku.draw();
+        }else{
+            drawGrids();
+            //Draw Sudoku
+            sudoku.draw();
+            drawNumber(5,0,phaseList[phasei],"black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"XXXX Unknown Condition XXXX","black",side*0.6,"Times New Roman",false);
+        }
     }
 }
 const drawGraph = () => {
@@ -177,7 +215,7 @@ const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
     let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(size*factor)+"px Times New Roman";
+    ct.font = ""+Math.floor(1.5*size*factor)+"px Times New Roman";
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(str,x+offset,y);
@@ -191,7 +229,7 @@ const drawNumber = (xi,yi,n,color="black",size=side, fontFamily = "Times New Rom
     }
     //Draw Number
     const x=Math.floor((xi-0.5)*side+offset);
-    const y=Math.floor((yi+0.55)*side);
+    const y=Math.floor((yi+0.5)*side);
     ct.fillStyle = color;
     ct.font = ""+Math.floor(size*0.8)+"px "+fontFamily;
     ct.textAlign = "center";

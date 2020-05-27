@@ -95,7 +95,7 @@ class VisionProgram_NumberReader{
         for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
             sudoku.scannerInput(this.images[imgI][1],this.images[imgI][2],this.imageAndNumber[imgI][2]);
         }
-        sudoku.startSolving()
+        sudoku.checkSolvability();
     }
     userInput(type,x,y){
         if(type=="touch"){
@@ -109,7 +109,7 @@ class VisionProgram_NumberReader{
                 }
             }
         }else if(type=="move"){
-            draw("",[this.draggedImageIndex,x-side/2,y-side/2]);
+            draw(undefined,[this.draggedImageIndex,x-side/2,y-side/2]);
         }else if(type=="release"){
             if(this.draggedImageIndex==undefined) return;
             if(y<1||y>9) return;

@@ -88,11 +88,13 @@ class Scanner{
         }
     }
     checkSudoku(){
-        const solvable = sudoku.startSolving();
+        const solvable = sudoku.checkSolvability(false);
         if(solvable==false){
             alert("Scanning process might have failed. Drag and Drop to correct the mistake.");
             changePhase("Correct Scanning Error");
             this.numberV.startCorrection();
+        }else{
+            changePhase("User Solving");
         }
 
     }
