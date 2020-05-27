@@ -201,10 +201,10 @@ BruteForce_TakeAGuess(x,y,candidateNum,board,level){
 			candidateCount++;
 		}
 	}
-	hiliNote[hiliNote.length] = [x+1,y+1,candidate,"▢","blue",1.4];
+	hiliNote[hiliNote.length] = [x+1,y+1,candidate,"▢","blue",1.2];
 	const msg = "Took a Guess";
 	const hiliNum = [[x+1,y+1,"","lime"]];
-	const hiliBox = [[x+1,y+1,x+1,y+1,"blue"]];
+	const hiliBox = null;//[[x+1,y+1,x+1,y+1,"blue"]];
 	this.action("programProgressed",x,y,candidate,[msg,hiliNum,hiliNote,hiliBox,level]);
 	return false;
 }
@@ -340,7 +340,7 @@ nakedPair(board,level){
 								for(let j=0;j<pair;j++){
 									const num = candidates[combi[j]];
 									if(board.note[x][y][num-1]){
-										hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+										hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 									}
 								}
 							}
@@ -356,7 +356,7 @@ nakedPair(board,level){
 										}
 									}
 									if(!oneOfEliminated&&board.note[x][y][num-1]){
-										hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+										hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 									}
 								}
 							}							
@@ -487,7 +487,7 @@ candidateBox(board,level){
 					const [x,y] = [i,row];
 					if(board.tile[x][y]!=0) continue;
 					if(board.note[x][y][note]){
-						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 					}
 				}
 				//Notes to eleminate
@@ -559,7 +559,7 @@ candidateBox(board,level){
 					const [x,y] = [col,i];
 					if(board.tile[x][y]!=0) continue;
 					if(board.note[x][y][note]){
-						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+						hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 					}
 				}
 				//Notes to eleminate
@@ -600,7 +600,7 @@ candidateLine(board,level){
 				}
 				if(board.tile[x][y]!=0) continue;
 				if(!board.note[x][y][num-1]) continue;
-				hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+				hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 				if(xCandidateLine==-1){//This is the first one found
 					xCandidateLine=x;
 				}else{
@@ -669,8 +669,8 @@ singleNote(board,level){
 			if(candidateCounter==1){
 				const msg = "Single Note in a Cell";
 				const hiliNum = [[x+1,y+1,"","lime"]];
-				const hiliNote= [[x+1,y+1,number,number,"darkGray"],[x+1,y+1,number,"▢","red",1.4]];
-				const hiliBox = [[x+1,y+1,x+1,y+1,"lime"]];
+				const hiliNote= [[x+1,y+1,number,number,"darkGray"],[x+1,y+1,number,"▢","red",1.2]];
+				const hiliBox = null;//[[x+1,y+1,x+1,y+1,"lime"]];
 				this.action("programProgressed",x,y,number,[msg,hiliNum,hiliNote,hiliBox,0.25]);
 				return true;
 			}
@@ -731,7 +731,7 @@ singleNote(board,level){
 							hiliNote[hiliNote.length] = [x+1,y+1,i+1,i+1,"darkGray"];
 						}
 					}
-					hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.4];
+					hiliNote[hiliNote.length] = [x+1,y+1,num,"▢","red",1.2];
 					//Prepare Box
 					let xii,yii,xil,yil;
 					if(     BoxRowCol==0){
