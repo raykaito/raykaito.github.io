@@ -40,7 +40,7 @@ draw(){
 	}else{
 		const board = this.board[slider.value];
 		board.draw(this.showMethod);
-		if(phaseList[phasei]=="Solvable"){
+		if(phaseList[phasei]=="Analyzed"){
 			//Draw graph
 			const xRange = 7*side;
 			const yRange = 2*side;
@@ -71,7 +71,7 @@ scannerInput(xi,yi,newNum){
 userInput(xi,yi,newNum,note=false){
 	if(phaseList[phasei]=="Input Sudoku Manualy"){
 		this.action("addOriginalNumber", xi,yi,newNum);
-	}else if(phaseList[phasei]=="User Solving"){
+	}else if(phaseList[phasei]=="User Solving"||phaseList[phasei]=="Analyzed"){
 		if(note){
 			if(this.board[slider.value].tile[xi][yi]!=0) return;
 			this.action("userModifiedNote"  ,xi,yi,newNum);
@@ -669,7 +669,7 @@ singleNote(board,level){
 			if(candidateCounter==1){
 				const msg = "Single Note in a Cell";
 				const hiliNum = [[x+1,y+1,"","lime"]];
-				const hiliNote= [[x+1,y+1,number,number,"gray",1.4],[x+1,y+1,number,"▢","red",1.4]];
+				const hiliNote= [[x+1,y+1,number,number,"darkGray"],[x+1,y+1,number,"▢","red",1.4]];
 				const hiliBox = [[x+1,y+1,x+1,y+1,"lime"]];
 				this.action("programProgressed",x,y,number,[msg,hiliNum,hiliNote,hiliBox,0.25]);
 				return true;

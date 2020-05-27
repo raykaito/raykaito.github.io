@@ -42,7 +42,7 @@ class Scanner{
     }
     drawImage(){
         animationStartTime = Date.now();
-        const newWidth = Math.min(this.img.width,this.img.height,640);
+        const newWidth = Math.min(this.img.width,this.img.height);
         draw();
         if(newWidth!=this.vLength) this.resizeOcanvas(newWidth);
         this.oct.drawImage(this.img,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
@@ -118,6 +118,6 @@ class Scanner{
         this.ocanvas.width = this.vLength;
         this.ocanvas.height= this.vLength;
         canvasScale = this.ocanvas.width/(side*9);
-        console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+")");
+        console.log("Ocanvas Dim: ("+this.ocanvas.width+","+this.ocanvas.height+","+canvasScale+")");
     }
 }

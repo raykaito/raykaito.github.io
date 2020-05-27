@@ -40,7 +40,7 @@ step(){
 	if(currentDepth==-1) return false;
 	//Check if there is unsolved index or not
 	let unsolvedTileIndex = -1;
-	let minCandidate = 9;
+	let minCandidate = 10;
 	for(let i=0;i<81;i++){
 		const newNumCan = this.situation[currentDepth].numCandidates[i];
 		if(newNumCan<0){
@@ -59,19 +59,19 @@ step(){
 	}else{
 		this.guess(unsolvedTileIndex);
 	}
-	if(this.solutionCount>1) return true;
-	if(this.solvable==false) return true;
+	if(this.solutionCount>1) return false;
+	if(this.solvable==false) return false;
 	return true;
 }
 solved(){
-	console.log("SOLVED: "+arrayToString(this.path));
+	//console.log("SOLVED: "+arrayToString(this.path));
 	this.solutionSituation = new Situation();
 	this.solutionSituation.duplicate(this.situation[this.path.length-1]);
 	this.path.pop();
 	this.solutionCount++;
 }
 guess(index){
-	console.log("GUESS : "+arrayToString(this.path));
+	//console.log("GUESS : "+arrayToString(this.path));
 	const newDepth = this.path.length;
 	let currentPath = this.path[newDepth-1];
 	//Find Number To Geuss
@@ -101,7 +101,7 @@ failed(){
 		this.solvable = false;
 		return;
 	}
-	console.log("FAILED: "+arrayToString(this.path));
+	//console.log("FAILED: "+arrayToString(this.path));
 	this.path.pop();
 }
 inputSetNumbers(situation,array){

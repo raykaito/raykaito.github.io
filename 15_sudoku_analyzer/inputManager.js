@@ -149,6 +149,8 @@ const release=(event)=>{
 		if(yil==10&&yii==10){
 			//Start "User Solving" phase
 			sudoku.checkSolvability();
+		}else if(yil==12&&yii==12){
+			sudoku.startAnalysis();
 		}else if(xii<1||xii>9||yii<1||yii>9){
 			console.log("invalid release region");
 		}else{

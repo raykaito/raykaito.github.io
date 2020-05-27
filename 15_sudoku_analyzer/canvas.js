@@ -136,6 +136,7 @@ const draw = (type=undefined,par=[undefined])=>{
         }else if(phaseList[phasei]=="User Solving"){
             drawGrids();
             drawNumber(5,0,"User Solving","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,12,"Click Here to Analyze","black",side*0.6,"Times New Roman",false);
             sudoku.draw();
         }else if(phaseList[phasei]=="Analyzing Sudoku"){
             drawGrids();
