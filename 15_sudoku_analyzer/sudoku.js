@@ -46,12 +46,14 @@ touchWhileSolving(x,y,event){
 		if(this.userInputMode=="Numbers"){
 			if(this.selectedNumber==0){
 				drawGrids("Number");
+				event.preventDefault();
 			}else{
 				this.userInput(xi-1,yi-1,this.selectedNumber,false);
 			}
 		}else if(this.userInputMode=="Notes"){
 			if(this.noSelectedNotes){
 				drawGrids("Number");
+				event.preventDefault();
 			}else{
 				this.dragMode="AutoNoteInput";
 				this.autoNoteChangedIndex = new Array(81).fill(false);
