@@ -167,7 +167,7 @@ const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     const square = str=="▢";
     const size = side/3.5;
     let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
-    let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
+    let y=Math.floor((yi+0.5)*side)+(Math.floor((pos-1)/3)-1)*size;
     ct.fillStyle = color;
     ct.font = ""+Math.floor(1.5*size*factor*(square?1.2:1))+"px Times New Roman";
     ct.textAlign = "center";
