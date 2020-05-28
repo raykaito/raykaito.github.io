@@ -71,26 +71,103 @@ const resize = () => {
 
     draw();
 }
-const draw=()=>{
-    phase.draw();
-}
-const canvasRestoreSave=()=>{
-    ct.restore();
-    ct.save();
-}
-const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes)=>{
-    drawNumber(1.5,10,"Number",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(3.5,10,"Notes",color="black",side*0.4,"Times New Roman",false);
-    for(let i=0;i<9;i++){
-        drawNumber(i+1,11,i+1,color="black",side*0.8,"Times New Roman",false);
-    }
-    if(userInputMode=="Numbers"){
-        drawRectIndex(1,10,2,10,"lime");
-        if(selectedNumber>0)drawRectIndex(selectedNumber,11,selectedNumber,11,"lime");
+const draw = (type=undefined,par=[undefined])=>{
+    if(type!=undefined){
+        if(type=="drawInputs"){
+            drawGrids(false);
+            //Draw Inputs for Solved Number
+            drawNumber(2,8,1,"gray",side*3);
+            drawNumber(5,8,2,"gray",side*3);
+            drawNumber(8,8,3,"gray",side*3);
+            drawNumber(2,5,4,"gray",side*3);
+            drawNumber(5,5,5,"gray",side*3);
+            drawNumber(8,5,6,"gray",side*3);
+            drawNumber(2,2,7,"gray",side*3);
+            drawNumber(5,2,8,"gray",side*3);
+            drawNumber(8,2,9,"gray",side*3);
+            if(phaseList[phasei]=="User Solving"){
+                //Draw Inputs for Notes
+                drawNumber(3,9,1,"gray",side);
+                drawNumber(6,9,2,"gray",side);
+                drawNumber(9,9,3,"gray",side);
+                drawNumber(3,6,4,"gray",side);
+                drawNumber(6,6,5,"gray",side);
+                drawNumber(9,6,6,"gray",side);
+                drawNumber(3,3,7,"gray",side);
+                drawNumber(6,3,8,"gray",side);
+                drawNumber(9,3,9,"gray",side);
+            }
+        }
     }else{
-        drawRectIndex(3,10,4,10,"lime");
-        for(i=0;i<9;i++){
-            if(selectedNotes[i]) drawRectIndex(i+1,11,i+1,11,"lime");
+        if(phaseList[phasei]=="Input Sudoku Manualy"){
+            drawGrids();
+            sudoku.draw();
+            drawNumber(5,0,"Input Sudoku or Upload →","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"Tap HERE to start Solving.","black",side*0.6,"Times New Roman",false);
+        }else if(phaseList[phasei]=="Scanning Board"||phaseList[phasei]=="Uploading Image"){
+            ct.restore();
+            ct.save();
+            drawGrids();
+            drawNumber(5,0,"Scanning Sudoku...","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+            if(scanner) scanner.draw();
+        }else if(phaseList[phasei]=="Correct Scanning Error"){
+            drawGrids();
+            drawNumber(5,0,"Drag and Drop","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"Tap HERE When Done.","black",side*0.6,"Times New Roman",false);
+            for(let imgI=0;imgI<scanner.numberV.imageAndNumber.length;imgI++){
+                const readNumber = scanner.numberV.imageAndNumber[imgI][2];
+                const img = scanner.numberV.imageAndNumber[imgI][0];
+                let y=(readNumber-1+1.1)*side;
+                let x=(scanner.numberV.imageAndNumber[imgI][1]+1.1)*side+offset;
+                if(par!=undefined&&par[0]!=imgI){
+                    ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
+                }
+            }
+            if(par!=undefined&&par[0]!=undefined){
+                const img =  scanner.numberV.imageAndNumber[par[0]][0];
+                ct.drawImage(img,0,0,img.width,img.height,par[1],par[2],side*0.8,side*0.8);
+            }
+            for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
+        }else if(phaseList[phasei]=="Checking Solvability"){
+            drawGrids();
+            drawNumber(5,0,"Checking Solvability","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+        }else if(phaseList[phasei]=="User Solving"){
+            drawGrids();
+            drawNumber(5,0,"User Solving","black",side*0.6,"Times New Roman",false);
+            drawNumber(5,12,"Click Here to Analyze","black",side*0.6,"Times New Roman",false);
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Analyzing Sudoku"){
+            drawGrids();
+            drawGraph();
+            drawNumber(5,0,"Analyzing Sudoku...","black",side*0.6,"Times New Roman",false);
+            //Canvas Touched. Draw Inputs
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Analyzed"){
+            drawGrids();
+            drawGraph();
+            drawNumber(5,0,"Analysis Complete!!!","black",side*0.6,"Times New Roman",false);
+            //Canvas Touched. Draw Inputs
+            sudoku.draw();
+        }else if(phaseList[phasei]=="Unsolvable"){
+            drawGrids();
+            drawNumber(5,0,"This sudoku was Unsolvable","black",side*0.6,"Times New Roman",false);
+            //Draw Sudoku
+            sudoku.draw();
+            alert("This sudoku was unsolvable. Please input sudoku Manually");
+            changePhase("Input Sudoku Manualy");
+        }else if(phaseList[phasei]=="Checking Solvability"){
+            drawGrids();
+            drawNumber(5,0,"Checking Solvability","black",side*0.6,"Times New Roman",false);
+            //Draw Sudoku
+            sudoku.draw();
+        }else{
+            drawGrids();
+            //Draw Sudoku
+            sudoku.draw();
+            drawNumber(5,0,phaseList[phasei],"black",side*0.6,"Times New Roman",false);
+            drawNumber(5,10,"XXXX Unknown Condition XXXX","black",side*0.6,"Times New Roman",false);
         }
     }
 }
@@ -114,7 +191,8 @@ const drawGraph = () => {
     drawNumber(1.25,11.25,"Hard Tech",color="black",side*0.4,"Times New Roman",false);
     drawNumber(1.25,10.75,"Guessing" ,color="black",side*0.4,"Times New Roman",false);
 }
-const drawGrids = (type="Normal") => {
+
+const drawGrids = (nineByNine=true) => {
     //Fill with White
     ct.clearRect(0, 0, width, height);
     ct.fillStyle = "white";
@@ -123,38 +201,14 @@ const drawGrids = (type="Normal") => {
     //Draw Borders
     ct.strokeStyle = "black";
     for(let i=0;i<=9;i++){
-        if(i%3!=0&&type!="Normal") continue;
+        if(i%3!=0&&!nineByNine) continue;
         let w = (((i%3)==0)?3:1);
         drawLine(side*i+offset,side*1    ,side*i+offset,side*10    ,w);
         drawLine(offset       ,side*(i+1),side*9+offset,side*(i+1) ,w);
     }
-    if(type=="Number"||type=="NumberNote"){
-         //Draw Inputs for Solved Number
-        drawNumber(2,8,1,"gray",side*3);
-        drawNumber(5,8,2,"gray",side*3);
-        drawNumber(8,8,3,"gray",side*3);
-        drawNumber(2,5,4,"gray",side*3);
-        drawNumber(5,5,5,"gray",side*3);
-        drawNumber(8,5,6,"gray",side*3);
-        drawNumber(2,2,7,"gray",side*3);
-        drawNumber(5,2,8,"gray",side*3);
-        drawNumber(8,2,9,"gray",side*3);        
-    }
-    if(type=="NumberNote"){      
-        //Draw Inputs for Notes
-        drawNumber(3,9,1,"gray",side);
-        drawNumber(6,9,2,"gray",side);
-        drawNumber(9,9,3,"gray",side);
-        drawNumber(3,6,4,"gray",side);
-        drawNumber(6,6,5,"gray",side);
-        drawNumber(9,6,6,"gray",side);
-        drawNumber(3,3,7,"gray",side);
-        drawNumber(6,3,8,"gray",side);
-        drawNumber(9,3,9,"gray",side);
-    }
-}
-const drawIcon=(img,xi,yi)=>{
-    if(img) ct.drawImage(img,0,0,img.width,img.height,side*(xi+0.1)+offset,side*(yi+0.1),side*0.8,side*0.8);
+    //Draw Camera Icon
+    if(icon_camera) ct.drawImage(icon_camera,0,0,100,100,side*8.1+offset,side*0.1,side*0.8,side*0.8);
+    if(icon_folder) ct.drawImage(icon_folder,0,0,100,100,side*7.1+offset,side*0.1,side*0.8,side*0.8);
 }
 
 const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {

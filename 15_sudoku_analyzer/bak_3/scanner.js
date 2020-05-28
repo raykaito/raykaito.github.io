@@ -91,10 +91,10 @@ class Scanner{
         const solvable = sudoku.checkSolvability(false);
         if(solvable==false){
             alert("Scanning process might have failed. Drag and Drop to correct the mistake.");
-            phase.changePhase("Correct Scanning Error");
+            changePhase("Correct Scanning Error");
             this.numberV.startCorrection();
         }else{
-            phase.changePhase("User Solving");
+            changePhase("User Solving");
         }
 
     }

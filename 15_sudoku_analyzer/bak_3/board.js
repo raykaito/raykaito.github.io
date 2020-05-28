@@ -91,33 +91,29 @@ solved(solved){
 	this.msg = solved?"SUDOKU SOLVED!":"SUDOKU UNSOLVED...";
 	this.hiliBox = [[1,1,9,9,solved?"lime":"red"]];
 }
-draw(showMsg=false,hilightNumber=null,hilightNote=null){
+draw(showMsg=false){
 	//Draw Original Numbers
 	for(let x=0;x<9;x++){
 		for(let y=0;y<9;y++){
 			const num = this.tile[x][y];
 			//Draw Original Numbers
-			if(num<0){drawNumber(x+1,y+1,-num,"black");}
-			//Draw Solved Numbers
-			if(num>0){drawNumber(x+1,y+1, num,"darkGray");}
-			//Draw Highlight
-			if(hilightNumber!=null&&hilightNumber>0&&hilightNumber==Math.abs(num)){
-				drawRectIndex(x+1,y+1,x+1,y+1,"lime",1);
+			if(num<0){
+				drawNumber(x+1,y+1,-num,"black");
+				continue;
 			}
-			if(num==0){
-				for(let num=0;num<9;num++){
-					if(this.note[x][y][num]){
-						drawNotes(x+1,y+1,num+1,num+1,"darkGray");
-						if(hilightNote!=null&&hilightNote[num]){
-							drawNotes(x+1,y+1,num+1,"▢","lime",1.1);
-						}
-					}
-				}
+			//Draw Solved Numbers
+			if(num>0){
+				drawNumber(x+1,y+1, num,"darkGray");
+				continue;
+			}
+			for(let num=0;num<9;num++){
+				if(this.note[x][y][num]) drawNotes(x+1,y+1,num+1,num+1,"darkGray");
 			}
 		}
 	}
 	//Draw Progress
-	if(showMsg&&(phase.phase=="User Solving"||phase.phase=="Analyzed")){
+	const phase = phaseList[phasei];
+	if(showMsg&&(phase=="User Solving"||phase=="Analyzed")){
 		drawNumber(5,10,this.msg,"black",side*0.6,"Times New Roman",false);
 		if(this.hiliNum!=null){
 			for(let i=0;i<this.hiliNum.length;i++){

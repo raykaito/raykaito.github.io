@@ -6,153 +6,8 @@ constructor(){
 	this.solvable = false;
 	this.board = new Array();
 	this.board[0] = new Board();
-	this.userInputMode = "Numbers";
-	this.selectedNumber= 0;
-	this.initiallySelectedNumber;
-	this.selectedNotes = new Array(9).fill(false);
-	this.noSelectedNotes = true;
 	//brute force parameters
 	this.bruteForceParameter = new Array();//[step at guess, candidateNum]
-	this.dragMode = "";//[AutoNoteInput,ModeChange,SelectionChange,SelectionChangeNumber]
-	this.autoNoteChangedIndex = new Array(81).fill(false);
-	this.selectionChangedIndex = new Array( 9).fill(false);
-}
-autoNoteChange(xi,yi){
-	if(!this.autoNoteChangedIndex[this.XYToin([xi-1,yi-1])]){
-		this.autoNoteChangedIndex[this.XYToin([xi-1,yi-1])]=true;
-		for(let i=0;i<9;i++){
-			if(this.selectedNotes[i]){
-				this.userInput(xi-1,yi-1,i+1,true);
-			}
-		}
-	}
-}
-selectionChange(xi,yi){
-	if(!this.selectionChangedIndex[xi-1]){
-		this.selectionChangedIndex[xi-1]=true;
-		this.selectedNotes[xi-1]=!this.selectedNotes[xi-1];
-		this.noSelectedNotes=true;
-		for(let i=0;i<9;i++){
-			if(this.selectedNotes[i]){
-				this.noSelectedNotes=false;
-				break;
-			}
-		}
-	}
-}
-touchWhileSolving(x,y){
-	const [xi,yi]=XYtoIndex([x,y]);
-	if(xi>=1&&xi<=9&&yi>=1&&yi<=9){
-		if(this.userInputMode=="Numbers"){
-			if(this.selectedNumber==0){
-				drawGrids("Number");
-			}else{
-				this.userInput(xi-1,yi-1,this.selectedNumber,false);
-			}
-		}else if(this.userInputMode=="Notes"){
-			if(this.noSelectedNotes){
-				drawGrids("Number");
-			}else{
-				this.dragMode="AutoNoteInput";
-				this.autoNoteChangedIndex = new Array(81).fill(false);
-				this.autoNoteChange(xi,yi);
-			}
-		}
-	}else if(yi==10&&xi>=1&&xi<=4){
-		this.dragMode = "ModeChange";
-	}else if(yi==11){
-		if(this.userInputMode=="Numbers"){
-			this.dragMode = "SelectionChangeNumber";
-			this.initiallySelectedNumber = this.selectedNumber;
-		}else if(this.userInputMode=="Notes"){
-			this.dragMode = "SelectionChange";
-			this.selectionChangedIndex = new Array(9).fill(false);
-			this.selectionChange(xi,yi);
-		}
-	}
-}
-moveWhileSolving(x,y){
-	const [xi,yi]=XYtoIndex([x,y]);
-	if(this.dragMode=="AutoNoteInput"&&xi>=1&&xi<=9&&yi>=1&&yi<=9){
-		if(this.userInputMode=="Notes"&&!this.noSelectedNotes){
-			this.autoNoteChange(xi,yi);
-		}
-		draw();
-	}else if(this.dragMode=="ModeChange"){
-		draw();
-	}else if(this.dragMode=="SelectionChange"){
-		this.selectionChange(xi,yi);
-		draw();
-	}else if(this.dragMode=="SelectionChangeNumber"){
-		this.selectedNumber=xi;
-		draw();
-	}
-}
-releaseWhileSolving(x,y){
-	const [xil,yil]=XYtoIndex([x,y]);
-	const [xii,yii]=XYtoIndex([touchX,touchY]);
-	if(this.dragMode==""){
-		let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
-		if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
-		if(this.userInputMode=="Numbers"&&this.selectedNumber==0){
-			sudoku.userInput(xii-1,yii-1,newNum,false);
-		}else if(this.userInputMode=="Notes"&&this.noSelectedNotes){
-			sudoku.userInput(xii-1,yii-1,newNum,true);
-		}
-		if(yii==12&&yil==12){
-			this.startAnalysis();
-		}
-	}else if(this.dragMode=="AutoNoteInput"){
-		this.dragMode="";
-	}else if(this.dragMode=="ModeChange"){
-		this.dragMode="";
-		if(xil>2) 	this.userInputMode = "Notes";
-		else		this.userInputMode = "Numbers";
-	}else if(this.dragMode=="SelectionChange"){
-		this.dragMode="";
-	}else if(this.dragMode=="SelectionChangeNumber"){
-		this.dragMode="";
-		if(xii==xil){
-			if(this.initiallySelectedNumber==xil) this.selectedNumber=0;
-			else this.selectedNumber=xil;
-		}
-	}
-}
-draw(){
-	if(phase.phase=="Checking Solvability"){
-		this.solver.draw();
-	}else if(phase.phase=="Analyzed"){
-		const board = this.board[slider.value];
-		board.draw(this.showMethod);
-		//Draw graph
-		const xRange = 7*side;
-		const yRange = 2*side;
-		const xStart = side*1.5+offset;
-		const yStart = side*13;
-		ct.strokeStyle = "black";
-		ct.lineWidth = 1;
-	    ct.beginPath();
-	    ct.moveTo(xStart,yStart);
-		for(let i=1;i<slider.max;i++){
-			const x = Math.floor(xRange*i/slider.max);
-			const y = Math.floor(yRange*this.board[i].level/4);
-	    	ct.lineTo(xStart+x,yStart-y);
-		}
-	    ct.stroke();
-	    //Draw Current Posistion
-	    const currentStep = slider.value;
-	    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
-	    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
-	    drawLine(xCurrent,yCurrent,xCurrent,yStart,0);
-	}else if(phase.phase=="User Solving"){
-		const board = this.board[slider.value];
-		board.draw(this.showMethod,(this.userInputMode=="Numbers"?this.selectedNumber:null),(this.userInputMode=="Notes"?this.selectedNotes:null));
-		drawUserInputInterface(this.userInputMode,this.selectedNumber, this.selectedNotes);
-	}else{
-		const board = this.board[slider.value];
-		board.draw(this.showMethod);		
-	}
-	return false;
 }
 checkSolvability(changePhaseAutomatically = true){
 	let array = new Array(81);
@@ -164,8 +19,8 @@ checkSolvability(changePhaseAutomatically = true){
 	const solver = new Solver(array);
 	const solvable = solver.checkSolvability();
 	if(changePhaseAutomatically){
-		if(solvable) phase.changePhase("User Solving");
-		else 		 phase.changePhase("Unsolvable");
+		if(solvable) changePhase("User Solving");
+		else 		 changePhase("Unsolvable");
 	}else{
 		return solvable;
 	}
@@ -179,13 +34,44 @@ showHideMethod(showMethod = !this.showMethod){
 	this.showMethod = showMethod;
 	draw();
 }
+draw(){
+	if(phaseList[phasei]=="Checking Solvability"){
+		this.solver.draw();
+	}else{
+		const board = this.board[slider.value];
+		board.draw(this.showMethod);
+		if(phaseList[phasei]=="Analyzed"){
+			//Draw graph
+			const xRange = 7*side;
+			const yRange = 2*side;
+			const xStart = side*1.5+offset;
+			const yStart = side*13;
+			ct.strokeStyle = "black";
+			ct.lineWidth = 1;
+		    ct.beginPath();
+		    ct.moveTo(xStart,yStart);
+			for(let i=1;i<slider.max;i++){
+				const x = Math.floor(xRange*i/slider.max);
+				const y = Math.floor(yRange*this.board[i].level/4);
+		    	ct.lineTo(xStart+x,yStart-y);
+			}
+		    ct.stroke();
+		    //Draw Current Posistion
+		    const currentStep = slider.value;
+		    const xCurrent = xStart+Math.floor(xRange*currentStep/slider.max);
+		    const yCurrent = yStart-Math.floor(yRange*this.board[currentStep].level/4);
+		    drawLine(xCurrent,yCurrent,xCurrent,yStart,0);
+		}
+	}
+	return false;
+}
 scannerInput(xi,yi,newNum){
 	this.action("addOriginalNumber", xi,yi,newNum);
 }
 userInput(xi,yi,newNum,note=false){
-	if(phase.phase=="Input Sudoku Manually"){
+	if(phaseList[phasei]=="Input Sudoku Manualy"){
 		this.action("addOriginalNumber", xi,yi,newNum);
-	}else if(phase.phase=="User Solving"||phase.phase=="Analyzed"){
+	}else if(phaseList[phasei]=="User Solving"||phaseList[phasei]=="Analyzed"){
 		if(note){
 			if(this.board[slider.value].tile[xi][yi]!=0) return;
 			this.action("userModifiedNote"  ,xi,yi,newNum);
@@ -215,18 +101,19 @@ action(type,x,y,num,par){
 		this.step		= step+1;
 		slider.max 		= step+1;
 		slider.value 	= step+1;
+		slider.style.display = "inline-block";
 	}
 	draw();
 }
 startAnalysis(){
-	phase.changePhase("Analyzing Sudoku");
+	changePhase("Analyzing Sudoku");
 	this.solvable = false;
 	this.bruteForceParameter = new Array();
 	while(this.solve());
 	if(this.solvable){
-		phase.changePhase("Analyzed");
+		changePhase("Analyzed");
 	}else{
-		phase.changePhase("Unsolvable");
+		changePhase("Unsolvable");
 	}
 }
 solve(){

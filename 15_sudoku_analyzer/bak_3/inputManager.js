@@ -71,9 +71,26 @@ const touch=(event)=>{
 	let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
+
 	touchX = x;
 	touchY = y;
-	phase.touch(x,y,event);
+	const [xi,yi]=XYtoIndex([x,y]);
+	console.log(xi,yi);
+	if(xi<1||xi>9||yi>10){
+		console.log("invalid touch region");
+		return;
+	}else if(yi<1||yi>9){
+		console.log("invalid touch region");
+		event.preventDefault();
+		return;
+	}
+	event.preventDefault();
+	if(phaseList[phasei]=="Correct Scanning Error"){
+		scanner.userInput("touch",xi,yi);
+	}else{
+		draw("drawInputs");
+		console.log("Drawing Inputs");
+	}
 }
 const move=(event)=>{
 	//Check time first
@@ -85,15 +102,66 @@ const move=(event)=>{
 	let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
-	phase.move(x,y);
+	
+	if(phaseList[phasei]=="Correct Scanning Error"){
+		scanner.userInput("move",x,y);
+	}
 }
 const release=(event)=>{
+	//Check if the touch start position if valid or not
+	if(touchX==undefined||touchY==undefined){
+		console.log("invalid touch region (out of canvas)");
+		draw();
+		return;
+	}
 	const rect = event.target.getBoundingClientRect();
 	let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
 	let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
 	x *= pixelRatio;
 	y *= pixelRatio;
-	phase.release(x,y);
+
+	//get x and y index for initial and last position
+	const [xii,yii] = XYtoIndex([touchX,touchY]);
+	const [xil,yil] = XYtoIndex([x,y]);
+
+	console.log("Touched  XY: ("+xii+","+yii+")");
+	console.log("Released XY: ("+xil+","+yil+")");
+
+	if(yii<1){
+		if(xii==9){
+			startScan();
+			return;
+		}else if(xii==8){
+			uploadImage();
+			return;
+		}
+	}else if(phaseList[phasei]=="Correct Scanning Error"){
+		if(yii<1){
+			if(rcanvas.style.display=="none")   rcanvas.style.display="block";
+			else								rcanvas.style.display="none";
+		}
+		if(yii>9){
+			scanner.numberV.endCorrection();
+		}else{
+			scanner.userInput("release",xil,yil);
+		}
+	}else{
+		if(yil==10&&yii==10){
+			//Start "User Solving" phase
+			sudoku.checkSolvability();
+		}else if(yil==12&&yii==12){
+			sudoku.startAnalysis();
+		}else if(xii<1||xii>9||yii<1||yii>9){
+			console.log("invalid release region");
+		}else{
+			let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
+			const index = sudoku.XYToBi([xil-1,yil-1])[1];
+			if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
+			console.log("Uer Input: "+newNum);
+			sudoku.userInput(xii-1,yii-1,newNum,index==8);
+		}
+	}
+	draw();
 }
 
 console.log("Loaded: inputManager.js");

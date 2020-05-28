@@ -69,30 +69,12 @@ class VisionProgram_NumberReader{
         }
     }
     draw(){
-        if(phase.phase=="Correct Scanning Error"){
-            console.log("Here");
-            for(let i=0;i<9;i++) drawNumber(1,i+1,i+1,"red");
-            for(let imgI=0;imgI<this.imageAndNumber.length;imgI++){
-                const readNumber = this.imageAndNumber[imgI][2];
-                const img = this.imageAndNumber[imgI][0];
-                let y=(readNumber-1+1.1)*side;
-                let x=(this.imageAndNumber[imgI][1]+1.1)*side+offset;
-                if(this.draggedImageIndex!=imgI){
-                    ct.drawImage(img,0,0,img.width,img.height,x,y,side*0.8,side*0.8);
-                }
-            }
-            if(this.draggedImageIndex!=undefined){
-                const img =  this.imageAndNumber[this.draggedImageIndex][0];
-                ct.drawImage(img,0,0,img.width,img.height,this.draggedImageX,this.draggedImageY,side*0.8,side*0.8);
-            }
-        }else{
-            for(let i=0;i<this.images.length;i++){
-                if(i<this.currentImageWorkingOn) continue;
-                const img = this.images[i][0].updateDisplayImage();
-                //this.images[i][0].display(false);
-                ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*side+offset,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
-                //ct.drawImage(img,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
-            }
+        for(let i=0;i<this.images.length;i++){
+            if(i<this.currentImageWorkingOn) continue;
+            const img = this.images[i][0].updateDisplayImage();
+            //this.images[i][0].display(false);
+            ct.drawImage(img,0,0,img.width,img.height,(this.images[i][1]+0.1)*side+offset,(this.images[i][2]+1.1)*side,side*0.8,side*0.8);
+            //ct.drawImage(img,(this.images[i][1]+1.1)*side,(this.images[i][2]+1.1)*side);//,side*0.8,side*0.8);
         }
     }
     resetImageAndNumberX(){
@@ -123,12 +105,11 @@ class VisionProgram_NumberReader{
             for(let imgI = 0;imgI<this.imageAndNumber.length;imgI++){
                 if(this.imageAndNumber[imgI][1]==x-2&&this.imageAndNumber[imgI][2]==y){
                     this.draggedImageIndex = imgI;
+                    draw("",[this.draggedImageIndex,(x-1)*side,y*side]);
                 }
             }
         }else if(type=="move"){
-            this.draggedImageX=x-side/2;
-            this.draggedImageY=y-side/2;
-            draw();
+            draw(undefined,[this.draggedImageIndex,x-side/2,y-side/2]);
         }else if(type=="release"){
             if(this.draggedImageIndex==undefined) return;
             if(y<1||y>9) return;
@@ -136,7 +117,7 @@ class VisionProgram_NumberReader{
             this.resetImageAndNumberX();
             this.dragging = false;
             this.draggedImageIndex = undefined;
-            draw();
+            draw("",[undefined]);
         }
     }
 }
