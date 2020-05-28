@@ -40,7 +40,7 @@ selectionChange(xi,yi){
 		}
 	}
 }
-touchWhileSolving(x,y){
+touchWhileSolving(x,y,event){
 	const [xi,yi]=XYtoIndex([x,y]);
 	if(xi>=1&&xi<=9&&yi>=1&&yi<=9){
 		if(this.userInputMode=="Numbers"){
@@ -56,18 +56,23 @@ touchWhileSolving(x,y){
 				this.dragMode="AutoNoteInput";
 				this.autoNoteChangedIndex = new Array(81).fill(false);
 				this.autoNoteChange(xi,yi);
+				event.preventDefault();
 			}
 		}
 	}else if(yi==10&&xi>=1&&xi<=4){
 		this.dragMode = "ModeChange";
+		event.preventDefault();
+
 	}else if(yi==11){
 		if(this.userInputMode=="Numbers"){
 			this.dragMode = "SelectionChangeNumber";
 			this.initiallySelectedNumber = this.selectedNumber;
+			event.preventDefault();
 		}else if(this.userInputMode=="Notes"){
 			this.dragMode = "SelectionChange";
 			this.selectionChangedIndex = new Array(9).fill(false);
 			this.selectionChange(xi,yi);
+			event.preventDefault();
 		}
 	}
 }
