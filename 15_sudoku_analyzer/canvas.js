@@ -217,10 +217,11 @@ const drawLine = (xi,yi,xii,yii,w) => {
     const horizontal = (yi==yii);
     const xiBigger = (xi>xii);
     const yiBigger = (yi>yii);
-    xi = Math.floor(xi )+(widthOdd?0.5:0)+(horizontal?(xiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
-    xii= Math.floor(xii)+(widthOdd?0.5:0)+(horizontal?(xiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
-    yi = Math.floor(yi )+(widthOdd?0.5:0)+(vertical?(yiBigger? ct.lineWidth:-ct.lineWidth):0)/2;
-    yii= Math.floor(yii)+(widthOdd?0.5:0)+(vertical?(yiBigger?-ct.lineWidth: ct.lineWidth):0)/2;
+    const halfWidth = (ct.lineWidth-widthOdd?1:0)/2;
+    xi = Math.floor(xi )+(widthOdd?0.5:0)+(horizontal?(xiBigger? halfWidth:-halfWidth):0);
+    xii= Math.floor(xii)+(widthOdd?0.5:0)+(horizontal?(xiBigger?-halfWidth: halfWidth):0);
+    yi = Math.floor(yi )+(widthOdd?0.5:0)+(vertical?(yiBigger? halfWidth:-halfWidth):0);
+    yii= Math.floor(yii)+(widthOdd?0.5:0)+(vertical?(yiBigger?-halfWidth: halfWidth):0);
     ct.beginPath();
     ct.moveTo(xi ,yi );
     ct.lineTo(xii,yii);
