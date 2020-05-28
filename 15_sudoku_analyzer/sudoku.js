@@ -168,6 +168,7 @@ draw(){
 }
 checkSolvability(changePhaseAutomatically = true){
 	let array = new Array(81);
+	this.showMethod = false;
 	const board = this.board[Number(slider.value)];
 	for(let i=0;i<81;i++){
 		const [x,y] = this.inToXY(i);
