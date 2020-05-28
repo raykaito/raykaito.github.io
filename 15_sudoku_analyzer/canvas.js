@@ -166,6 +166,7 @@ const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     ct.textAlign = "center";
     ct.textBaseline = "middle";
     ct.fillText(str,x+offset,y);
+    if(xi==9&&yi==9) alert(ct.font+",F: "+factor+",S: "+size);
 }
 
 const drawNumber = (xi,yi,n,color="black",size=side, fontFamily = "Times New Roman",overWrite = true) => {
