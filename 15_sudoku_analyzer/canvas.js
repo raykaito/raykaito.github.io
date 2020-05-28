@@ -162,10 +162,10 @@ const drawNotes = (xi,yi,pos,str,color="black",factor=0.8) => {
     let x=Math.floor((xi-0.5)*side)+((pos-1)%3-1)*size;
     let y=Math.floor((yi+0.55)*side)+(Math.floor((pos-1)/3)-1)*size;
     ct.fillStyle = color;
-    ct.font = ""+Math.floor(1.5*size*factor)+"px Times New Roman";
+    ct.font = ""+Math.floor(1.5*size*factor*(str=="▢"?1.5:1))+"px Times New Roman";
     ct.textAlign = "center";
     ct.textBaseline = "middle";
-    ct.fillText(str,x+offset,y);
+    ct.fillText((str=="▢"?"□":str),x+offset,y);
     if(xi==9&&yi==9) alert(ct.font+",F: "+factor+",S: "+size);
 }
 
