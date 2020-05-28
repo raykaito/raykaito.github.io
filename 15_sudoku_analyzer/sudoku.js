@@ -45,15 +45,15 @@ touchWhileSolving(x,y,event){
 	if(xi>=1&&xi<=9&&yi>=1&&yi<=9){
 		if(this.userInputMode=="Numbers"){
 			if(this.selectedNumber==0){
-				drawGrids("Number");
 				event.preventDefault();
+				drawGrids("Number");
 			}else{
 				this.userInput(xi-1,yi-1,this.selectedNumber,false);
 			}
 		}else if(this.userInputMode=="Notes"){
 			if(this.noSelectedNotes){
-				drawGrids("Number");
 				event.preventDefault();
+				drawGrids("Number");
 			}else{
 				this.dragMode="AutoNoteInput";
 				this.autoNoteChangedIndex = new Array(81).fill(false);
