@@ -7,7 +7,7 @@ constructor(initial){
 		sudoku:1,
 		folder_icon:1,
 		camera_icon:1,
-		textUp:"Input Sudoku or Upload →",		
+		textUp:"Input Sudoku or",		
 		textDown:"Tap HERE to start Solving."},
 
 	{	phase:"Scanning Board",			

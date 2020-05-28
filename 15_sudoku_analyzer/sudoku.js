@@ -107,10 +107,10 @@ releaseWhileSolving(x,y){
 		}else if(this.userInputMode=="Notes"&&this.noSelectedNotes){
 			if(xii>=1&&xii<=9&&yii>=1&&yii<=9)sudoku.userInput(xii-1,yii-1,newNum,true);
 		}
-		if(yii==12&&yil==12){
-			if(xii==2&&xil==2){			this.startAnalysis();
-			}else if(xii==1&&xil==1){	slider.value --;
-			}else if(xii==3&&xil==3){	slider.value ++;
+		if(yii==10&&yil==10){
+			if(xii==8&&xil==8){			if(confirm("Do you want to start Analysis?")) this.startAnalysis();
+			}else if(xii==7&&xil==7){	slider.value --;
+			}else if(xii==9&&xil==9){	slider.value ++;
 			}
 			draw();
 		}
