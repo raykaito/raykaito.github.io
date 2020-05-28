@@ -46,14 +46,14 @@ touchWhileSolving(x,y,event){
 		if(this.userInputMode=="Numbers"){
 			if(this.selectedNumber==0){
 				event.preventDefault();
-				drawGrids("Number");
+				if(this.board[slider.value].tile[xi-1][yi-1]>=0)drawGrids("Number");
 			}else{
 				this.userInput(xi-1,yi-1,this.selectedNumber,false);
 			}
 		}else if(this.userInputMode=="Notes"){
 			if(this.noSelectedNotes){
 				event.preventDefault();
-				drawGrids("Number");
+				if(this.board[slider.value].tile[xi-1][yi-1]==0)drawGrids("Number");
 			}else{
 				this.dragMode="AutoNoteInput";
 				this.autoNoteChangedIndex = new Array(81).fill(false);
@@ -102,9 +102,9 @@ releaseWhileSolving(x,y){
 		let newNum = 3*(Math.floor((9-yil)/3))+Math.floor((xil-1)/3)+1;
 		if(xil<1||xil>9||yil<1||yil>9) newNum = 0;
 		if(this.userInputMode=="Numbers"&&this.selectedNumber==0){
-			sudoku.userInput(xii-1,yii-1,newNum,false);
+			if(xii>=1&&xii<=9&&yii>=1&&yii<=9)sudoku.userInput(xii-1,yii-1,newNum,false);
 		}else if(this.userInputMode=="Notes"&&this.noSelectedNotes){
-			sudoku.userInput(xii-1,yii-1,newNum,true);
+			if(xii>=1&&xii<=9&&yii>=1&&yii<=9)sudoku.userInput(xii-1,yii-1,newNum,true);
 		}
 		if(yii==12&&yil==12){
 			this.startAnalysis();
@@ -194,10 +194,10 @@ userInput(xi,yi,newNum,note=false){
 		this.action("addOriginalNumber", xi,yi,newNum);
 	}else if(phase.phase=="User Solving"||phase.phase=="Analyzed"){
 		if(note){
-			if(this.board[slider.value].tile[xi][yi]!=0) return;
-			this.action("userModifiedNote"  ,xi,yi,newNum);
+			if(this.board[slider.value].tile[xi][yi]==0){
+				this.action("userModifiedNote"  ,xi,yi,newNum);
+			}
 		}else{
-			if(this.board[slider.value].tile[xi][yi]<0) return;
 			this.action("addUserInputNumber",xi,yi,newNum);
 		}
 		

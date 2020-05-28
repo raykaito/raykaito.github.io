@@ -117,7 +117,6 @@ draw(){
 }
 touch(x,y,event){
 	const [xi,yi]=XYtoIndex([x,y]);
-	console.log(xi,yi);
 	if(this.phase=="User Solving"){
 		sudoku.touchWhileSolving(x,y,event);
 	}else{

@@ -37,9 +37,28 @@ addOriginalNumber(x,y,num){
 	console.log("sudoku.userInput("+x+","+y+","+num+");");
 }
 addUserInputNumber(x,y,num){
-	this.tile[x][y] = num;
-	this.msg = "User Solved a Tile";
-	this.par = [x,y];
+	//Check if the original number exists
+	if(this.tile[x][y]<0){
+		this.msg = "Removed Notes";
+		this.removeNotes(x,y,-this.tile[x][y]);
+	}else{
+		this.tile[x][y] = num;
+		this.removeNotes(x,y,num);
+		this.msg = "User Solved a Tile";
+		this.par = [x,y];
+	}
+}
+removeNotes(x,y,num){
+	const col = x;
+	const row = y;
+	const box = Math.floor(x/3)+Math.floor(y/3)*3;
+	console.log(x,y,num);
+	for(let i=0;i<9;i++){
+		const [xi,yi] = sudoku.biToXY([box,i]);
+		this.note[col][i][num-1]=false;
+		this.note[i][row][num-1]=false;
+		this.note[xi][yi][num-1]=false;
+	}
 }
 userModifiedNote(x,y,num){
 	this.note[x][y][num-1] = !this.note[x][y][num-1];
