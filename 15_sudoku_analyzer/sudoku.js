@@ -16,6 +16,7 @@ constructor(){
 	this.dragMode = "";//[AutoNoteInput,ModeChange,SelectionChange,SelectionChangeNumber]
 	this.autoNoteChangedIndex = new Array(81).fill(false);
 	this.selectionChangedIndex = new Array( 9).fill(false);
+	this.lastActionType = "Init";
 }
 autoNoteChange(xi,yi){
 	if(!this.autoNoteChangedIndex[this.XYToin([xi-1,yi-1])]){
@@ -107,7 +108,11 @@ releaseWhileSolving(x,y){
 			if(xii>=1&&xii<=9&&yii>=1&&yii<=9)sudoku.userInput(xii-1,yii-1,newNum,true);
 		}
 		if(yii==12&&yil==12){
-			this.startAnalysis();
+			if(xii==2&&xil==2){			this.startAnalysis();
+			}else if(xii==1&&xil==1){	slider.value --;
+			}else if(xii==3&&xil==3){	slider.value ++;
+			}
+			draw();
 		}
 	}else if(this.dragMode=="AutoNoteInput"){
 		this.dragMode="";
@@ -207,6 +212,8 @@ action(type,x,y,num,par){
 	const step = Number(slider.value);
 	if(type=="addOriginalNumber"){
 		this.board[step].addOriginalNumber(x,y,num);		
+	}else if(type=="userModifiedNote"&&this.lastActionType=="userModifiedNote"){
+		this.board[step].userModifiedNote(x,y,num);
 	}else{
 		this.board[step+1] = new Board(this.board[step]);
 		switch(type){
@@ -223,6 +230,7 @@ action(type,x,y,num,par){
 		slider.max 		= step+1;
 		slider.value 	= step+1;
 	}
+	this.lastActionType=type;
 	draw();
 }
 startAnalysis(){

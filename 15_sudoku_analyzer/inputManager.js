@@ -4,6 +4,7 @@ let upKey    = false;
 let downKey  = false;
 let spaceKey = false;
 let ctrKey   = false;
+let pKey   	 = false;
 let lastMoveTime=0;
 let moveIntervalTime = 15;
 
@@ -51,9 +52,11 @@ const keyPressed=(event)=>{
 		case  38:    upKey = true; break;
 		case  39: rightKey = true; break;
 		case  40:  downKey = true; break;
+		case  80:     pKey = true; break;
 		default : console.log("keyCode: "+event.keyCode);
 		//default : alert("keyCode: "+event.keyCode);
 	}
+	if(pKey) preLoad();
 }
 const keyReleased=(event)=>{
 	switch(event.keyCode){
@@ -63,6 +66,7 @@ const keyReleased=(event)=>{
 		case  38:    upKey = false; break;
 		case  39: rightKey = false; break;
 		case  40:  downKey = false; break;
+		case  80:     pKey = false; break;
 	}
 }
 const touch=(event)=>{

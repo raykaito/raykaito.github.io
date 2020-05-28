@@ -81,6 +81,9 @@ const canvasRestoreSave=()=>{
 const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes)=>{
     drawNumber(1.5,10,"Number",color="black",side*0.4,"Times New Roman",false);
     drawNumber(3.5,10,"Notes",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1,12,"←",color="black",side*0.8,"Times New Roman",false);
+    drawNumber(2,12,"A",color="black",side*0.8,"Times New Roman",false);
+    drawNumber(3,12,"→",color="black",side*0.8,"Times New Roman",false);
     for(let i=0;i<9;i++){
         drawNumber(i+1,11,i+1,color="black",side*0.8,"Times New Roman",false);
     }
