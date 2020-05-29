@@ -108,10 +108,7 @@ releaseWhileSolving(x,y){
 			if(xii>=1&&xii<=9&&yii>=1&&yii<=9)sudoku.userInput(xii-1,yii-1,newNum,true);
 		}
 		if(yii==10&&yil==10){
-			if(xii==8&&xil==8){			if(confirm("Do you want to start Analysis?")) this.startAnalysis();
-			}else if(xii==7&&xil==7){	slider.value --;
-			}else if(xii==9&&xil==9){	slider.value ++;
-			}
+			if(xii==9&&xil==9&&confirm("Do you want to start Analysis?")) this.startAnalysis();
 			draw();
 		}
 	}else if(this.dragMode=="AutoNoteInput"){
@@ -139,7 +136,7 @@ draw(){
 		//Draw graph
 		const xRange = 7*side;
 		const yRange = 2*side;
-		const xStart = side*1.5+offset;
+		const xStart = side*1+offset;
 		const yStart = side*13;
 		ct.strokeStyle = "black";
 		ct.lineWidth = 1;

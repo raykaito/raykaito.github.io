@@ -103,7 +103,10 @@ updateInfo(){
 	this.noteVisualizer 	= (newPhase.noteVisualizer	== undefined?0:newPhase.noteVisualizer);
 	this.textUp				= (newPhase.textUp			== undefined?"":newPhase.textUp);
 	this.textDown			= (newPhase.textDown		== undefined?"":newPhase.textDown);
-	slider.style.display = ((this.graph||this.phase=="User Solving")?"inline-block":"none");
+	const controllerStyle = ((this.graph||this.phase=="User Solving")?"inline-block":"none");
+	slider.style.display = controllerStyle;
+	rightA.style.display = controllerStyle;
+	leftA.style.display = controllerStyle;
 }
 draw(){
     if(this.restoreSave        ) canvasRestoreSave();

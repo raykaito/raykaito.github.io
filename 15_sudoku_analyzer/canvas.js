@@ -63,8 +63,13 @@ const resize = () => {
 
     side = Math.floor(Math.min((width-LineWidthThick-2)/9,50*pixelRatio));
     offset = Math.floor((width-9*side)/2);
-    slider.style.width=(Math.floor((side*7)/pixelRatio)+10)+"px";
-    slider.style.marginLeft=(Math.floor((offset+side*1.5)/pixelRatio)-5)+"px";
+    slider.style.width=(Math.floor((side*7)/pixelRatio)+18)+"px";
+    //slider.style.marginLeft=(Math.floor((offset+side*1.5)/pixelRatio)-5)+"px";
+    slider.style.marginLeft="0px";
+    rightA.style.width=(Math.floor((side*0.8)/pixelRatio))+"px";
+    rightA.style.fontSize=(Math.floor((side*0.5)/pixelRatio))+"px";
+    leftA.style.width=(Math.floor((side*0.8)/pixelRatio))+"px";
+    leftA.style.fontSize=(Math.floor((side*0.5)/pixelRatio))+"px";
                                 
     canvas.height = side*13+Math.floor(LineWidthThin/2);
     canvas.style.height = canvas.height/pixelRatio+"px";
@@ -84,9 +89,7 @@ const canvasRestoreSave=()=>{
 const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes)=>{
     drawNumber(1.5,10,"Number",color="black",side*0.4,"Times New Roman",false);
     drawNumber(3.5,10,"Notes",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(7,10,"◄",color="black",side*1.2,"Times New Roman",false);
-    drawIcon(icon_analyze,7,10);
-    drawNumber(9,10,"►",color="black",side*1.2,"Times New Roman",false);
+    drawIcon(icon_analyze,8,10);
     for(let i=0;i<9;i++){
         drawNumber(i+1,11,i+1,color="black",side*0.8,"Times New Roman",false);
     }
@@ -103,22 +106,22 @@ const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes)=>{
 const drawGraph = () => {
     //SetBacgroundRegions
     ct.fillStyle = "red";
-    ct.fillRect(side*1.5+offset, side*11  , side*7, side/2);
+    ct.fillRect(side*1.0+offset, side*11  , side*7, side/2);
     ct.fillStyle = "orange";
-    ct.fillRect(side*1.5+offset, side*11.5, side*7, side/2);
+    ct.fillRect(side*1.0+offset, side*11.5, side*7, side/2);
     ct.fillStyle = "yellow";
-    ct.fillRect(side*1.5+offset, side*12  , side*7, side/2);
+    ct.fillRect(side*1.0+offset, side*12  , side*7, side/2);
     ct.fillStyle = "lightgreen";
-    ct.fillRect(side*1.5+offset, side*12.5, side*7, side/2);
+    ct.fillRect(side*1.0+offset, side*12.5, side*7, side/2);
     //Draw Axis
     ct.strokeStyle = "black";
-    drawLine(side*1.5+offset,side*11,side*1.5+offset,side*13,1);
-    drawLine(side*1.5+offset,side*13,side*8.5+offset,side*13,1);
+    drawLine(side*1.0+offset,side*11,side*1+offset,side*13,1);
+    drawLine(side*1.0+offset,side*13,side*8+offset,side*13,1);
     //Label Axis
-    drawNumber(1.25,12.25,"Easy Tech",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(1.25,11.75,"Med. Tech",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(1.25,11.25,"Hard Tech",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(1.25,10.75,"Guessing" ,color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1,12.25,"Easy",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1,11.75,"Med.",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1,11.25,"Hard",color="black",side*0.4,"Times New Roman",false);
+    drawNumber(1,10.75,"Guess" ,color="black",side*0.4,"Times New Roman",false);
 }
 const drawGrids = (type="Normal") => {
     //Fill with White
