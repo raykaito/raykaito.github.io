@@ -45,4 +45,6 @@ td{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /*Disables the double tap zoom for iOS*/
+    touch-action: manipulation;
 }

@@ -63,13 +63,14 @@ const resize = () => {
 
     side = Math.floor(Math.min((width-LineWidthThick-2)/9,50*pixelRatio));
     offset = Math.floor((width-9*side)/2);
-    slider.style.width=(Math.floor((side*7)/pixelRatio)+18)+"px";
+    slider.style.width=(Math.floor((side*7)/pixelRatio)+16)+"px";
     //slider.style.marginLeft=(Math.floor((offset+side*1.5)/pixelRatio)-5)+"px";
     slider.style.marginLeft="0px";
-    rightA.style.width=(Math.floor((side*0.8)/pixelRatio))+"px";
-    rightA.style.fontSize=(Math.floor((side*0.5)/pixelRatio))+"px";
-    leftA.style.width=(Math.floor((side*0.8)/pixelRatio))+"px";
-    leftA.style.fontSize=(Math.floor((side*0.5)/pixelRatio))+"px";
+    const arrowSize = (Math.floor((side*0.6)/pixelRatio))+"px";
+    rightA.style.width    = arrowSize;
+    leftA.style.width     = arrowSize;;
+    rightA.style.fontSize = arrowSize;;
+    leftA.style.fontSize  = arrowSize;;
                                 
     canvas.height = side*13+Math.floor(LineWidthThin/2);
     canvas.style.height = canvas.height/pixelRatio+"px";
