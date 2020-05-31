@@ -14,6 +14,7 @@ constructor(){
 	//brute force parameters
 	this.bruteForceParameter = new Array();//[step at guess, candidateNum]
 	this.dragMode = "";//[AutoNoteInput,ModeChange,SelectionChange,SelectionChangeNumber]
+	this.dragXY = [0,0];
 	this.autoNoteChangedIndex = new Array(81).fill(false);
 	this.selectionChangedIndex = new Array( 9).fill(false);
 	this.lastActionType = "Init";
@@ -87,11 +88,15 @@ moveWhileSolving(x,y){
 		}
 		draw();
 	}else if(this.dragMode=="ModeChange"){
+		if(xi>2) 	this.userInputMode = "Notes";
+		else		this.userInputMode = "Numbers";
+		this.dragXY = [x,y];
 		draw();
 	}else if(this.dragMode=="SelectionChange"){
 		this.selectionChange(xi,yi);
 		draw();
 	}else if(this.dragMode=="SelectionChangeNumber"){
+		this.dragXY = [x,y];
 		this.selectedNumber=xi;
 		draw();
 	}
@@ -156,7 +161,7 @@ draw(){
 	}else if(phase.phase=="User Solving"){
 		const board = this.board[slider.value];
 		board.draw(this.showMethod,(this.userInputMode=="Numbers"?this.selectedNumber:null),(this.userInputMode=="Notes"?this.selectedNotes:null));
-		drawUserInputInterface(this.userInputMode,this.selectedNumber, this.selectedNotes);
+		drawUserInputInterface(this.userInputMode,this.selectedNumber, this.selectedNotes,this.dragMode,this.dragXY);
 	}else{
 		const board = this.board[slider.value];
 		board.draw(this.showMethod);		

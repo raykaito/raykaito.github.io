@@ -87,21 +87,79 @@ const canvasRestoreSave=()=>{
     ct.restore();
     ct.save();
 }
-const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes)=>{
-    drawNumber(1.5,10,"Number",color="black",side*0.4,"Times New Roman",false);
-    drawNumber(3.5,10,"Notes",color="black",side*0.4,"Times New Roman",false);
-    drawIcon(icon_analyze,8,10);
-    for(let i=0;i<9;i++){
-        drawNumber(i+1,11,i+1,color="black",side*0.8,"Times New Roman",false);
-    }
-    if(userInputMode=="Numbers"){
-        drawRectIndex(1,10,2,10,"lime");
-        if(selectedNumber>0)drawRectIndex(selectedNumber,11,selectedNumber,11,"lime");
+const drawUserInputInterface=(userInputMode,selectedNumber, selectedNotes,dragMode=null,[dragx=null, dragy=null])=>{
+    //Draw User Input Mode (Number vs Notes);
+    if(dragMode=="ModeChange"){
+        const xi = Math.atan(((dragx-offset)/side-2)*10)/Math.PI*2+1.5;
+        drawSwitch(0.5,10,2.5,10,[xi],[10],side/4,side/2);
     }else{
-        drawRectIndex(3,10,4,10,"lime");
-        for(i=0;i<9;i++){
-            if(selectedNotes[i]) drawRectIndex(i+1,11,i+1,11,"lime");
+        drawSwitch(0.5,10,2.5,10,[userInputMode=="Numbers"?0.5:2.5],[10],side/4,side/2);
+    }
+    drawNumber(1.5,10,"Number",color="white",side*0.4,"Times New Roman",false);
+    drawNumber(3.5,10,"Notes",color="white",side*0.4,"Times New Roman",false);
+    drawIcon(icon_analyze,8,10);
+
+    //Draw Selected Numbers of Notes (1~9)
+    if(userInputMode=="Numbers"){
+        if(dragMode=="SelectionChangeNumber"){
+            //let tempx = Math.atan(((dragx-offset)/side-2)*10)/Math.PI*2+1.5;
+            let tempx = Math.pow(((dragx-offset)/side-selectedNumber+0.5),5)*16;
+            console.log(tempx);
+            const xi = Math.min(8,Math.max(0,selectedNumber-1+tempx));
+            drawSwitch(0,11,8,11,[xi],[11],side/2.25,0);
+        }else{
+            let xi;
+            console.log(selectedNumber);
+            if(selectedNumber>0) xi = selectedNumber-1;
+            drawSwitch(0,11,8,11,[xi],[11],side/2.25,0);
         }
+    }else{
+        const xi = new Array();
+        const yi = new Array();
+        for(i=0;i<9;i++){
+            if(selectedNotes[i]){
+                xi[i] = i;
+                yi[i] = 11;
+            }
+        }
+        drawSwitch(0,11,8,11,xi,yi,side/2.25,0);
+    }
+    for(let i=0;i<9;i++){
+        drawNumber(i+1,11,i+1,color="white",side*0.8,"Times New Roman",false);
+    }
+}
+const drawSwitch = (xii,yii,xil,yil,xic,yic,radius,length) => {
+    const xi = Math.floor((xii+0.5)*side-length+offset)+0.5;
+    const xl = Math.floor((xil+0.5)*side+length+offset)+0.5;
+    const yi = Math.floor((yii+0.5)*side)+0.5;
+    const yl = Math.floor((yil+0.5)*side)+0.5;
+    const xci= new Array();
+    const xcl= new Array();
+    const yc = new Array();
+    for(let i=0;i<xic.length;i++){
+        xci[i] = Math.floor((xic[i]+0.5)*side-length+offset)+0.5;
+        xcl[i] = Math.floor((xic[i]+0.5)*side+length+offset)+0.5;
+        yc[i]  = Math.floor((yic[i]+0.5)*side)+0.5;
+    }
+    //Draw Outer
+    ct.beginPath();
+    ct.arc(xi,yi,radius,0.5*Math.PI,1.5*Math.PI);
+    ct.arc(xl,yl,radius,1.5*Math.PI,0.5*Math.PI);
+    ct.fillStyle = "black";
+    ct.fill();
+    //Draw Innder
+    ct.beginPath();
+    ct.arc(xi,yi,radius-LineWidthThin,0.5*Math.PI,1.5*Math.PI);
+    ct.arc(xl,yl,radius-LineWidthThin,1.5*Math.PI,0.5*Math.PI);
+    ct.fillStyle = "gray";
+    ct.fill();
+    //Draw Selection
+    for(let i=0;i<xic.length;i++){
+        ct.beginPath();
+        ct.arc(xci[i],yc[i],radius-LineWidthThin*2,0.5*Math.PI,1.5*Math.PI);
+        ct.arc(xcl[i],yc[i],radius-LineWidthThin*2,1.5*Math.PI,0.5*Math.PI);
+        ct.fillStyle = "black";
+        ct.fill();
     }
 }
 const drawGraph = () => {
