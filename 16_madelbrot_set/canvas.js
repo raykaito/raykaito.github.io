@@ -8,20 +8,27 @@ constructor(canvas=false,dim=false){
     }
     this.loop = true;
     this.canvas = canvas;
+    alert("about to add event listeners");
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
     this.canvas.addEventListener('touchstart', (event)=>{this.start(event);}, false);
     this.ct = canvas.getContext("2d");
     if(dim!=false) this.resize(dim);
+    alert("resize the canvas");
     this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
+    alert("getImageData");
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     this.center = [0,0];
     this.sideLength = 4;
+    alert("about to rest the whole thing");
     this.reset();
 }
 reset(){
+    alert("begin reset");
     this.loop = true;
     this.counter = 0;
+    alert("reset pixel");
     this.resetPixels();
+    alert("begin start");
     this.start();
 }
 getModXY(x,y){
