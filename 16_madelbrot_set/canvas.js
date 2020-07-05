@@ -1,15 +1,6 @@
 class Canvas{
-ct;
-canvas;
-animationStartTime;
-imageData;
-center;
-sideLength;
-pixels;
-loop;
-counter;
-pixelRatio;
 constructor(canvas=false,dim=false){
+    alert("Canvas Constructor initiated.");
     //Initialize
     if(canvas.tagName!="CANVAS"){
         alert("Initialize Canvas Failed. Invalid type :["+canvas.tagName+"] was passes as an argument.");
