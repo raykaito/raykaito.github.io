@@ -1,4 +1,4 @@
-alert("C");
+alert("D");
 class Canvas{
 constructor(canvas=false,dim=false){
 }
