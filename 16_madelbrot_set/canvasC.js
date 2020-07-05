@@ -1,4 +1,4 @@
-alert("F");
+alert("G");
 class Canvas{
 constructor(canvas=false,dim=false){
     alert("Canvas Constructor initiated.");
@@ -41,26 +41,6 @@ touch=(event)=>{
     this.center = [xMod,yMod];
     this.sideLength *=0.5;
     this.reset();
-}
-resetPixels(){
-    for(let i=0;i<this.pixels.length;i++){
-        const [x,y] = this.i2xy(i);
-        const [xMod,yMod] = this.getModXY(x,y);
-        this.pixels[i] = new Pixel(xMod,yMod);
-    }
-}
-resize(dim){
-    if(dim.length!=2){
-        alert("Invalid dim dimension");
-        return;
-    }
-    this.pixelRatio = window.devicePixelRatio;
-    this.canvas.style.width  = dim[0] + "px";
-    this.canvas.style.height = dim[1] + "px";
-    this.canvas.width  = dim[0];
-    this.canvas.height = dim[1];
-    this.canvas.width *= this.pixelRatio;
-    this.canvas.height*= this.pixelRatio;
 }
 }
 
