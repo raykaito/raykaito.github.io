@@ -133,4 +133,4 @@ update(){
     return this.explodeCount;
 }
 }
-console.log("Loaded: canvas.js");
+alert("Loaded: canvas.js");
