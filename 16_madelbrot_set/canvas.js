@@ -1,7 +1,5 @@
-alert("one");
-class CanvasF{
+class Canvas{
 constructor(canvas=false,dim=false){
-    alert("Canvas Constructor initiated.");
     //Initialize
     if(canvas.tagName!="CANVAS"){
         alert("Initialize Canvas Failed. Invalid type :["+canvas.tagName+"] was passes as an argument.");
@@ -30,7 +28,7 @@ getModXY(x,y){
     const yMod = this.center[1]+(y/this.canvas.width-1/2)*this.sideLength;
     return [xMod,yMod];
 }
-touch=(event)=>{
+touch(event){
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
@@ -102,4 +100,29 @@ setPix(indexIn, value, type="all"){
 }
 }
 
-alert("Loaded: canvas.js");
+class Pixel{
+constructor(x,y){
+    this.reset(x,y);
+}
+reset(x,y){
+    this.originalx = x;
+    this.originaly = y;
+    this.x=x;
+    this.y=y;
+    this.counter = 0;
+    this.explodeCount = false;
+}
+update(){
+    if(this.explodeCount!=false) return this.explodeCount;
+    this.counter++;
+    const newx = this.x*this.x-this.y*this.y+this.originalx;
+    const newy = this.x*this.y*2+this.originaly;
+    this.x=newx;
+    this.y=newy;
+    if(newx*newx+newy*newy>4){
+        this.explodeCount = this.counter;
+    }
+    return this.explodeCount;
+}
+}
+console.log("Loaded: canvas.js");

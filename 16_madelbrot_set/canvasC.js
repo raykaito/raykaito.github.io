@@ -36,6 +36,18 @@ resetPixels(){
         this.pixels[i] = new Pixel(xMod,yMod);
     }
 }
+touch(event){
+    const rect = event.target.getBoundingClientRect();
+    let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+    let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
+    x *= this.pixelRatio;
+    y *= this.pixelRatio;
+    this.loop = false;
+    const [xMod,yMod] = this.getModXY(x,y);
+    this.center = [xMod,yMod];
+    this.sideLength *=0.5;
+    this.reset();
+}
 resize(dim){
     if(dim.length!=2){
         alert("Invalid dim dimension");
