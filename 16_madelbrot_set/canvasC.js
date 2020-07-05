@@ -1,5 +1,5 @@
-alert("one");
-class CanvasF{
+alert("C");
+class Canvas{
 constructor(canvas=false,dim=false){
     alert("Canvas Constructor initiated.");
     //Initialize
@@ -102,4 +102,4 @@ setPix(indexIn, value, type="all"){
 }
 }
 
-alert("Loaded: canvas.js");
+alert("Loaded: canvasC.js");
