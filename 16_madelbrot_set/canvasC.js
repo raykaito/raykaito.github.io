@@ -1,7 +1,6 @@
-alert("G");
+alert("H");
 class Canvas{
 constructor(canvas=false,dim=false){
-    alert("Canvas Constructor initiated.");
     //Initialize
     if(canvas.tagName!="CANVAS"){
         alert("Initialize Canvas Failed. Invalid type :["+canvas.tagName+"] was passes as an argument.");
@@ -29,18 +28,6 @@ getModXY(x,y){
     const xMod = this.center[0]+(x/this.canvas.width-1/2)*this.sideLength;
     const yMod = this.center[1]+(y/this.canvas.width-1/2)*this.sideLength;
     return [xMod,yMod];
-}
-touch=(event)=>{
-    const rect = event.target.getBoundingClientRect();
-    let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
-    let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
-    x *= this.pixelRatio;
-    y *= this.pixelRatio;
-    this.loop = false;
-    const [xMod,yMod] = this.getModXY(x,y);
-    this.center = [xMod,yMod];
-    this.sideLength *=0.5;
-    this.reset();
 }
 }
 
