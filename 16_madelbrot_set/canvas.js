@@ -9,27 +9,20 @@ constructor(canvas=false,dim=false){
     }
     this.loop = true;
     this.canvas = canvas;
-    alert("about to add event listeners");
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
     this.canvas.addEventListener('touchstart', (event)=>{this.start(event);}, false);
     this.ct = canvas.getContext("2d");
     if(dim!=false) this.resize(dim);
-    alert("resize the canvas");
     this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
-    alert("getImageData");
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     this.center = [0,0];
     this.sideLength = 4;
-    alert("about to rest the whole thing");
     this.reset();
 }
 reset(){
-    alert("begin reset");
     this.loop = true;
     this.counter = 0;
-    alert("reset pixel");
     this.resetPixels();
-    alert("begin start");
     this.start();
 }
 getModXY(x,y){
@@ -108,30 +101,5 @@ setPix(indexIn, value, type="all"){
     if(type=="all"||type==2) this.imageData.data[4*index+3] = 255;
 }
 }
-alert("two");
-class Pixel{
-constructor(x,y){
-    this.reset(x,y);
-}
-reset(x,y){
-    this.originalx = x;
-    this.originaly = y;
-    this.x=x;
-    this.y=y;
-    this.counter = 0;
-    this.explodeCount = false;
-}
-update(){
-    if(this.explodeCount!=false) return this.explodeCount;
-    this.counter++;
-    const newx = this.x*this.x-this.y*this.y+this.originalx;
-    const newy = this.x*this.y*2+this.originaly;
-    this.x=newx;
-    this.y=newy;
-    if(newx*newx+newy*newy>4){
-        this.explodeCount = this.counter;
-    }
-    return this.explodeCount;
-}
-}
+
 alert("Loaded: canvas.js");
