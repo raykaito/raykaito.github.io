@@ -1,0 +1,57 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Mandelbrot Set</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Mandelbrot Set
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="left">
+				<div id="Text1"></div><br>
+			</td>
+		</tr>
+
+	</table>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		const tableElement  = document.getElementById('Table' );
+		const bodyElement   = document.getElementById('Body'  );
+		const canvasElement = document.getElementById('Canvas');
+		const text1 = document.getElementById('Text1');
+		showObject(bodyElement, tableElement);
+
+		const canvas = new Canvas(canvasElement, [400,400]);
+	//--> 
+	</script>
+
+</body>
+
+
+</html>
