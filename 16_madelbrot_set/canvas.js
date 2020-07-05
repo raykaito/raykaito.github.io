@@ -1,3 +1,4 @@
+alert("one");
 class Canvas{
 constructor(canvas=false,dim=false){
     alert("Canvas Constructor initiated.");
@@ -107,7 +108,7 @@ setPix(indexIn, value, type="all"){
     if(type=="all"||type==2) this.imageData.data[4*index+3] = 255;
 }
 }
-
+alert("two");
 class Pixel{
 constructor(x,y){
     this.reset(x,y);
