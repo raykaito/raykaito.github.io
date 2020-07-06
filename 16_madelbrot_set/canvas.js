@@ -19,7 +19,6 @@ constructor(canvas){
 }
 reset(){
     console.log("Start with... initialIteration:"+this.initialIteration+", eachIteration:"+this.eachIteration);
-    this.startTime = Date.now();
     this.loop = true;
     this.counter = 0;
     this.minIteration = -1;
@@ -31,6 +30,7 @@ reset(){
     this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
     this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
     this.iterate(this.initialIteration);
+    this.startTime = Date.now();
     this.start();
 }
 resetPixels(){
@@ -66,21 +66,30 @@ iterate(iterateCount=1){
     return newDead;
 }
 start(){
-    if(!this.loop){
-        console.log(Date.now()-this.startTime);
-        return;
-    }
+    if(!this.loop) return;
     const newDead = this.iterate(this.eachIteration);
     if(this.minIteration!=-1&&newDead==false){
-        this.loop=false;
-        this.initialIteration = this.minIteration;
-        this.eachIteration = Math.ceil((this.maxIteration-this.minIteration)/20);
+        this.loop = false;
+        this.getIterationParameters();
     }else{
         this.maxIteration = this.counter;
     }
     this.ct.putImageData(this.imageData,0,0);
     text1.textContent = "Number of iterations: "+this.counter;
     requestAnimationFrame(()=>{this.start();});
+}
+touch(event){
+    const rect = event.target.getBoundingClientRect();
+    let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
+    let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
+    x *= this.pixelRatio;
+    y *= this.pixelRatio;
+    this.loop = false;
+    const [xMod,yMod] = this.getModXY(x,y);
+    this.center = [xMod,yMod];
+    this.sideLength *=0.5;
+    this.getIterationParameters();
+    this.reset();
 }
 resize(){
     this.canvas.width = Math.floor(window.innerWidth)-20;
@@ -94,27 +103,10 @@ resize(){
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
 }
-touch(event){
-    const rect = event.target.getBoundingClientRect();
-    let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
-    let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
-    x *= this.pixelRatio;
-    y *= this.pixelRatio;
-    this.loop = false;
-    const [xMod,yMod] = this.getModXY(x,y);
-    this.center = [xMod,yMod];
-    this.sideLength *=0.5;
+getIterationParameters(){
+    const time = Date.now()-this.startTime;
     this.initialIteration = this.minIteration;
-    this.eachIteration = Math.ceil((this.maxIteration-this.minIteration)/20);
-    this.reset();
-}
-i2xy(i){
-    return [i%this.canvas.width,Math.floor(i/this.canvas.width)];
-}
-getModXY(x,y){
-    const xMod = this.center[0]+(x/this.canvas.width-1/2)*this.sideLength;
-    const yMod = this.center[1]+(y/this.canvas.width-1/2)*this.sideLength;
-    return [xMod,yMod];
+    this.eachIteration = Math.ceil((this.maxIteration-this.minIteration)*50/time);
 }
 setPix(index, value){
     //Set the pixel based on type
@@ -124,6 +116,14 @@ setPix(index, value){
 }
 interpolate(value){
     return 255*0.75*(1-Math.pow(0.99,((value-this.minIteration))));
+}
+i2xy(i){
+    return [i%this.canvas.width,Math.floor(i/this.canvas.width)];
+}
+getModXY(x,y){
+    const xMod = this.center[0]+(x/this.canvas.width-1/2)*this.sideLength;
+    const yMod = this.center[1]+(y/this.canvas.width-1/2)*this.sideLength;
+    return [xMod,yMod];
 }
 }
 
