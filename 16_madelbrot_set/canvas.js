@@ -6,7 +6,8 @@ constructor(canvas){
     this.resize();
     //Add Event listeners
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
-    //this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
+    this.canvas.addEventListener('mousemove', (event)=>{this.moveMouse(event);}, false);
+    this.canvas.addEventListener('mouseup'  , (event)=>{this.release(event);}, false);
     //Array for pixels
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     //Initialize ROI
@@ -19,16 +20,21 @@ constructor(canvas){
 }
 reset(){
     console.log("Start with... initialIteration:"+this.initialIteration+", eachIteration:"+this.eachIteration);
+    //Looping Parameters
     this.loop = true;
     this.counter = 0;
     this.minIteration = -1;
     this.maxIteration = -1;
     this.maxIterationSecond = -1;
+    //Pixel Parameters
     this.deads = new Array(this.canvas.width*this.canvas.height).fill(-1);
     this.resetPixels();
     this.ct.fillStyle = "white";
     this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
     this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
+    //Touch control parameters
+    this.touchStart = false;
+    this.touchXY = [0,0];
     this.iterate(this.initialIteration);
     this.startTime = Date.now();
     this.start();
@@ -76,18 +82,46 @@ start(){
     }
     this.ct.putImageData(this.imageData,0,0);
     text1.textContent = "Number of iterations: "+this.counter;
+    text2.textContent = "Length of side: "+this.sideLength.toExponential(3);
     requestAnimationFrame(()=>{this.start();});
 }
-touch(event){
+getXY(event){
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
     x *= this.pixelRatio;
     y *= this.pixelRatio;
+    return [x,y];
+}
+touch(event){
     this.loop = false;
-    const [xMod,yMod] = this.getModXY(x,y);
-    this.center = [xMod,yMod];
-    this.sideLength *=0.5;
+    this.move = false;
+    this.touchStart = true;
+    this.touchXY = this.getXY(event);
+    this.lastMove = Date.now()
+}
+moveMouse(event){
+    if(this.touchStart==false) return;
+    if(Date.now()-this.lastMove<15) return;
+    this.lastMove = Date.now();
+    this.ct.putImageData(this.imageData,0,0);
+    const [x,y] = this.getXY(event);
+    const halfSide = Math.abs(x-this.touchXY[0]);
+    this.ct.strokeStyle = "lime";
+    this.ct.lineWidth = this.pixelRatio;
+    this.ct.strokeRect(this.touchXY[0]-halfSide,this.touchXY[1]-halfSide,halfSide*2,halfSide*2);
+}
+release(event){    
+    this.loop = false;
+    const [x,y] = this.getXY(event);
+    const [cx,cy] = this.touchXY;
+    this.center = this.getModXY(cx,cy);
+    const halfSide = Math.abs(x-this.touchXY[0]);
+    if(halfSide==0){
+        this.sideLength *=0.5;
+    }else{
+        this.sideLength *=(2*halfSide/this.canvas.width);
+    }
     this.getIterationParameters();
     this.reset();
 }
