@@ -6,8 +6,11 @@ constructor(canvas){
     this.resize();
     //Add Event listeners
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
+    this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
     this.canvas.addEventListener('mousemove', (event)=>{this.moveMouse(event);}, false);
+    this.canvas.addEventListener('touchmove', (event)=>{this.moveMouse(event);}, false);
     this.canvas.addEventListener('mouseup'  , (event)=>{this.release(event);}, false);
+    this.canvas.addEventListener('touchend'  , (event)=>{this.release(event);}, false);
     //Array for pixels
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     //Initialize ROI
@@ -86,6 +89,7 @@ start(){
     requestAnimationFrame(()=>{this.start();});
 }
 getXY(event){
+    event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
@@ -94,7 +98,6 @@ getXY(event){
     return [x,y];
 }
 touch(event){
-    event.preventDefault();
     this.loop = false;
     this.move = false;
     this.touchStart = true;
