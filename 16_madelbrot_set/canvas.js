@@ -6,24 +6,31 @@ constructor(canvas){
     this.resize();
     //Add Event listeners
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
-    this.canvas.addEventListener('touchstart', (event)=>{this.start(event);}, false);
+    this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
     //Array for pixels
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     //Initialize ROI
     this.center = [0,0];
     this.sideLength = 4;
+    this.eachIteration = 1;
+    this.initialIteration = 0;
     //Reset...or start
     this.reset();
 }
 reset(){
+    console.log("Start with... initialIteration:"+this.initialIteration+", eachIteration:"+this.eachIteration);
     this.startTime = Date.now();
-    this.counter = 0;
     this.loop = true;
+    this.counter = 0;
+    this.minIteration = -1;
+    this.maxIteration = -1;
+    this.maxIterationSecond = -1;
     this.deads = new Array(this.canvas.width*this.canvas.height).fill(-1);
     this.resetPixels();
     this.ct.fillStyle = "white";
     this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
     this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
+    this.iterate(this.initialIteration);
     this.start();
 }
 resetPixels(){
@@ -33,32 +40,44 @@ resetPixels(){
         this.pixels[i] = new Pixel(xMod,yMod);
     }
 }
+iterate(iterateCount=1){
+    this.counter+=iterateCount; 
+    let newDead = false;
+    for(let i=0;i<this.pixels.length;i++){
+        if(this.deads[i]!=-1){
+            //this.setPix(i,Math.pow(this.deads[i],0.5)*255/Math.pow(this.counter,0.5));
+            this.setPix(i,this.interpolate(this.deads[i]));
+            continue;
+        }
+        const result = this.pixels[i].update(iterateCount);
+        if(result != false){
+            if(this.minIteration==-1||result<this.minIteration) this.minIteration = result;
+            if(result>this.maxIteration){
+                this.maxIterationSecond = this.maxIteration;
+                this.maxIteration = result;
+            }
+            newDead = true;
+            this.deads[i]=result;
+        }
+    }
+    if(newDead){
+        if((this.maxIterationSecond-this.maxIteration)>1)  newDead=false;
+    }
+    return newDead;
+}
 start(){
     if(!this.loop){
         console.log(Date.now()-this.startTime);
         return;
     }
-    this.counter+=5; 
-    let newDead = false;
-    let unWhiteFound = false;
-    for(let i=0;i<this.pixels.length;i++){
-        if(this.deads[i]!=-1){
-            unWhiteFound = true;
-            this.setPix(i,Math.pow(this.deads[i],0.5)*255/Math.pow(this.counter,0.5));
-            //this.setPix(i,this.deads[i]*255/this.counter);
-            continue;
-        }
-        const result = this.pixels[i].update();
-        //let value = 255;
-        if(result != false){
-            unWhiteFound = true;
-            this.deads[i]=result;
-            if(result==this.counter) newDead = true;
-            //value = this.deads[i]*255/this.counter;
-        }
-        //this.setPix(i,value);
+    const newDead = this.iterate(this.eachIteration);
+    if(this.minIteration!=-1&&newDead==false){
+        this.loop=false;
+        this.initialIteration = this.minIteration;
+        this.eachIteration = Math.ceil((this.maxIteration-this.minIteration)/20);
+    }else{
+        this.maxIteration = this.counter;
     }
-    if(unWhiteFound&&newDead==false) this.loop=false;
     this.ct.putImageData(this.imageData,0,0);
     text1.textContent = "Number of iterations: "+this.counter;
     requestAnimationFrame(()=>{this.start();});
@@ -85,6 +104,8 @@ touch(event){
     const [xMod,yMod] = this.getModXY(x,y);
     this.center = [xMod,yMod];
     this.sideLength *=0.5;
+    this.initialIteration = this.minIteration;
+    this.eachIteration = Math.ceil((this.maxIteration-this.minIteration)/20);
     this.reset();
 }
 i2xy(i){
@@ -101,6 +122,9 @@ setPix(index, value){
     this.imageData.data[4*index+1] = value;
     this.imageData.data[4*index+2] = value;
 }
+interpolate(value){
+    return 255*0.75*(1-Math.pow(0.99,((value-this.minIteration))));
+}
 }
 
 class Pixel{
@@ -115,8 +139,8 @@ reset(x,y){
     this.counter = 0;
     this.explodeCount = false;
 }
-update(){
-    for(let i=0;i<5;i++){
+update(iteration){
+    for(let i=0;i<iteration;i++){
         if(this.explodeCount!=false) return this.explodeCount;
         this.counter++;
         const newx = this.x*this.x-this.y*this.y+this.originalx;
