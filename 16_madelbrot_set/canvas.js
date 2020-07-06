@@ -6,7 +6,7 @@ constructor(canvas){
     this.resize();
     //Add Event listeners
     this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
-    this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
+    //this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
     //Array for pixels
     this.pixels = new Array(this.canvas.width*this.canvas.height);
     //Initialize ROI
