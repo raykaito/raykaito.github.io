@@ -91,6 +91,7 @@ getXY(event){
     let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
     x *= this.pixelRatio;
     y *= this.pixelRatio;
+    event.preventDefault();
     return [x,y];
 }
 touch(event){
