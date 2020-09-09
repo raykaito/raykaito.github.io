@@ -21,8 +21,8 @@ class DiscScanner{
         this.constraints = {
             audio:false,
             video:{
-                width:50,
-                height:50,
+                width:150,
+                height:150,
                 facingMode:(this.front?"user":"environment")
             }
         };
