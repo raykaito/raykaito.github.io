@@ -70,6 +70,81 @@ class DiscScanner{
     }
     drawVideo(){
         //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.displayct.drawImage(this.video,0,0,this.videoWidth,this.videoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        requestAnimationFrame(()=>{this.drawVideo();});
+    }
+}class DiscScanner_back{
+    constructor(video,canvasClass){
+        //Get display canvas info
+        this.displayCanvas = canvasClass.canvas;
+        this.displayct = canvasClass.ct;
+        this.displayCanvasWidth = this.displayCanvas.width;
+        this.displayCanvasHeight= this.displayCanvas.height;
+        this.video = video;
+
+        //Create Canvas for Original Video Image
+        this.originalCanvas = document.createElement("canvas");
+        this.originalct = this.originalCanvas.getContext("2d");
+        this.originalCanvasWidth = -1;
+        this.originalCanvasHeight= -1;
+
+        //Initialize Board Reader Class
+        this.boardV = new VisionProgram_BoardReader();
+        this.numberV= new VisionProgram_NumberReader();
+
+        this.front=false;
+        this.constraints = {
+            audio:false,
+            video:{
+                width:1500,
+                height:900,
+                facingMode:(this.front?"user":"environment")
+            }
+        };
+        this.videoWidth = -1;
+        this.videoHeight= -1;
+    }
+    handleSuccess(stream){
+        this.video.srcObject = stream;
+        const mediaSettings = stream.getTracks()[0].getSettings();
+        this.videoWidth = mediaSettings.width;
+        this.videoHeight= mediaSettings.height;
+        console.log(stream.getTracks()[0]);
+        this.originalCanvasWidth = this.videoWidth;
+        this.originalCanvasHeight= this.videoHeight;
+        this.getVideoDisplayOffsetSettings();
+        alert(this.video+","+this.croppedVideoXStart+","+this.croppedVideoYStart+","+this.croppedVideoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight);
+        this.drawVideo();
+    }
+    getVideoDisplayOffsetSettings(){
+        const croppedVideoHeight = this.videoWidth *this.displayCanvasHeight/this.displayCanvasWidth;
+        const croppedVideoWidth  = this.videoHeight*this.displayCanvasWidth /this.displayCanvasHeight;
+        if(croppedVideoHeight<=this.videoHeight){
+            this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
+            this.croppedVideoXStart = 0;
+            this.croppedVideoHeight= Math.floor(croppedVideoHeight);
+            this.croppedVideoWidth = this.videoWidth;
+        }else{
+            this.croppedVideoXStart = Math.floor((this.videoWidth-croppedVideoWidth)/2);
+            this.croppedVideoYStart = 0;
+            this.croppedVideoWidth = Math.floor(croppedVideoWidth);
+            this.croppedVideoHeight= this.videoHeight;
+        }
+    }
+    startScan(){        
+        navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
+    }
+    stopScan(){
+        let stream = this.video.srcObject;
+        if(stream==null) return;
+        let tracks = stream.getTracks();
+        tracks.forEach(function(track) {
+            track.stop();
+        });
+        this.video.srcObject = null;
+    }
+    drawVideo(){
+        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
         this.displayct.drawImage(this.video,0,0);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
