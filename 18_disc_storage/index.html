@@ -1,0 +1,122 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Disc Search</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="stylesheet" href="noThickness.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+		<tr>
+			<td align="left">
+		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><input type="file" id="folder" style="display:none;">
+				</br><canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td align="center" class="untouchable">
+		        <a id="leftArrow"  style="display:none;margin:0;text-align:right;vertical-align: middle;" onclick="{slider.value--;draw();}">◄</a>
+		        <input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()" style="display:none;margin:0">
+		        <a id="rightArrow" style="display:none;margin:0;text-align:left; vertical-align: middle;" onclick="{slider.value++;draw();}">►</a>
+			</td>
+		</tr>
+		<tr>
+			<td align="center" valign="middle">
+				<canvas id="RCanvas" style="display:none"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="sudoku.js"></script>
+	<script type="text/javascript" src="quickSolver.js"></script>
+	<script type="text/javascript" src="board_reader.js"></script>
+	<script type="text/javascript" src="number_reader.js"></script>
+	<script type="text/javascript" src="scanner.js"></script>
+	<script type="text/javascript" src="phase.js"></script>
+	<script type="text/javascript" src="functions/TrigScript.js"></script>
+	<script type="text/javascript" src="functions/DataScript.js"></script>
+	<script type="text/javascript" src="functions/StatScript.js"></script>
+	<script type="text/javascript" src="functions/EyesScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+		const recordMode = true;
+	 
+		let table  = document.getElementById('Table' );
+		let body   = document.getElementById('Body'  );
+		let canvas = document.getElementById('Canvas');
+		let rcanvas= document.getElementById('RCanvas');
+		let slider = document.getElementById('slider');
+		let video  = document.getElementById("player");
+		let leftA  = document.getElementById("leftArrow");
+		let rightA = document.getElementById("rightArrow");
+		let file   = document.getElementById("folder");
+		showObject(body, table);
+
+		const phase = new Phase("Input Sudoku Manually");
+		let scanner = false;
+		let animationStartTime;
+		const startScan = () => {
+			phase.changePhase("Scanning Board");
+			draw();
+			slider.value=0;
+			slider.style.display = "none";
+			sudoku.reset(0);
+			scanner = new Scanner();
+		}
+		const uploadImage = () => {
+			phase.changePhase("Uploading Image");
+			draw();
+			slider.value=0;
+			slider.style.display = "none";
+			sudoku.reset(0);
+            file.click();
+		}
+
+		const sudoku = new Sudoku();
+		initCanvas();
+		initEventlistener();
+		const preLoad=()=>{
+			sudoku.userInput(0,1,8);
+			sudoku.userInput(0,3,4);
+			sudoku.userInput(1,2,7);
+			sudoku.userInput(1,4,1);
+			sudoku.userInput(1,6,6);
+			sudoku.userInput(2,0,5);
+			sudoku.userInput(2,5,3);
+			sudoku.userInput(2,7,4);
+			sudoku.userInput(3,0,3);
+			sudoku.userInput(3,5,2);
+			sudoku.userInput(3,6,5);
+			sudoku.userInput(4,2,1);
+			sudoku.userInput(4,4,7);
+			sudoku.userInput(5,3,5);
+			sudoku.userInput(5,8,9);
+			sudoku.userInput(6,2,5);
+			sudoku.userInput(6,3,3);
+			sudoku.userInput(6,8,7);
+			sudoku.userInput(7,1,2);
+			sudoku.userInput(7,5,8);
+			sudoku.userInput(7,7,3);
+			sudoku.userInput(8,4,6);
+			sudoku.userInput(8,6,9);
+			sudoku.checkSolvability();
+		}
+		//preLoad();
+		//sudoku.checkSolvability();
+	//--> 
+	</script>
+
+</body>
+
+
+</html>
