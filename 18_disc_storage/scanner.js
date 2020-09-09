@@ -34,12 +34,10 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        console.log(mediaSettings);
+        console.log(stream.getTracks()[0]);
         this.originalCanvasWidth = this.videoWidth;
         this.originalCanvasHeight= this.videoHeight;
         this.getVideoDisplayOffsetSettings();
-        alert(this.video+","+this.croppedVideoXStart+","+this.croppedVideoYStart+","+this.croppedVideoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight)
-        alert(this.videoWidth+","+this.videoHeight+","+this.displayCanvasWidth+","+this.displayCanvasHeight);
         this.drawVideo();
     }
     getVideoDisplayOffsetSettings(){
@@ -71,7 +69,6 @@ class DiscScanner{
     }
     drawVideo(){
         this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        alert("requested");
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
