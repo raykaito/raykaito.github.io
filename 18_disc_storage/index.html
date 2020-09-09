@@ -118,64 +118,65 @@
 		}
 		updateScannerStatus();
 
+		if(false){
+			const recordMode = true;
+			let canvas = document.getElementById('Canvas');
+			let rcanvas= document.getElementById('RCanvas');
+			let slider = document.getElementById('slider');
+			let video  = document.getElementById("player");
+			let leftA  = document.getElementById("leftArrow");
+			let rightA = document.getElementById("rightArrow");
+			let file   = document.getElementById("folder");
 
-		const recordMode = true;
-		let canvas = document.getElementById('Canvas');
-		let rcanvas= document.getElementById('RCanvas');
-		let slider = document.getElementById('slider');
-		let video  = document.getElementById("player");
-		let leftA  = document.getElementById("leftArrow");
-		let rightA = document.getElementById("rightArrow");
-		let file   = document.getElementById("folder");
+			const phase = new Phase("Input Sudoku Manually");
+			let scanner = false;
+			let animationStartTime;
+			const startScan = () => {
+				phase.changePhase("Scanning Board");
+				draw();
+				slider.value=0;
+				slider.style.display = "none";
+				sudoku.reset(0);
+				scanner = new Scanner();
+			}
+			const uploadImage = () => {
+				phase.changePhase("Uploading Image");
+				draw();
+				slider.value=0;
+				slider.style.display = "none";
+				sudoku.reset(0);
+	            file.click();
+			}
 
-		const phase = new Phase("Input Sudoku Manually");
-		let scanner = false;
-		let animationStartTime;
-		const startScan = () => {
-			phase.changePhase("Scanning Board");
-			draw();
-			slider.value=0;
-			slider.style.display = "none";
-			sudoku.reset(0);
-			scanner = new Scanner();
-		}
-		const uploadImage = () => {
-			phase.changePhase("Uploading Image");
-			draw();
-			slider.value=0;
-			slider.style.display = "none";
-			sudoku.reset(0);
-            file.click();
-		}
-
-		const sudoku = new Sudoku();
-		initCanvas();
-		initEventlistener();
-		const preLoad=()=>{
-			sudoku.userInput(0,1,8);
-			sudoku.userInput(0,3,4);
-			sudoku.userInput(1,2,7);
-			sudoku.userInput(1,4,1);
-			sudoku.userInput(1,6,6);
-			sudoku.userInput(2,0,5);
-			sudoku.userInput(2,5,3);
-			sudoku.userInput(2,7,4);
-			sudoku.userInput(3,0,3);
-			sudoku.userInput(3,5,2);
-			sudoku.userInput(3,6,5);
-			sudoku.userInput(4,2,1);
-			sudoku.userInput(4,4,7);
-			sudoku.userInput(5,3,5);
-			sudoku.userInput(5,8,9);
-			sudoku.userInput(6,2,5);
-			sudoku.userInput(6,3,3);
-			sudoku.userInput(6,8,7);
-			sudoku.userInput(7,1,2);
-			sudoku.userInput(7,5,8);
-			sudoku.userInput(7,7,3);
-			sudoku.userInput(8,4,6);
-			sudoku.userInput(8,6,9);
-			sudoku.checkSolvability();
+			const sudoku = new Sudoku();
+			initCanvas();
+			initEventlistener();
+			const preLoad=()=>{
+				sudoku.userInput(0,1,8);
+				sudoku.userInput(0,3,4);
+				sudoku.userInput(1,2,7);
+				sudoku.userInput(1,4,1);
+				sudoku.userInput(1,6,6);
+				sudoku.userInput(2,0,5);
+				sudoku.userInput(2,5,3);
+				sudoku.userInput(2,7,4);
+				sudoku.userInput(3,0,3);
+				sudoku.userInput(3,5,2);
+				sudoku.userInput(3,6,5);
+				sudoku.userInput(4,2,1);
+				sudoku.userInput(4,4,7);
+				sudoku.userInput(5,3,5);
+				sudoku.userInput(5,8,9);
+				sudoku.userInput(6,2,5);
+				sudoku.userInput(6,3,3);
+				sudoku.userInput(6,8,7);
+				sudoku.userInput(7,1,2);
+				sudoku.userInput(7,5,8);
+				sudoku.userInput(7,7,3);
+				sudoku.userInput(8,4,6);
+				sudoku.userInput(8,6,9);
+				sudoku.checkSolvability();
+			}
 		}
 		//preLoad();
 		//sudoku.checkSolvability();
