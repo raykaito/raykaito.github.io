@@ -21,8 +21,8 @@ class DiscScanner{
         this.constraints = {
             audio:false,
             video:{
-                width:1500,
-                height:1500,
+                width:800,
+                height:800,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -36,7 +36,9 @@ class DiscScanner{
         this.videoHeight= mediaSettings.height;
         console.log(stream.getTracks()[0]);
         this.originalCanvasWidth = this.videoWidth;
-        this.originalCanvasHeight= this.videoHeight;
+        this.originalCanvasHeight= Math.floor(this.videoHeight/2);
+        this.originalCanvas.width = this.originalCanvasWidth;
+        this.originalCanvas.height= this.originalCanvasHeight;
         this.drawVideo();
     }
     startScan(){        
@@ -53,8 +55,8 @@ class DiscScanner{
     }
     drawVideo(){
         //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        this.originalct.drawImage(this.video,0,0);
-        this.displayct.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.originalct.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2,0,0,this.originalCanvasWidth,this.originalCanvasHeight);
+        this.displayct.drawImage(this.originalCanvas,0,0,this.originalCanvasWidth,this.originalCanvasHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
