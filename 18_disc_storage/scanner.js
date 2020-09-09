@@ -70,11 +70,8 @@ class DiscScanner{
         this.video.srcObject = null;
     }
     drawVideo(){
-        //adjust video size for display
         this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        //this.displayct.drawImage(this.video,0,0,this.videoWidth,this.videoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        //this.displayct.drawImage(this.video,0,0);
+        alert("requested");
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
