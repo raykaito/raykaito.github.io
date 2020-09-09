@@ -66,7 +66,7 @@ class Scanner{
         if(newWidth!=this.vLength) this.resizeOcanvas(newWidth);
         this.oct.drawImage(video,this.sx,this.sy,this.vLength,this.vLength,0,0,this.vLength,this.vLength);
               //ct.drawImage(this.ocanvas,0,0,this.vLength,this.vLength,offset,side,side*9,side*9);
-              ct.drawImage(this.ocanvas,0,0);//,this.vLength,this.vLength,offset,side,side*9,side*9);
+              ct.drawImage(video,0,0);//,this.vLength,this.vLength,offset,side,side*9,side*9);
         const result = this.boardV.startScan(this.ocanvas,this.oct,this.numberV);
         if(!result) requestAnimationFrame(()=>{this.drawVideo();});
         else{
