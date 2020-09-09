@@ -19,8 +19,8 @@ class Scanner{
                 video:{
                     //width:1920,
                     //height:1080,
-                    width:640,
-                    height:640,
+                    width:4096,
+                    height:2160,
                     facingMode:(this.front?"user":"environment")
                 }
             };
