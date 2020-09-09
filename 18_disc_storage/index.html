@@ -61,7 +61,7 @@
         const displayCanvas = new Canvas(document.getElementById("displayCanvas"));
         displayCanvas.flexResize(0.95,0.6);
 		displayCanvas.fillAll();
-        table.width = displayCanvas.canvas.width;
+        table.width = displayCanvas.canvas.style.width;
 
 		const codeDisplayCanvas = new CodeCanvas(document.getElementById("codeDisplayCanvas"));
 		codeDisplayCanvas.flexResize(0.95,0.6);
