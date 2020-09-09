@@ -1,3 +1,66 @@
+class DiscScanner{
+    constructor(video,canvasClass){
+        //Create Canvas for Original Video Image
+        this.dcanvas = canvasClass.canvas;
+        this.dct = canvasClass.ct;
+        this.dcanvasWidth = this.dcanvas.width;
+        this.dcanvasHeight= this.dcanvas.height;
+        this.video = video;
+
+        //Initialize Board Reader Class
+        this.boardV = new VisionProgram_BoardReader();
+        this.numberV= new VisionProgram_NumberReader();
+
+        this.front=false;
+        this.constraints = {
+            audio:false,
+            video:{
+                //width:1920,
+                //height:1080,
+                width:4096,
+                height:2160,
+                facingMode:(this.front?"user":"environment")
+            }
+        };
+        this.videoWidth = -1;
+        this.videoHeight= -1;
+    }
+    handleSuccess(stream){
+        this.video.srcObject = stream;
+        const mediaSettings = stream.getTracks()[0].getSettings();
+        this.videoWidth = mediaSettings.width;
+        this.videoHeight= mediaSettings.height;
+        this.getVideoDisplayOffsetSettings();
+        this.drawVideo();
+    }
+    getVideoDisplayOffsetSettings(){
+        const croppedVideoHeight = this.videoWidth*this.dcanvasHeight/this.dcanvasWidth;
+        this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
+        this.croppedVideoHeight= Math.floor(croppedVideoHeight);
+        console.log(this.videoWidth);
+        console.log(this.dcanvasHeight);
+        console.log(this.dcanvasWidth);
+        console.log(this.croppedVideoYStart);
+        console.log(this.croppedVideoHeight);
+    }
+    startScan(){        
+        navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
+    }
+    stopScan(){
+        let stream = this.video.srcObject;
+        if(stream==null) return;
+        let tracks = stream.getTracks();
+        tracks.forEach(function(track) {
+            track.stop();
+        });
+        this.video.srcObject = null;
+    }
+    drawVideo(){
+        //adjust video size for display
+        this.dct.drawImage(this.video,0,this.croppedVideoYStart,this.videoWidth,this.croppedVideoHeight,0,0,this.dcanvasWidth,this.dcanvasHeight);
+        requestAnimationFrame(()=>{this.drawVideo();});
+    }
+}
 class Scanner{
     constructor(uploadImage = false,img){
         //Create Canvas for Original Video Image
