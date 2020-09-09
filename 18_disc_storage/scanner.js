@@ -38,6 +38,7 @@ class DiscScanner{
         this.originalCanvasWidth = this.videoWidth;
         this.originalCanvasHeight= this.videoHeight;
         this.getVideoDisplayOffsetSettings();
+        alert(this.video+","+this.croppedVideoXStart+","+this.croppedVideoYStart+","+this.croppedVideoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight);
         this.drawVideo();
     }
     getVideoDisplayOffsetSettings(){
@@ -68,7 +69,8 @@ class DiscScanner{
         this.video.srcObject = null;
     }
     drawVideo(){
-        this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.displayct.drawImage(this.video,0,0);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
