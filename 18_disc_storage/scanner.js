@@ -1,11 +1,17 @@
 class DiscScanner{
     constructor(video,canvasClass){
-        //Create Canvas for Original Video Image
-        this.dcanvas = canvasClass.canvas;
-        this.dct = canvasClass.ct;
-        this.dcanvasWidth = this.dcanvas.width;
-        this.dcanvasHeight= this.dcanvas.height;
+        //Get display canvas info
+        this.displayCanvas = canvasClass.canvas;
+        this.displayct = canvasClass.ct;
+        this.displayCanvasWidth = this.displayCanvas.width;
+        this.displayCanvasHeight= this.displayCanvas.height;
         this.video = video;
+
+        //Create Canvas for Original Video Image
+        this.originalCanvas = document.createElement("canvas");
+        this.originalct = this.originalCanvas.getContext("2d");
+        this.originalCanvasWidth = -1;
+        this.originalCanvasHeight= -1;
 
         //Initialize Board Reader Class
         this.boardV = new VisionProgram_BoardReader();
@@ -30,16 +36,18 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
+        this.originalCanvasWidth = mediaSettings.width;
+        this.originalCanvasHeight= mediaSettings.height;
         this.getVideoDisplayOffsetSettings();
         this.drawVideo();
     }
     getVideoDisplayOffsetSettings(){
-        const croppedVideoHeight = this.videoWidth*this.dcanvasHeight/this.dcanvasWidth;
+        const croppedVideoHeight = this.videoWidth*this.displayCanvasHeight/this.displayCanvasWidth;
         this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
         this.croppedVideoHeight= Math.floor(croppedVideoHeight);
         console.log(this.videoWidth);
-        console.log(this.dcanvasHeight);
-        console.log(this.dcanvasWidth);
+        console.log(this.displayCanvasHeight);
+        console.log(this.displayCanvasWidth);
         console.log(this.croppedVideoYStart);
         console.log(this.croppedVideoHeight);
     }
@@ -57,7 +65,8 @@ class DiscScanner{
     }
     drawVideo(){
         //adjust video size for display
-        this.dct.drawImage(this.video,0,this.croppedVideoYStart,this.videoWidth,this.croppedVideoHeight,0,0,this.dcanvasWidth,this.dcanvasHeight);
+        //this.displayct.drawImage(this.video,0,this.croppedVideoYStart,this.videoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.displayct.drawImage(this.video,0,0);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
