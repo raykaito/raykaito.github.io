@@ -24,7 +24,7 @@ class DiscScanner{
                 //width:1920,
                 //height:1080,
                 width:4096,
-                height:4096,
+                height:2160,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -36,8 +36,9 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        this.originalCanvasWidth = mediaSettings.width;
-        this.originalCanvasHeight= mediaSettings.height;
+        console.log(mediaSettings);
+        this.originalCanvasWidth = this.videoWidth;
+        this.originalCanvasHeight= this.videoHeight;
         this.getVideoDisplayOffsetSettings();
         alert(this.video+","+this.croppedVideoXStart+","+this.croppedVideoYStart+","+this.croppedVideoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight)
         alert(this.videoWidth+","+this.videoHeight+","+this.displayCanvasWidth+","+this.displayCanvasHeight);
@@ -72,7 +73,10 @@ class DiscScanner{
     }
     drawVideo(){
         //adjust video size for display
-        this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.displayct.drawImage(this.video,0,0,this.videoWidth,this.videoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        //this.displayct.drawImage(this.video,0,0);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
