@@ -43,14 +43,19 @@ class DiscScanner{
         this.drawVideo();
     }
     getVideoDisplayOffsetSettings(){
-        const croppedVideoHeight = this.videoWidth*this.displayCanvasHeight/this.displayCanvasWidth;
-        this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
-        this.croppedVideoHeight= Math.floor(croppedVideoHeight);
-        console.log(this.videoWidth);
-        console.log(this.displayCanvasHeight);
-        console.log(this.displayCanvasWidth);
-        console.log(this.croppedVideoYStart);
-        console.log(this.croppedVideoHeight);
+        const croppedVideoHeight = this.videoWidth *this.displayCanvasHeight/this.displayCanvasWidth;
+        const croppedVideoWidth  = this.videoHeight*this.displayCanvasWidth /this.displayCanvasHeight;
+        if(croppedVideoHeight<=this.videoHeight){
+            this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
+            this.croppedVideoXStart = 0;
+            this.croppedVideoHeight= Math.floor(croppedVideoHeight);
+            this.croppedVideoWidth = this.videoWidth;
+        }else{
+            this.croppedVideoXStart = Math.floor((this.videoWidth-croppedVideoWidth)/2);
+            this.croppedVideoYStart = 0;
+            this.croppedVideoWidth = Math.floor(croppedVideoWidth);
+            this.croppedVideoHeight= this.videoHeight;
+        }
     }
     startScan(){        
         navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
@@ -66,7 +71,7 @@ class DiscScanner{
     }
     drawVideo(){
         //adjust video size for display
-        this.displayct.drawImage(this.video,0,-this.croppedVideoYStart,this.videoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
         alert(this.video+","+0+","+this.croppedVideoYStart+","+this.videoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight)
         requestAnimationFrame(()=>{this.drawVideo();});
     }
