@@ -24,7 +24,7 @@ class DiscScanner{
                 //width:1920,
                 //height:1080,
                 width:4096,
-                height:2160,
+                height:4096,
                 facingMode:(this.front?"user":"environment")
             }
         };
