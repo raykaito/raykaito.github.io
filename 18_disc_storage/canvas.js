@@ -7,7 +7,8 @@ class Canvas{
         this.canvas.width = Math.floor(window.innerWidth);
         if(Math.floor(window.innerWidth)>520)   this.canvas.width = 520;
         if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
-        this.canvas.height = Math.floor(this.canvas.width * 0.6);    
+        table.width = this.canvas.width;
+        this.canvas.height = this.canvas.width;
         this.canvas.style.width  = this.canvas.width +"px";
         this.canvas.style.height = this.canvas.height +"px";
         this.canvas.width *= this.pixelRatio;

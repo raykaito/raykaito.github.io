@@ -22,7 +22,7 @@ class DiscScanner{
             audio:false,
             video:{
                 width:1500,
-                height:900,
+                height:1500,
                 facingMode:(this.front?"user":"environment")
             }
         };
@@ -37,24 +37,7 @@ class DiscScanner{
         console.log(stream.getTracks()[0]);
         this.originalCanvasWidth = this.videoWidth;
         this.originalCanvasHeight= this.videoHeight;
-        this.getVideoDisplayOffsetSettings();
-        alert(this.video+","+this.croppedVideoXStart+","+this.croppedVideoYStart+","+this.croppedVideoWidth+","+this.croppedVideoHeight+","+0+","+0+","+this.displayCanvasWidth+","+this.displayCanvasHeight);
         this.drawVideo();
-    }
-    getVideoDisplayOffsetSettings(){
-        const croppedVideoHeight = this.videoWidth *this.displayCanvasHeight/this.displayCanvasWidth;
-        const croppedVideoWidth  = this.videoHeight*this.displayCanvasWidth /this.displayCanvasHeight;
-        if(croppedVideoHeight<=this.videoHeight){
-            this.croppedVideoYStart = Math.floor((this.videoHeight-croppedVideoHeight)/2);
-            this.croppedVideoXStart = 0;
-            this.croppedVideoHeight= Math.floor(croppedVideoHeight);
-            this.croppedVideoWidth = this.videoWidth;
-        }else{
-            this.croppedVideoXStart = Math.floor((this.videoWidth-croppedVideoWidth)/2);
-            this.croppedVideoYStart = 0;
-            this.croppedVideoWidth = Math.floor(croppedVideoWidth);
-            this.croppedVideoHeight= this.videoHeight;
-        }
     }
     startScan(){        
         navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
