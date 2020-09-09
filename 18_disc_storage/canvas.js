@@ -25,6 +25,48 @@ class Canvas{
     }
 }
 
+class CodeCanvas{
+    constructor(canvas){
+        this.canvas = canvas;
+        this.ct = canvas.getContext("2d");
+        this.pixelRatio = window.devicePixelRatio;
+        
+        this.canvas.width = Math.floor(window.innerWidth);
+        if(Math.floor(window.innerWidth)>520)   this.canvas.width = 520;
+        if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
+        table.width = this.canvas.width;
+        this.canvas.height = Math.floor(this.canvas.width/2);
+        this.canvas.style.width  = this.canvas.width +"px";
+        this.canvas.style.height = this.canvas.height +"px";
+        this.canvas.width *= this.pixelRatio;
+        this.canvas.height*= this.pixelRatio;
+
+        this.ct.fillStyle = "white";
+        this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.displayCode();
+    }
+    displayCode(){
+        const scale = 1;
+        const offset = 10.5;
+        const data = [0,1,0,0,1,1,0,0,0,1,1,1];
+        for(let i=0;i<12;i++){
+            this.ct.strokeStyle = "black";
+            this.ct.lineWidth = ((data[i]==1)?3:1)*scale;
+            this.ct.beginPath();
+            this.ct.moveTo(200,i*scale*4+offset);
+            this.ct.lineTo(300,i*scale*4+offset);
+            this.ct.closePath();
+            this.ct.stroke();
+        }
+    }
+    hideCanvas(){
+        this.canvas.style.display = "none";
+    }
+    showCanvas(){
+        this.canvas.style.display = "inline";
+    }
+}
+
 let pixelRatio;
 let width;
 let height;

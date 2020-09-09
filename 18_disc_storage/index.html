@@ -36,6 +36,11 @@
 				<u><p id="textLeftColumn">All</p></u>
 			</td>
 		</tr>
+		<tr>
+			<td align="left" colspan="2">
+		        <canvas id="codeDisplayCanvas" style="display:inline"></canvas>
+			</td>
+		</tr>
 
 		<tr>
 			<td align="left" colspan="2">
@@ -84,6 +89,7 @@
 
 		//Prepare displayCanvas
 		const displayCanvas = new Canvas(document.getElementById("displayCanvas"));
+		const codeDisplayCanvas = new CodeCanvas(document.getElementById("codeDisplayCanvas"));
 
 		//Prepare scanner
 		const discScanner = new DiscScanner(document.getElementById("cameraMedia"),displayCanvas);
