@@ -2,7 +2,7 @@ class VisionProgram{
     constructor(originalCanvas,displayCanvas){
         this.oCanvas = originalCanvas;
         this.dCanvas = displayCanvas;
-        this.canvasScale = this.dCanvas.canvas.width/this.oCanvas.canvas.width;
+        this.canvasScale = this.oCanvas.canvas.width/this.dCanvas.canvas.width;
     }
     locatePeaks(xi,yi,xf,yf){
         return [x,y];
