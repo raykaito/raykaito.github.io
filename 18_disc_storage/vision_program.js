@@ -1,4 +1,4 @@
-class VisionProgram_CodeLocator{
+class VisionProgram{
     constructor(){
         //tells if the program has failed or not
         this.failed;
@@ -766,3 +766,5 @@ class VisionProgram_BoardReader{
         return (scn.std<15);
     }
 }
+
+console.log("Loaded: vision_program.js")

@@ -5,6 +5,9 @@ class DiscScanner{
         this.oCanvas = new Canvas();
         this.oCanvas.appendSelf();
         this.video = video;
+        this.video.setAttribute('autoplay', '');
+        this.video.setAttribute('muted', '');
+        this.video.setAttribute('playsinline', '');
 
         this.front=false;
         this.constraints = {
@@ -18,15 +21,18 @@ class DiscScanner{
         this.videoWidth = -1;
         this.videoHeight= -1;
 
+        //Animation Properties
+        this.animeRequest;
+
         //Initialize visionProgram
-        this.vProgram = new VisionProgram_CodeLocator();
+        this.vProgram = new VisionProgram();
     }
     handleSuccess(stream){
         this.video.srcObject = stream;
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        console.log(this.videoWidth,this.videoHeight);
+        log([this.videoWidth,this.videoHeight]);
         this.oCanvas.resize(this.videoWidth,this.videoHeight/2);
         this.drawVideo();
     }
@@ -36,6 +42,7 @@ class DiscScanner{
     stopScan(){
         let stream = this.video.srcObject;
         if(stream==null) return;
+        cancelAnimationFrame(this.animeRequest);
         let tracks = stream.getTracks();
         tracks.forEach(function(track) {
             track.stop();
@@ -43,12 +50,9 @@ class DiscScanner{
         this.video.srcObject = null;
     }
     drawVideo(){
-        const rx = Math.floor(Math.random()*10);
-        const ry = Math.floor(Math.random()*10);
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2,rx,ry);
-        requestAnimationFrame(()=>{this.drawVideo();});
-        log([rx,ry]);
+        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
+        this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
 console.log("Loaded: scanner.js");
