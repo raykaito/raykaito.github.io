@@ -5,7 +5,6 @@
 <head>
 	<title>Disc Search</title>
 	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
-	<link rel="stylesheet" href="noThickness.css" type="text/css">
 	<link rel="icon" type="image/png" href="../icon.png">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1"/>
 </head>
@@ -25,7 +24,7 @@
 		</tr>
 		<tr>
 			<td align="left" colspan="2">
-		        <canvas id="displayCanvas" style="display:inline"></canvas>
+		        <canvas id="displayCanvas" style="display:inline" onclick="discScanner.drawVideo()"></canvas>
 			</td>
 		</tr>
 		<tr>
@@ -59,12 +58,12 @@
 
 		//Prepare DisplayCanvas & codeDisplayCanvas
         const displayCanvas = new Canvas(document.getElementById("displayCanvas"));
-        displayCanvas.flexResize(0.95,0.6);
+        displayCanvas.flexResize(0.95,0.5);
 		displayCanvas.fillAll();
         table.width = displayCanvas.canvas.style.width;
 
 		const codeDisplayCanvas = new CodeCanvas(document.getElementById("codeDisplayCanvas"));
-		codeDisplayCanvas.flexResize(0.95,0.6);
+		codeDisplayCanvas.flexResize(0.95,0.5);
 		codeDisplayCanvas.fillAll("white");
 		codeDisplayCanvas.displayCode();
 

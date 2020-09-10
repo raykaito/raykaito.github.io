@@ -10,17 +10,16 @@ class Canvas{
         if(Math.floor(window.innerWidth)<WidthMin)   width = WidthMin;
         width = Math.floor(width*windowWidthRatio);
         let height = Math.floor(width*HeightRatio);
-        this.resize(width,height);
+        this.resizeStyle(width,height);
+        this.resize(width*this.pixelRatio,height*this.pixelRatio);
     }
-    resize(width, height, actualSize=false){
-        if(actualSize){
-            width /= this.pixelRatio;
-            height/= this.pixelRatio;
-        }
+    resize(width, height){
+        this.canvas.width = Math.floor(width);
+        this.canvas.height= Math.floor(height);
+    }
+    resizeStyle(width,height){
         this.canvas.style.width  = Math.floor(width) +"px";
         this.canvas.style.height = Math.floor(height)+"px";
-        this.canvas.width = Math.floor(width*this.pixelRatio);
-        this.canvas.height= Math.floor(height*this.pixelRatio);
     }
     hideCanvas(){
         this.canvas.style.display = "none";
@@ -38,6 +37,10 @@ class Canvas{
     fillAll(color="black"){
         this.ct.fillStyle = color;
         this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
+    }
+    drawImage(img,sx,sy,sw,sh,dx=0,dy=0,dw=this.canvas.width,dh=this.canvas.height){
+        //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);
+        this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
     }
 }
 

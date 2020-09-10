@@ -1,17 +1,10 @@
 class DiscScanner{
-    constructor(video,canvasClass){
+    constructor(video,displayCanvas){
         //Get display canvas info
-        this.displayCanvas = canvasClass.canvas;
-        this.displayct = canvasClass.ct;
-        this.displayCanvasWidth = this.displayCanvas.width;
-        this.displayCanvasHeight= this.displayCanvas.height;
+        this.dCanvas = displayCanvas;
+        this.oCanvas = new Canvas();
+        body.appendChild(this.oCanvas.canvas);
         this.video = video;
-
-        //Create Canvas for Original Video Image
-        this.originalCanvas = document.createElement("canvas");
-        this.originalct = this.originalCanvas.getContext("2d");
-        this.originalCanvasWidth = -1;
-        this.originalCanvasHeight= -1;
 
         this.front=false;
         this.constraints = {
@@ -33,11 +26,8 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        console.log(stream.getTracks()[0]);
-        this.originalCanvasWidth = this.videoWidth;
-        this.originalCanvasHeight= Math.floor(this.videoHeight/2);
-        this.originalCanvas.width = this.originalCanvasWidth;
-        this.originalCanvas.height= this.originalCanvasHeight;
+        console.log(this.videoWidth,this.videoHeight);
+        this.oCanvas.resize(this.videoWidth,this.videoHeight/2);
         this.drawVideo();
     }
     startScan(){        
@@ -54,8 +44,8 @@ class DiscScanner{
     }
     drawVideo(){
         //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
-        this.originalct.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2,0,0,this.originalCanvasWidth,this.originalCanvasHeight);
-        this.displayct.drawImage(this.originalCanvas,0,0,this.originalCanvasWidth,this.originalCanvasHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
+        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
         requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
