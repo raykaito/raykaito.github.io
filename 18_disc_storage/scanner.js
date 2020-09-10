@@ -50,7 +50,7 @@ class DiscScanner{
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
         this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        const firstImageData = discScanner.vProgram.newROI(5,5,200,10,0.1);
+        const firstImageData = discScanner.vProgram.newROI(150,5,400,200,0.1);
         discScanner.vProgram.displayImageDataD(firstImageData);
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }

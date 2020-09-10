@@ -2,7 +2,6 @@ class VisionProgram{
     constructor(originalCanvas,displayCanvas){
         this.oCanvas = originalCanvas;
         this.dCanvas = displayCanvas;
-        this.canvasScale = this.oCanvas.canvas.width/this.dCanvas.canvas.width;
     }
     locatePeaks(xi,yi,xf,yf){
         return [x,y];
@@ -24,7 +23,6 @@ class VisionProgram{
     }
     displayImageDataO(imgData){
         const [tempCanvas,x,y,theta] = imgData.prepareDisplayCanvas();
-        log([tempCanvas.width,tempCanvas.height]);
         this.oCanvas.ct.save();
         this.oCanvas.translate(x,y);
         this.oCanvas.rotateRad(theta);
@@ -34,12 +32,12 @@ class VisionProgram{
     }
     displayImageDataD(imgData){
         const [tempCanvas,x,y,theta] = imgData.prepareDisplayCanvas();
-        log([tempCanvas.width,tempCanvas.height]);
+        const canvasScale = this.dCanvas.canvas.width/this.oCanvas.canvas.width;
         this.dCanvas.ct.save();
-        this.dCanvas.translate(x*this.canvasScale,y*this.canvasScale);
+        this.dCanvas.translate(x*canvasScale,y*canvasScale);
         this.dCanvas.rotateRad(theta);
-        this.dCanvas.drawImage(tempCanvas,0,0,tempCanvas.width,tempCanvas.height,0,0,tempCanvas.width*this.canvasScale,tempCanvas.height*this.canvasScale);
-        this.dCanvas.drawRect("lime",0,0,tempCanvas.width*this.canvasScale,tempCanvas.height*this.canvasScale);
+        this.dCanvas.drawImage(tempCanvas,0,0,tempCanvas.width,tempCanvas.height,0,0,tempCanvas.width*canvasScale,tempCanvas.height*canvasScale);
+        this.dCanvas.drawRect("lime",0,0,tempCanvas.width*canvasScale,tempCanvas.height*canvasScale);
         this.dCanvas.ct.restore();
     }
 }
@@ -55,7 +53,9 @@ class ImageData{
 
         this.imgOut = imgIn;
         for(let i=0;i<imgIn.data.length;i++){
-            this.imgOut.data[i]=imgIn.data[i];
+            if(i%4!=3){
+                this.imgOut.data[i]=imgIn.data[i]/4;
+            }
         }
     }
     get passData(){
