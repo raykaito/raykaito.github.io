@@ -4,6 +4,16 @@ class Canvas{
         this.ct = canvas.getContext("2d");
         this.pixelRatio = window.devicePixelRatio;
     }
+    //Transformation
+    translate(x,y){
+        this.ct.translate(x,y);
+    }
+    rotateDeg(deg){
+        this.rotate(deg*Math.PI/180);
+    }
+    rotateRad(rad){
+        this.ct.rotate(rad);
+    }
     //Style of canvas element on HTML
     flexResize(windowWidthRatio=0.95, HeightRatio=1, WidthMax=520, WidthMin=320){
         let width = Math.floor(window.innerWidth);
@@ -46,6 +56,11 @@ class Canvas{
     fillAll(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
         this.ct.fillStyle = color;
         this.ct.fillRect(dx,dy,width,height);
+    }
+    drawRect(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
+        this.ct.strokeStyle = color;
+        this.ct.rect(dx,dy,width,height);
+        this.ct.stroke();
     }
     drawImage(img,sx,sy,sw,sh,dx=0,dy=0,dw=this.canvas.width,dh=this.canvas.height){
         //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);

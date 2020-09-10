@@ -22,7 +22,7 @@ class DiscScanner{
         this.animeRequest;
 
         //Initialize visionProgram
-        this.vProgram = new VisionProgram();
+        this.vProgram = new VisionProgram(this.oCanvas,this.dCanvas);
     }
     handleSuccess(stream){
         this.video.srcObject = stream;
@@ -50,7 +50,12 @@ class DiscScanner{
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
         this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
+        const firstImageData = discScanner.vProgram.newROI(5,5,200,10,0.1);
+        discScanner.vProgram.displayImageDataD(firstImageData);
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }
+}
+function dcClicked(){
+    log("display Canvas Clicked");
 }
 console.log("Loaded: scanner.js");
