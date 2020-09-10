@@ -5,9 +5,6 @@ class DiscScanner{
         this.oCanvas = new Canvas();
         this.oCanvas.appendSelf();
         this.video = video;
-        this.video.setAttribute('autoplay', '');
-        this.video.setAttribute('muted', '');
-        this.video.setAttribute('playsinline', '');
 
         this.front=false;
         this.constraints = {
@@ -32,8 +29,9 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        log([this.videoWidth,this.videoHeight]);
+        log([this.videoWidth,this.videoHeight,"HAHHA"]);
         this.oCanvas.resize(this.videoWidth,this.videoHeight/2);
+        this.video.play();
         this.drawVideo();
     }
     startScan(){        
