@@ -43,11 +43,12 @@ class DiscScanner{
         this.video.srcObject = null;
     }
     drawVideo(){
-        log([this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2]);
-        //this.displayct.drawImage(this.video,this.croppedVideoXStart,this.croppedVideoYStart,this.croppedVideoWidth,this.croppedVideoHeight,0,0,this.displayCanvasWidth,this.displayCanvasHeight);
+        const rx = Math.floor(Math.random()*10);
+        const ry = Math.floor(Math.random()*10);
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
+        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2,rx,ry);
         requestAnimationFrame(()=>{this.drawVideo();});
+        log([rx,ry]);
     }
 }
 console.log("Loaded: scanner.js");

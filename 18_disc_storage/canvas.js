@@ -51,15 +51,17 @@ class Canvas{
         //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);
         this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
     }
-    appendSelf(parent = body){
-        body.appendChild(this.canvas);
+    appendSelf(parent=body){
+        parent.appendChild(this.canvas);
     }
 }
 
 class LogCanvas extends Canvas{
-    constructor(canvas=document.createElement("canvas")){
+    constructor(canvas=document.createElement("canvas"),lineSize=16){
         super(canvas);
-        this.appendSelf();
+        this.lineSize = lineSize;
+        this.font = ""+lineSize+"px 'Times'";
+        this.appendSelf(debugSpace);
         this.flexResize(0.95,1);
         this.fillAll("white");
         this.newLine("Logger Started...");
@@ -72,9 +74,9 @@ class LogCanvas extends Canvas{
             });
             string = newString;
         }
-        this.text(string);
-        this.ct.drawImage(this.canvas,0,10);
-        this.fillAll("white",0,0,this.canvas.width,10);
+        this.text(string,0,0,"black",this.font);
+        this.ct.drawImage(this.canvas,0,this.lineSize);
+        this.fillAll("white",0,0,this.canvas.width,this.lineSize);
     }
 }
 
