@@ -4,6 +4,7 @@ class Canvas{
         this.ct = canvas.getContext("2d");
         this.pixelRatio = window.devicePixelRatio;
     }
+    //Style of canvas element on HTML
     flexResize(windowWidthRatio=0.95, HeightRatio=1, WidthMax=520, WidthMin=320){
         let width = Math.floor(window.innerWidth);
         if(Math.floor(window.innerWidth)>WidthMax)   width = WidthMax;
@@ -27,6 +28,14 @@ class Canvas{
     showCanvas(){
         this.canvas.style.display = "inline";
     }
+    //DrawStrokeFill things on Canvas
+    text(string="empty string", x=0, y=0, color="black", font="10px 'Times'", ta="left", tbl="top"){
+        this.ct.fillStyle = color;
+        this.ct.font = font;
+        this.ct.textAlign = ta;
+        this.ct.textBaseline = tbl;
+        this.ct.fillText(string,x,y);
+    }
     strokeLine(xi,yi,xf,yf){
         this.ct.beginPath();
         this.ct.moveTo(xi,yi);
@@ -41,6 +50,9 @@ class Canvas{
     drawImage(img,sx,sy,sw,sh,dx=0,dy=0,dw=this.canvas.width,dh=this.canvas.height){
         //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);
         this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
+    }
+    appendSelf(parent = body){
+        body.appendChild(this.canvas);
     }
 }
 
