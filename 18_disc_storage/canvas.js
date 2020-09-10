@@ -43,9 +43,9 @@ class Canvas{
         this.ct.closePath();
         this.ct.stroke();
     }
-    fillAll(color="black"){
+    fillAll(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
         this.ct.fillStyle = color;
-        this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.ct.fillRect(dx,dy,width,height);
     }
     drawImage(img,sx,sy,sw,sh,dx=0,dy=0,dw=this.canvas.width,dh=this.canvas.height){
         //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);
@@ -53,6 +53,28 @@ class Canvas{
     }
     appendSelf(parent = body){
         body.appendChild(this.canvas);
+    }
+}
+
+class LogCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas")){
+        super(canvas);
+        this.appendSelf();
+        this.flexResize(0.95,1);
+        this.fillAll("white");
+        this.newLine("Logger Started...");
+    }
+    newLine(string){
+        if(string.isArray){
+            let newString = "";
+            string.forEach((element)=>{
+                newString = newString+","+element;
+            });
+            string = newString;
+        }
+        this.text(string);
+        this.ct.drawImage(this.canvas,0,10);
+        this.fillAll("white",0,0,this.canvas.width,10);
     }
 }
 

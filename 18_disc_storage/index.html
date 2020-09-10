@@ -62,6 +62,7 @@
 		displayCanvas.fillAll();
         table.width = displayCanvas.canvas.style.width;
 
+        //
 		const codeDisplayCanvas = new CodeCanvas(document.getElementById("codeDisplayCanvas"));
 		codeDisplayCanvas.flexResize(0.95,0.5);
 		codeDisplayCanvas.fillAll("white");
@@ -99,6 +100,12 @@
 			updateScannerStatus();
 		}
 		updateScannerStatus();
+
+		//Debugging tool for ios
+		logCanvas = new LogCanvas();
+		function log(input){
+			logCanvas.newLine(input);
+		}
 	//--> 
 	</script>
 
