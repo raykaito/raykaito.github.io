@@ -50,12 +50,13 @@ class DiscScanner{
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
         this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        const firstImageData = discScanner.vProgram.newROI(150,5,400,200,0.1);
-        discScanner.vProgram.displayImageDataD(firstImageData);
+        this.vProgram.run();
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
+let outLine=false;
 function dcClicked(){
+    outLine =! outLine;
     log("display Canvas Clicked");
 }
 console.log("Loaded: scanner.js");

@@ -59,15 +59,46 @@ class Canvas{
     }
     drawRect(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
         this.ct.strokeStyle = color;
+        this.ct.beginPath();
         this.ct.rect(dx,dy,width,height);
+        this.ct.closePath();
         this.ct.stroke();
     }
+    fillRect(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
+        this.ct.fillStyle = color;
+        this.ct.fillRect(dx,dy,width,height);
+    }
     drawImage(img,sx,sy,sw,sh,dx=0,dy=0,dw=this.canvas.width,dh=this.canvas.height){
-        //console.log(img,sx,sy,sw,sh,dx,dy,dw,dh);
         this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
     }
     appendSelf(parent=body){
         parent.appendChild(this.canvas);
+    }
+}
+
+class GraphCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas"),width=100,height=256){
+        super(canvas);
+        this.clear();
+    }
+    resize(width,height){
+        super.resize(width+2,height+2);
+    }
+    clear(){
+        this.fillAll("black");    
+    }
+    update(data){
+        if(Array.isArray(data)){
+            this.clear();
+            for(let i=0;i<data.length;i++){
+                this.fillRect("white",i+1,1,1,this.canvas.height-data[i]-2);
+            }
+        }else{
+            alert("Data input for GraphCanvas needs to be 1-D Array");
+        }
+    }
+    show(){
+        this.appendSelf();
     }
 }
 
@@ -77,11 +108,11 @@ class LogCanvas extends Canvas{
         this.lineSize = lineSize;
         this.font = ""+lineSize+"px 'Times'";
         this.appendSelf(debugSpace);
-        this.flexResize(0.95,1);
+        this.flexResize(0.95,0.2);
         this.fillAll("white");
         this.newLine("Logger Started...");
     }
-    newLine(string){
+    newLine(string="Empty"){
         if(string.isArray){
             let newString = "";
             string.forEach((element)=>{
