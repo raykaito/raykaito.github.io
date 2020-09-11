@@ -127,15 +127,91 @@ class LineScanner extends ImageData{
     showGraph(){
         this.graph.appendSelf();
     }
+    getData(imgIn,type="all"){
+        let data = new Array(imgIn.width);
+        if(type=="r"){
+            for(let i=0;i<imgIn.width;i++){
+                data[i]=100*(imgIn.data[4*i])/256;
+            }
+        }else if(type=="g"){
+            for(let i=0;i<imgIn.width;i++){
+                data[i]=100*(imgIn.data[4*i+1])/256;
+            }
+        }else if(type=="b"){
+            for(let i=0;i<imgIn.width;i++){
+                data[i]=100*(imgIn.data[4*i+2])/256;
+            }
+        }else{
+            for(let i=0;i<imgIn.width;i++){
+                data[i]=100*(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/(256*3);
+            }
+        }
+        return data;
+    }
+    smoothenData(data,range=3){
+        let counter=0;
+        let sum = 0;
+        let smoothdata = new Array(data.length);
+        for(let i=-range; i<data.length+range; i++){
+            if(i+range<data.length){
+                counter++;
+                sum+=data[i+range];
+            }
+            if(i-range>=0){
+                counter--;
+                sum-=data[i-range];
+            }
+            if(i>=0&&i<data.length){
+                smoothdata[i]=sum/counter;
+            }
+        }
+        return smoothdata;
+    }
+    derivativeData(data){
+        let derivative = new Array(data.length);
+        let rightSlope = 0;
+        let leftSlope = 0;
+        for(let i=0;i<data.length;i++){
+            if(i>0){
+                leftSlope=rightSlope;
+            }
+            if(i+1<data.length){
+                rightSlope = data[i+1]-data[i];
+            }
+            derivative[i]=rightSlope+leftSlope;
+        }
+        return derivative;
+    }
+    dualIntegrate(data){
+        let dualInt = new Array(data.length).fill(50);
+        let sum=0;
+        for(let i=0;i<data.length;i++){
+            if(data[i]<0){
+                sum+=data[i];
+                dualInt[i] = sum+50;
+            }else{
+                sum = 0;
+            }
+        }
+        sum=0;
+        for(let i=data.length-1;i>=0;i--){
+            if(data[i]>0){
+                sum+=data[i];
+                dualInt[i] = sum+50;
+            }else{
+                sum = 0;
+            }
+        }
+        return dualInt;
+    }
     run([imgIn,xpos,ypos,theta]){
         this.updateROI([imgIn,xpos,ypos,theta])
         this.graph.resize(imgIn.width,100);
-        let data = new Array(imgIn.width);
-        for(let i=0;i<imgIn.width;i++){
-            data[i]=100*(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/(256*3);
-        }
-
-        this.graph.update(data);
+        const d_0_original = this.getData(imgIn);
+        const d_1_smoothen = this.smoothenData(d_0_original);
+        const d_2_derivative = this.derivativeData(d_1_smoothen);
+        const d_3_dualInt = this.dualIntegrate(d_2_derivative);
+        this.graph.update(d_3_dualInt);
     }
 }
 

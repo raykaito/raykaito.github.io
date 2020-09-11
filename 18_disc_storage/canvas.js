@@ -72,6 +72,7 @@ class Canvas{
         this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
     }
     appendSelf(parent=body){
+        console.log("HERE");
         parent.appendChild(this.canvas);
     }
 }
