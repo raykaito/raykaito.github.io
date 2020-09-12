@@ -2,15 +2,23 @@ class VisionProgram{
     constructor(originalCanvas,displayCanvas){
         this.oCanvas = originalCanvas;
         this.dCanvas = displayCanvas;
-        this.middleLS = new LineScanner();
-        this.middleLS.showGraph();
+        this.LS_num = 10;
+        this.LS = new Array(this.LS_num);
+        for(let i=0;i<this.LS_num;i++){
+            this.LS[i] = new LineScanner(3);
+            this.LS[i].showGraph();
+        }
     }
     run(){
         const width  = this.oCanvas.canvas.width;
         const height = this.oCanvas.canvas.height;
-        this.middleLS.run(this.newROI(width/2,0,height,1,90*Math.PI/180));
-        this.displayImageDataD(this.middleLS);
-        this.displayImageDataO(this.middleLS);
+        for(let i=0;i<this.LS_num;i++){
+            const hStart = height/2+height/40*i;
+            const roi = this.newROI(0,hStart,width,1,0);
+            this.LS[i].run(roi);
+            this.displayImageDataD(this.LS[i]);
+            this.displayImageDataO(this.LS[i]);
+        }
     }
     locatePeaks(xi,yi,xf,yf){
         return [x,y];
@@ -117,8 +125,9 @@ class ImageData{
 }
 
 class LineScanner extends ImageData{
-    constructor(){
+    constructor(smoothrange = 1){
         super();
+        this.smoothrange = smoothrange;
         this.graph = new GraphCanvas();
     }
     updateROI([imgIn,xpos,ypos,theta]){
@@ -152,7 +161,8 @@ class LineScanner extends ImageData{
         }
         return data;
     }
-    smoothenData(data,range=1){
+    smoothenData(data){
+        const range = this.smoothrange;
         let counter=0;
         let sum = 0;
         let smoothdata = new Array(data.length);

@@ -9,9 +9,11 @@ class Canvas{
         this.ct.translate(x,y);
     }
     rotateDeg(deg){
+        if(deg==0) return;
         this.rotate(deg*Math.PI/180);
     }
     rotateRad(rad){
+        if(rad==0) return; 
         this.ct.rotate(rad);
     }
     //Style of canvas element on HTML
