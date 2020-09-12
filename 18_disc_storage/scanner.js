@@ -29,8 +29,8 @@ class DiscScanner{
         const mediaSettings = stream.getTracks()[0].getSettings();
         this.videoWidth = mediaSettings.width;
         this.videoHeight= mediaSettings.height;
-        log([this.videoWidth,this.videoHeight,"HAHHA"]);
         this.oCanvas.resize(this.videoWidth,this.videoHeight/2);
+        this.vProgram.resizeOcanvas(this.videoWidth,this.videoHeight/2)
         this.oCanvas.resizeStyle(this.videoWidth,this.videoHeight/2,true);
         this.video.play();
         this.drawVideo();

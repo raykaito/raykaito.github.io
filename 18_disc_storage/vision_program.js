@@ -1,29 +1,54 @@
 class VisionProgram{
     constructor(originalCanvas,displayCanvas){
         this.oCanvas = originalCanvas;
+        this.width  = originalCanvas.canvas.width;
+        this.height = originalCanvas.canvas.height;
         this.dCanvas = displayCanvas;
-        this.LS_num = 10;
+        this.oimgdata;
+
+        this.lineScanner = new houghTransform();
+        this.lineScanner.showPlot();
+
+        return;
+        this.LS_num = 15;
         this.LS = new Array(this.LS_num);
         for(let i=0;i<this.LS_num;i++){
             this.LS[i] = new LineScanner(3);
             this.LS[i].showGraph();
         }
+
+    }
+    resizeOcanvas(width,height){
+        this.width = width;
+        this.height= height;
     }
     run(){
-        const width  = this.oCanvas.canvas.width;
-        const height = this.oCanvas.canvas.height;
+        this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
+        this.lineScanner.run([this.oimgdata,0,0,0]);
+        return;
         for(let i=0;i<this.LS_num;i++){
-            const hStart = height/2+height/40*i;
-            const roi = this.newROI(0,hStart,width,1,0);
+            const hStart = this.height/2+this.height/40*i;
+            const roi = this.newROI(0,hStart,this.width,1,0);
             this.LS[i].run(roi);
             this.displayImageDataD(this.LS[i]);
             this.displayImageDataO(this.LS[i]);
         }
     }
-    locatePeaks(xi,yi,xf,yf){
-        return [x,y];
-    }
     newROI(x=0,y=0,width=1,height=1,theta=0){
+        if(theta==0){
+            //Crop from oimagedata
+            let imgData = this.oCanvas.ct.createImageData(width,height);
+            for(let xi=0;xi<width;xi++){
+                for(let yi=0;yi<height;yi++){
+                    const indexOut = this.xy2i([xi,yi]);
+                    const indexIn  = this.xy2i([xi+x,yi+y]);
+                    for(let i=0;i<3;i++){
+                        imgData.data[indexOut*4+i] = this.oimgdata.data[indexIn*4+i];
+                    }
+                }
+            }
+            return [imgData, x,y,theta];
+        }
         //Create New Canvas
         const roi = new Canvas();
         roi.resize(width,height);
@@ -60,6 +85,12 @@ class VisionProgram{
         this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*wScale,tc.height*hScale);
         imgData.ddraw(this.dCanvas);
         this.dCanvas.ct.restore();
+    }
+    xy2i(xy,width=this.width){
+        return Math.floor(xy[0])+width*Math.floor(xy[1]);
+    }
+    i2xy(i, width=this.width){
+        return [i%width, Math.floor(i/width)];
     }
 }
 
@@ -122,6 +153,77 @@ class ImageData{
 
         return rgbValue;
     }
+    xy2i(xy,width=this.width){
+        return Math.floor(xy[0])+width*Math.floor(xy[1]);
+    }
+    i2xy(i, width=this.width){
+        return [i%width, Math.floor(i/width)];
+    }
+}
+
+class houghTransform extends ImageData{
+    constructor(rho=100,theta=60){
+        super();
+        this.resolutionRho = rho;
+        this.resolutionTheta = theta;
+        this.intensity = new Array(this.resolutionRho*this.resolutionTheta);
+        //Prepare Plot Canvas
+        this.plot = new Canvas();
+        this.plot.resize(this.resolutionTheta,this.resolutionRho);
+        this.plot.resizeStyle(this.resolutionTheta,this.resolutionRho,true);
+        this.plotimgdata = this.plot.ct.createImageData(this.resolutionTheta,this.resolutionRho);
+        for(let i=0;i<this.intensity.length;i++){
+            this.plotimgdata.data[i*4+3]=256;
+        }
+        //Settings
+        this.xSkip = 10;
+        this.ySkip = 10;
+        this.thetaStart = -30;
+        this.thetaScale = 1;
+        this.rhoScale = 1;
+    }
+    showPlot(){
+        this.plot.appendSelf();
+    }
+    run([imgIn,xpos,ypos,theta]){
+        this.updateROI([imgIn,xpos,ypos,theta]);
+        const width = imgIn.width;
+        const height= imgIn.height;
+        this.rhoScale = this.resolutionRho/getDist(width,height);
+        this.intensity.fill(0);
+        for(let i=0;i<imgIn.data.length/4;i++){
+            const [x,y] = this.i2xy(i);
+            if(x%this.xSkip!=0) continue;
+            if(y%this.ySkip!=0) continue;
+            const value = 256-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
+            this.updateIntensity(x,y,value);
+        }
+        this.updatePlotImageData();
+    }
+    updatePlotImageData(){
+        const maxIntensity = Math.max(10,Math.max(...this.intensity));
+        const intensityScale = 256/maxIntensity;
+        for(let i=0;i<this.intensity.length;i++){
+            const intensity = this.intensity[i]*intensityScale;
+            this.plotimgdata.data[i*4+0]=intensity;
+            this.plotimgdata.data[i*4+1]=intensity;
+            this.plotimgdata.data[i*4+2]=intensity;
+        }
+        this.plot.ct.putImageData(this.plotimgdata,0,0);
+    }
+    updateIntensity(x,y,value){
+        const radiusi = getDist(x,y);
+        const thetai  = getDir(x,y);
+        const thetaStartRad = deg2rad(this.thetaStart);
+        const thetaScaleRad = deg2rad(this.thetaScale);
+        for(let theta=0;theta<this.resolutionTheta;theta++){
+            const currentTheta = thetai-thetaStartRad+thetaScaleRad*theta;
+            const rho = radiusi*Math.cos(currentTheta);
+            const rhoIndex = Math.abs(Math.floor(this.rhoScale*rho));
+            this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
+        }
+        return;
+    }
 }
 
 class LineScanner extends ImageData{
@@ -129,13 +231,6 @@ class LineScanner extends ImageData{
         super();
         this.smoothrange = smoothrange;
         this.graph = new GraphCanvas();
-    }
-    updateROI([imgIn,xpos,ypos,theta]){
-        if(imgIn.height!=1){
-            alert("The Height for ROI needs to be 1 for LineScanner.");
-        }else{
-            super.updateROI([imgIn,xpos,ypos,theta]);
-        }
     }
     showGraph(){
         this.graph.appendSelf();
@@ -226,7 +321,7 @@ class LineScanner extends ImageData{
         return intensity;
     }
     run([imgIn,xpos,ypos,theta]){
-        this.updateROI([imgIn,xpos,ypos,theta])
+        this.updateROI([imgIn,xpos,ypos,theta]);
         this.graph.resize(imgIn.width,100);
         this.graph.resizeStyle(imgIn.width,100,true);
         const d_0_original = this.getData(imgIn);

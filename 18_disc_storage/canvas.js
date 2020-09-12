@@ -152,4 +152,17 @@ class CodeCanvas extends Canvas{
     }
 }
 
+const getDist=(xt,yt,xi=0,yi=0)=>{
+    return Math.sqrt((xt-xi)*(xt-xi)+(yt-yi)*(yt-yi));
+}
+const getDir=(xt,yt,xi=0,yi=0)=>{
+    return Math.atan2(yt-yi,xt-xi);
+}
+const deg2rad=(deg)=>{
+    return deg/180*Math.PI;
+}
+const rad2deg=(rad)=>{
+    return rad*180/Math.PI;
+}
+
 console.log("Loaded: canvas.js");
