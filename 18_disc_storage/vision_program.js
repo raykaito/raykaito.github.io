@@ -8,7 +8,7 @@ class VisionProgram{
     run(){
         const width  = this.oCanvas.canvas.width;
         const height = this.oCanvas.canvas.height;
-        this.middleLS.run(this.newROI(0,height/2,width,1,0));
+        this.middleLS.run(this.newROI(width/2,0,height,1,90*Math.PI/180));
         this.displayImageDataD(this.middleLS);
         this.displayImageDataO(this.middleLS);
     }
@@ -152,7 +152,7 @@ class LineScanner extends ImageData{
         }
         return data;
     }
-    smoothenData(data,range=3){
+    smoothenData(data,range=2){
         let counter=0;
         let sum = 0;
         let smoothdata = new Array(data.length);
