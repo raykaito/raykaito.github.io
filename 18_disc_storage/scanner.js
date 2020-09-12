@@ -31,6 +31,7 @@ class DiscScanner{
         this.videoHeight= mediaSettings.height;
         log([this.videoWidth,this.videoHeight,"HAHHA"]);
         this.oCanvas.resize(this.videoWidth,this.videoHeight/2);
+        this.oCanvas.resizeStyle(this.videoWidth,this.videoHeight/2,true);
         this.video.play();
         this.drawVideo();
     }

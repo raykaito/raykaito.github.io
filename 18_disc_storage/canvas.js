@@ -28,9 +28,14 @@ class Canvas{
         this.canvas.width = Math.floor(width);
         this.canvas.height= Math.floor(height);
     }
-    resizeStyle(width,height){
-        this.canvas.style.width  = Math.floor(width) +"px";
-        this.canvas.style.height = Math.floor(height)+"px";
+    resizeStyle(width,height,divideByPR=false){
+        if(divideByPR){
+            this.canvas.style.width  = Math.floor(width/this.pixelRatio) +"px";
+            this.canvas.style.height = Math.floor(height/this.pixelRatio)+"px";
+        }else{
+            this.canvas.style.width  = Math.floor(width) +"px";
+            this.canvas.style.height = Math.floor(height)+"px";
+        }
     }
     hideCanvas(){
         this.canvas.style.display = "none";
@@ -84,6 +89,9 @@ class GraphCanvas extends Canvas{
     }
     resize(width,height){
         super.resize(width+2,height+2);
+    }
+    resizeStyle(width,height){
+        super.resizeStyle(width+2,height+2);
     }
     clear(){
         this.fillAll("black");    

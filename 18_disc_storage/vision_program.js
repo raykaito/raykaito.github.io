@@ -10,7 +10,7 @@ class VisionProgram{
         const height = this.oCanvas.canvas.height;
         this.middleLS.run(this.newROI(0,height/2,width,1,0));
         this.displayImageDataD(this.middleLS);
-        //this.displayImageDataO(this.lineScannerA);
+        this.displayImageDataO(this.middleLS);
     }
     locatePeaks(xi,yi,xf,yf){
         return [x,y];
@@ -37,6 +37,7 @@ class VisionProgram{
         this.oCanvas.rotateRad(theta);
         this.oCanvas.drawRect("lime",-1,-1,tc.width+2,tc.height+2);
         this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width,tc.height);
+        imgData.odraw(this.oCanvas);
         this.oCanvas.ct.restore();
     }
     displayImageDataD(imgData){
@@ -49,6 +50,7 @@ class VisionProgram{
         this.dCanvas.rotateRad(theta);
         this.dCanvas.drawRect("lime",-1,-1,tc.width*wScale+2,tc.height*hScale+2);
         this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*wScale,tc.height*hScale);
+        imgData.ddraw(this.dCanvas);
         this.dCanvas.ct.restore();
     }
 }
@@ -77,6 +79,8 @@ class ImageData{
         tempCanvas.ct.putImageData(this.imgOut,0,0);
         return [tempCanvas,this.xpos,this.ypos,this.theta];
     }
+    odraw(){}
+    ddraw(){}
     xy2i(xy,width=this.width){
         return Math.floor(xy[0])+width*Math.floor(xy[1]);
     }
@@ -204,14 +208,23 @@ class LineScanner extends ImageData{
         }
         return dualInt;
     }
+    lineIntensity(data){
+        let intensity = new Array(data.length).fill(0);
+        for(let i=0;i<data.length-1;i++){
+            intensity[i] = Math.max(0,data[i+1]-data[i]);
+        }
+        return intensity;
+    }
     run([imgIn,xpos,ypos,theta]){
         this.updateROI([imgIn,xpos,ypos,theta])
         this.graph.resize(imgIn.width,100);
+        this.graph.resizeStyle(imgIn.width,100,true);
         const d_0_original = this.getData(imgIn);
         const d_1_smoothen = this.smoothenData(d_0_original);
         const d_2_derivative = this.derivativeData(d_1_smoothen);
         const d_3_dualInt = this.dualIntegrate(d_2_derivative);
-        this.graph.update(d_3_dualInt);
+        const d_4_lines = this.lineIntensity(d_3_dualInt);
+        this.graph.update(d_4_lines);
     }
 }
 
