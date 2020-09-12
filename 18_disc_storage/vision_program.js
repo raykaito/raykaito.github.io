@@ -253,9 +253,9 @@ class Binarize extends ImageData{
             const [x,y] = this.i2xy(i);
             const value = (imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
             if(value>this.threshold){
-                this.setPixI(i,0);
-            }else{
                 this.setPixI(i,255);
+            }else{
+                this.setPixI(i,0);
             }
         }
     }
