@@ -152,7 +152,7 @@ class LineScanner extends ImageData{
         }
         return data;
     }
-    smoothenData(data,range=2){
+    smoothenData(data,range=1){
         let counter=0;
         let sum = 0;
         let smoothdata = new Array(data.length);
