@@ -228,7 +228,7 @@ class houghTransform extends ImageData{
         for(let theta=0;theta<this.resolutionTheta;theta++){
             const currentTheta = thetai+thetaStartRad+thetaScaleRad*theta;
             const rho = radiusi*Math.cos(currentTheta);
-            const rhoIndex = Math.abs(Math.floor(this.rhoScale*rho));
+            const rhoIndex = Math.floor(this.rhoScale*rho+this.resolutionRho/2);
             this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
         }
         return;
