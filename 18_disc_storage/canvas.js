@@ -98,11 +98,11 @@ class GraphCanvas extends Canvas{
     clear(){
         this.fillAll("black");    
     }
-    update(data){
+    update(data,scale=1){
         if(Array.isArray(data)){
             this.clear();
             for(let i=0;i<data.length;i++){
-                this.fillRect("white",i+1,1,1,this.canvas.height-data[i]-2);
+                this.fillRect("white",i+1,1,1,this.canvas.height-data[i]*scale-2);
             }
         }else{
             alert("Data input for GraphCanvas needs to be 1-D Array");
@@ -150,19 +150,6 @@ class CodeCanvas extends Canvas{
             this.strokeLine(200,i*scale*6+offset,300,i*scale*6+offset);
         }
     }
-}
-
-const getDist=(xt,yt,xi=0,yi=0)=>{
-    return Math.sqrt((xt-xi)*(xt-xi)+(yt-yi)*(yt-yi));
-}
-const getDir=(xt,yt,xi=0,yi=0)=>{
-    return Math.atan2(yt-yi,xt-xi);
-}
-const deg2rad=(deg)=>{
-    return deg/180*Math.PI;
-}
-const rad2deg=(rad)=>{
-    return rad*180/Math.PI;
 }
 
 console.log("Loaded: canvas.js");

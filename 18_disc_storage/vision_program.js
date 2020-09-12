@@ -8,8 +8,10 @@ class VisionProgram{
 
         this.lineScanner = new houghTransform();
         this.lineScanner.showPlot();
+        this.histogram = new Histogram();
+        this.histogram.showGraph();
+        this.binary = new Binarize();
 
-        return;
         this.LS_num = 15;
         this.LS = new Array(this.LS_num);
         for(let i=0;i<this.LS_num;i++){
@@ -24,8 +26,14 @@ class VisionProgram{
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        this.lineScanner.run([this.oimgdata,0,0,0]);
+        this.histogram.run([this.oimgdata,0,0,0]);
+        const thresh = this.histogram.getOtsuThresh();
+        this.binary.setThresh(thresh);
+        this.binary.run([this.oimgdata,0,0,0]);
+        this.lineScanner.run(this.binary.passROI);
+        this.displayImageDataD(this.binary);
         return;
+
         for(let i=0;i<this.LS_num;i++){
             const hStart = this.height/2+this.height/40*i;
             const roi = this.newROI(0,hStart,this.width,1,0);
@@ -126,32 +134,24 @@ class ImageData{
     i2xy(i, width=this.width){
         return [i%width, Math.floor(i/width)];
     }
-    setPix(indexIn, value, type="all"){
-        //Check if indexIn is xy or index
-        let index;
-        if(indexIn.length==2)   index = this.xy2i(indexIn);
-        else                    index = indexIn;
-
+    setPixXY(indexIn, value, type="all"){this.setPixI(this.xy2i(indexIn),value,type);}
+    getPixXY(imgIn, indexIn, type="all"){this.getPixI(imgIn,this.xy2i(indexIn, imgIn.width),type);}
+    setPixI(index, value, type="all"){
         //Set the pixel based on type
-        if(type=="all"||type==0) this.imgOut.data[4*index+0] = value;
-        if(type=="all"||type==1) this.imgOut.data[4*index+1] = value;
-        if(type=="all"||type==2) this.imgOut.data[4*index+2] = value;
-    }
-    getPix(imgIn, indexIn, type="all"){
-        //Check if indexIn is xy or index
-        let index;
-        if(indexIn.length==2)   index = this.xy2i(indexIn, imgIn.width);
-        else                    index = indexIn;
-
+        if(type=="all"){
+            this.imgOut.data[4*index  ] = value;
+            this.imgOut.data[4*index+1] = value;
+            this.imgOut.data[4*index+2] = value;
+        }else{
+            this.imgOut.data[4*index+type] = value;
+        }}
+    getPixI(imgIn,index,type="all"){
         //Get the pixel based on type
-        let rgbValue =0;
-        if(type=="all"||type==0) rgbValue += imgIn.data[4*index+0];
-        if(type=="all"||type==1) rgbValue += imgIn.data[4*index+1];
-        if(type=="all"||type==2) rgbValue += imgIn.data[4*index+2];
-        if(             type==3) rgbValue += imgIn.data[4*index+3];
-        if(type=="all") rgbValue /= 3;
-
-        return rgbValue;
+        if(type=="all"){
+            return (imgIn.data[4*index]+imgIn.data[4*index+1]+imgIn.data[4*index+2])/3;
+        }else{
+            return imgIn.data[4*index+type];
+        }
     }
     xy2i(xy,width=this.width){
         return Math.floor(xy[0])+width*Math.floor(xy[1]);
@@ -161,8 +161,105 @@ class ImageData{
     }
 }
 
+class Histogram extends ImageData{
+    constructor(){
+        super();
+        this.bin = new Array(256).fill(0);
+        this.otsu= new Array(256);
+        this.graph = new GraphCanvas();
+        this.graph.resize(256,100);
+        this.graph.resizeStyle(256,100,true);
+        this.grapha = new GraphCanvas();
+        this.grapha.resize(256,100);
+        this.grapha.resizeStyle(256,100,true);
+    }
+    showGraph(){
+        this.graph.appendSelf();
+        this.grapha.appendSelf();
+    }
+    updateBin(imgIn){
+        this.bin.fill(0);
+        for(let i=0;i<imgIn.data.length/4;i++){
+            this.bin[Math.floor(this.getPixI(imgIn,i))]++;
+        }
+    }
+    getOtsu(){
+        let totalP = new Array(this.bin.length).fill(0);
+        let totalN = new Array(this.bin.length).fill(0);
+        let firstAccumulativeP = new Array(this.bin.length).fill(0);
+        let firstAccumulativeN = new Array(this.bin.length).fill(0);
+        let secondAccumulativeP = new Array(this.bin.length).fill(0);
+        let secondAccumulativeN = new Array(this.bin.length).fill(0);
+        for(let i=0;i<this.bin.length;i++){
+            totalP[i] = this.bin[i];
+            firstAccumulativeP[i] = this.bin[i]*i;
+            secondAccumulativeP[i] = this.bin[i]*i*i;
+            if(i>0){
+                totalP[i]+=totalP[i-1];
+                firstAccumulativeP[i]+=firstAccumulativeP[i-1];
+                secondAccumulativeP[i]+=secondAccumulativeP[i-1];
+            }
+        }
+        for(let i=this.bin.length-1;i>=0;i--){
+            totalN[i] = this.bin[i];
+            firstAccumulativeN[i] = this.bin[i]*i;
+            secondAccumulativeN[i] = this.bin[i]*i*i;
+            if(i<this.bin.length-1){
+                totalN[i]+=totalN[i+1];
+                firstAccumulativeN[i]+=firstAccumulativeN[i+1];
+                secondAccumulativeN[i]+=secondAccumulativeN[i+1];
+            }
+        }
+        let otsu = new Array(256).fill(0);
+        for(let i=0;i<this.bin.length;i++){
+            const centerP = firstAccumulativeP[i]/Math.max(1,totalP[i]);
+            const centerN = firstAccumulativeN[i]/Math.max(1,totalN[i]);
+            const varianceP = secondAccumulativeP[i]-centerP*centerP*totalP[i];
+            const varianceN = secondAccumulativeN[i]-centerN*centerN*totalN[i];
+            otsu[i] = varianceP+varianceN;
+        }
+        return otsu;        
+    }
+    getOtsuThresh(){
+        const otsuMin = Math.min(...this.otsu);
+        for(let i=0;i<this.bin.length;i++){
+            if(this.otsu[i]==otsuMin) return i;
+        }
+        return -1;
+    }
+    run([imgIn,xpos,ypos,theta]){
+        this.updateROI([imgIn,xpos,ypos,theta]);
+        this.updateBin(imgIn);
+        this.otsu = this.getOtsu();
+        this.graph.update(this.bin,100/Math.max(1,Math.max(...this.bin)));
+        this.grapha.update(this.otsu,100/Math.max(1,Math.max(...this.otsu)));
+    }
+}
+
+class Binarize extends ImageData{
+    constructor(threshold=128){
+        super();
+        this.threshold = threshold;
+    }
+    setThresh(threshold=128){
+        this.threshold = threshold;
+    }
+    run([imgIn,xpos,ypos,theta]){
+        this.updateROI([imgIn,xpos,ypos,theta]);
+        for(let i=0;i<imgIn.data.length/4;i++){
+            const [x,y] = this.i2xy(i);
+            const value = 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
+            if(value>this.threshold){
+                this.setPixI(i,0);
+            }else{
+                this.setPixI(i,255);
+            }
+        }
+    }
+}
+
 class houghTransform extends ImageData{
-    constructor(rho=200,theta=60){
+    constructor(rho=200,theta=200){
         super();
         this.resolutionRho = rho;
         this.resolutionTheta = theta;
@@ -176,10 +273,10 @@ class houghTransform extends ImageData{
             this.plotimgdata.data[i*4+3]=256;
         }
         //Settings
-        this.ySkip = 20;
+        this.ySkip = 10;
         this.xavg = 10;
         this.thetaStart = -30;
-        this.thetaScale = 1;
+        this.thetaScale = 60/200;
         this.rhoScale = 1;
     }
     showPlot(){
@@ -248,100 +345,22 @@ class LineScanner extends ImageData{
     showGraph(){
         this.graph.appendSelf();
     }
-    getData(imgIn,type="all"){
+    getData(imgIn){
         let data = new Array(imgIn.width);
-        if(type=="r"){
-            for(let i=0;i<imgIn.width;i++){
-                data[i]=100*(imgIn.data[4*i])/256;
-            }
-        }else if(type=="g"){
-            for(let i=0;i<imgIn.width;i++){
-                data[i]=100*(imgIn.data[4*i+1])/256;
-            }
-        }else if(type=="b"){
-            for(let i=0;i<imgIn.width;i++){
-                data[i]=100*(imgIn.data[4*i+2])/256;
-            }
-        }else{
-            for(let i=0;i<imgIn.width;i++){
-                data[i]=100*(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/(256*3);
-            }
+        for(let i=0;i<imgIn.width*imgIn.height;i++){
+            data[i]=this.getPixI(imgIn,i);
         }
         return data;
-    }
-    smoothenData(data){
-        const range = this.smoothrange;
-        let counter=0;
-        let sum = 0;
-        let smoothdata = new Array(data.length);
-        for(let i=-range; i<data.length+range; i++){
-            if(i+range<data.length){
-                counter++;
-                sum+=data[i+range];
-            }
-            if(i-range>=0){
-                counter--;
-                sum-=data[i-range];
-            }
-            if(i>=0&&i<data.length){
-                smoothdata[i]=sum/counter;
-            }
-        }
-        return smoothdata;
-    }
-    derivativeData(data){
-        let derivative = new Array(data.length);
-        let rightSlope = 0;
-        let leftSlope = 0;
-        for(let i=0;i<data.length;i++){
-            if(i>0){
-                leftSlope=rightSlope;
-            }
-            if(i+1<data.length){
-                rightSlope = data[i+1]-data[i];
-            }
-            derivative[i]=rightSlope+leftSlope;
-        }
-        return derivative;
-    }
-    dualIntegrate(data){
-        let dualInt = new Array(data.length).fill(50);
-        let sum=0;
-        for(let i=0;i<data.length;i++){
-            if(data[i]<0){
-                sum+=data[i];
-                dualInt[i] = sum+50;
-            }else{
-                sum = 0;
-            }
-        }
-        sum=0;
-        for(let i=data.length-1;i>=0;i--){
-            if(data[i]>0){
-                sum+=data[i];
-                dualInt[i] = sum+50;
-            }else{
-                sum = 0;
-            }
-        }
-        return dualInt;
-    }
-    lineIntensity(data){
-        let intensity = new Array(data.length).fill(0);
-        for(let i=0;i<data.length-1;i++){
-            intensity[i] = Math.max(0,data[i+1]-data[i]);
-        }
-        return intensity;
     }
     run([imgIn,xpos,ypos,theta]){
         this.updateROI([imgIn,xpos,ypos,theta]);
         this.graph.resize(imgIn.width,100);
         this.graph.resizeStyle(imgIn.width,100,true);
         const d_0_original = this.getData(imgIn);
-        const d_1_smoothen = this.smoothenData(d_0_original);
-        const d_2_derivative = this.derivativeData(d_1_smoothen);
-        const d_3_dualInt = this.dualIntegrate(d_2_derivative);
-        const d_4_lines = this.lineIntensity(d_3_dualInt);
+        const d_1_smoothen = smoothenArray(d_0_original, this.smoothrange);
+        const d_2_derivative = takeDerivative(d_1_smoothen);
+        const d_3_dualInt = dualIntegrate(d_2_derivative);
+        const d_4_lines = lineIntensity(d_3_dualInt);
         this.graph.update(d_4_lines);
     }
 }

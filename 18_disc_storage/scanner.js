@@ -55,9 +55,4 @@ class DiscScanner{
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }
 }
-let outLine=false;
-function dcClicked(){
-    outLine =! outLine;
-    log("display Canvas Clicked");
-}
 console.log("Loaded: scanner.js");
