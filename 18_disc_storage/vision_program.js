@@ -176,8 +176,8 @@ class houghTransform extends ImageData{
             this.plotimgdata.data[i*4+3]=256;
         }
         //Settings
-        this.xSkip = 10;
         this.ySkip = 10;
+        this.xavg = 10;
         this.thetaStart = -30;
         this.thetaScale = 1;
         this.rhoScale = 1;
@@ -189,14 +189,18 @@ class houghTransform extends ImageData{
         this.updateROI([imgIn,xpos,ypos,theta]);
         const width = imgIn.width;
         const height= imgIn.height;
-        this.rhoScale = this.resolutionRho/getDist(width,height);
+        this.rhoScale = this.resolutionRho/width;
         this.intensity.fill(0);
+        let value=0;
         for(let i=0;i<imgIn.data.length/4;i++){
             const [x,y] = this.i2xy(i);
-            if(x%this.xSkip!=0) continue;
+            if(x==0){value=0;}
             if(y%this.ySkip!=0) continue;
-            const value = 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
-            this.updateIntensity(x,y,value);
+            value += 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
+            if(x%this.xavg==4){
+                this.updateIntensity(x-(this.xavg-1)/2,y,value);
+                value=0;
+            }
         }
         this.updatePlotImageData();
     }
@@ -206,8 +210,13 @@ class houghTransform extends ImageData{
         for(let i=0;i<this.intensity.length;i++){
             const intensity = this.intensity[i]*intensityScale;
             this.plotimgdata.data[i*4+0]=intensity;
-            this.plotimgdata.data[i*4+1]=intensity;
-            this.plotimgdata.data[i*4+2]=intensity;
+            if(this.intensity[i]>maxIntensity*0.8){
+                this.plotimgdata.data[i*4+1]=0;
+                this.plotimgdata.data[i*4+2]=0;
+            }else{
+                this.plotimgdata.data[i*4+1]=intensity;
+                this.plotimgdata.data[i*4+2]=intensity;
+            }
         }
         this.plot.ct.putImageData(this.plotimgdata,0,0);
     }
