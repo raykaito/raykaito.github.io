@@ -81,5 +81,16 @@ const lineIntensity=(data)=>{
     }
     return intensity;
 }
+const getMinIndex=(data)=>{
+    let min = data[0];
+    let minIndex = 0;
+    for(let i=1;i<data.length;i++){
+        if(data[i]<min){
+            min = data[i];
+            minIndex=i;
+        }
+    }
+    return minIndex;
+}
 
 console.log("Loaded: functions.js");

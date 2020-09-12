@@ -27,7 +27,11 @@ class VisionProgram{
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
         this.histogram.run([this.oimgdata,0,0,0]);
-        const thresh = this.histogram.getOtsuThresh();
+        this.histogram.updateGraphHistogram();
+        this.histogram.getOtsu();
+        this.histogram.updateGraphOtsu();
+        const thresh = getMinIndex(this.histogram.otsu);
+        log(thresh);
         this.binary.setThresh(thresh);
         this.binary.run([this.oimgdata,0,0,0]);
         this.lineScanner.run(this.binary.passROI);
@@ -166,16 +170,16 @@ class Histogram extends ImageData{
         super();
         this.bin = new Array(256).fill(0);
         this.otsu= new Array(256);
-        this.graph = new GraphCanvas();
-        this.graph.resize(256,100);
-        this.graph.resizeStyle(256,100,true);
-        this.grapha = new GraphCanvas();
-        this.grapha.resize(256,100);
-        this.grapha.resizeStyle(256,100,true);
+        this.graphHisto = new GraphCanvas();
+        this.graphHisto.resize(256,100);
+        this.graphHisto.resizeStyle(256,100,true);
+        this.graphOtsu = new GraphCanvas();
+        this.graphOtsu.resize(256,100);
+        this.graphOtsu.resizeStyle(256,100,true);
     }
     showGraph(){
-        this.graph.appendSelf();
-        this.grapha.appendSelf();
+        this.graphHisto.appendSelf();
+        this.graphOtsu.appendSelf();
     }
     updateBin(imgIn){
         this.bin.fill(0);
@@ -218,7 +222,7 @@ class Histogram extends ImageData{
             const varianceN = secondAccumulativeN[i]-centerN*centerN*totalN[i];
             otsu[i] = varianceP+varianceN;
         }
-        return otsu;        
+        this.otsu = otsu;        
     }
     getOtsuThresh(){
         const otsuMin = Math.min(...this.otsu);
@@ -230,10 +234,9 @@ class Histogram extends ImageData{
     run([imgIn,xpos,ypos,theta]){
         this.updateROI([imgIn,xpos,ypos,theta]);
         this.updateBin(imgIn);
-        this.otsu = this.getOtsu();
-        this.graph.update(this.bin,100/Math.max(1,Math.max(...this.bin)));
-        this.grapha.update(this.otsu,100/Math.max(1,Math.max(...this.otsu)));
     }
+    updateGraphHistogram(){this.graphHisto.update(this.bin,100/Math.max(1,Math.max(...this.bin)));}
+    updateGraphOtsu(){this.graphOtsu.update(this.otsu,100/Math.max(1,Math.max(...this.otsu)));}
 }
 
 class Binarize extends ImageData{
@@ -248,7 +251,7 @@ class Binarize extends ImageData{
         this.updateROI([imgIn,xpos,ypos,theta]);
         for(let i=0;i<imgIn.data.length/4;i++){
             const [x,y] = this.i2xy(i);
-            const value = 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
+            const value = (imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
             if(value>this.threshold){
                 this.setPixI(i,0);
             }else{
