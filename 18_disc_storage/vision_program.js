@@ -162,7 +162,7 @@ class ImageData{
 }
 
 class houghTransform extends ImageData{
-    constructor(rho=100,theta=60){
+    constructor(rho=200,theta=60){
         super();
         this.resolutionRho = rho;
         this.resolutionTheta = theta;
@@ -214,8 +214,14 @@ class houghTransform extends ImageData{
                 this.plotimgdata.data[i*4+1]=0;
                 this.plotimgdata.data[i*4+2]=0;
             }else{
-                this.plotimgdata.data[i*4+1]=intensity;
-                this.plotimgdata.data[i*4+2]=intensity;
+                if(this.intensity[i]>maxIntensity*0.9){
+                    this.plotimgdata.data[i*4+1]=intensity;
+                    this.plotimgdata.data[i*4+2]=intensity;
+                }else{
+                    this.plotimgdata.data[i*4+1]=intensity;
+                    this.plotimgdata.data[i*4+2]=intensity;
+
+                }
             }
         }
         this.plot.ct.putImageData(this.plotimgdata,0,0);
@@ -223,12 +229,10 @@ class houghTransform extends ImageData{
     updateIntensity(x,y,value){
         const radiusi = getDist(x,y);
         const thetai  = getDir(x,y);
-        const thetaStartRad = deg2rad(this.thetaStart);
-        const thetaScaleRad = deg2rad(this.thetaScale);
         for(let theta=0;theta<this.resolutionTheta;theta++){
-            const currentTheta = thetai+thetaStartRad+thetaScaleRad*theta;
+            const currentTheta = thetai+deg2rad(this.thetaStart+this.thetaScale*theta);
             const rho = radiusi*Math.cos(currentTheta);
-            const rhoIndex = Math.floor(this.rhoScale*rho+this.resolutionRho/2);
+            const rhoIndex = Math.floor(this.rhoScale*rho);
             this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
         }
         return;
