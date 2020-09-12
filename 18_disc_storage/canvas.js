@@ -145,7 +145,7 @@ class CodeCanvas extends Canvas{
         this.ct.strokeStyle = "black";
         for(let i=0;i<12;i++){
             this.ct.lineWidth = ((data[i]==1)?3:1)*scale;
-            this.strokeLine(200,i*scale*4+offset,300,i*scale*4+offset);
+            this.strokeLine(200,i*scale*6+offset,300,i*scale*6+offset);
         }
     }
 }
