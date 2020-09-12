@@ -195,7 +195,7 @@ class houghTransform extends ImageData{
             const [x,y] = this.i2xy(i);
             if(x%this.xSkip!=0) continue;
             if(y%this.ySkip!=0) continue;
-            const value = 256-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
+            const value = 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
             this.updateIntensity(x,y,value);
         }
         this.updatePlotImageData();
@@ -217,7 +217,7 @@ class houghTransform extends ImageData{
         const thetaStartRad = deg2rad(this.thetaStart);
         const thetaScaleRad = deg2rad(this.thetaScale);
         for(let theta=0;theta<this.resolutionTheta;theta++){
-            const currentTheta = thetai-thetaStartRad+thetaScaleRad*theta;
+            const currentTheta = thetai+thetaStartRad+thetaScaleRad*theta;
             const rho = radiusi*Math.cos(currentTheta);
             const rhoIndex = Math.abs(Math.floor(this.rhoScale*rho));
             this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
