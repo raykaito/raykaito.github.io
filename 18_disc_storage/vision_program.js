@@ -176,7 +176,7 @@ class houghTransform extends ImageData{
             this.plotimgdata.data[i*4+3]=256;
         }
         //Settings
-        this.ySkip = 10;
+        this.ySkip = 20;
         this.xavg = 10;
         this.thetaStart = -30;
         this.thetaScale = 1;
