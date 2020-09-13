@@ -11,10 +11,14 @@ class VisionProgram{
         this.histogram = new Histogram();
 
         this.linearScanner = new LineScanner(3);
+        this.codeScanner = new Array(50);
+        for(let i=0;i<this.codeScanner.length;i++){this.codeScanner[i] = new LineScanner(3);}
     }
     resizeOcanvas(width,height){
         this.width = width;
         this.height= height;
+        this.wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
+        this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
@@ -23,6 +27,7 @@ class VisionProgram{
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
         const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
+
         const lineDetectionROI_R = this.newROI(11*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_R);
         const [inter_R, angle_R] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
@@ -34,23 +39,34 @@ class VisionProgram{
         const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
         const lineIntensity = this.linearScanner.autoLineIntensityAquisition(linearScan_ROI);
 
-        const height = this.dCanvas.canvas.height;
         this.dCanvas.ct.strokeStyle="lime";
         this.dCanvas.ct.lineWidth = 2;
-        const wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
-        const hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
+        let previousPosition = -1;
+        let codeScannerCount = 0;
         for(let i=0;i<lineIntensity.length;i++){
             if(lineIntensity[i]==0) continue;
-            const xi = i;
+            if(previousPosition==-1){
+                previousPosition = i;
+                continue;
+            }
+            const xi = (i+previousPosition)/2;
+            previousPosition = i;
             if(xi<this.width*0.1||xi>this.width*0.9)continue;
-            const yi = height/2;
+            const yi = this.height/2;
             const angle = inter_angle+slope_angle*i;
-            const xt = xi-height*Math.sin(deg2rad(angle))/4;
-            const yt = height/4;
-            this.dCanvas.line(xi*wScale,yi*hScale,xt*wScale,yt*hScale);
+            const xt = Math.floor(xi-this.height*Math.sin(deg2rad(angle))/4);
+            const yt = 0;
+            const codeROI = this.newROI(xt,yt,1,this.height/2,0,Math.sin(deg2rad(angle)));
+            //const codeROI = this.newROI(this.width/2,0,1,this.height/2,);
+            
+            this.codeScanner[codeScannerCount].autoLineIntensityAquisition(codeROI);
+            codeScannerCount++;
+            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
+            //this.displayImageDataD(this.codeScanner[codeScannerCount]);
+            return;
         }
     }
-    newROI(x=0,y=0,width=1,height=1,theta=0){
+    newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
         x=Math.floor(x);
         y=Math.floor(y);
         width=Math.floor(width);
@@ -61,50 +77,69 @@ class VisionProgram{
             for(let xi=0;xi<width;xi++){
                 for(let yi=0;yi<height;yi++){
                     const indexOut = this.xy2i([xi,yi],width);
-                    const indexIn  = this.xy2i([xi+x,yi+y],this.width);
+                    const indexIn  = this.xy2i([xi+x+dx*yi,yi+y+dy*xi],this.width);
                     for(let i=0;i<4;i++){
                         imgData.data[indexOut*4+i] = this.oimgdata.data[indexIn*4+i];
                     }
                 }
             }
-            return [imgData, x,y,theta];
+            return [imgData, x,y,theta,dx,dy];
+        }else{
+            //Create New Canvas
+            const roi = new Canvas();
+            roi.resize(width,height);
+            //Copy and paste the ROI from oCanvas
+            roi.ct.save();
+            roi.rotateRad(-theta);
+            roi.translate(-x,-y);
+            //Copy the region to ROI
+            roi.ct.drawImage(this.oCanvas.canvas,0,0);
+            roi.ct.restore();
+            //Create Image Data
+            return [roi.ct.getImageData(0,0,width,height),x,y,theta,dx,dy];
         }
-        //Create New Canvas
-        const roi = new Canvas();
-        roi.resize(width,height);
-        //Copy and paste the ROI from oCanvas
-        roi.ct.save();
-        roi.rotateRad(-theta);
-        roi.translate(-x,-y);
-        //Copy the region to ROI
-        roi.ct.drawImage(this.oCanvas.canvas,0,0);
-        roi.ct.restore();
-        //Create Image Data
-        return [roi.ct.getImageData(0,0,width,height),x,y,theta];
     }
     displayImageDataO(imgData){
         const [tempCanvas,x,y,theta] = imgData.prepareDisplayCanvas();
         const tc = tempCanvas.canvas;
-        this.oCanvas.ct.save();
-        this.oCanvas.translate(x,y);
-        this.oCanvas.rotateRad(theta);
-        this.oCanvas.drawRect("lime",-1,-1,tc.width+2,tc.height+2);
-        this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width,tc.height);
-        imgData.odraw(this.oCanvas);
-        this.oCanvas.ct.restore();
+        this.oCanvas.ct.lineWidth = 1;
+        if(theta==0){            
+            this.oCanvas.drawRect("lime",-1+x,-1+y,tc.width+2,tc.height+2);
+            this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,x,y,tc.width,tc.height);
+            imgData.odraw(this.oCanvas);
+            return;
+        }else{
+            this.oCanvas.ct.save();
+            this.oCanvas.translate(x,y);
+            this.oCanvas.rotateRad(theta);
+            this.oCanvas.drawRect("lime",-1,-1,tc.width+2,tc.height+2);
+            this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width,tc.height);
+            imgData.odraw(this.oCanvas);
+            this.oCanvas.ct.restore();
+        }
     }
     displayImageDataD(imgData){
         const [tempCanvas,x,y,theta] = imgData.prepareDisplayCanvas();
         const tc = tempCanvas.canvas;
-        const wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
-        const hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
-        this.dCanvas.ct.save();
-        this.dCanvas.translate(x*wScale,y*hScale);
-        this.dCanvas.rotateRad(theta);
-        this.dCanvas.drawRect("lime",-1,-1,tc.width*wScale+2,tc.height*hScale+2);
-        this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*wScale,tc.height*hScale);
-        imgData.ddraw(this.dCanvas);
-        this.dCanvas.ct.restore();
+        this.dCanvas.ct.lineWidth = 1;
+        if(theta==0){
+            const xpos = Math.floor(x*this.wScale);
+            const ypos = Math.floor(y*this.hScale);
+            const width = Math.floor(tc.width*this.wScale);
+            const height= Math.floor(tc.height*this.hScale);        
+            this.dCanvas.drawRect("lime",xpos-1,ypos-1,width+2,height+2);
+            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,width,height);
+            imgData.ddraw(this.dCanvas);
+            return;
+        }else{
+            this.dCanvas.ct.save();
+            this.dCanvas.translate(x*this.wScale,y*this.hScale);
+            this.dCanvas.rotateRad(theta);
+            this.dCanvas.drawRect("lime",-1,-1,tc.width*this.wScale+2,tc.height*this.hScale+2);
+            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*this.wScale,tc.height*this.hScale);
+            imgData.ddraw(this.dCanvas);
+            this.dCanvas.ct.restore();
+        }
     }
     xy2i(xy,width=this.width){
         return Math.floor(xy[0])+width*Math.floor(xy[1]);
@@ -117,7 +152,7 @@ class VisionProgram{
 class ImageData{
     constructor(){
     }
-    updateROI([imgIn,xpos,ypos,theta]){
+    updateROI([imgIn,xpos,ypos,theta,dx,dy]){
         this.imgIn = imgIn;
         this.xpos = xpos;
         this.ypos = ypos;
@@ -125,12 +160,14 @@ class ImageData{
         this.height= imgIn.height;
         this.theta= theta;
         this.imgOut = imgIn;
+        this.dx = dx;
+        this.dy = dy;
         for(let i=0;i<imgIn.data.length;i++){
             this.imgOut.data[i]=imgIn.data[i];
         }
     }
     get passROI(){
-        return [this.imgOut, this.xpos, this.ypos, this.theta];
+        return [this.imgOut, this.xpos, this.ypos, this.theta,this.dx,this.dy];
     }
     prepareDisplayCanvas(){
         const tempCanvas = new Canvas();
@@ -340,6 +377,7 @@ class LineScanner extends ImageData{
     updateLineIntensity(){
         const d_0_original = this.getData();
         const d_1_smoothen = smoothenArray(d_0_original, this.smoothrange);
+        graphA.update(d_0_original,100/256);
         const d_2_derivative = takeDerivative(d_1_smoothen);
         const d_3_dualInt = dualIntegrate(d_2_derivative);
         this.lineIntensity = highPass(getLineIntensity(d_3_dualInt));
