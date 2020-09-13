@@ -10,7 +10,7 @@ class VisionProgram{
         this.lineScanner.showPlot();
         this.histogram = new Histogram();
         this.histogram.showGraph();
-        this.binary = new Binarize();
+        return;
 
         this.LS_num = 15;
         this.LS = new Array(this.LS_num);
@@ -26,16 +26,18 @@ class VisionProgram{
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        this.histogram.run([this.oimgdata,0,0,0]);
-        this.histogram.updateGraphHistogram();
+        const lineDetectionROI = this.newROI(this.width/4,this.height/2,this.width/2,this.height/4,0);
+        this.histogram.updateROI(lineDetectionROI);
+        this.histogram.updateBin();
         this.histogram.getOtsu();
+        this.histogram.getOtsuThresh();
+        this.histogram.updateGraphHistogram();
         this.histogram.updateGraphOtsu();
-        const thresh = getMinIndex(this.histogram.otsu);
-        log(thresh);
-        this.binary.setThresh(thresh);
-        this.binary.run([this.oimgdata,0,0,0]);
-        this.lineScanner.run(this.binary.passROI);
-        this.displayImageDataD(this.binary);
+        this.histogram.binarize();
+        this.lineScanner.updateROI(this.histogram.passROI);
+        this.lineScanner.transform();
+        this.lineScanner.updatePlotImageData();
+        this.displayImageDataO(this.histogram);
         return;
 
         for(let i=0;i<this.LS_num;i++){
@@ -47,14 +49,18 @@ class VisionProgram{
         }
     }
     newROI(x=0,y=0,width=1,height=1,theta=0){
+        x=Math.floor(x);
+        y=Math.floor(y);
+        width=Math.floor(width);
+        height=Math.floor(height);
         if(theta==0){
             //Crop from oimagedata
             let imgData = this.oCanvas.ct.createImageData(width,height);
             for(let xi=0;xi<width;xi++){
                 for(let yi=0;yi<height;yi++){
-                    const indexOut = this.xy2i([xi,yi]);
-                    const indexIn  = this.xy2i([xi+x,yi+y]);
-                    for(let i=0;i<3;i++){
+                    const indexOut = this.xy2i([xi,yi],width);
+                    const indexIn  = this.xy2i([xi+x,yi+y],this.width);
+                    for(let i=0;i<4;i++){
                         imgData.data[indexOut*4+i] = this.oimgdata.data[indexIn*4+i];
                     }
                 }
@@ -170,6 +176,7 @@ class Histogram extends ImageData{
         super();
         this.bin = new Array(256).fill(0);
         this.otsu= new Array(256);
+        this.thresh;
         this.graphHisto = new GraphCanvas();
         this.graphHisto.resize(256,100);
         this.graphHisto.resizeStyle(256,100,true);
@@ -181,7 +188,7 @@ class Histogram extends ImageData{
         this.graphHisto.appendSelf();
         this.graphOtsu.appendSelf();
     }
-    updateBin(imgIn){
+    updateBin(imgIn = this.imgIn){
         this.bin.fill(0);
         for(let i=0;i<imgIn.data.length/4;i++){
             this.bin[Math.floor(this.getPixI(imgIn,i))]++;
@@ -225,44 +232,24 @@ class Histogram extends ImageData{
         this.otsu = otsu;        
     }
     getOtsuThresh(){
-        const otsuMin = Math.min(...this.otsu);
-        for(let i=0;i<this.bin.length;i++){
-            if(this.otsu[i]==otsuMin) return i;
-        }
-        return -1;
+        this.thresh = getMinIndex(this.otsu);
     }
-    run([imgIn,xpos,ypos,theta]){
-        this.updateROI([imgIn,xpos,ypos,theta]);
-        this.updateBin(imgIn);
-    }
-    updateGraphHistogram(){this.graphHisto.update(this.bin,100/Math.max(1,Math.max(...this.bin)));}
-    updateGraphOtsu(){this.graphOtsu.update(this.otsu,100/Math.max(1,Math.max(...this.otsu)));}
-}
-
-class Binarize extends ImageData{
-    constructor(threshold=128){
-        super();
-        this.threshold = threshold;
-    }
-    setThresh(threshold=128){
-        this.threshold = threshold;
-    }
-    run([imgIn,xpos,ypos,theta]){
-        this.updateROI([imgIn,xpos,ypos,theta]);
-        for(let i=0;i<imgIn.data.length/4;i++){
-            const [x,y] = this.i2xy(i);
-            const value = (imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
-            if(value>this.threshold){
+    binarize(){
+        for(let i=0;i<this.imgIn.data.length/4;i++){
+            const value = this.getPixI(this.imgIn,i);
+            if(value>this.thresh){
                 this.setPixI(i,255);
             }else{
                 this.setPixI(i,0);
             }
         }
     }
+    updateGraphHistogram(){this.graphHisto.update(this.bin,true);}
+    updateGraphOtsu(){this.graphOtsu.update(this.otsu,true);}
 }
 
 class houghTransform extends ImageData{
-    constructor(rho=200,theta=200){
+    constructor(rho=100,theta=100){
         super();
         this.resolutionRho = rho;
         this.resolutionTheta = theta;
@@ -279,7 +266,7 @@ class houghTransform extends ImageData{
         this.ySkip = 10;
         this.xavg = 10;
         this.thetaStart = -30;
-        this.thetaScale = 60/200;
+        this.thetaScale = 60/100;
         this.rhoScale = 1;
     }
     showPlot(){
@@ -297,36 +284,44 @@ class houghTransform extends ImageData{
             if(x==0){value=0;}
             if(y%this.ySkip!=0) continue;
             value += 255-(imgIn.data[4*i]+imgIn.data[4*i+1]+imgIn.data[4*i+2])/3;
-            if(x%this.xavg==4){
+            if(x%this.xavg==(this.xavg-1)){
                 this.updateIntensity(x-(this.xavg-1)/2,y,value);
                 value=0;
             }
         }
         this.updatePlotImageData();
     }
+    transform(){
+        const width = this.imgIn.width;
+        const height= this.imgIn.height;
+        this.rhoScale = this.resolutionRho/width;
+        this.intensity.fill(0);
+        let value=0;
+        for(let i=0;i<this.imgIn.data.length/4;i++){
+            const [x,y] = this.i2xy(i);
+            if(x==0){value=0;}
+            if(y%this.ySkip!=0) continue;
+            value += 255-this.getPixI(this.imgIn,i);
+            if(x%this.xavg==(this.xavg-1)){
+                this.updateIntensity(x-(this.xavg-1)/2,y,value);
+                value=0;
+            }
+        }
+    }
     updatePlotImageData(){
-        const maxIntensity = Math.max(10,Math.max(...this.intensity));
+        const maxIntensity = Math.max(10,getMax(this.intensity));
         const intensityScale = 256/maxIntensity;
         for(let i=0;i<this.intensity.length;i++){
             const intensity = this.intensity[i]*intensityScale;
             this.plotimgdata.data[i*4+0]=intensity;
-            if(this.intensity[i]>maxIntensity*0.8){
-                this.plotimgdata.data[i*4+1]=0;
-                this.plotimgdata.data[i*4+2]=0;
-            }else{
-                if(this.intensity[i]>maxIntensity*0.9){
-                    this.plotimgdata.data[i*4+1]=intensity;
-                    this.plotimgdata.data[i*4+2]=intensity;
-                }else{
-                    this.plotimgdata.data[i*4+1]=intensity;
-                    this.plotimgdata.data[i*4+2]=intensity;
-
-                }
-            }
+            this.plotimgdata.data[i*4+1]=intensity;
+            this.plotimgdata.data[i*4+2]=intensity;
         }
+        average(this.plotimgdata,this.xavg,this.xavg);
         this.plot.ct.putImageData(this.plotimgdata,0,0);
     }
     updateIntensity(x,y,value){
+        if(value==0) return;
         const radiusi = getDist(x,y);
         const thetai  = getDir(x,y);
         for(let theta=0;theta<this.resolutionTheta;theta++){
@@ -336,6 +331,65 @@ class houghTransform extends ImageData{
             this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
         }
         return;
+    }
+}
+const average=(imgdata,xrange=1,yrange=1)=>{
+    let imgHolder = {data: new Array(imgdata.width*imgdata.height*4)};
+    let counter, tempR, tempG, tempB, index;
+    for(let y=0;y<imgdata.height;y++){
+        counter = tempR = tempG = tempB = 0;
+        for(let x=-xrange;x<imgdata.width+xrange;x++){
+            index = Math.floor(x)+imgdata.width*Math.floor(y);
+            
+            if(x+xrange<imgdata.width){
+                counter++;
+                tempR += imgdata.data[4*(index+xrange)+0];
+                tempG += imgdata.data[4*(index+xrange)+1];
+                tempB += imgdata.data[4*(index+xrange)+2];
+            }
+            
+            if(x-xrange>=0){
+                counter--;
+                tempR -= imgdata.data[4*(index-xrange)+0];
+                tempG -= imgdata.data[4*(index-xrange)+1];
+                tempB -= imgdata.data[4*(index-xrange)+2];
+            }
+            if(x>=0&&x<imgdata.width){
+                imgHolder.data[4*index  ] = tempR/counter;
+                imgHolder.data[4*index+1] = tempG/counter;
+                imgHolder.data[4*index+2] = tempB/counter;
+            }
+        }
+    }
+    for(let x=0;x<imgdata.width;x++){
+        counter = tempR = tempG = tempB = 0;
+        for(let y=-yrange;y<imgdata.height+yrange;y++){
+            index = Math.floor(x)+imgdata.width*Math.floor(y);
+            
+            if(y+yrange<imgdata.height){
+                counter++;
+                tempR += imgHolder.data[4*(index+yrange*imgdata.width)+0];
+                tempG += imgHolder.data[4*(index+yrange*imgdata.width)+1];
+                tempB += imgHolder.data[4*(index+yrange*imgdata.width)+2];
+            }
+            
+            if(y-yrange>=0){
+                counter--;
+                tempR -= imgHolder.data[4*(index-yrange*imgdata.width)+0];
+                tempG -= imgHolder.data[4*(index-yrange*imgdata.width)+1];
+                tempB -= imgHolder.data[4*(index-yrange*imgdata.width)+2];
+            }
+            if(y>=0&&y<imgdata.height){
+                imgdata.data[4*index  ] = tempR/counter;
+                imgdata.data[4*index+1] = tempG/counter;
+                imgdata.data[4*index+2] = tempB/counter;
+            }
+        }
+    }
+}
+const filterTest=(imgDataOriginal)=>{
+    for(let i=0;i<imgDataOriginal.data.length;i++){
+        imgDataOriginal.data[i]=255;
     }
 }
 

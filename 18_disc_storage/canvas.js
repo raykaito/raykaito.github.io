@@ -98,7 +98,11 @@ class GraphCanvas extends Canvas{
     clear(){
         this.fillAll("black");    
     }
-    update(data,scale=1){
+    update(data,autoScale=false){
+        let scale = 1;
+        if(autoScale){
+            scale = 100/Math.max(1,Math.max(...data));
+        }
         if(Array.isArray(data)){
             this.clear();
             for(let i=0;i<data.length;i++){

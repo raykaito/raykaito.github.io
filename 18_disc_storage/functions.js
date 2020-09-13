@@ -81,6 +81,8 @@ const lineIntensity=(data)=>{
     }
     return intensity;
 }
+const getMin=(data)=>{return Math.min(...data);}
+const getMax=(data)=>{return Math.max(...data);}
 const getMinIndex=(data)=>{
     let min = data[0];
     let minIndex = 0;
@@ -91,6 +93,17 @@ const getMinIndex=(data)=>{
         }
     }
     return minIndex;
+}
+const getMaxIndex=(data)=>{
+    let max = data[0];
+    let maxIndex = 0;
+    for(let i=1;i<data.length;i++){
+        if(data[i]>max){
+            max = data[i];
+            maxIndex=i;
+        }
+    }
+    return maxIndex;
 }
 
 console.log("Loaded: functions.js");
