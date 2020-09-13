@@ -1,6 +1,8 @@
 let outLine=false;
+let ya = 1;
 function dcClicked(){
     outLine =! outLine;
+    ya++;
     log("display Canvas Clicked");
 }
 
