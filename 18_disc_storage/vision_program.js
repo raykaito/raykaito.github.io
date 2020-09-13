@@ -23,7 +23,7 @@ class VisionProgram{
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
         const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
-        const lineDetectionROI_R = this.newROI(12*this.width/16,this.height/2,this.width/8,this.height/2-1);
+        const lineDetectionROI_R = this.newROI(11*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_R);
         const [inter_R, angle_R] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
@@ -50,7 +50,7 @@ class VisionProgram{
         const hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
         for(let i=-20;i<lineCount+20;i++){
             const xi = inter_L+lineGap*i;
-            if(xi<this.width*0.2||xi>this.width*0.8)continue;
+            if(xi<this.width*0.1||xi>this.width*0.9)continue;
             const yi = height/2;
             const angle = angle_L+angleGap*i;
             const xt = xi-height*Math.sin(deg2rad(angle))/4;
