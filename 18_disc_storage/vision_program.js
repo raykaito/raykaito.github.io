@@ -6,20 +6,15 @@ class VisionProgram{
         this.dCanvas = displayCanvas;
         this.oimgdata;
 
-        this.lineScanner = new houghTransform();
-        this.lineScanner.showPlot();
-        this.lineScanner.showGraph();
+        this.houghTrans = new houghTransform();
+        //this.houghTrans.showPlot();
+        //this.houghTrans.showGraph();
+
         this.histogram = new Histogram();
         this.histogram.showGraph();
-        return;
 
-        this.LS_num = 15;
-        this.LS = new Array(this.LS_num);
-        for(let i=0;i<this.LS_num;i++){
-            this.LS[i] = new LineScanner(3);
-            this.LS[i].showGraph();
-        }
-
+        this.linearScanner = new LineScanner(3);
+        this.linearScanner.showGraph();
     }
     resizeOcanvas(width,height){
         this.width = width;
@@ -27,6 +22,7 @@ class VisionProgram{
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
+
         let lineDetectionROI = this.newROI(3*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.updateROI(lineDetectionROI);
         this.histogram.updateBin();
@@ -35,12 +31,15 @@ class VisionProgram{
         this.histogram.updateGraphHistogram();
         this.histogram.updateGraphOtsu();
         this.histogram.binarize();
-        this.lineScanner.updateROI(this.histogram.passROI);
-        this.lineScanner.yLines(15);
-        this.lineScanner.transform();
-        this.lineScanner.detectLine();
-        this.lineScanner.updatePlotImageData();
-        this.displayImageDataO(this.lineScanner);
+
+        this.houghTrans.updateROI(this.histogram.passROI);
+        this.houghTrans.yLines(15);
+        this.houghTrans.transform();
+        this.houghTrans.detectLine();
+        this.houghTrans.updatePlotImageData();
+        const intersection_L = this.houghTrans.getXInter();
+        this.displayImageDataD(this.houghTrans);
+
         lineDetectionROI = this.newROI(12*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.updateROI(lineDetectionROI);
         this.histogram.updateBin();
@@ -49,21 +48,49 @@ class VisionProgram{
         this.histogram.updateGraphHistogram();
         this.histogram.updateGraphOtsu();
         this.histogram.binarize();
-        this.lineScanner.updateROI(this.histogram.passROI);
-        this.lineScanner.yLines(15);
-        this.lineScanner.transform();
-        this.lineScanner.detectLine();
-        this.lineScanner.updatePlotImageData();
-        this.displayImageDataO(this.lineScanner);
-        return;
 
-        for(let i=0;i<this.LS_num;i++){
-            const hStart = this.height/2+this.height/40*i;
-            const roi = this.newROI(0,hStart,this.width,1,0);
-            this.LS[i].run(roi);
-            this.displayImageDataD(this.LS[i]);
-            this.displayImageDataO(this.LS[i]);
+        this.houghTrans.updateROI(this.histogram.passROI);
+        this.houghTrans.yLines(15);
+        this.houghTrans.transform();
+        this.houghTrans.detectLine();
+        this.houghTrans.updatePlotImageData();
+        const intersection_R = this.houghTrans.getXInter();
+        this.displayImageDataD(this.houghTrans);
+
+        const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
+        this.linearScanner.updateROI(linearScan_ROI);
+        this.linearScanner.updateLineIntensity(linearScan_ROI);
+        this.linearScanner.updateGraph();
+        this.displayImageDataD(this.linearScanner);
+
+        const lineCount = this.getLineCount(this.linearScanner.lineIntensity,intersection_L,intersection_R);
+    }
+    getLineCount(lineInt,inter_L,inter_R){
+        const countStart = 5;
+        const countEnd = 50;
+        let maxScore = 0;
+        let maxScoreCount = -1;
+        const length = inter_R-inter_L;
+        const lineIntThresh = getMax(lineInt.slice(Math.floor(inter_L),Math.floor(inter_R)))/10;
+        for(let count=countStart;count<countEnd;count++){
+            let score = 0;
+            let gap = length/count;
+            for(let i=0;i<Math.ceil(length);i++){
+                if(lineInt[i+Math.floor(inter_L)]<lineIntThresh) continue;
+                if(((i+gap/4)%gap)<gap/2){
+                    score++;
+                }else{
+                    score--;
+                }
+            }
+            score=score/count;
+            if(score>maxScore){
+                maxScore = score;
+                maxScoreCount = count;
+            }
         }
+        log(maxScoreCount);
+        return maxScoreCount;
     }
     newROI(x=0,y=0,width=1,height=1,theta=0){
         x=Math.floor(x);
@@ -343,6 +370,9 @@ class houghTransform extends ImageData{
         this.thetaMax = this.thetaStart+this.scaleTheta*(maxIndex%this.rangeTheta);
         this.rhoMax = 1/this.scaleRho*Math.floor(maxIndex/this.rangeTheta);
     }
+    getXInter(){
+        return this.xpos+this.rhoMax/Math.cos(deg2rad(this.thetaMax));
+    }
     prepareDisplayCanvas(){
         const [tempCanvas,xpos,ypos,theta] = super.prepareDisplayCanvas();
         const xi=this.rhoMax/Math.cos(deg2rad(this.thetaMax));
@@ -370,11 +400,19 @@ class houghTransform extends ImageData{
 class LineScanner extends ImageData{
     constructor(smoothrange = 1){
         super();
+        this.lineIntensity = new Array(5);
         this.smoothrange = smoothrange;
         this.graph = new GraphCanvas();
     }
     showGraph(){
         this.graph.appendSelf();
+    }
+    updateGraph(){
+        this.graph.update(this.lineIntensity,true);
+    }
+    resizeGraph(){
+        this.graph.resize(imgIn.width,100);
+        this.graph.resizeStyle(imgIn.width,100,true);
     }
     getData(imgIn){
         let data = new Array(imgIn.width);
@@ -383,16 +421,12 @@ class LineScanner extends ImageData{
         }
         return data;
     }
-    run([imgIn,xpos,ypos,theta]){
-        this.updateROI([imgIn,xpos,ypos,theta]);
-        this.graph.resize(imgIn.width,100);
-        this.graph.resizeStyle(imgIn.width,100,true);
+    updateLineIntensity([imgIn,xpos,ypos,theta]){
         const d_0_original = this.getData(imgIn);
         const d_1_smoothen = smoothenArray(d_0_original, this.smoothrange);
         const d_2_derivative = takeDerivative(d_1_smoothen);
         const d_3_dualInt = dualIntegrate(d_2_derivative);
-        const d_4_lines = getLineIntensity(d_3_dualInt);
-        this.graph.update(d_4_lines);
+        this.lineIntensity = getLineIntensity(d_3_dualInt);
     }
 }
 
