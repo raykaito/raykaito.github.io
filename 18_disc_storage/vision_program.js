@@ -27,7 +27,7 @@ class VisionProgram{
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        const lineDetectionROI = this.newROI(3*this.width/8,this.height/2,this.width/4,this.height/2-1);
+        let lineDetectionROI = this.newROI(3*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.updateROI(lineDetectionROI);
         this.histogram.updateBin();
         this.histogram.getOtsu();
@@ -36,11 +36,25 @@ class VisionProgram{
         this.histogram.updateGraphOtsu();
         this.histogram.binarize();
         this.lineScanner.updateROI(this.histogram.passROI);
-        this.lineScanner.yLines(10);
+        this.lineScanner.yLines(15);
         this.lineScanner.transform();
-        this.lineScanner.detectLines();
+        this.lineScanner.detectLine();
         this.lineScanner.updatePlotImageData();
-        this.displayImageDataO(this.histogram);
+        this.displayImageDataO(this.lineScanner);
+        lineDetectionROI = this.newROI(12*this.width/16,this.height/2,this.width/8,this.height/2-1);
+        this.histogram.updateROI(lineDetectionROI);
+        this.histogram.updateBin();
+        this.histogram.getOtsu();
+        this.histogram.getOtsuThresh();
+        this.histogram.updateGraphHistogram();
+        this.histogram.updateGraphOtsu();
+        this.histogram.binarize();
+        this.lineScanner.updateROI(this.histogram.passROI);
+        this.lineScanner.yLines(15);
+        this.lineScanner.transform();
+        this.lineScanner.detectLine();
+        this.lineScanner.updatePlotImageData();
+        this.displayImageDataO(this.lineScanner);
         return;
 
         for(let i=0;i<this.LS_num;i++){
@@ -261,8 +275,8 @@ class houghTransform extends ImageData{
         //important Parameters
         this.ySkip = 100;
         this.xavg = 1;
-        this.thetaStart = -50;
-        this.scaleTheta = 1;
+        this.thetaStart = -10;
+        this.scaleTheta = 20/100;
         this.scaleRho = 1;
         //Prepare Plot Canvas
         this.plot = new Canvas();
@@ -323,6 +337,22 @@ class houghTransform extends ImageData{
         const d_3_dualInt = dualIntegrate(d_2_derivative);
         const d_4_lines = getLineIntensity(d_3_dualInt);
         this.graph.update(d_4_lines,true);
+    }
+    detectLine(){
+        const maxIndex = getMaxIndex(this.intensity);
+        this.thetaMax = this.thetaStart+this.scaleTheta*(maxIndex%this.rangeTheta);
+        this.rhoMax = 1/this.scaleRho*Math.floor(maxIndex/this.rangeTheta);
+    }
+    prepareDisplayCanvas(){
+        const [tempCanvas,xpos,ypos,theta] = super.prepareDisplayCanvas();
+        const xi=this.rhoMax/Math.cos(deg2rad(this.thetaMax));
+        const yi=0;
+        const xt=xi+this.height*Math.sin(deg2rad(this.thetaMax));
+        const yt=this.height;
+        tempCanvas.ct.strokeStyle = "lime";
+        tempCanvas.ct.lineWidth = 5;
+        tempCanvas.line(xi,yi,xt,yt);
+        return [tempCanvas,xpos,ypos,theta];
     }
     updatePlotImageData(){
         const maxIntensity = Math.max(10,getMax(this.intensity));

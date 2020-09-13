@@ -53,7 +53,7 @@ class Canvas{
         this.ct.textBaseline = tbl;
         this.ct.fillText(string,x,y);
     }
-    strokeLine(xi,yi,xf,yf){
+    line(xi,yi,xf,yf){
         this.ct.beginPath();
         this.ct.moveTo(xi,yi);
         this.ct.lineTo(xf,yf);
@@ -151,7 +151,7 @@ class CodeCanvas extends Canvas{
         this.ct.strokeStyle = "black";
         for(let i=0;i<12;i++){
             this.ct.lineWidth = ((data[i]==1)?3:1)*scale;
-            this.strokeLine(200,i*scale*6+offset,300,i*scale*6+offset);
+            this.line(200,i*scale*6+offset,300,i*scale*6+offset);
         }
     }
 }
