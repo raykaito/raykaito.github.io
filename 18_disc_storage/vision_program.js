@@ -38,6 +38,7 @@ class VisionProgram{
         this.houghTrans.detectLine();
         this.houghTrans.updatePlotImageData();
         const intersection_L = this.houghTrans.getXInter();
+        const angle_L = this.houghTrans.getAngle();
         this.displayImageDataD(this.houghTrans);
 
         lineDetectionROI = this.newROI(12*this.width/16,this.height/2,this.width/8,this.height/2-1);
@@ -55,6 +56,7 @@ class VisionProgram{
         this.houghTrans.detectLine();
         this.houghTrans.updatePlotImageData();
         const intersection_R = this.houghTrans.getXInter();
+        const angle_R = this.houghTrans.getAngle();
         this.displayImageDataD(this.houghTrans);
 
         const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
@@ -64,10 +66,25 @@ class VisionProgram{
         this.displayImageDataD(this.linearScanner);
 
         const lineCount = this.getLineCount(this.linearScanner.lineIntensity,intersection_L,intersection_R);
+        const height = this.dCanvas.canvas.height;
+        const lineGap = (intersection_R-intersection_L)/lineCount;
+        const angleGap = (angle_R-angle_L)/lineCount;
+        this.dCanvas.ct.strokeStyle="lime";
+        this.dCanvas.ct.lineWidth = 3;
+        const wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
+        const hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
+        for(let i=0;i<lineCount+1;i++){
+            const angle = angle_L+angleGap*i;
+            const xi = intersection_L+lineGap*i;
+            const yi = height/2;
+            const xt = xi-height*Math.sin(deg2rad(angle))/2;
+            const yt = 0;
+            this.dCanvas.line(xi*wScale,yi*hScale,xt*wScale,yt*hScale);
+        }
     }
     getLineCount(lineInt,inter_L,inter_R){
         const countStart = 5;
-        const countEnd = 50;
+        const countEnd = 30;
         let maxScore = 0;
         let maxScoreCount = -1;
         const length = inter_R-inter_L;
@@ -89,7 +106,6 @@ class VisionProgram{
                 maxScoreCount = count;
             }
         }
-        log(maxScoreCount);
         return maxScoreCount;
     }
     newROI(x=0,y=0,width=1,height=1,theta=0){
@@ -372,6 +388,9 @@ class houghTransform extends ImageData{
     }
     getXInter(){
         return this.xpos+this.rhoMax/Math.cos(deg2rad(this.thetaMax));
+    }
+    getAngle(){
+        return this.thetaMax;
     }
     prepareDisplayCanvas(){
         const [tempCanvas,xpos,ypos,theta] = super.prepareDisplayCanvas();
