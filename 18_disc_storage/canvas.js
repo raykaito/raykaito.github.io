@@ -3,6 +3,7 @@ class Canvas{
         this.canvas = canvas;
         this.ct = canvas.getContext("2d");
         this.pixelRatio = window.devicePixelRatio;
+        this.imgdata;
     }
     //Transformation
     translate(x,y){
@@ -79,41 +80,89 @@ class Canvas{
         this.ct.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
     }
     appendSelf(parent=body){
-        console.log("HERE");
         parent.appendChild(this.canvas);
     }
+    //imageData
+    createImageData(w=this.canvas.width,h=this.canvas.height){
+        this.imgdata = this.ct.createImageData(w,h);
+    }
 }
-
-class GraphCanvas extends Canvas{
-    constructor(canvas=document.createElement("canvas"),width=100,height=256){
+class PlotCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas")){
         super(canvas);
+        this.reset(100,100);
+    }
+    reset(width,height){
+        if(this.canvas.width!=width+2||this.canvas.height!=height+2){
+            this.resize(width,height);
+            this.resizeStyle(width,height,true);
+            this.createImageData(width,height);
+            for(let i=0;i<width*height;i++){
+                this.imgdata.data[i*4+3] = 256;
+            }
+        }
         this.clear();
     }
     resize(width,height){
         super.resize(width+2,height+2);
     }
-    resizeStyle(width,height){
-        super.resizeStyle(width+2,height+2);
+    resizeStyle(width,height,divideByPR){
+        super.resizeStyle(width+2,height+2,divideByPR);
+    }
+    clear(){
+        this.fillAll("white");
+        this.fillRect("black",1,1,this.canvas.width-2,this.canvas.height-2);
+    }
+    update(data,width,height="fromWidth",autoScale=true){
+        const scale = autoScale?256/Math.max(1,getMax(data)):1;
+        if(height=="fromWidth"){
+            height = data.length/width;
+        }
+        this.reset(width,height);
+        for(let i=0;i<data.length;i++){
+            const brightness = data[i]*scale;
+            this.imgdata.data[i*4+0]=brightness;
+            this.imgdata.data[i*4+1]=brightness;
+            this.imgdata.data[i*4+2]=brightness;
+        }
+        this.ct.putImageData(this.imgdata,1,1);
+    }
+}
+
+class GraphCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas")){
+        super(canvas);
+        this.clear();
+    }
+    reset(width,height){
+        if(this.canvas.width!=width+2||this.canvas.height!=height+2){
+            this.resize(width,height);
+            this.resizeStyle(width,height,true);
+        }
+        this.clear();
+    }
+    resize(width,height){
+        super.resize(width+2,height+2);
+    }
+    resizeStyle(width,height,divideByPR){
+        super.resizeStyle(width+2,height+2,divideByPR);
     }
     clear(){
         this.fillAll("black");    
     }
-    update(data,autoScale=false){
-        let scale = 1;
-        if(autoScale){
-            scale = 100/Math.max(1,Math.max(...data));
+    update(data,scale="autoScale",width="dataLength",height=100){
+        scale = (scale=="autoScale")?height/Math.max(1,getMax(data)):scale;
+        if(width=="dataLength"){
+            width = data.length;
         }
         if(Array.isArray(data)){
-            this.clear();
+            this.reset(width,height);
             for(let i=0;i<data.length;i++){
                 this.fillRect("white",i+1,1,1,this.canvas.height-data[i]*scale-2);
             }
         }else{
             alert("Data input for GraphCanvas needs to be 1-D Array");
         }
-    }
-    show(){
-        this.appendSelf();
     }
 }
 

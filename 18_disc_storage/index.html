@@ -94,7 +94,7 @@
 			}else{
 				textScannerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
 				discScanner.stopScan();
-				displayCanvas.hideCanvas();
+				//displayCanvas.hideCanvas();
 				rightTitle.innerHTML = "All";
 				leftTitle.innerHTML  = "";
 			}
@@ -108,6 +108,20 @@
 			updateScannerStatus();
 		}
 		updateScannerStatus();
+
+		//Usefull plots and graphs
+		const plotA = new PlotCanvas();
+		const plotB = new PlotCanvas();
+		const plotC = new PlotCanvas();
+		plotA.appendSelf();
+		plotB.appendSelf();
+		plotC.appendSelf();
+		const graphA = new GraphCanvas();
+		const graphB = new GraphCanvas();
+		const graphC = new GraphCanvas();
+		graphA.appendSelf();
+		graphB.appendSelf();
+		graphC.appendSelf();
 
 	//--> 
 	</script>

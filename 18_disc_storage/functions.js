@@ -111,5 +111,16 @@ const getMaxIndex=(data)=>{
     }
     return maxIndex;
 }
+const highPass=(data,thresh="autoAdjust")=>{
+    if(thresh="autoAdjust"){
+        thresh=getMax(data)*0.1;
+    }
+    for(let i=0;i<data.length;i++){
+        if(data[i]<thresh){
+            data[i]=0;
+        }
+    }
+    return data;
+}
 
 console.log("Loaded: functions.js");
