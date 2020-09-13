@@ -28,68 +28,27 @@ class VisionProgram{
         const [inter_R, angle_R] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
 
+        const slope_angle = (angle_R-angle_L)/(inter_R-inter_L);
+        const inter_angle = angle_L-inter_L*slope_angle;
+
         const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
         const lineIntensity = this.linearScanner.autoLineIntensityAquisition(linearScan_ROI);
 
-        let linePointList = new Array(0);
-        for(let i=0;i<lineIntensity.length;i++){
-            if(lineIntensity[i]!=0){
-                linePointList[linePointList.length] = i;
-            }
-        }
-        if(linePointList.length==0) return;
-        const lineCount = this.getLineCount(this.linearScanner.lineIntensity,inter_L,inter_R);
-        log(lineCount);
-        const gapT = (inter_R-inter_L)/lineCount;
         const height = this.dCanvas.canvas.height;
-        const lineGap = (inter_R-inter_L)/lineCount;
-        const angleGap = (angle_R-angle_L)/lineCount;
         this.dCanvas.ct.strokeStyle="lime";
         this.dCanvas.ct.lineWidth = 2;
         const wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
         const hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
-        for(let i=-20;i<lineCount+20;i++){
-            const xi = inter_L+lineGap*i;
+        for(let i=0;i<lineIntensity.length;i++){
+            if(lineIntensity[i]==0) continue;
+            const xi = i;
             if(xi<this.width*0.1||xi>this.width*0.9)continue;
             const yi = height/2;
-            const angle = angle_L+angleGap*i;
+            const angle = inter_angle+slope_angle*i;
             const xt = xi-height*Math.sin(deg2rad(angle))/4;
             const yt = height/4;
             this.dCanvas.line(xi*wScale,yi*hScale,xt*wScale,yt*hScale);
         }
-        return;
-        const [gap,ratio] = getGapAndRatio(linePointList,inter_L,gapT*0.8,gapT*1.2,lineIntensity.length);
-        return;
-
-
-
-
-    }
-    getLineCount(lineInt,inter_L,inter_R){
-        const countStart = 10;
-        const countEnd = 60;
-        let maxScore = 0;
-        let maxScoreCount = -1;
-        const length = inter_R-inter_L;
-        const lineIntThresh = getMax(lineInt.slice(Math.floor(inter_L),Math.floor(inter_R)))/10;
-        for(let count=countStart;count<countEnd;count++){
-            let score = 0;
-            let gap = length/count;
-            for(let i=0;i<Math.ceil(length);i++){
-                if(lineInt[i+Math.floor(inter_L)]<lineIntThresh) continue;
-                if(((i+gap/4)%gap)<gap/2){
-                    score++;
-                }else{
-                    score--;
-                }
-            }
-            score=score/count;
-            if(score>maxScore){
-                maxScore = score;
-                maxScoreCount = count;
-            }
-        }
-        return maxScoreCount;
     }
     newROI(x=0,y=0,width=1,height=1,theta=0){
         x=Math.floor(x);
@@ -385,41 +344,6 @@ class LineScanner extends ImageData{
         const d_3_dualInt = dualIntegrate(d_2_derivative);
         this.lineIntensity = highPass(getLineIntensity(d_3_dualInt));
     }
-}
-
-const getGapAndRatio=(pointList,begginingPoint,minGap,maxGap,width)=>{
-    let minDistIndex=0;
-    let minDist = getMax(pointList);
-    for(let i=0;i<pointList.length;i++){
-        const newDist = Math.abs(begginingPoint-pointList[i]);
-        if(newDist<minDist){
-            minDistIndex = i;
-            minDist = newDist;
-        }else{break;}
-    }
-    const offset = pointList[minDistIndex];
-    const rangeGap = 100;
-    const rangeRat = 200;
-    const minRat = 0.98;
-    const maxRat = 1.02;
-    let intensity = new Array(rangeGap*rangeRat).fill(0);
-    for(let i=minDistIndex+1;i<Math.min(minDistIndex+500,pointList.length);i++){
-        const x = (pointList[i]-offset);
-        const localMinNum = Math.floor(x/maxGap);
-        const localMaxNum = Math.floor(x/minGap);
-        for(let num=localMinNum;num<=localMaxNum;num++){
-            for(let gapIndex=0;gapIndex<rangeGap;gapIndex++){
-                const gap = minGap+gapIndex*(maxGap-minGap)/rangeGap;
-                const rat = Math.pow(x/(gap*num),1/num);
-                const ratIndex = Math.floor(rangeRat*(rat-minRat)/(maxRat-minRat));
-                if(ratIndex>=0&&ratIndex<rangeRat){
-                    intensity[ratIndex*rangeGap+gapIndex]+=1;
-                }
-            }
-        }
-    }
-    plotB.update(intensity,rangeGap);
-    return[0,0];
 }
 
 const average=(imgdata,xrange=1,yrange=1)=>{
