@@ -76,10 +76,14 @@ const dualIntegrate=(data)=>{
     }
     return dualInt;
 }
-const lineIntensity=(data)=>{
+const getLineIntensity=(data)=>{
     let intensity = new Array(data.length).fill(0);
     for(let i=0;i<data.length-1;i++){
         intensity[i] = Math.max(0,data[i+1]-data[i]);
+        if(i>0&&intensity[i]!=0&&intensity[i-1]!=0){
+            intensity[i] += intensity[i-1];
+            intensity[i-1] = 0;
+        }
     }
     return intensity;
 }

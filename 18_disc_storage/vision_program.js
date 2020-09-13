@@ -8,6 +8,7 @@ class VisionProgram{
 
         this.lineScanner = new houghTransform();
         this.lineScanner.showPlot();
+        this.lineScanner.showGraph();
         this.histogram = new Histogram();
         this.histogram.showGraph();
         return;
@@ -26,7 +27,7 @@ class VisionProgram{
     }
     run(){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        const lineDetectionROI = this.newROI(this.width/4,this.height/2,this.width/2,this.height/4,0);
+        const lineDetectionROI = this.newROI(3*this.width/8,this.height/2,this.width/4,this.height/2-1);
         this.histogram.updateROI(lineDetectionROI);
         this.histogram.updateBin();
         this.histogram.getOtsu();
@@ -37,6 +38,7 @@ class VisionProgram{
         this.lineScanner.updateROI(this.histogram.passROI);
         this.lineScanner.yLines(10);
         this.lineScanner.transform();
+        this.lineScanner.detectLines();
         this.lineScanner.updatePlotImageData();
         this.displayImageDataO(this.histogram);
         return;
@@ -250,36 +252,40 @@ class Histogram extends ImageData{
 }
 
 class houghTransform extends ImageData{
-    constructor(rho=400,theta=60){
+    constructor(rho=100,theta=100){
         super();
-        this.resolutionRho = rho;
-        this.resolutionTheta = theta;
-        this.intensity = new Array(this.resolutionRho*this.resolutionTheta);
+        //range for rho and theta
+        this.rangeRho = rho;
+        this.rangeTheta = theta;
+        this.intensity = new Array(this.rangeRho*this.rangeTheta);
+        //important Parameters
+        this.ySkip = 100;
+        this.xavg = 1;
+        this.thetaStart = -50;
+        this.scaleTheta = 1;
+        this.scaleRho = 1;
         //Prepare Plot Canvas
         this.plot = new Canvas();
-        this.plot.resize(this.resolutionTheta,this.resolutionRho);
-        this.plot.resizeStyle(this.resolutionTheta,this.resolutionRho,true);
-        this.plotimgdata = this.plot.ct.createImageData(this.resolutionTheta,this.resolutionRho);
+        this.plot.resize(this.rangeTheta,this.rangeRho);
+        this.plot.resizeStyle(this.rangeTheta,this.rangeRho,true);
+        this.plotimgdata = this.plot.ct.createImageData(this.rangeTheta,this.rangeRho);
         for(let i=0;i<this.intensity.length;i++){
             this.plotimgdata.data[i*4+3]=256;
         }
-        //Settings
-        this.ySkip = 2;
-        this.xavg = 1;
-        this.thetaStart = -30;
-        this.thetaScale = 60/theta;
-        this.rhoScale = 1;
+        //Prepare Graph Canvas
+        this.graph = new GraphCanvas();
+        this.graph.resize(this.rangeRho,100);
+        this.graph.resizeStyle(this.rangeRho,100,true);
     }
-    showPlot(){
-        this.plot.appendSelf();
-    }
+    showPlot(){this.plot.appendSelf();}
+    showGraph(){this.graph.appendSelf();}
     yLines(numLine=10){
         this.ySkip = Math.floor(this.imgIn.height/numLine);
     }
     transform(){
         const width = this.imgIn.width;
         const height= this.imgIn.height;
-        this.rhoScale = this.resolutionRho/width;
+        this.scaleRho = this.rangeRho/width;
         this.intensity.fill(0);
         let value=0;
         for(let i=0;i<this.imgIn.data.length/4;i++){
@@ -293,6 +299,31 @@ class houghTransform extends ImageData{
             }
         }
     }
+    updateIntensity(x,y,value){
+        if(value==0) return;
+        const radiusi = getDist(x,y);
+        const thetai  = getDir(x,y);
+        for(let theta=0;theta<this.rangeTheta;theta++){
+            const currentTheta = thetai+deg2rad(this.thetaStart+this.scaleTheta*theta);
+            const rho = radiusi*Math.cos(currentTheta);
+            const rhoIndex = Math.floor(this.scaleRho*rho);
+            this.intensity[rhoIndex*this.rangeTheta+theta]+=value;
+        }
+        return;
+    }
+    detectLines(){
+        const theta = getMaxIndex(this.intensity)%this.rangeTheta;
+        let lineIntensity = new Array(this.rangeRho);
+        const maxIntensity = getMax(this.intensity);
+        for(let i=0;i<this.rangeRho;i++){
+            lineIntensity[i] = maxIntensity-this.intensity[i*this.rangeTheta+theta];
+        }
+        const d_1_smoothen = smoothenArray(lineIntensity, this.rangeRho/50);
+        const d_2_derivative = takeDerivative(d_1_smoothen);
+        const d_3_dualInt = dualIntegrate(d_2_derivative);
+        const d_4_lines = getLineIntensity(d_3_dualInt);
+        this.graph.update(d_4_lines,true);
+    }
     updatePlotImageData(){
         const maxIntensity = Math.max(10,getMax(this.intensity));
         const intensityScale = 256/maxIntensity;
@@ -302,20 +333,7 @@ class houghTransform extends ImageData{
             this.plotimgdata.data[i*4+1]=intensity;
             this.plotimgdata.data[i*4+2]=intensity;
         }
-        average(this.plotimgdata,this.xavg,this.xavg);
         this.plot.ct.putImageData(this.plotimgdata,0,0);
-    }
-    updateIntensity(x,y,value){
-        if(value==0) return;
-        const radiusi = getDist(x,y);
-        const thetai  = getDir(x,y);
-        for(let theta=0;theta<this.resolutionTheta;theta++){
-            const currentTheta = thetai+deg2rad(this.thetaStart+this.thetaScale*theta);
-            const rho = radiusi*Math.cos(currentTheta);
-            const rhoIndex = Math.floor(this.rhoScale*rho);
-            this.intensity[rhoIndex*this.resolutionTheta+theta]+=value;
-        }
-        return;
     }
 }
 
@@ -343,7 +361,7 @@ class LineScanner extends ImageData{
         const d_1_smoothen = smoothenArray(d_0_original, this.smoothrange);
         const d_2_derivative = takeDerivative(d_1_smoothen);
         const d_3_dualInt = dualIntegrate(d_2_derivative);
-        const d_4_lines = lineIntensity(d_3_dualInt);
+        const d_4_lines = getLineIntensity(d_3_dualInt);
         this.graph.update(d_4_lines);
     }
 }
