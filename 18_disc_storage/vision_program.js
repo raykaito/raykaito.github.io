@@ -11,8 +11,7 @@ class VisionProgram{
         this.histogram = new Histogram();
 
         this.linearScanner = new LineScanner(3);
-        this.codeScanner = new Array(50);
-        for(let i=0;i<this.codeScanner.length;i++){this.codeScanner[i] = new LineScanner(3);}
+        this.codeScanner = new LineScanner(3);
     }
     resizeOcanvas(width,height){
         this.width = width;
@@ -42,7 +41,6 @@ class VisionProgram{
         this.dCanvas.ct.strokeStyle="lime";
         this.dCanvas.ct.lineWidth = 2;
         let previousPosition = -1;
-        let codeScannerCount = 0;
         for(let i=0;i<lineIntensity.length;i++){
             if(lineIntensity[i]==0) continue;
             if(previousPosition==-1){
@@ -54,16 +52,13 @@ class VisionProgram{
             if(xi<this.width*0.1||xi>this.width*0.9)continue;
             const yi = this.height/2;
             const angle = inter_angle+slope_angle*i;
-            const xt = Math.floor(xi-this.height*Math.sin(deg2rad(angle))/4);
+            const xt = Math.floor(xi-this.height*Math.sin(deg2rad(angle))/2);
             const yt = 0;
             const codeROI = this.newROI(xt,yt,1,this.height/2,0,Math.sin(deg2rad(angle)));
-            //const codeROI = this.newROI(this.width/2,0,1,this.height/2,);
-            
-            this.codeScanner[codeScannerCount].autoLineIntensityAquisition(codeROI);
-            codeScannerCount++;
+            this.histogram.autoBinarizeWithOtsuMethod(codeROI);
+            const code = this.codeScanner.scanForCode(this.histogram.passROI);
             this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
-            //this.displayImageDataD(this.codeScanner[codeScannerCount]);
-            return;
+            this.dCanvas.text(code,xi*this.wScale,yi*this.hScale);
         }
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
@@ -377,10 +372,53 @@ class LineScanner extends ImageData{
     updateLineIntensity(){
         const d_0_original = this.getData();
         const d_1_smoothen = smoothenArray(d_0_original, this.smoothrange);
-        graphA.update(d_0_original,100/256);
         const d_2_derivative = takeDerivative(d_1_smoothen);
         const d_3_dualInt = dualIntegrate(d_2_derivative);
         this.lineIntensity = highPass(getLineIntensity(d_3_dualInt));
+    }
+    scanForCode(ROI){
+        this.updateROI(ROI);
+        const rawData = this.getData();
+        //Get each Bar (12 bars)
+        let waitForBlack = true;
+        let blackStart = -1;
+        let center = new Array();
+        let width = new Array();
+        for(let i=0;i<rawData.length;i++){
+            if(waitForBlack){
+                if(rawData[i]==0){
+                    waitForBlack = false;
+                    blackStart = i;
+                }
+            }else{
+                if(rawData[i]!=0){
+                    waitForBlack = true;
+                    center[center.length] = (i+blackStart)/2;
+                    width[width.length]  = i-blackStart;
+                }
+            }
+        }
+        //remove unwanted bars
+        while(center.length>12){
+            const gapFirst = center[1]-center[0];
+            const gapLast = center[center.length-1]-center[center.length-2];
+            if(gapFirst>gapLast){
+                center.shift();
+                width.shift();
+            }else{
+                center.pop();
+                width.shift();
+            }
+        }
+        //choose order
+        if(width[0]>width[11]) width.reverse();
+        const thresh = (width[0]+width[11])/2;
+        let binaryString = new String();
+        for(let i=1;i<11;i++){
+            binaryString+=(width[i]>thresh?"1":"0");
+        }
+        log(binaryString);
+        return parseInt(binaryString,2);
     }
 }
 

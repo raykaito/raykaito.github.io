@@ -194,13 +194,28 @@ class CodeCanvas extends Canvas{
     constructor(canvas=document.createElement("canvas")){
         super(canvas);
     }
-    displayCode(data = [0,1,0,0,1,1,0,0,0,1,1,1]){
+    displayCode(num = 0,xi,xt){
+        let binary = "0"+num.toString(2)+"1";
+        while(binary.length<12) binary = "0"+binary;
         const scale = 1;
-        const offset = 10.5;
+        const gap = 4;
+        const offset = 15.5;
         this.ct.strokeStyle = "black";
         for(let i=0;i<12;i++){
-            this.ct.lineWidth = ((data[i]==1)?3:1)*scale;
-            this.line(200,i*scale*6+offset,300,i*scale*6+offset);
+            this.ct.lineWidth = ((binary.charAt(i)=="1")?3:1)*scale;
+            this.line(xi,i*scale*gap+offset,xt,i*scale*gap+offset);
+        }        
+    }
+    displayCodes(){
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        this.fillAll("white");
+        this.ct.strokeStyle = "black";
+        this.ct.lineWidth = 2;
+        const discNumber = 30;
+        for(let i=0;i<discNumber;i++){
+            this.line(i*width/discNumber,0,i*width/discNumber,height);
+            this.displayCode(i,i*width/discNumber,(i+1)*width/discNumber);
         }
     }
 }
