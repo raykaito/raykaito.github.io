@@ -27,7 +27,7 @@ class VisionProgram{
         const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
 
-        const lineDetectionROI_R = this.newROI(11*this.width/16,this.height/2,this.width/8,this.height/2-1);
+        const lineDetectionROI_R = this.newROI(13*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_R);
         const [inter_R, angle_R] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
         this.displayImageDataD(this.houghTrans);
@@ -45,7 +45,7 @@ class VisionProgram{
                 previousPosition = i;
                 continue;
             }
-            const xi = (i+previousPosition)/2;
+            const xi = (i+previousPosition)/2+2;
             const yi = this.oCanvas.canvas.height/2;
             const yt = 0;
             previousPosition = i;
@@ -62,7 +62,7 @@ class VisionProgram{
             const [code,ya,yb] = result;
             const xa = Math.floor(xi-(this.height/2-ya)*Math.sin(deg2rad(angle)));
             const xb = Math.floor(xi-(this.height/2-yb)*Math.sin(deg2rad(angle)));
-            this.dCanvas.text(code,xi*this.wScale,ya*this.hScale);
+            //this.dCanvas.text(code,xi*this.wScale,ya*this.hScale);
             this.dCanvas.ct.strokeStyle=(code==targetNumber?"lime":"red");
             this.dCanvas.ct.lineWidth = 5*this.dCanvas.pixelRatio;
             this.dCanvas.line(xa*this.wScale,ya*this.hScale,xb*this.wScale,yb*this.hScale);
