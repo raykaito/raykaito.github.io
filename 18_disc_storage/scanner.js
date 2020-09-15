@@ -8,6 +8,9 @@ class DiscScanner{
 
         //The disc number it is looking for
         this.targetNumber = -1;
+        this.textScannerStatus = document.getElementById("textScannerStatus");
+        this.scannerOn = false;
+        this.updateScannerStatus();
 
         this.front=false;
         this.constraints = {
@@ -37,11 +40,15 @@ class DiscScanner{
         this.oCanvas.resizeStyle(this.videoWidth,this.videoHeight/2,true);
         this.video.play();
         this.drawVideo();
+        this.scannerOn = true;
+        this.updateScannerStatus();
     }
     startScan(){        
+        if(this.scannerOn) return;
         navigator.mediaDevices.getUserMedia(this.constraints).then((stream)=>{this.handleSuccess(stream);});
     }
     stopScan(){
+        if(!this.scannerOn) return;
         let stream = this.video.srcObject;
         if(stream==null) return;
         cancelAnimationFrame(this.animeRequest);
@@ -50,6 +57,8 @@ class DiscScanner{
             track.stop();
         });
         this.video.srcObject = null;
+        this.scannerOn = false;
+        this.updateScannerStatus();
     }
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
@@ -59,7 +68,29 @@ class DiscScanner{
     }
     addDiscNumber(number){
         this.targetNumber = number;
-        switchScanner(true);
+        this.startScan();
+    }
+    switchScannerOnOff(defaultInput){
+        if(defaultInput==undefined){
+            if(this.scannerOn){
+                this.stopScan();
+            }else{
+                this.startScan();
+            }
+        }else if(defaultInput==false){
+            this.stopScan();
+        }else if(defaultInput==true){
+            this.startScan();
+        }
+    }
+    updateScannerStatus(){
+        if(this.scannerOn){
+            this.dCanvas.showCanvas();
+            this.textScannerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
+        }else{
+            this.dCanvas.hideCanvas();
+            this.textScannerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
+        }
     }
 }
 console.log("Loaded: scanner.js");

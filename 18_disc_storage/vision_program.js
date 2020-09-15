@@ -38,7 +38,6 @@ class VisionProgram{
         const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
         const lineIntensity = this.linearScanner.autoLineIntensityAquisition(linearScan_ROI);
 
-        this.dCanvas.ct.lineWidth = 2;
         let previousPosition = -1;
         for(let i=0;i<lineIntensity.length;i++){
             if(lineIntensity[i]==0) continue;
@@ -49,16 +48,16 @@ class VisionProgram{
             const xi = (i+previousPosition)/2;
             previousPosition = i;
             if(xi<this.width*0.1||xi>this.width*0.9)continue;
-            const yi = this.height/2;
             const angle = inter_angle+slope_angle*i;
             const xt = Math.floor(xi-this.height*Math.sin(deg2rad(angle))/2);
-            const yt = 0;
-            const codeROI = this.newROI(xt,yt,1,this.height/2,0,Math.sin(deg2rad(angle)));
+            const codeROI = this.newROI(xt,0,1,this.height/2,0,Math.sin(deg2rad(angle)));
             this.histogram.autoBinarizeWithOtsuMethod(codeROI);
-            const code = this.codeScanner.scanForCode(this.histogram.passROI);
-            if(code=="CodeNotFound") continue;
-            this.dCanvas.text(code,xi*this.wScale,yi*this.hScale);
+            const result = this.codeScanner.scanForCode(this.histogram.passROI);
+            if(result=="CodeNotFound") continue;
+            const [code,yi,yt] = result;
+            //this.dCanvas.text(code,xi*this.wScale,yi*this.hScale);
             this.dCanvas.ct.strokeStyle=(code==targetNumber?"lime":"red");
+            this.dCanvas.ct.lineWidth = 5*this.dCanvas.pixelRatio;
             this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
         }
     }
@@ -420,7 +419,7 @@ class LineScanner extends ImageData{
             binaryString+=(width[i]>thresh?"1":"0");
         }
         log(binaryString);
-        return parseInt(binaryString,2);
+        return [parseInt(binaryString,2),center[0],center[center.length-1]];
     }
 }
 

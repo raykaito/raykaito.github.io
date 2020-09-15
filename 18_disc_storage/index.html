@@ -14,12 +14,12 @@
 
 	<table id="Table" border="0" align="center">
 		<tr>
-			<td align="left" onclick="switchScanner()">
+			<td align="left" onclick="discScanner.switchScannerOnOff()">
 		        <a id="textScannerStatus">Camera ON/OFF</a>
 		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
 			</td>
 			<td align="right">
-		        <input id="searchBar" type="text" placeholder="Search by Title" onfocus="switchScanner(false)" onchange="updateSearchResult()">
+		        <input id="searchBar" type="text" placeholder="Search by Title" onfocus="discScanner.switchScannerOnOff(false)" onchange="updateSearchResult()">
 			</td>
 		</tr>
 		<tr>
@@ -40,12 +40,12 @@
 					</tr>
 		        </table>
 			</td>
-		</tr><!--
+		</tr>
 		<tr>
 			<td align="left" colspan="2">
 		        <input type="file" accept='text/plain' onchange='tvManager.loadLocalTxt(event)'>
 			</td>
-		</tr>-->
+		</tr>
 		<tr>
 			<td id="debugger" align="left" colspan="2">
 		        <canvas id="codeDisplayCanvas" style="display:none"></canvas>
@@ -90,32 +90,6 @@
 
 		//Prepare scanner
 		const discScanner = new DiscScanner(document.getElementById("cameraMedia"),displayCanvas);
-
-		//Scanner Status
-		const textScannerStatus	= document.getElementById("textScannerStatus");
-		const searchBar			= document.getElementById("searchBar");
-		let ScannerOn = false;
-		const updateScannerStatus = () => {
-			if(ScannerOn){
-				textScannerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
-				discScanner.startScan();
-				displayCanvas.showCanvas();
-
-			}else{
-				textScannerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
-				discScanner.stopScan();
-				displayCanvas.hideCanvas();
-			}
-		}
-		const switchScanner = (input) => {
-			if(input==undefined){
-				ScannerOn = !ScannerOn;
-			}else{
-				ScannerOn = input;
-			}
-			updateScannerStatus();
-		}
-		updateScannerStatus();
 
 		//Usefull plots and graphs
 		const plotA = new PlotCanvas();
