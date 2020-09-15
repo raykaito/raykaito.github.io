@@ -171,7 +171,6 @@ class LogCanvas extends Canvas{
         super(canvas);
         this.lineSize = lineSize;
         this.font = ""+lineSize+"px 'Times'";
-        //this.appendSelf(debugSpace);
         this.flexResize(0.95,0.2);
         this.fillAll("white");
         this.newLine("Logger Started...");

@@ -3,7 +3,7 @@ class DiscScanner{
         //Get display canvas info
         this.dCanvas = displayCanvas;
         this.oCanvas = new Canvas();
-        this.oCanvas.appendSelf();
+        //this.oCanvas.appendSelf();
         this.video = video;
 
         //The disc number it is looking for
@@ -69,6 +69,7 @@ class DiscScanner{
     addDiscNumber(number){
         this.targetNumber = number;
         this.startScan();
+        window.scrollTo(0,0);
     }
     switchScannerOnOff(defaultInput){
         if(defaultInput==undefined){
@@ -88,7 +89,7 @@ class DiscScanner{
             this.dCanvas.showCanvas();
             this.textScannerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
         }else{
-            this.dCanvas.hideCanvas();
+            //this.dCanvas.hideCanvas();
             this.textScannerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
         }
     }

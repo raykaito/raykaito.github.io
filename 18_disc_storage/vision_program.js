@@ -46,6 +46,8 @@ class VisionProgram{
                 continue;
             }
             const xi = (i+previousPosition)/2;
+            const yi = this.oCanvas.canvas.height/2;
+            const yt = 0;
             previousPosition = i;
             if(xi<this.width*0.1||xi>this.width*0.9)continue;
             const angle = inter_angle+slope_angle*i;
@@ -53,12 +55,17 @@ class VisionProgram{
             const codeROI = this.newROI(xt,0,1,this.height/2,0,Math.sin(deg2rad(angle)));
             this.histogram.autoBinarizeWithOtsuMethod(codeROI);
             const result = this.codeScanner.scanForCode(this.histogram.passROI);
+            this.dCanvas.ct.strokeStyle = "lime";
+            this.dCanvas.ct.lineWidth = this.dCanvas.pixelRatio;
+            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
             if(result=="CodeNotFound") continue;
-            const [code,yi,yt] = result;
-            //this.dCanvas.text(code,xi*this.wScale,yi*this.hScale);
+            const [code,ya,yb] = result;
+            const xa = Math.floor(xi-(this.height/2-ya)*Math.sin(deg2rad(angle)));
+            const xb = Math.floor(xi-(this.height/2-yb)*Math.sin(deg2rad(angle)));
+            this.dCanvas.text(code,xi*this.wScale,ya*this.hScale);
             this.dCanvas.ct.strokeStyle=(code==targetNumber?"lime":"red");
             this.dCanvas.ct.lineWidth = 5*this.dCanvas.pixelRatio;
-            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
+            this.dCanvas.line(xa*this.wScale,ya*this.hScale,xb*this.wScale,yb*this.hScale);
         }
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
@@ -384,7 +391,7 @@ class LineScanner extends ImageData{
         let blackStart = -1;
         let center = new Array();
         let width = new Array();
-        for(let i=0;i<rawData.length;i++){
+        for(let i=rawData.length-1;i>=0;i--){
             if(waitForBlack){
                 if(rawData[i]==0){
                     waitForBlack = false;
@@ -394,31 +401,24 @@ class LineScanner extends ImageData{
                 if(rawData[i]!=0){
                     waitForBlack = true;
                     center[center.length] = (i+blackStart)/2;
-                    width[width.length]  = i-blackStart;
+                    width[width.length]  = blackStart-i;
                 }
             }
+            if(center.length==12) break;
         }
+        //check for errors
         if(center.length<12) return "CodeNotFound";
-        //remove unwanted bars
-        while(center.length>12){
-            const gapFirst = center[1]-center[0];
-            const gapLast = center[center.length-1]-center[center.length-2];
-            if(gapFirst>gapLast){
-                center.shift();
-                width.shift();
-            }else{
-                center.pop();
-                width.shift();
-            }
-        }
-        //choose order
         if(width[0]>width[11]) width.reverse();
+        for(let i=1;i<center.length;i++){
+            if(Math.abs(center[i]-center[i-1])>width[11]*2){
+                return "CodeNotFound";
+            }
+        }        
         const thresh = (width[0]+width[11])/2;
         let binaryString = new String();
         for(let i=1;i<11;i++){
             binaryString+=(width[i]>thresh?"1":"0");
         }
-        log(binaryString);
         return [parseInt(binaryString,2),center[0],center[center.length-1]];
     }
 }
