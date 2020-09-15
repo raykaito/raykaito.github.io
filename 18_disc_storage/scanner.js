@@ -6,6 +6,9 @@ class DiscScanner{
         this.oCanvas.appendSelf();
         this.video = video;
 
+        //The disc number it is looking for
+        this.targetNumber = -1;
+
         this.front=false;
         this.constraints = {
             audio:false,
@@ -51,8 +54,12 @@ class DiscScanner{
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
         this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        this.vProgram.run();
+        this.vProgram.run(this.targetNumber);
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
+    }
+    addDiscNumber(number){
+        this.targetNumber = number;
+        switchScanner(true);
     }
 }
 console.log("Loaded: scanner.js");

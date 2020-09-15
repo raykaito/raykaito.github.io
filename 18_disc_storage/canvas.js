@@ -171,7 +171,7 @@ class LogCanvas extends Canvas{
         super(canvas);
         this.lineSize = lineSize;
         this.font = ""+lineSize+"px 'Times'";
-        this.appendSelf(debugSpace);
+        //this.appendSelf(debugSpace);
         this.flexResize(0.95,0.2);
         this.fillAll("white");
         this.newLine("Logger Started...");
@@ -197,13 +197,14 @@ class CodeCanvas extends Canvas{
     displayCode(num = 0,xi,xt){
         let binary = "0"+num.toString(2)+"1";
         while(binary.length<12) binary = "0"+binary;
-        const scale = 1;
+        const scale = this.pixelRatio;
         const gap = 4;
-        const offset = 15.5;
+        const offset = 15*this.pixelRatio;
+        const g = 2*this.pixelRatio;
         this.ct.strokeStyle = "black";
         for(let i=0;i<12;i++){
-            this.ct.lineWidth = ((binary.charAt(i)=="1")?3:1)*scale;
-            this.line(xi,i*scale*gap+offset,xt,i*scale*gap+offset);
+            this.ct.lineWidth = ((binary.charAt(i)=="1")?2:1)*scale;
+            this.line(xi+g,i*scale*gap+offset,xt-g,i*scale*gap+offset);
         }        
     }
     displayCodes(){
@@ -211,9 +212,10 @@ class CodeCanvas extends Canvas{
         const height = this.canvas.height;
         this.fillAll("white");
         this.ct.strokeStyle = "black";
-        this.ct.lineWidth = 2;
-        const discNumber = 30;
+        log(this.ct.lineWidth);
+        const discNumber = 60;
         for(let i=0;i<discNumber;i++){
+            this.ct.lineWidth = 1*this.pixelRatio;
             this.line(i*width/discNumber,0,i*width/discNumber,height);
             this.displayCode(i,i*width/discNumber,(i+1)*width/discNumber);
         }

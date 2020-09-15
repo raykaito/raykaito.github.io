@@ -19,7 +19,7 @@ class VisionProgram{
         this.wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
         this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
     }
-    run(){
+    run(targetNumber){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
 
         const lineDetectionROI_L = this.newROI(3*this.width/16,this.height/2,this.width/8,this.height/2-1);
@@ -38,7 +38,6 @@ class VisionProgram{
         const linearScan_ROI = this.newROI(0,this.height/2,this.width,1);
         const lineIntensity = this.linearScanner.autoLineIntensityAquisition(linearScan_ROI);
 
-        this.dCanvas.ct.strokeStyle="lime";
         this.dCanvas.ct.lineWidth = 2;
         let previousPosition = -1;
         for(let i=0;i<lineIntensity.length;i++){
@@ -57,8 +56,10 @@ class VisionProgram{
             const codeROI = this.newROI(xt,yt,1,this.height/2,0,Math.sin(deg2rad(angle)));
             this.histogram.autoBinarizeWithOtsuMethod(codeROI);
             const code = this.codeScanner.scanForCode(this.histogram.passROI);
-            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
+            if(code=="CodeNotFound") continue;
             this.dCanvas.text(code,xi*this.wScale,yi*this.hScale);
+            this.dCanvas.ct.strokeStyle=(code==targetNumber?"lime":"red");
+            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
         }
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
@@ -398,6 +399,7 @@ class LineScanner extends ImageData{
                 }
             }
         }
+        if(center.length<12) return "CodeNotFound";
         //remove unwanted bars
         while(center.length>12){
             const gapFirst = center[1]-center[0];
