@@ -19,7 +19,7 @@
 		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
 			</td>
 			<td align="right">
-		        <input id="searchBar" type="text" placeholder="Search by Title" onfocus="discScanner.switchScannerOnOff(false)" onchange="updateSearchResult()">
+		        <input id="searchBar" type="text" placeholder="Search by Title" onfocus="discScanner.switchScannerOnOff(false)">
 			</td>
 		</tr>
 		<tr>
@@ -32,10 +32,10 @@
 		        <table id="TVPrograms" border="0" width="100%">
 					<tr>
 						<td align="left" width="70%">
-							タイトル
+							<U>タイトル</U>
 						</td>
 						<td align="center" width="30%">
-							ディスク番号
+							<U>ディスク番号</U>
 						</td>
 					</tr>
 		        </table>
@@ -43,7 +43,7 @@
 		</tr>
 		<tr>
 			<td align="left" colspan="2">
-		        <input type="file" accept='text/plain' onchange='tvManager.loadLocalTxt(event)'>
+		        <input type="file" class="fileInput" accept='text/plain' onchange='tvManager.loadLocalTxt(event)'>
 			</td>
 		</tr>
 		<tr>

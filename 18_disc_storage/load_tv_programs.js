@@ -2,12 +2,16 @@ class TVListManager{
     constructor(){
         this.tvProgramList = new Array();//{title:,hiragana:,discNumber:,row:,rowIndex:}
         this.tvTable = document.getElementById("TVPrograms");
+        this.fInput = document.getElementById("fileInput");
+        this.searchBar = document.getElementById("searchBar");
+        addEventListener('keyup',()=>{this.updateSearchResult(tvManager);},false);
     }
     loadRemoteTxt(url){
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200){
-            tvManager.loadTVPrograms(this.responseText);
+                tvManager.loadTVPrograms(this.responseText);
+                this.fInput.style.display = "none";
             }
         };
         xhttp.open("GET", url, true);
@@ -46,18 +50,45 @@ class TVListManager{
     appendTVProgram(tvProgram){
         const newRow = this.tvTable.insertRow(1);
         newRow.setAttribute("onclick","tvManager.addDiscNumber(this)");
+
         const title = newRow.insertCell(0);
-        const discNumber = newRow.insertCell(1);
         title.innerHTML = tvProgram.title;
+        title.setAttribute("align","left");
+        
+        const discNumber = newRow.insertCell(1);
         discNumber.innerHTML = tvProgram.discNumber;
         discNumber.setAttribute("align","center");
+        
         tvProgram.row = newRow;
         tvProgram.rowIndex = newRow.rowIndex;
     }
     addDiscNumber(row){
-        discScanner.addDiscNumber(Number(row.cells[1].innerText));
+        const discNumber = Number(row.cells[1].innerText);
+        alert("ディスクの番号は"+discNumber+"です")
+        discScanner.addDiscNumber(discNumber);
     }
-    updateTVProgram(){ 
+    updateSearchResult(tvManager){
+        const tv = tvManager;
+        const targetText = tv.searchBar.value;
+        const targetTextKatakana = tv.hiraganaToKatakana(targetText);
+        console.log(tv.tvProgramList);
+        for(let tvProgramIndex = 0;tvProgramIndex<tv.tvProgramList.length;tvProgramIndex++){
+            const foundOnTitle          = tv.tvProgramList[tvProgramIndex].title.search(targetText)+1;
+            const foundOnTitleKata      = tv.tvProgramList[tvProgramIndex].title.search(targetTextKatakana)+1;
+            const foundOnHiragana       = tv.tvProgramList[tvProgramIndex].hiragana.search(targetText)+1;
+            const foundOnHiraganaKata   = tv.tvProgramList[tvProgramIndex].hiragana.search(targetTextKatakana)+1;
+            if(foundOnTitle+foundOnHiragana+foundOnTitleKata+foundOnHiraganaKata>0){
+                tv.tvProgramList[tvProgramIndex].row.style.display = "table-row";
+            }else{
+                tv.tvProgramList[tvProgramIndex].row.style.display = "none";
+            }
+        }
+    }
+    hiraganaToKatakana(str){
+        return str.replace(/[\u3041-\u3096]/g,function(match){
+            const chr = match.charCodeAt(0) + 0x60;
+            return String.fromCharCode(chr);
+        });
     }
 }
 
