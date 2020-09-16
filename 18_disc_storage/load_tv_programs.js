@@ -11,7 +11,7 @@ class TVListManager{
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200){
                 tvManager.loadTVPrograms(this.responseText);
-                this.fInput.style.display = "none";
+                tvManager.fInput.style.display = "none";
             }
         };
         xhttp.open("GET", url, true);

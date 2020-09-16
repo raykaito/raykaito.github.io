@@ -89,7 +89,7 @@ class DiscScanner{
             this.dCanvas.showCanvas();
             this.textScannerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
         }else{
-            //this.dCanvas.hideCanvas();
+            this.dCanvas.hideCanvas();
             this.textScannerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
         }
     }
