@@ -63,8 +63,9 @@ class TVListManager{
         tvProgram.rowIndex = newRow.rowIndex;
     }
     addDiscNumber(row){
+        const title = row.cells[0].innerText;
         const discNumber = Number(row.cells[1].innerText);
-        alert("ディスクの番号は"+discNumber+"です")
+        alert("[ "+title+" ] ディスクの番号は "+discNumber+" です")
         discScanner.addDiscNumber(discNumber);
     }
     updateSearchResult(tvManager){
