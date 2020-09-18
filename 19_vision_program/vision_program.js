@@ -29,7 +29,7 @@ class VisionProgram{
         const width = 200;
         const height = 200;
 
-        const lineDetectionROI_L = this.newROI((this.width-width)/2,(this.height-height)/2,width,height);
+        const lineDetectionROI_L = this.newROI((this.width-width)/2,7*(this.height-height)/8,width,height);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
         graphA.update(this.histogram.bin);
         graphA.ct.strokeStyle = "red";
@@ -44,10 +44,12 @@ class VisionProgram{
         this.displayImageDataD(this.houghTrans);
         plotA.ct.strokeStyle = "red";
         plotA.ct.lineWidth = 1;
-        const x = this.houghTrans.maxIndex%this.houghTrans.rangeThetaIndex+1;
-        const y = Math.floor(this.houghTrans.maxIndex/this.houghTrans.rangeThetaIndex)+1;
-        plotA.drawRect(x-3,y-3,7,7,"red");
-        plotA.drawRect(x-2,y-2,5,5,"red");
+        for(let i=0;i<this.houghTrans.maxIndex.length;i++){
+            const x = this.houghTrans.maxIndex[i]%this.houghTrans.rangeThetaIndex+1;
+            const y = Math.floor(this.houghTrans.maxIndex[i]/this.houghTrans.rangeThetaIndex)+1;
+            plotA.drawRect(x-3,y-3,7,7,"red");
+            plotA.drawRect(x-2,y-2,5,5,"red");
+        }
 
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
@@ -338,17 +340,13 @@ class houghTransform extends imgData{
         this.scaleRho = 1;      //Actual = Scale*index
         this.intensity = new Array(this.rangeRhoIndex*this.rangeThetaIndex);
         //important Parameters
-        this.ySkip = 100;
+        this.skipRate = 0.8;
     }
     autoIntAngleAquisition(ROI){
         this.updateROI(ROI);
-        this.xyLines(15);
         this.transform();
-        this.detectLine();
+        this.detectLines();
         return [this.getXInter(), this.getAngle()];
-    }
-    xyLines(numLine=10){
-        this.xySkip = Math.floor(Math.min(this.height,this.width)/numLine);
     }
     transform(){
         const width = this.width;
@@ -357,8 +355,8 @@ class houghTransform extends imgData{
         this.intensity.fill(0);
         for(let i=1;i<this.imgIn.data.length/4;i++){
             const [x,y] = this.i2xy(i);
-            if(y%this.xySkip!=0&&x%this.xySkip!=0) continue;
             if(this.getPixI(this.imgIn,i)!=0){
+                if(Math.random()<this.skipRate) continue;
                 this.updateIntensity(x,y,1);
             }
         }
@@ -375,15 +373,54 @@ class houghTransform extends imgData{
             this.intensity[rhoIndex*this.rangeThetaIndex+thetaIndex]+=value;
         }
     }
+    detectLines(){
+        const intensityThresh = getMax(this.intensity)*0.85;
+        const range=this.width/100;
+        let lineCandidate = new Array();
+        for(let i=0;i<this.intensity.length;i++){
+            if(this.intensity[i]>intensityThresh){
+                const [theta,rho] = this.i2xy(i,this.rangeThetaIndex);
+                let checkNear = false;
+                for(let candidateIndex=0;candidateIndex<lineCandidate.length;candidateIndex++){
+                    const rhoC = lineCandidate[candidateIndex][0];
+                    const thetaC=lineCandidate[candidateIndex][1];
+                    if(Math.abs(rhoC-rho)<range&&Math.abs(thetaC-theta)<range){
+                        checkNear = true;
+                        if(this.intensity[i]>lineCandidate[candidateIndex][2]){
+                            lineCandidate[candidateIndex][0] = rho;
+                            lineCandidate[candidateIndex][1] = theta;
+                            lineCandidate[candidateIndex][2] = this.intensity[i];
+                        }
+                        break;
+                    }
+                }
+                if(!checkNear){
+                    lineCandidate[lineCandidate.length] = [rho, theta, this.intensity[i]];
+                }
+            }
+        }
+        this.thetaMax = new Array(0);
+        this.rhoMax = new Array(0);
+        this.maxIndex = new Array(0);
+        for(let i=0;i<lineCandidate.length;i++){
+            const rhoMaxIndex = lineCandidate[i][0];
+            const thetaMaxIndex = lineCandidate[i][1];
+            this.maxIndex[i] = rhoMaxIndex*this.rangeThetaIndex+thetaMaxIndex;
+            this.thetaMax[i] = this.scaleTheta*(thetaMaxIndex+this.startThetaIndex);
+            this.rhoMax[i] = this.scaleRho*(rhoMaxIndex+this.startRhoIndex);
+        }
+    }
     detectLine(){
-        this.maxIndex = getMaxIndex(this.intensity);
-        this.thetaMaxIndex = this.maxIndex%this.rangeThetaIndex;
-        this.rhoMaxIndex = Math.floor(this.maxIndex/this.rangeThetaIndex);
-        this.thetaMax = this.scaleTheta*(this.thetaMaxIndex+this.startThetaIndex);
-        this.rhoMax = this.scaleRho*(this.rhoMaxIndex+this.startRhoIndex);
+        this.thetaMax = new Array(0);
+        this.rhoMax = new Array(0);
+        this.maxIndex = new Array(0);
+        this.maxIndex[0] = getMaxIndex(this.intensity);
+        this.thetaMaxIndex = this.maxIndex[0]%this.rangeThetaIndex;
+        this.rhoMaxIndex = Math.floor(this.maxIndex[0]/this.rangeThetaIndex);
+        this.thetaMax[0] = this.scaleTheta*(this.thetaMaxIndex+this.startThetaIndex);
+        this.rhoMax[0] = this.scaleRho*(this.rhoMaxIndex+this.startRhoIndex);
     }
     getXInter(){
-        log([this.thetaMax,this.rhoMax]);
         return this.xpos-this.rhoMax/Math.cos(deg2rad(this.thetaMax));
     }
     getAngle(){
@@ -391,25 +428,28 @@ class houghTransform extends imgData{
     }
     prepareDisplayCanvas(){
         const [tempCanvas,xpos,ypos,theta] = super.prepareDisplayCanvas();
-        if(this.thetaMax<45&&this.thetaMax>-45){
-            const xi=this.rhoMax/Math.cos(deg2rad(this.thetaMax));
-            const yi=0;
-            const xt=xi+this.height*Math.tan(deg2rad(this.thetaMax));
-            const yt=this.height;
-            tempCanvas.ct.strokeStyle = "red";
-            tempCanvas.ct.lineWidth = 3;
-            tempCanvas.line(xi,yi,xt,yt);
-            return [tempCanvas,xpos,ypos,theta];
-        }else{            
-            const yi=-this.rhoMax/Math.sin(deg2rad(this.thetaMax));
-            const xi=0;
-            const yt=yi+this.width/Math.tan(deg2rad(this.thetaMax));
-            const xt=this.width;
-            tempCanvas.ct.strokeStyle = "red";
-            tempCanvas.ct.lineWidth = 3;
-            tempCanvas.line(xi,yi,xt,yt);
-            return [tempCanvas,xpos,ypos,theta];
+        if(this.thetaMax.length!=0){
+            for(let i=0;i<this.thetaMax.length;i++){
+                if(this.thetaMax[i]<45&&this.thetaMax[i]>-45){
+                    const xi=this.rhoMax[i]/Math.cos(deg2rad(this.thetaMax[i]));
+                    const yi=0;
+                    const xt=xi+this.height*Math.tan(deg2rad(this.thetaMax[i]));
+                    const yt=this.height;
+                    tempCanvas.ct.strokeStyle = "red";
+                    tempCanvas.ct.lineWidth = 3;
+                    tempCanvas.line(xi,yi,xt,yt);
+                }else{            
+                    const yi=-this.rhoMax[i]/Math.sin(deg2rad(this.thetaMax[i]));
+                    const xi=0;
+                    const yt=yi+this.width/Math.tan(deg2rad(this.thetaMax[i]));
+                    const xt=this.width;
+                    tempCanvas.ct.strokeStyle = "red";
+                    tempCanvas.ct.lineWidth = 3;
+                    tempCanvas.line(xi,yi,xt,yt);
+                }
+            }
         }
+        return [tempCanvas,xpos,ypos,theta];
     }
 }
 
