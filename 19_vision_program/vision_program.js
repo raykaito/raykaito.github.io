@@ -27,7 +27,7 @@ class VisionProgram{
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
 
         const width = 200;
-        const height = 100;
+        const height = 200;
 
         const lineDetectionROI_L = this.newROI((this.width-width)/2,(this.height-height)/2,width,height);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
@@ -44,8 +44,8 @@ class VisionProgram{
         this.displayImageDataD(this.houghTrans);
         plotA.ct.strokeStyle = "red";
         plotA.ct.lineWidth = 1;
-        const x = this.houghTrans.maxIndex%this.houghTrans.rangeTheta+1;
-        const y = Math.floor(this.houghTrans.maxIndex/this.houghTrans.rangeTheta)+1;
+        const x = this.houghTrans.maxIndex%this.houghTrans.rangeThetaIndex+1;
+        const y = Math.floor(this.houghTrans.maxIndex/this.houghTrans.rangeThetaIndex)+1;
         plotA.drawRect(x-3,y-3,7,7,"red");
         plotA.drawRect(x-2,y-2,5,5,"red");
 
@@ -327,74 +327,89 @@ class Binary extends imgData{
 }
 
 class houghTransform extends imgData{
-    constructor(rho=100,theta=180){
+    constructor(){
         super();
         //range for rho and theta
-        this.rangeRho = rho;
-        this.rangeTheta = theta;
-        this.intensity = new Array(this.rangeRho*this.rangeTheta);
+        this.rangeRhoIndex = 200;
+        this.rangeThetaIndex = 180;
+        this.startThetaIndex = -90;
+        this.startRhoIndex = -100;
+        this.scaleTheta = 1;    //Actual = Scale*index
+        this.scaleRho = 1;      //Actual = Scale*index
+        this.intensity = new Array(this.rangeRhoIndex*this.rangeThetaIndex);
         //important Parameters
         this.ySkip = 100;
-        this.thetaStart = -90;
-        this.scaleTheta = 1;
-        this.scaleRho = 1;
     }
     autoIntAngleAquisition(ROI){
         this.updateROI(ROI);
-        this.yLines(15);
+        this.xyLines(15);
         this.transform();
         this.detectLine();
         return [this.getXInter(), this.getAngle()];
     }
-    yLines(numLine=10){
-        this.ySkip = Math.floor(this.height/numLine);
+    xyLines(numLine=10){
+        this.xySkip = Math.floor(Math.min(this.height,this.width)/numLine);
     }
     transform(){
         const width = this.width;
         const height= this.height;
-        this.scaleRho = this.rangeRho/width;
+        this.scaleRho = width/(this.rangeRhoIndex/2);
         this.intensity.fill(0);
         for(let i=1;i<this.imgIn.data.length/4;i++){
             const [x,y] = this.i2xy(i);
-            if(y%this.ySkip!=0) continue;
+            if(y%this.xySkip!=0&&x%this.xySkip!=0) continue;
             if(this.getPixI(this.imgIn,i)!=0){
                 this.updateIntensity(x,y,1);
             }
         }
-        plotA.update(this.intensity,this.rangeTheta);
+        plotA.update(this.intensity,this.rangeThetaIndex);
     }
     updateIntensity(x,y,value){
         if(value==0) return;
         const radiusi = getDist(x,y);
         const thetai  = getDir(x,y);
-        for(let theta=0;theta<this.rangeTheta;theta++){
-            const currentTheta = thetai+deg2rad(this.thetaStart+this.scaleTheta*theta);
-            const rho = radiusi*Math.cos(currentTheta);
-            const rhoIndex = Math.floor(this.scaleRho*rho);
-            this.intensity[rhoIndex*this.rangeTheta+theta]+=value;
+        for(let thetaIndex=0;thetaIndex<this.rangeThetaIndex;thetaIndex++){
+            const currentThetaActual = thetai+deg2rad((this.startThetaIndex+thetaIndex)*this.scaleTheta);
+            const rhoActual = radiusi*Math.cos(currentThetaActual);
+            const rhoIndex = Math.floor(rhoActual/this.scaleRho)-this.startRhoIndex;
+            this.intensity[rhoIndex*this.rangeThetaIndex+thetaIndex]+=value;
         }
     }
     detectLine(){
         this.maxIndex = getMaxIndex(this.intensity);
-        this.thetaMax = this.thetaStart+this.scaleTheta*(this.maxIndex%this.rangeTheta);
-        this.rhoMax = 1/this.scaleRho*Math.floor(this.maxIndex/this.rangeTheta);
+        this.thetaMaxIndex = this.maxIndex%this.rangeThetaIndex;
+        this.rhoMaxIndex = Math.floor(this.maxIndex/this.rangeThetaIndex);
+        this.thetaMax = this.scaleTheta*(this.thetaMaxIndex+this.startThetaIndex);
+        this.rhoMax = this.scaleRho*(this.rhoMaxIndex+this.startRhoIndex);
     }
     getXInter(){
-        return this.xpos+this.rhoMax/Math.cos(deg2rad(this.thetaMax));
+        log([this.thetaMax,this.rhoMax]);
+        return this.xpos-this.rhoMax/Math.cos(deg2rad(this.thetaMax));
     }
     getAngle(){
         return this.thetaMax;
     }
     prepareDisplayCanvas(){
         const [tempCanvas,xpos,ypos,theta] = super.prepareDisplayCanvas();
-        const xi=this.rhoMax/Math.cos(deg2rad(this.thetaMax));
-        const yi=0;
-        const xt=xi+this.height*Math.sin(deg2rad(this.thetaMax));
-        const yt=this.height;
-        tempCanvas.ct.strokeStyle = "lime";
-        tempCanvas.ct.lineWidth = 2;
-        tempCanvas.line(xi,yi,xt,yt);
-        return [tempCanvas,xpos,ypos,theta];
+        if(this.thetaMax<45&&this.thetaMax>-45){
+            const xi=this.rhoMax/Math.cos(deg2rad(this.thetaMax));
+            const yi=0;
+            const xt=xi+this.height*Math.tan(deg2rad(this.thetaMax));
+            const yt=this.height;
+            tempCanvas.ct.strokeStyle = "red";
+            tempCanvas.ct.lineWidth = 3;
+            tempCanvas.line(xi,yi,xt,yt);
+            return [tempCanvas,xpos,ypos,theta];
+        }else{            
+            const yi=-this.rhoMax/Math.sin(deg2rad(this.thetaMax));
+            const xi=0;
+            const yt=yi+this.width/Math.tan(deg2rad(this.thetaMax));
+            const xt=this.width;
+            tempCanvas.ct.strokeStyle = "red";
+            tempCanvas.ct.lineWidth = 3;
+            tempCanvas.line(xi,yi,xt,yt);
+            return [tempCanvas,xpos,ypos,theta];
+        }
     }
 }
 
