@@ -109,7 +109,7 @@ class VisionProgram{
             const width = Math.floor(tc.width*this.wScale);
             const height= Math.floor(tc.height*this.hScale);        
             this.dCanvas.drawRect(xpos-1,ypos-1,width+2,height+2,"lime");
-            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,width,height);
+            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,tc.width,tc.height);
             imgData.ddraw(this.dCanvas);
             return;
         }else{
