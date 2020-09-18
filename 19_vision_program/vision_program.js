@@ -327,7 +327,7 @@ class Binary extends imgData{
 }
 
 class houghTransform extends imgData{
-    constructor(rho=100,theta=100){
+    constructor(rho=100,theta=180){
         super();
         //range for rho and theta
         this.rangeRho = rho;
@@ -335,8 +335,8 @@ class houghTransform extends imgData{
         this.intensity = new Array(this.rangeRho*this.rangeTheta);
         //important Parameters
         this.ySkip = 100;
-        this.thetaStart = -10;
-        this.scaleTheta = 20/100;
+        this.thetaStart = -90;
+        this.scaleTheta = 1;
         this.scaleRho = 1;
     }
     autoIntAngleAquisition(ROI){
