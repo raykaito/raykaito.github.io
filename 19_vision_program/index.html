@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Image Processing</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+		<tr>
+			<td align="left" onclick="streamer.switchStreamerOnOff()">
+		        <a id="textStreamerStatus">Camera ON/OFF</a>
+		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
+			</td>
+			<td align="right">
+		        <input id="searchBar" type="text" placeholder="Text Input" onfocus="streamer.switchStreamerOnOff(false)">
+			</td>
+		</tr>
+		<tr>
+			<td align="left" colspan="2">
+		        <canvas id="displayCanvas" style="display:inline" onclick="dcClicked()"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td id="debugger" align="left" colspan="2">
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="functions.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="vision_program.js"></script>
+	<script type="text/javascript" src="video_stream.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+		//Opacity Control
+		const table  = document.getElementById('Table' );
+		const body   = document.getElementById('Body'  );
+		showObject(body, table);
+
+        //Debugger
+        const debugSpace = document.getElementById("debugger");
+		//Debugging tool for ios
+		logCanvas = new LogCanvas();
+        logCanvas.appendSelf(debugSpace);
+		function log(input){
+			logCanvas.newLine(input);
+		}
+
+		//Prepare streamer
+		const streamer = new VideoStream(document.getElementById("cameraMedia"));
+
+		//Usefull plots and graphs
+		const plotA = new PlotCanvas();
+		const plotB = new PlotCanvas();
+		const plotC = new PlotCanvas();
+		const graphA = new GraphCanvas();
+		const graphB = new GraphCanvas();
+		const graphC = new GraphCanvas();
+		graphA.appendSelf(debugSpace);
+		plotA.appendSelf(debugSpace);
+		if(false){
+			plotB.appendSelf();
+			plotC.appendSelf();
+			graphB.appendSelf();
+			graphC.appendSelf();
+		}
+
+	//--> 
+	</script>
+
+</body>
+
+
+</html>
