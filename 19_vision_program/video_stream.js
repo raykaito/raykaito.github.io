@@ -8,7 +8,7 @@ class VideoStream{
             audio:false,
             video:{
                 width:800,
-                height:400,
+                height:800,
                 facingMode:(this.front?"user":"environment")
             }
         };
