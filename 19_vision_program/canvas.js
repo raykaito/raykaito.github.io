@@ -63,18 +63,17 @@ class Canvas{
         this.ct.closePath();
         this.ct.stroke();
     }
-    fillAll(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
-        this.ct.fillStyle = color;
-        this.ct.fillRect(dx,dy,width,height);
+    fillAll(color="black"){
+        this.fillRect(0,0,this.canvas.width,this.canvas.height,color);
     }
-    drawRect(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
+    drawRect(dx=0,dy=0,width=this.canvas.width,height=this.canvas.height,color="black"){
         this.ct.strokeStyle = color;
         this.ct.beginPath();
         this.ct.rect(dx+0.5,dy+0.5,width-1,height-1);
         this.ct.closePath();
         this.ct.stroke();
     }
-    fillRect(color="black",dx=0,dy=0,width=this.canvas.width,height=this.canvas.height){
+    fillRect(dx=0,dy=0,width=this.canvas.width,height=this.canvas.height,color="black"){
         this.ct.fillStyle = color;
         this.ct.fillRect(dx,dy,width,height);
     }
@@ -113,7 +112,7 @@ class PlotCanvas extends Canvas{
     }
     clear(){
         this.fillAll("black");
-        this.fillRect("white",1,1,this.canvas.width-2,this.canvas.height-2);
+        this.fillRect(1,1,this.canvas.width-2,this.canvas.height-2,"white");
     }
     update(data,width,height="fromWidth",autoScale=true){
         const scale = autoScale?256/Math.max(1,getMax(data)):1;
@@ -135,7 +134,7 @@ class GraphCanvas extends Canvas{
     constructor(canvas=document.createElement("canvas")){
         super(canvas);
         this.clear();
-        this.fillRect("white",1,1,this.canvas.width-2,this.canvas.height-2);
+        this.fillRect(1,1,this.canvas.width-2,this.canvas.height-2,"white");
     }
     reset(width,height){
         if(this.canvas.width!=width+2||this.canvas.height!=height+2){
@@ -161,7 +160,7 @@ class GraphCanvas extends Canvas{
         if(Array.isArray(data)){
             this.reset(width,height);
             for(let i=0;i<data.length;i++){
-                this.fillRect("white",i+1,1,1,this.canvas.height-data[i]*scale-2);
+                this.fillRect(i+1,1,1,this.canvas.height-data[i]*scale-2,"white");
             }
         }else{
             alert("Data input for GraphCanvas needs to be 1-D Array");
@@ -188,7 +187,7 @@ class LogCanvas extends Canvas{
         }
         this.text(string,0,0,"black",this.font);
         this.ct.drawImage(this.canvas,0,this.lineSize);
-        this.fillAll("white",0,0,this.canvas.width,this.lineSize);
+        this.fillRect(0,0,this.canvas.width,this.lineSize,"white");
     }
 }
 

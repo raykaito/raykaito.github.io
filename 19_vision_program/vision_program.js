@@ -4,7 +4,7 @@ class VisionProgram{
         this.oimgdata;
         //Prepare DisplayCanvas
         this.dCanvas = new Canvas(document.getElementById('displayCanvas'));
-        this.resizeOcanvas(2,1);
+        this.resizeOcanvas(1,1);
 
         this.houghTrans = new houghTransform();
         this.histogram = new Histogram();
@@ -21,11 +21,16 @@ class VisionProgram{
         this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
     }
     run(video){
+        //this.dCanvas.fillAll()
+        //return;
         this.oCanvas.drawImage(video,0,0,this.width,this.height);
         this.dCanvas.drawImage(video,0,0,this.width,this.height);
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
 
-        const lineDetectionROI_L = this.newROI(this.width/4,this.height/4,this.width/2,this.height/2);
+        const width = 200;
+        const height = 100;
+
+        const lineDetectionROI_L = this.newROI((this.width-width)/2,(this.height-height)/2,width,height);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
         graphA.update(this.histogram.bin);
         graphA.ct.strokeStyle = "red";
@@ -38,8 +43,8 @@ class VisionProgram{
         plotA.ct.lineWidth = 1;
         const x = this.houghTrans.maxIndex%this.houghTrans.rangeTheta+1;
         const y = Math.floor(this.houghTrans.maxIndex/this.houghTrans.rangeTheta)+1;
-        plotA.drawRect("red",x-3,y-3,7,7);
-        plotA.drawRect("red",x-2,y-2,5,5);
+        plotA.drawRect(x-3,y-3,7,7,"red");
+        plotA.drawRect(x-2,y-2,5,5,"red");
 
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
@@ -80,7 +85,7 @@ class VisionProgram{
         const tc = tempCanvas.canvas;
         this.oCanvas.ct.lineWidth = 1;
         if(theta==0){            
-            this.oCanvas.drawRect("lime",-1+x,-1+y,tc.width+2,tc.height+2);
+            this.oCanvas.drawRect(-1+x,-1+y,tc.width+2,tc.height+2,"lime");
             this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,x,y,tc.width,tc.height);
             imgData.odraw(this.oCanvas);
             return;
@@ -88,7 +93,7 @@ class VisionProgram{
             this.oCanvas.ct.save();
             this.oCanvas.translate(x,y);
             this.oCanvas.rotateRad(theta);
-            this.oCanvas.drawRect("lime",-1,-1,tc.width+2,tc.height+2);
+            this.oCanvas.drawRect(-1,-1,tc.width+2,tc.height+2,"lime");
             this.oCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width,tc.height);
             imgData.odraw(this.oCanvas);
             this.oCanvas.ct.restore();
@@ -103,7 +108,7 @@ class VisionProgram{
             const ypos = Math.floor(y*this.hScale);
             const width = Math.floor(tc.width*this.wScale);
             const height= Math.floor(tc.height*this.hScale);        
-            this.dCanvas.drawRect("lime",xpos-1,ypos-1,width+2,height+2);
+            this.dCanvas.drawRect(xpos-1,ypos-1,width+2,height+2,"lime");
             this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,width,height);
             imgData.ddraw(this.dCanvas);
             return;
@@ -111,7 +116,7 @@ class VisionProgram{
             this.dCanvas.ct.save();
             this.dCanvas.translate(x*this.wScale,y*this.hScale);
             this.dCanvas.rotateRad(theta);
-            this.dCanvas.drawRect("lime",-1,-1,tc.width*this.wScale+2,tc.height*this.hScale+2);
+            this.dCanvas.drawRect(-1,-1,tc.width*this.wScale+2,tc.height*this.hScale+2,"lime");
             this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*this.wScale,tc.height*this.hScale);
             imgData.ddraw(this.dCanvas);
             this.dCanvas.ct.restore();
