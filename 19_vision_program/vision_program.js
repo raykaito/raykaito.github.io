@@ -8,6 +8,7 @@ class VisionProgram{
 
         this.houghTrans = new houghTransform();
         this.histogram = new Histogram();
+        this.edgeExtraction = new Binary();
     }
     resizeOcanvas(width,height){
         this.oCanvas.resize(width,height);
@@ -21,8 +22,6 @@ class VisionProgram{
         this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
     }
     run(video){
-        //this.dCanvas.fillAll()
-        //return;
         this.oCanvas.drawImage(video,0,0,this.width,this.height);
         this.dCanvas.drawImage(video,0,0,this.width,this.height);
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
@@ -37,7 +36,11 @@ class VisionProgram{
         graphA.ct.lineWidth = 1;
         graphA.line(this.histogram.thresh+1,1,this.histogram.thresh+1,101);
 
-        const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
+        this.edgeExtraction.updateROI(this.histogram.passROI);
+        this.edgeExtraction.extractEdge(this.histogram.passROI);
+        //this.displayImageDataD(this.edgeExtraction);
+
+        const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.edgeExtraction.passROI);
         this.displayImageDataD(this.houghTrans);
         plotA.ct.strokeStyle = "red";
         plotA.ct.lineWidth = 1;
@@ -109,7 +112,7 @@ class VisionProgram{
             const width = Math.floor(tc.width*this.wScale);
             const height= Math.floor(tc.height*this.hScale);        
             this.dCanvas.drawRect(xpos-1,ypos-1,width+2,height+2,"lime");
-            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,tc.width,tc.height);
+            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,xpos,ypos,width,height);
             imgData.ddraw(this.dCanvas);
             return;
         }else{
@@ -130,11 +133,12 @@ class VisionProgram{
     }
 }
 
-class ImageData{
+class imgData{
     constructor(){
     }
-    updateROI([imgIn,xpos,ypos,theta,dx,dy]){
-        this.imgIn = imgIn;
+    updateROI([imgIn,xpos,ypos,theta,dx,dy],imgOutInit="copy"){
+        this.imgIn = {data:new Uint8ClampedArray(imgIn.width*imgIn.height*4)};
+        this.imgIn.data.set(imgIn.data);
         this.xpos = xpos;
         this.ypos = ypos;
         this.width = imgIn.width;
@@ -143,8 +147,14 @@ class ImageData{
         this.imgOut = imgIn;
         this.dx = dx;
         this.dy = dy;
-        for(let i=0;i<imgIn.data.length;i++){
-            this.imgOut.data[i]=imgIn.data[i];
+        if(imgOutInit!="copy"){
+            for(let i=0;i<imgIn.data.length;i++){
+                if(i%4==3){
+                    this.imgOut.data[i]=255;
+                }else{
+                    this.imgOut.data[i]=imgOutInit;
+                }
+            }
         }
     }
     get passROI(){
@@ -165,7 +175,7 @@ class ImageData{
         return [i%width, Math.floor(i/width)];
     }
     setPixXY(indexIn, value, type="all"){this.setPixI(this.xy2i(indexIn),value,type);}
-    getPixXY(imgIn, indexIn, type="all"){this.getPixI(imgIn,this.xy2i(indexIn, imgIn.width),type);}
+    getPixXY(imgIn, indexIn, type="all"){return this.getPixI(imgIn,this.xy2i(indexIn, imgIn.width),type);}
     setPixI(index, value, type="all"){
         //Set the pixel based on type
         if(type=="all"){
@@ -174,7 +184,8 @@ class ImageData{
             this.imgOut.data[4*index+2] = value;
         }else{
             this.imgOut.data[4*index+type] = value;
-        }}
+        }
+    }
     getPixI(imgIn,index,type="all"){
         //Get the pixel based on type
         if(type=="all"){
@@ -191,7 +202,7 @@ class ImageData{
     }
 }
 
-class Histogram extends ImageData{
+class Histogram extends imgData{
     constructor(){
         super();
         this.bin = new Array(256).fill(0);
@@ -263,7 +274,59 @@ class Histogram extends ImageData{
     }
 }
 
-class houghTransform extends ImageData{
+class Binary extends imgData{
+    constructor(){
+        super();
+    }
+    updateROI(ROI){
+        super.updateROI(ROI,0);
+    }
+    invert(){
+        //Horizontal Edge Scan
+        for(let y=0;y<this.height;y++){
+            for(let x=0;x<this.width;x++){
+                const value = (this.getPixXY(this.imgIn,[x,y]));
+                this.setPixXY([x,y],255-value);
+            }
+        }
+    }
+    extractEdge(){
+        //Horizontal Edge Scan
+        for(let y=0;y<this.height;y++){
+            let pastBlack = (this.getPixXY(this.imgIn,[0,y])==0);
+            let nowBlack;
+            for(let x=1;x<this.width;x++){
+                nowBlack = (this.getPixXY(this.imgIn,[x,y])==0);
+                if(nowBlack!=pastBlack){
+                    if(nowBlack){
+                        this.setPixXY([x,y],255);
+                    }else{
+                        this.setPixXY([x-1,y],255);
+                    }
+                    pastBlack = nowBlack;
+                }
+            }
+        }
+        //Vertical Edge Scan
+        for(let x=0;x<this.width;x++){
+            let pastBlack = (this.getPixXY(this.imgIn,[x,0])==0);
+            let nowBlack;
+            for(let y=1;y<this.height;y++){
+                nowBlack = (this.getPixXY(this.imgIn,[x,y])==0);
+                if(nowBlack!=pastBlack){
+                    if(nowBlack){
+                        this.setPixXY([x,y],255);
+                    }else{
+                        this.setPixXY([x,y-1],255);
+                    }
+                    pastBlack = nowBlack;
+                }
+            }
+        }
+    }
+}
+
+class houghTransform extends imgData{
     constructor(rho=100,theta=100){
         super();
         //range for rho and theta
@@ -284,20 +347,18 @@ class houghTransform extends ImageData{
         return [this.getXInter(), this.getAngle()];
     }
     yLines(numLine=10){
-        this.ySkip = Math.floor(this.imgIn.height/numLine);
+        this.ySkip = Math.floor(this.height/numLine);
     }
     transform(){
-        const width = this.imgIn.width;
-        const height= this.imgIn.height;
+        const width = this.width;
+        const height= this.height;
         this.scaleRho = this.rangeRho/width;
         this.intensity.fill(0);
         for(let i=1;i<this.imgIn.data.length/4;i++){
             const [x,y] = this.i2xy(i);
             if(y%this.ySkip!=0) continue;
-            if(this.getPixI(this.imgIn,i)==0){
-                if(this.getPixI(this.imgIn,i-1)!=0){
-                    this.updateIntensity(x,y,1);
-                }
+            if(this.getPixI(this.imgIn,i)!=0){
+                this.updateIntensity(x,y,1);
             }
         }
         plotA.update(this.intensity,this.rangeTheta);
@@ -337,7 +398,7 @@ class houghTransform extends ImageData{
     }
 }
 
-class LineScanner extends ImageData{
+class LineScanner extends imgData{
     constructor(smoothrange = 1){
         super();
         this.lineIntensity = new Array(5);
@@ -349,8 +410,8 @@ class LineScanner extends ImageData{
         return this.lineIntensity;
     }
     getData(){
-        let data = new Array(this.imgIn.width);
-        for(let i=0;i<this.imgIn.width*this.imgIn.height;i++){
+        let data = new Array(this.width);
+        for(let i=0;i<this.width*this.height;i++){
             data[i]=this.getPixI(this.imgIn,i);
         }
         return data;

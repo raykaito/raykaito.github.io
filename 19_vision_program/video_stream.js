@@ -30,8 +30,8 @@ class VideoStream{
         this.videoHeight= mediaSettings.height;
         this.vProgram.resizeOcanvas(this.videoWidth,this.videoHeight)
         this.video.play();
-        this.drawVideo();
         this.streamerOn = true;
+        this.drawVideo();
         this.updateStreamerStatus();
     }
     startScan(){        
@@ -52,8 +52,10 @@ class VideoStream{
         this.updateStreamerStatus();
     }
     drawVideo(){
-        this.vProgram.run(this.video);
-        this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
+        if(this.streamerOn){
+            this.vProgram.run(this.video);
+            this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
+        }
     }
     addDiscNumber(number){
         this.targetNumber = number;
