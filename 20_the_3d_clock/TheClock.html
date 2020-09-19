@@ -23,15 +23,28 @@
             //var colors = [0xC41E3A, 0x009E60, 0x0051BA, 0xFF5800, 0xFFD500, 0xFFFFFF];
             //var faceMaterials = colors.map(function(c) { return new THREE.MeshLambertMaterial({ color: c , ambient: c });});
             //var cubeMaterials = new THREE.MeshFaceMaterial(faceMaterials);
+            const texA = new THREE.TextureLoader().load("img/0.png");
 
             var materials = [
-                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("img/0.png")}),
+                new THREE.MeshBasicMaterial({map: texA}),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png")}),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("img/2.png")}),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")}),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("img/1.png")})
-            ];
+            ];/*
+            const texA = new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png");
+            var materials = [
+                new THREE.MeshBasicMaterial({map:  texA}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")})
+            ];*/
+
+            console.log(materials);
+            texA.minFilter = THREE.NearestFilter;
 
             var geometry = new THREE.BoxGeometry();
             //var geometry2 = new THREE.BoxBufferGeometry(200, 200, 200);
