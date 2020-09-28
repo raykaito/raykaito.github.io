@@ -38,8 +38,8 @@ class TVListManager{
                                        discNumber:tvProgramTemp[2]};
         }
         this.tvProgramList.sort(function(a,b){
-            if(Number(a.discNumber)<Number(b.discNumber)) return  1;
-            if(Number(a.discNumber)>Number(b.discNumber)) return -1;
+            if(a.hiragana<b.hiragana) return 1;
+            if(a.hiragana>b.hiragana) return -1;
             return 0;
         })
         for(let i=0;i<this.tvProgramList.length;i++){
