@@ -45,7 +45,6 @@ class TVListManager{
         for(let i=0;i<this.tvProgramList.length;i++){
             this.appendTVProgram(this.tvProgramList[i]);
         }
-        console.log(this.tvProgramList);
     }
     appendTVProgram(tvProgram){
         const newRow = this.tvTable.insertRow(1);

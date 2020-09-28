@@ -17,7 +17,7 @@ class VisionProgram{
         this.width = width;
         this.height= height;
         this.wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
-        this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
+        this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height*2;
     }
     run(targetNumber){
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
@@ -25,12 +25,12 @@ class VisionProgram{
         const lineDetectionROI_L = this.newROI(3*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
         const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
-        this.displayImageDataD(this.houghTrans);
+        //this.displayImageDataD(this.houghTrans);
 
         const lineDetectionROI_R = this.newROI(13*this.width/16,this.height/2,this.width/8,this.height/2-1);
         this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_R);
         const [inter_R, angle_R] = this.houghTrans.autoIntAngleAquisition(this.histogram.passROI);
-        this.displayImageDataD(this.houghTrans);
+        //this.displayImageDataD(this.houghTrans);
 
         const slope_angle = (angle_R-angle_L)/(inter_R-inter_L);
         const inter_angle = angle_L-inter_L*slope_angle;
@@ -54,10 +54,10 @@ class VisionProgram{
             const xt = Math.floor(xi-this.height*Math.sin(deg2rad(angle))/2);
             const codeROI = this.newROI(xt,0,1,this.height/2,0,Math.sin(deg2rad(angle)));
             this.histogram.autoBinarizeWithOtsuMethod(codeROI);
-            const result = this.codeScanner.scanForCode(this.histogram.passROI);
+            const result = this.codeScanner.scanForCode(this.histogram.passROI);/*
             this.dCanvas.ct.strokeStyle = "lime";
             this.dCanvas.ct.lineWidth = this.dCanvas.pixelRatio;
-            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);
+            this.dCanvas.line(xi*this.wScale,yi*this.hScale,xt*this.wScale,yt*this.hScale);*/
             if(result=="CodeNotFound") continue;
             const [code,ya,yb] = result;
             const xa = Math.floor(xi-(this.height/2-ya)*Math.sin(deg2rad(angle)));

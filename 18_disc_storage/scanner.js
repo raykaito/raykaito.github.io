@@ -62,7 +62,7 @@ class DiscScanner{
     }
     drawVideo(){
         this.oCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
-        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/2);
+        this.dCanvas.drawImage(this.video,0,this.videoHeight/4,this.videoWidth,this.videoHeight/4);
         this.vProgram.run(this.targetNumber);
         this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
     }
