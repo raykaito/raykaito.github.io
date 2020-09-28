@@ -11,14 +11,7 @@
 
 
 <body id="Body" bgcolor = 'black'>
-
-	<table id="Table" border="0" align="center" width="3">
-		<tr>
-			<td colspan ="5"  align="center">
-				<canvas id="Canvas" style="border:0px solid #000000;"></canvas>
-			</td>
-		</tr>
-	</table>
+	<canvas id="Canvas" style="border:0px solid #000000;"></canvas>
 
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
@@ -36,9 +29,14 @@
 		const height= canvas.canvas.height;
 		const xc = width/2;
 		const yc = height/2;
-		const gap = width/8;
-		const fontSize = height/16;
+		const gap = width/5;
+		const fontSize = height/10;
 		const font = "arial";
+
+        const bodyWidth = window.innerWidth;
+        const bodyHeight = window.innerHeight;
+		canvas.canvas.style.marginLeft = Math.floor((bodyWidth-width/canvas.pixelRatio)/2)+"px";
+		canvas.canvas.style.marginTop = Math.floor((bodyHeight-height/canvas.pixelRatio)/2)+"px";
 
 		function animate(){
 			//Get Time
