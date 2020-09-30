@@ -52,7 +52,7 @@
 			xRecorded = new Array();
 			yRecorded = new Array();
 			readyForRecord = true;
-			alert("Draw something on canvas.");
+			alert("Draw something on this canvas.");
 		}
 		function drawRecording(){
 			const currentIndex = xRecorded.length-1;
@@ -60,7 +60,8 @@
 			const yi = yRecorded[currentIndex-1];
 			const xf = xRecorded[currentIndex];
 			const yf = yRecorded[currentIndex];
-			canvas.line(xi,yi,xf,yf);
+			canvas.strokeColor("black");
+			canvas.lines(xRecorded,yRecorded);
 		}
 
 		//Animate the shrunk version
@@ -152,7 +153,7 @@
 				yList[i] = yRecorded[i];
 			}
 			setTimeout(()=>{
-				alert("Use slider to select number of terms for fourier series.");
+				alert("Use the slider to select a number of terms for this fourier series.");
 				sliderUpdated();
 			},250);
 		}
@@ -170,7 +171,7 @@
 			drawGraph(fourierPolyY,true ,"lightblue");
 			canvas.strokeColor("purple");
 			canvas.lines(fourierPolyX,fourierPolyY,0.5);
-			canvas.text("Number of Terms: "+slider.value,width/4,height/4*3,"black",height/2/10*canvas.pixelRatio+"px 'Times'","center","middel");
+			canvas.text("Number of Terms: "+slider.value,width/4,height/4*3,"black",height/20+"px 'Times'","center","middel");
 		}
 		function sliderChanged(){
 			getReadyToAnimateFourierDrawing();

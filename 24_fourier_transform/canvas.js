@@ -20,8 +20,8 @@ class Canvas{
         const rect = event.target.getBoundingClientRect();
         let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
         let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
-        //x *= this.pixelRatio;
-        //y *= this.pixelRatio;
+        x *= this.pixelRatio;
+        y *= this.pixelRatio;
         return [x,y];
     }
     touch(event){
