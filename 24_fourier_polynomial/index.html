@@ -3,7 +3,7 @@
 <html>
 
 <head>
-	<title>Fourier Transform</title>
+	<title>Fourier Polynomial</title>
 	<link rel="stylesheet" type="text/css">
 	<link rel="icon" type="image/png" href="../icon.png">
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -39,6 +39,8 @@
 		const width  = canvas.canvas.width;
 		const height = canvas.canvas.height;
 		canvas.fillAll("white");
+		slider.style.width = canvas.canvas.style.width;
+		console.log(canvas.canvas.style.width);
 
 		//Setup Variables
 		let xRecorded;
@@ -60,6 +62,7 @@
 			const yi = yRecorded[currentIndex-1];
 			const xf = xRecorded[currentIndex];
 			const yf = yRecorded[currentIndex];
+			canvas.lineWidth(1);
 			canvas.strokeColor("black");
 			canvas.lines(xRecorded,yRecorded);
 		}
@@ -110,6 +113,11 @@
 			}
 			canvas.strokeColor(color);
 			canvas.lines(tLine,xLine);
+			if(top){
+				canvas.text("Y coordinate vs Time",width/2,0,"black",height/30+"px 'Times'");
+			}else{
+				canvas.text("X coordinate vs Time",width/2,height/2,"black",height/30+"px 'Times'");
+			}
 		}
 		function drawReflection(index){
 			const x = new Array(4);
@@ -138,7 +146,7 @@
 			}
 		}
 
-		//Get fourier series
+		//Get fourier polynomial
 		let xList, yList;
 		function getReadyToFourierTransform(){
 			drawShrunkDrawing(0.5);
@@ -153,7 +161,7 @@
 				yList[i] = yRecorded[i];
 			}
 			setTimeout(()=>{
-				alert("Use the slider to select a number of terms for this fourier series.");
+				alert("Use the slider to select a number of terms for this fourier polynomial.");
 				sliderUpdated();
 			},250);
 		}
@@ -171,7 +179,9 @@
 			drawGraph(fourierPolyY,true ,"lightblue");
 			canvas.strokeColor("purple");
 			canvas.lines(fourierPolyX,fourierPolyY,0.5);
-			canvas.text("Number of Terms: "+slider.value,width/4,height/4*3,"black",height/20+"px 'Times'","center","middel");
+			canvas.text("Number of Terms: "+slider.value,0,0,"black",height/30+"px 'Times'");
+			canvas.text("Number of Terms: "+slider.value,0,0,"black",height/30+"px 'Times'");
+
 		}
 		function sliderChanged(){
 			getReadyToAnimateFourierDrawing();
@@ -214,7 +224,7 @@
 		function donothing(){
 			//nothing
 		}
-		//Calculate Fourier Series
+		//Calculate Fourier Polynomial
 		/*
 		exp(ix) = cos(x)+isin(x)
 		Xn = 1/T*Int(0→T){(x*exp(-in2πt/T) dt)}
