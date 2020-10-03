@@ -16,7 +16,6 @@ class Canvas{
     }
     //Touch Control
     getXY(event){
-        event.preventDefault();
         const rect = event.target.getBoundingClientRect();
         let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
         let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
@@ -25,14 +24,16 @@ class Canvas{
         return [x,y];
     }
     touch(event){
+        event.preventDefault();
         if(!readyForRecord) return;
-        readyForRecord = false;
+        recordingStarted();
         this.moveStart = false;
         this.touchStart = true;
         [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
         this.lastMove = Date.now();
     }
     moveMouse(event){
+        event.preventDefault();
         if(this.touchStart==false) return;
         if(Date.now()-this.lastMove<15) return;
         this.moveStart = true;
@@ -41,6 +42,7 @@ class Canvas{
         drawRecording();
     }
     release(event){
+        event.preventDefault();
         if(this.touchStart==false) return;
         [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
         this.moveStart = false;

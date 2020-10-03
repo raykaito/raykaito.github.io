@@ -14,6 +14,15 @@
 
 	<table id="Table" border="0" align="center">
 		<tr>
+			<td align="center">
+				<input type="button" width="20%" value="Unit Step" 	onclick="autoDraw(this)">
+				<input type="button" width="20%" value="Jump" 		onclick="autoDraw(this)">
+				<input type="button" width="20%" value="Rectangle" 	onclick="autoDraw(this)">
+				<input type="button" width="20%" value="Dots" 		onclick="autoDraw(this)">
+				<input type="button" width="20%" value="New Drawing"onclick="readyForRecording()">
+			</td>
+		</tr>
+		<tr>
 			<td align="left">
 				<canvas id="Canvas"></canvas>
 			</td>
@@ -46,15 +55,102 @@
 		let xRecorded;
 		let yRecorded;
 		let readyForRecord = false;
-		let animation;
-		startRecording();
+		let animation, timeout;
+		readyForRecording();
 
 		//Record Figure
-		function startRecording(){
+		function readyForRecording(){
+			recordingStarted();
+			readyForRecord = true;
+			alert("Draw something on the canvas or click a button.");
+		}
+		function recordingStarted(){
+			slider.style.display = "none";
+			slider.value = 1;
+			canvas.fillAll("white");
+			cancelAnimationFrame(animation);
+			clearTimeout(timeout);
 			xRecorded = new Array();
 			yRecorded = new Array();
-			readyForRecord = true;
-			alert("Draw something on this canvas.");
+        	readyForRecord = false;
+		}
+		let autoDrawShape;
+		const autoXmin = Math.floor( width*0.1);
+		const autoXmax = Math.floor( width*0.9);
+		const autoYmin = Math.floor(height*0.1);
+		const autoYmax = Math.floor(height*0.9);
+		function autoDraw(button){
+			recordingStarted();
+			autoDrawShape = button.value;
+			getReadyToAnimateAutoDraw();
+		}
+		function getReadyToAnimateAutoDraw(){
+			totalFrames = 60;
+			frameCount = 0;
+			animateAutoDraw();
+		}
+		function animateAutoDraw(){
+			if(frameCount<=totalFrames){
+				animation = requestAnimationFrame(animateAutoDraw);
+				switch(autoDrawShape){
+					case "Unit Step":
+						xRecorded[frameCount] = (autoXmax-autoXmin)*frameCount/totalFrames+autoXmin;
+						if(frameCount/totalFrames==0.5){
+							yRecorded[frameCount] = (autoYmin+autoYmax)/2;
+						}else{
+							const yTop = (autoYmin*3+autoYmax)/4;
+							const yBot = (autoYmax*3+autoYmin)/4;
+							yRecorded[frameCount] = frameCount/totalFrames>0.5?yTop:yBot;
+						}
+						break;
+					case "Jump":
+						xRecorded[frameCount] = (autoXmax-autoXmin)*frameCount/totalFrames+autoXmin;;
+						if(frameCount==totalFrames){
+							yRecorded[frameCount] = autoYmin;
+						}else{
+							yRecorded[frameCount] = autoYmax;
+						}
+						break;
+					case "Rectangle":
+						if(frameCount/totalFrames<=0.25){
+							yRecorded[frameCount] = autoYmin;
+							const ratio = 4*((frameCount/totalFrames));
+							xRecorded[frameCount] = autoXmin+(autoXmax-autoXmin)*ratio;
+ 						}else if(frameCount/totalFrames<=0.5){
+							xRecorded[frameCount] = autoXmax;
+							const ratio = 4*((frameCount/totalFrames)-0.25);
+							yRecorded[frameCount] = autoYmin+(autoYmax-autoYmin)*ratio;
+						}else if(frameCount/totalFrames<=0.75){
+							yRecorded[frameCount] = autoYmax;
+							const ratio = 4*((frameCount/totalFrames)-0.5);
+							xRecorded[frameCount] = autoXmax-(autoXmax-autoXmin)*ratio;
+						}else{
+							xRecorded[frameCount] = autoXmin;
+							const ratio = 4*((frameCount/totalFrames)-0.75);
+							yRecorded[frameCount] = autoYmax-(autoYmax-autoYmin)*ratio;
+						}
+						break;
+					case "Dots":
+						if(frameCount%Math.ceil(totalFrames/4)==0){
+							yRecorded[frameCount] = Math.floor(Math.random()*height);
+							xRecorded[frameCount] = Math.floor(Math.random()*width);
+						}else{
+							xRecorded[frameCount] = xRecorded[frameCount-1];
+							yRecorded[frameCount] = yRecorded[frameCount-1];
+						}
+						break;
+					default:
+						cancelAnimationFrame(animation);
+						clearTimeout(timeout);
+						alert("unknown button")
+						break;
+				}
+				drawRecording();
+				frameCount++;
+			}else{
+        		getReadyToAnimateShrink();
+				return;
+			}
 		}
 		function drawRecording(){
 			const currentIndex = xRecorded.length-1;
@@ -83,11 +179,11 @@
 		}
 		function animateShrink(){
 			if(frameCount<=totalFrames){
-				requestAnimationFrame(animateShrink);
+				animation = requestAnimationFrame(animateShrink);
 				drawShrunkDrawing(0.5+(totalFrames-frameCount)/totalFrames*0.5);
 				frameCount++;
 			}else{
-				setTimeout(()=>{getReadyToAnimateWaves()},250);
+				timeout = setTimeout(()=>{getReadyToAnimateWaves()},250);
 				return;
 			}
 		}
@@ -97,7 +193,7 @@
 			totalFrames = xRecorded.length;
 			frameCount = 0;
 			drawReflection(frameCount);
-			setTimeout(()=>{animateWaves();},750);
+			timeout = setTimeout(()=>{animateWaves();},750);
 		}
 		function drawGraph(list,imaginary=false,color="red",indexMax){
 			const lineX = new Array();
@@ -134,14 +230,14 @@
 		}
 		function animateWaves(){
 			if(frameCount<totalFrames){
-				requestAnimationFrame(animateWaves);
+				animation = requestAnimationFrame(animateWaves);
 				frameCount++;
 				drawShrunkDrawing(0.5);
 				drawReflection(frameCount);
 				drawGraph(xRecorded,false,"red" ,frameCount);
 				drawGraph(yRecorded,true ,"blue",frameCount);
 			}else{
-				setTimeout(()=>{getReadyToFourierTransform()},500);
+				timeout = setTimeout(()=>{getReadyToFourierTransform()},500);
 				return;
 			}
 		}
@@ -160,7 +256,7 @@
 				xList[i] = xRecorded[i];
 				yList[i] = yRecorded[i];
 			}
-			setTimeout(()=>{
+			timeout = setTimeout(()=>{
 				alert("Use the slider to select a number of terms for this fourier polynomial.");
 				sliderUpdated();
 			},250);
@@ -168,6 +264,7 @@
 		let fourierCoefXY,fourierPolyX,fourierPolyY;
 		function sliderUpdated(){
         	cancelAnimationFrame(animation);
+			clearTimeout(timeout);
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
 			drawGraph(yRecorded,true ,"blue");
@@ -191,7 +288,7 @@
 			drawShrunkDrawing(0.5);
 			drawFourierArm(0);
 			totalFrames *= Math.floor(Math.sqrt(slider.value));
-			setTimeout(()=>{animateFourierDrawing();},750);
+			timeout = setTimeout(()=>{animateFourierDrawing();},750);
 		}
 		function drawFourierArm(t,shrinkRate=0.5){
 			canvas.strokeColor("purple");
@@ -215,9 +312,6 @@
 			frameCount = (frameCount+1)%totalFrames;
 			if(shrinkFrameCount<totalShrinkFrame)shrinkFrameCount ++;
 		}
-		function donothing(){
-			//nothing
-		}
 		//Calculate Fourier Polynomial
 		/*
 		exp(ix) = cos(x)+isin(x)
@@ -230,9 +324,6 @@
 			}else{
 				return Math.ceil(num/2)*-1;
 			}
-		}
-		for(let num=0;num<50;num++){
-			console.log(num2n(num));
 		}
 		function getFourierCoefficients(numMax,list,ilist){
 			const T = list.length;
