@@ -19,12 +19,15 @@
 				<input type="button" width="20%" value="Jump" 		onclick="autoDraw(this)">
 				<input type="button" width="20%" value="Rectangle" 	onclick="autoDraw(this)">
 				<input type="button" width="20%" value="Dots" 		onclick="autoDraw(this)">
-				<input type="button" width="20%" value="New Drawing"onclick="readyForRecording()">
+				<input type="button" width="20%" value="New Drawing"onclick="aksUserToRecord()">
+				<input type="button" width="20%" value="Camera"onclick="streamer.switchStreamerOnOff()">
+		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
 			</td>
 		</tr>
 		<tr>
-			<td align="left">
+			<td align="center">
 				<canvas id="Canvas"></canvas>
+				<canvas id="displayCanvas" style="display:inline"></canvas>
 			</td>
 		</tr>
 		<tr>
@@ -32,16 +35,30 @@
 		        <input class="slider" type="range" min="1" max="50" value="1" id="slider" oninput="sliderUpdated()" onchange="sliderChanged()" style="display:none;margin:0">
 			</td>
 		</tr>
+		<tr>
+			<td id="debugger" align="left" colspan="2">
+			</td>
+		</tr>
 	</table>
-
+	<script type="text/javascript" src="functions.js"></script>
 	<script type="text/javascript" src="canvas.js"></script>
-	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
+	<script type="text/javascript" src="vision_program.js"></script>
+	<script type="text/javascript" src="video_stream.js"></script>
 	<script type="text/javascript">
 	<!--
 		//Setup Elements
 		const body = document.getElementById("Body");
-		const canvas = new Canvas(document.getElementById('Canvas'));
+		const canvas = new drawCanvas(document.getElementById('Canvas'));
 		const slider = document.getElementById('slider');
+
+        //Debugger
+        const debugSpace = document.getElementById("debugger");
+		//Debugging tool for ios
+		logCanvas = new LogCanvas();
+        //logCanvas.appendSelf(debugSpace);
+		function log(input){
+			logCanvas.newLine(input);
+		}
 
 		//Setup Canvas
 		canvas.flexResize();
@@ -56,19 +73,20 @@
 		let yRecorded;
 		let readyForRecord = false;
 		let animation, timeout;
-		readyForRecording();
 
 		//Record Figure
-		function readyForRecording(){
-			recordingStarted();
+		function aksUserToRecord(){
+			streamer.switchStreamerOnOff(false);
+			resetAllForRecording();
 			readyForRecord = true;
 			alert("Draw something on the canvas or click a button.");
 		}
-		function recordingStarted(){
+		function resetAllForRecording(){
 			slider.style.display = "none";
 			slider.value = 1;
 			canvas.fillAll("white");
-			cancelAnimationFrame(animation);
+			if(animation!=undefined)
+				cancelAnimationFrame(animation);
 			clearTimeout(timeout);
 			xRecorded = new Array();
 			yRecorded = new Array();
@@ -80,7 +98,8 @@
 		const autoYmin = Math.floor(height*0.1);
 		const autoYmax = Math.floor(height*0.9);
 		function autoDraw(button){
-			recordingStarted();
+			streamer.switchStreamerOnOff(false);
+			resetAllForRecording();
 			autoDrawShape = button.value;
 			getReadyToAnimateAutoDraw();
 		}
@@ -152,6 +171,62 @@
 				return;
 			}
 		}
+		//Prepare streamer
+		const streamer = new VideoStream(document.getElementById("cameraMedia"));
+		function drawFromImageData(imgData,imgWidth){
+			canvas.ct.putImageData(imgData,0,0);
+			let xmax = 0;
+			let xmin = imgWidth;
+			let ymax = 0;
+			let ymin = imgData.data.length/4/imgWidth;
+			for(let i=0;i<imgData.data.length/4;i++){
+				//Go through each pixel and find a black point
+				if(imgData.data[i*4]==0){
+					let iNow = i;
+					let shapeDone = false;
+					while(!shapeDone){
+						imgData.data[iNow*4]=255;
+						const x = iNow%imgWidth;
+						const y = Math.floor(iNow/imgWidth);
+						xRecorded[xRecorded.length] = x;
+						yRecorded[yRecorded.length] = y;
+						xmax = Math.max(x,xmax);
+						xmin = Math.min(x,xmin);
+						ymax = Math.max(y,ymax);
+						ymin = Math.min(y,ymin);
+						let NewIFound = false;
+						for(let dir=0;dir<8;dir++){
+							const xTry = x+dxy[dir][0];
+							const yTry = y+dxy[dir][1];
+							const iTry = xTry+yTry*imgWidth;
+							if(imgData.data[iTry*4]==0){
+								NewIFound = true;
+								iNow = iTry;
+								break;
+							}
+						}
+						if(!NewIFound){
+							shapeDone = true;
+						}
+					}
+				}
+			}
+			const xmid = (xmax+xmin)/2;
+			const ymid = (ymax+ymin)/2;
+			const scale = Math.min(width*0.8/(xmax-xmin),height*0.8/(ymax-ymin));
+			for(let i=0;i<xRecorded.length;i++){
+				xRecorded[i]-=xmid;
+				xRecorded[i]*=scale;
+				xRecorded[i]+=width/2;
+			}
+			for(let i=0;i<yRecorded.length;i++){
+				yRecorded[i]-=ymid;
+				yRecorded[i]*=scale;
+				yRecorded[i]+=height/2;
+			}
+        	getReadyToAnimateShrink();
+		}
+
 		function drawRecording(){
 			const currentIndex = xRecorded.length-1;
 			const xi = xRecorded[currentIndex-1];
@@ -162,6 +237,7 @@
 			canvas.strokeColor("black");
 			canvas.lines(xRecorded,yRecorded);
 		}
+		aksUserToRecord();
 
 		//Animate the shrunk version
 		let totalFrames, frameCount, shrinkFrameCount;
@@ -388,8 +464,7 @@
 			}
 			//console.log(fourierPolyi);
 			return [fourierPolyi,fourierPoly];
-		}
-	 
+		}	 
 	//--> 
 	</script>
 

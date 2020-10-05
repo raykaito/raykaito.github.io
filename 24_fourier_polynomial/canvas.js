@@ -23,33 +23,9 @@ class Canvas{
         y *= this.pixelRatio;
         return [x,y];
     }
-    touch(event){
-        event.preventDefault();
-        if(!readyForRecord) return;
-        recordingStarted();
-        this.moveStart = false;
-        this.touchStart = true;
-        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
-        this.lastMove = Date.now();
-    }
-    moveMouse(event){
-        event.preventDefault();
-        if(this.touchStart==false) return;
-        if(Date.now()-this.lastMove<15) return;
-        this.moveStart = true;
-        this.lastMove = Date.now();
-        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
-        drawRecording();
-    }
-    release(event){
-        event.preventDefault();
-        if(this.touchStart==false) return;
-        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
-        this.moveStart = false;
-        this.touchStart = false;
-        drawRecording();
-        getReadyToAnimateShrink();
-    }
+    touch(event){}
+    moveMouse(event){}
+    release(event){}
     //Transformation
     translate(x,y){
         this.ct.translate(x,y);
@@ -110,6 +86,9 @@ class Canvas{
         this.ct.textBaseline = tbl;
         this.ct.fillText(string,x,y);
     }
+    textCenter(string="empty string", x=0, y=0, color="black", font="10px 'Times'", ta="center", tbl="middle"){
+        this.text(string,x,y,color,font,"center","middle");
+    }
     line(xi,yi,xf,yf){
         this.ct.beginPath();
         this.ct.moveTo(xi+0.5,yi);
@@ -154,6 +133,52 @@ class Canvas{
     //imageData
     createImageData(w=this.canvas.width,h=this.canvas.height){
         this.imgdata = this.ct.createImageData(w,h);
+    }
+}
+class displayCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas"),visionProgram){
+        super(canvas);
+        this.visionProgram = visionProgram;
+    }
+    touch(event){
+        super.touch(event);
+        event.preventDefault();
+        this.visionProgram.clicked(this.getXY(event));
+    }
+}
+class drawCanvas extends Canvas{
+    constructor(canvas=document.createElement("canvas")){
+        super(canvas);
+    }
+    touch(event){
+        super.touch(event);
+        event.preventDefault();
+        if(!readyForRecord) return;
+        resetAllForRecording();
+        this.moveStart = false;
+        this.touchStart = true;
+        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
+        this.lastMove = Date.now();
+    }
+    moveMouse(event){
+        super.moveMouse(event);
+        event.preventDefault();
+        if(this.touchStart==false) return;
+        if(Date.now()-this.lastMove<15) return;
+        this.moveStart = true;
+        this.lastMove = Date.now();
+        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
+        drawRecording();
+    }
+    release(event){
+        super.release(event);
+        event.preventDefault();
+        if(this.touchStart==false) return;
+        [xRecorded[xRecorded.length],yRecorded[yRecorded.length]] = this.getXY(event);
+        this.moveStart = false;
+        this.touchStart = false;
+        drawRecording();
+        getReadyToAnimateShrink();
     }
 }
 class PlotCanvas extends Canvas{
