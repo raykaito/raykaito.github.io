@@ -96,13 +96,25 @@ class Canvas{
         this.ct.closePath();
         this.ct.stroke();
     }
-    lines(x,y,shrinkRate=1,xOffset=0,yOffset=0){
-        this.ct.beginPath();
-        this.ct.moveTo(x[0]*shrinkRate+xOffset,y[0]*shrinkRate+yOffset);
-        for(let i=1;i<x.length;i++)
-            this.ct.lineTo(x[i]*shrinkRate+xOffset,y[i]*shrinkRate+yOffset);
-        //this.ct.closePath();
-        this.ct.stroke();
+    lines(x,y,breakUp=[],shrinkRate=1,xOffset=0,yOffset=0){
+        let startIndex = 0;
+        let nextBreakUpIndex = 0;
+        while(startIndex!=x.length){
+            let nextBreakUp;
+            if(breakUp[nextBreakUpIndex]==undefined){
+                nextBreakUp = x.length;
+            }else{
+                nextBreakUp = breakUp[nextBreakUpIndex];
+            }
+            this.ct.beginPath();
+            this.ct.moveTo((x[startIndex]-xOffset)*shrinkRate+xOffset,(y[startIndex]-yOffset)*shrinkRate+yOffset);
+            for(let i=startIndex+1;i<nextBreakUp;i++)
+                this.ct.lineTo((x[i]-xOffset)*shrinkRate+xOffset,(y[i]-yOffset)*shrinkRate+yOffset);
+            //this.ct.closePath();
+            this.ct.stroke();
+            startIndex = nextBreakUp;
+            nextBreakUpIndex++;
+        }
     }
     circle(x,y,rad,color="black"){
         this.ct.fillStyle = color;
