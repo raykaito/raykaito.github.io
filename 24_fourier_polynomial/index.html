@@ -30,16 +30,22 @@
 				<canvas id="displayCanvas" style="display:inline"></canvas>
 			</td>
 		</tr>
-		<tr id="controller" style="display:none;">
+		<tr id="terms" style="display:none;">
 			<td align="center" class="untouchable" width="40%">
-		        <font color="white">Number of Terms</font><br>
-		        <font color="white">Speed of Rotation</font><br>
-		        <font color="white">Zoom</font>
+		        <font color="white">Number of Terms</font>
 			</td>
 			<td align="center" class="untouchable" width="60%">
-		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderTerms" oninput="sliderTermsUpdated()" onchange="sliderTermsChanged()" style="display:inline-block;margin:0"><br>
-		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderSpeed" oninput="sliderSpeedUpdated()" style="display:inline-block;margin:0"><br>
-		        <input class="slider" type="range" min="1" max="50" value="1" step="0.1" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
+		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderTerms" oninput="sliderTermsUpdated()" onchange="sliderTermsChanged()" style="display:inline-block;margin:0">
+			</td>
+		</tr>
+		<tr id="controller" style="display:none;">
+			<td align="center" class="untouchable" width="40%">
+		        <font color="white">Zoom</font><br>
+		        <font color="white">Speed of Rotation</font>
+			</td>
+			<td align="center" class="untouchable" width="60%">
+		        <input class="slider" type="range" min="1" max="50" value="1" step="0.1" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0"><br>
+		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderSpeed" oninput="sliderSpeedUpdated()" style="display:inline-block;margin:0">
 			</td>
 		</tr>
 		<tr>
@@ -56,6 +62,7 @@
 		//Setup Elements
 		const body = document.getElementById("Body");
 		const canvas = new drawCanvas(document.getElementById('Canvas'));
+		const terms = document.getElementById('terms');
 		const controller = document.getElementById('controller');
 		const sliderTerms = document.getElementById('sliderTerms');
 		const sliderSpeed = document.getElementById('sliderSpeed');
@@ -96,6 +103,7 @@
 		}
 		function resetAllForRecording(){
 			controller.style.display = "none";
+			terms.style.display = "none";
 			sliderTerms.value = 1;
 			canvas.fillAll("white");
 			if(animation!=undefined)
@@ -341,7 +349,7 @@
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
 			drawGraph(yRecorded,true ,"blue");
-			controller.style.display = "table-row";
+			terms.style.display = "table-row";
 			sliderTerms.max = Math.ceil(xRecorded.length);
 			xList = new Array(xRecorded.length);
 			yList = new Array(yRecorded.length);
@@ -356,8 +364,8 @@
 		}
 		let fourierCoefXY,fourierPolyX,fourierPolyY;
 		function sliderTermsUpdated(){
-			sliderSpeed.max  = sliderTerms.value;
-			sliderSpeed.value=1;
+			sliderSpeed.max  = sliderTerms.value*4;
+			sliderSpeed.value= 4;
 			sliderZoom.max   = sliderTerms.value;
 			sliderZoom.value = 1;
         	cancelAnimationFrame(animation);
@@ -380,22 +388,22 @@
 		function sliderTermsChanged(){
 			getReadyToAnimateFourierDrawing();
 		}
+		let zoom,xOffset,yOffset;
+		function sliderZoomUpdated(){
+			if(shrinkFrameCount<totalShrinkFrame) return;
+			zoom = Number(sliderZoom.value);
+			sliderSpeed.value = Math.floor(zoom*4);
+			sliderSpeedUpdated();
+		}
 		function sliderSpeedUpdated(){
 			if(shrinkFrameCount<totalShrinkFrame) return;
 			const currentFrameRatio = frameCount/totalFrames;
 			totalFrames = 60*Number(sliderSpeed.value);
 			frameCount = totalFrames*currentFrameRatio;
 		}
-		let zoom,xOffset,yOffset;
-		function sliderZoomUpdated(){
-			if(shrinkFrameCount<totalShrinkFrame) return;
-			updateZoomSettings();
-		}
-		function updateZoomSettings(){
-			zoom = Number(sliderZoom.value);
-		}
 		function getReadyToAnimateFourierDrawing(){
-			updateZoomSettings();
+			controller.style.display = "table-row";
+			zoom = Number(sliderZoom.value);
 			totalFrames = Math.min(60*Number(sliderSpeed.value),xRecorded.length*4);
 			frameCount = 0;
 			shrinkFrameCount = 0;
@@ -427,8 +435,6 @@
 				const armLength = armsXY[0].length;
 				const chaseIndex = Math.floor(armLength*0.8);
 				shrinkRate = zoom;
-				xOffset = Math.min(width* (1-1/zoom),armsXY[1][chaseIndex])/zoom;
-				yOffset = Math.min(height*(1-1/zoom),armsXY[0][chaseIndex])/zoom;
 				xOffset = armsXY[1][chaseIndex];
 				yOffset = armsXY[0][chaseIndex];
 			}
