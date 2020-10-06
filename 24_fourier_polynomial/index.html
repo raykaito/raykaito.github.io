@@ -18,7 +18,6 @@
 				<input type="button" width="20%" value="Unit Step" 	onclick="autoDraw(this)">
 				<input type="button" width="20%" value="Impulse"	onclick="autoDraw(this)">
 				<input type="button" width="20%" value="Rectangle" 	onclick="autoDraw(this)">
-				<input type="button" width="20%" value="Dots" 		onclick="autoDraw(this)">
 				<input type="button" width="20%" value="New Drawing"onclick="aksUserToRecord()">
 				<input type="button" width="20%" value="Camera"onclick="streamer.switchStreamerOnOff()">
 		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
@@ -41,11 +40,9 @@
 		<tr id="controller" style="display:none;">
 			<td align="center" class="untouchable" width="40%">
 		        <font color="white">Zoom</font><br>
-		        <font color="white">Speed of Rotation</font>
 			</td>
 			<td align="center" class="untouchable" width="60%">
-		        <input class="slider" type="range" min="1" max="50" value="1" step="0.1" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0"><br>
-		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderSpeed" oninput="sliderSpeedUpdated()" style="display:inline-block;margin:0">
+		        <input class="slider" type="range" min="1" max="50" value="1" step="0.1" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
 			</td>
 		</tr>
 		<tr>
@@ -65,7 +62,6 @@
 		const terms = document.getElementById('terms');
 		const controller = document.getElementById('controller');
 		const sliderTerms = document.getElementById('sliderTerms');
-		const sliderSpeed = document.getElementById('sliderSpeed');
 		const sliderZoom = document.getElementById('sliderZoom');
 
         //Debugger
@@ -83,7 +79,6 @@
 		const height = canvas.canvas.height;
 		canvas.fillAll("white");
 		sliderTerms.style.width = Math.floor(0.6*width/canvas.pixelRatio)+"px";
-		sliderSpeed.style.width = Math.floor(0.6*width/canvas.pixelRatio)+"px";
 		sliderZoom.style.width = Math.floor(0.6*width/canvas.pixelRatio)+"px";
 		console.log(canvas.canvas.style.width);
 
@@ -126,7 +121,7 @@
 			getReadyToAnimateAutoDraw();
 		}
 		function getReadyToAnimateAutoDraw(){
-			totalFrames = 60;
+			totalFrames = 120;
 			frameCount = 0;
 			animateAutoDraw();
 		}
@@ -189,6 +184,29 @@
 				drawRecording();
 				frameCount++;
 			}else{
+				switch(autoDrawShape){
+					case "Unit Step":
+						for(let i=xRecorded.length-1;i>=0;i--){
+							xRecorded[xRecorded.length] = xRecorded[i];
+							yRecorded[yRecorded.length] = yRecorded[i];
+						}
+						break;
+					case "Impulse":
+						for(let i=xRecorded.length-1;i>=0;i--){
+							xRecorded[xRecorded.length] = xRecorded[i];
+							yRecorded[yRecorded.length] = yRecorded[i];
+						}
+						break;
+					case "Rectangle":
+						xRecorded.pop();
+						yRecorded.pop();
+						break;
+					default:
+						cancelAnimationFrame(animation);
+						clearTimeout(timeout);
+						alert("unknown button")
+						break;
+				}
         		getReadyToAnimateShrink();
 				return;
 			}
@@ -284,8 +302,22 @@
 				frameCount++;
 			}else{
 				timeout = setTimeout(()=>{getReadyToAnimateWaves()},250);
+				setupControllerSliderParameters();
 				return;
 			}
+		}
+		function setupControllerSliderParameters(){
+			const deltaX = new Array(xRecorded.length-1);
+			const deltaY = new Array(yRecorded.length-1);
+			for(let i=0;i<deltaX.length;i++){
+				deltaX[i] = Math.abs(xRecorded[i+1]-xRecorded[i]);
+				deltaY[i] = Math.abs(yRecorded[i+1]-yRecorded[i]);
+			}
+			const averageLengthX = getAverage(deltaX);
+			const averageLengthY = getAverage(deltaX);
+			const averageLength = getDist(averageLengthX,averageLengthY);
+			sliderZoom.max   = Math.floor(width/(averageLength*5));
+			sliderZoom.value = 1;
 		}
 
 		//Animate the waves in X and Y
@@ -364,17 +396,13 @@
 		}
 		let fourierCoefXY,fourierPolyX,fourierPolyY;
 		function sliderTermsUpdated(){
-			sliderSpeed.max  = sliderTerms.value*4;
-			sliderSpeed.value= 4;
-			sliderZoom.max   = sliderTerms.value;
-			sliderZoom.value = 1;
         	cancelAnimationFrame(animation);
 			clearTimeout(timeout);
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
 			drawGraph(yRecorded,true ,"blue");
 			fourierCoefXY = getFourierCoefficients(Number(sliderTerms.value),xList,yList);
-			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY);
+			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY,xList.length);
 			drawGraph(fourierPolyX,false,"pink");
 			drawGraph(fourierPolyY,true,"lightblue");
 			canvas.strokeColor("purple");
@@ -392,25 +420,22 @@
 		function sliderZoomUpdated(){
 			if(shrinkFrameCount<totalShrinkFrame) return;
 			zoom = Number(sliderZoom.value);
-			sliderSpeed.value = Math.floor(zoom*4);
-			sliderSpeedUpdated();
-		}
-		function sliderSpeedUpdated(){
-			if(shrinkFrameCount<totalShrinkFrame) return;
 			const currentFrameRatio = frameCount/totalFrames;
-			totalFrames = 60*Number(sliderSpeed.value);
+			totalFrames = 60*8*zoom;
 			frameCount = totalFrames*currentFrameRatio;
 		}
 		function getReadyToAnimateFourierDrawing(){
 			controller.style.display = "table-row";
+			sliderZoom.value = 1;
 			zoom = Number(sliderZoom.value);
-			totalFrames = Math.min(60*Number(sliderSpeed.value),xRecorded.length*4);
+			totalFrames = Math.min(60*8*zoom,xRecorded.length*4);
 			frameCount = 0;
 			shrinkFrameCount = 0;
 			drawShrunkDrawing(0.5);
 			const armsXY = getFourierPolynomial(fourierCoefXY,0);
 			drawFourierPath();
 			drawFourierArm(armsXY);
+			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY,8*60*sliderZoom.max);
 			timeout = setTimeout(()=>{animateFourierDrawing();},750);
 		}
 		function drawFourierPath(shrinkRate=0.5,xOffset = 0,yOffset=0){
@@ -430,7 +455,7 @@
 			totalShrinkFrame = 15;
 			animation = requestAnimationFrame(animateFourierDrawing);
 			let shrinkRate = Math.min(1,0.5+shrinkFrameCount/totalShrinkFrame);
-			const armsXY = getFourierPolynomial(fourierCoefXY,Math.floor(frameCount)/totalFrames);
+			const armsXY = getFourierPolynomial(fourierCoefXY,frameCount/totalFrames);
 			if(shrinkRate==1){
 				const armLength = armsXY[0].length;
 				const chaseIndex = Math.floor(armLength*0.8);
@@ -477,8 +502,7 @@
 			}
 			return fourierCoefficients;
 		}
-		function getFourierPolynomials(fourierCoefficients){
-			const T = xList.length;
+		function getFourierPolynomials(fourierCoefficients,T){
 			const omega = 2*Math.PI/T;
 			const fourierPoly = new Array(T);
 			const fourierPolyi= new Array(T);
@@ -500,7 +524,7 @@
 			}
 			return [fourierPoly,fourierPolyi];
 		}
-		function getFourierPolynomial(fourierCoefficients,theta){
+		function getFourierPolynomial(fourierCoefficients,t){
 			const omega = 2*Math.PI;
 			const fourierPoly = new Array();
 			const fourierPolyi= new Array();
@@ -513,10 +537,10 @@
 				if(fourierCoefficients[n]==undefined) break;
 				fourierPoly [num] = fourierPoly [num-1];
 				fourierPolyi[num] = fourierPolyi[num-1];
-				fourierPoly [num] +=fourierCoefficients[ n][0]*Math.cos( n*theta*omega);
-				fourierPolyi[num] +=fourierCoefficients[ n][0]*Math.sin( n*theta*omega);
-				fourierPolyi[num] +=fourierCoefficients[ n][1]*Math.cos( n*theta*omega);
-				fourierPoly [num] -=fourierCoefficients[ n][1]*Math.sin( n*theta*omega);
+				fourierPoly [num] +=fourierCoefficients[ n][0]*Math.cos( n*t*omega);
+				fourierPolyi[num] +=fourierCoefficients[ n][0]*Math.sin( n*t*omega);
+				fourierPolyi[num] +=fourierCoefficients[ n][1]*Math.cos( n*t*omega);
+				fourierPoly [num] -=fourierCoefficients[ n][1]*Math.sin( n*t*omega);
 			}
 			//console.log(fourierPolyi);
 			return [fourierPolyi,fourierPoly];
