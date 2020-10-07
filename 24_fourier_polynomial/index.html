@@ -42,7 +42,7 @@
 		        <font color="white">Zoom</font><br>
 			</td>
 			<td align="center" class="untouchable" width="60%">
-		        <input class="slider" type="range" min="1" max="50" value="1" step="any" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
+		        <input class="slider" type="range" min="0" max="1" value="1" step="any" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
 			</td>
 		</tr>
 		<tr>
@@ -88,6 +88,7 @@
 		let bRecorded;
 		let readyForRecord = false;
 		let animation, timeout;
+		let gaveAlert = false;
 
 		//Record Figure
 		function aksUserToRecord(){
@@ -351,8 +352,8 @@
 			const averageLengthX = getAverage(deltaX);
 			const averageLengthY = getAverage(deltaX);
 			const averageLength = getDist(averageLengthX,averageLengthY);
-			sliderZoom.max   = Math.floor(width/(averageLength*5));
-			sliderZoom.value = 1;
+			zoomMax = Math.floor(width/(averageLength*5));
+			sliderZoom.value = 0;
 		}
 
 		//Animate the waves in X and Y
@@ -411,7 +412,7 @@
 		}
 
 		//Get fourier polynomial
-		let xList, yList, a, b;
+		let xList, yList, aTerm, bTerm;
 		function getReadyToFourierTransform(){
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
@@ -419,9 +420,8 @@
 			const n = 0.1;
 			terms.style.display = "table-row";
 			termsMax = Math.ceil(xRecorded.length);
-			a = Math.pow((termsMax-1),(n/(n-1)));
-			a = Math.pow((termsMax-1),(n/(n-1)));
-			b = Math.log(Math.pow((termsMax-1),(1/(1-n))));
+			aTerm = Math.pow((termsMax-1),(n/(n-1)));
+			bTerm = Math.log(Math.pow((termsMax-1),(1/(1-n))));
 			xList = new Array(xRecorded.length);
 			yList = new Array(yRecorded.length);
 			for(let i=0;i<xRecorded.length;i++){
@@ -435,8 +435,13 @@
 		}
 		let fourierCoefXY,fourierPolyX,fourierPolyY;
 		function getTermsFromSlider(){
-			console.log(Number(sliderTerms.value));
-			return 1+Math.floor(a*Math.exp(b*Number(sliderTerms.value)));
+			const newTerm = 1+Math.floor(aTerm*Math.exp(bTerm*Number(sliderTerms.value)));
+			if(newTerm>100&&!gaveAlert){
+				alert("Alter: It may get really slow beyond N = 100.");
+				gaveAlert = true;
+				//sliderTermsChanged();
+			}
+			return newTerm;
 		}
 		function sliderTermsUpdated(){
         	cancelAnimationFrame(animation);
@@ -461,17 +466,20 @@
 			getReadyToAnimateFourierDrawing();
 		}
 		let zoom,xOffset,yOffset;
+		function getZoomValue(){
+			return Math.pow(zoomMax,Number(sliderZoom.value));
+		}
 		function sliderZoomUpdated(){
 			if(shrinkFrameCount<totalShrinkFrame) return;
-			zoom = Number(sliderZoom.value);
+			zoom = getZoomValue();
 			const currentFrameRatio = frameCount/totalFrames;
 			totalFrames = 60*8*zoom;
 			frameCount = totalFrames*currentFrameRatio;
 		}
 		function getReadyToAnimateFourierDrawing(){
 			controller.style.display = "table-row";
-			sliderZoom.value = 1;
-			zoom = Number(sliderZoom.value);
+			sliderZoom.value = 0;
+			zoom = getZoomValue();
 			totalFrames = Math.min(60*8*zoom,xRecorded.length*4);
 			frameCount = 0;
 			shrinkFrameCount = 0;
@@ -479,7 +487,7 @@
 			const armsXY = getFourierPolynomial(fourierCoefXY,0);
 			drawFourierPath();
 			drawFourierArm(armsXY);
-			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY,8*60*sliderZoom.max);
+			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY,8*60*zoomMax);
 			timeout = setTimeout(()=>{animateFourierDrawing();},750);
 		}
 		function drawFourierPath(shrinkRate=0.5,xOffset = 0,yOffset=0){
