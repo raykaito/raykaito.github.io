@@ -95,7 +95,7 @@
 			streamer.switchStreamerOnOff(false);
 			resetAllForRecording();
 			readyForRecord = true;
-			alert("Draw something on the canvas or click a button.");
+			alert("Draw something on the canvas or choose a shape. You can also hit 'camera' to scan shapes.");
 		}
 		function resetAllForRecording(){
 			controller.style.display = "none";
@@ -437,7 +437,7 @@
 		function getTermsFromSlider(){
 			const newTerm = 1+Math.floor(aTerm*Math.exp(bTerm*Number(sliderTerms.value)));
 			if(newTerm>100&&!gaveAlert){
-				alert("Alter: It may get really slow beyond N = 100.");
+				alert("Alert: It may get really slow beyond N = 100.");
 				gaveAlert = true;
 				//sliderTermsChanged();
 			}
