@@ -1,11 +1,10 @@
 let outLine=false;
 let ya = 1;
 const dxy = new Array();
-for(let i=0;i<24;i++){
+for(let i=0;i<16;i++){
     const theta = i*Math.PI/4;
     dxy[i]=[Math.round(Math.cos(theta)),Math.round(Math.sin(theta))];
 }
-console.log(dxy);
 function dcClicked(){
     outLine =! outLine;
     ya++;

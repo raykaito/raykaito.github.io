@@ -67,6 +67,7 @@ class VideoStream{
     }
     switchStreamerOnOff(defaultInput){
         if(defaultInput==undefined){
+            console.log(this.streamerOn);
             if(this.streamerOn){
                 this.stopScan();
             }else{

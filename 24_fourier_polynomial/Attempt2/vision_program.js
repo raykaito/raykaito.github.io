@@ -72,17 +72,17 @@ class VisionProgram{
         }else if(this.phase==4){
             this.blobFinder.removeUnselected();
             this.histogram.autoBinarizeWithOtsuMethod(this.blobFinder.passROI);
-            //this.edgeExtraction.updateROI(this.histogram.passROI);
-            //this.edgeExtraction.extractEdge();
-            //this.edgeExtraction.updateROI(this.edgeExtraction.passROI);
-            //this.edgeExtraction.invert();
-            this.displayImageDataD(this.histogram);
+            this.edgeExtraction.updateROI(this.histogram.passROI);
+            this.edgeExtraction.extractEdge();
+            this.edgeExtraction.updateROI(this.edgeExtraction.passROI);
+            this.edgeExtraction.invert();
+            this.displayImageDataD(this.edgeExtraction);
 
             this.phase++;
         }else if(this.phase==5){
-            this.displayImageDataD(this.histogram);
+            this.displayImageDataD(this.edgeExtraction);
             streamer.switchStreamerOnOff(false);
-            drawFromImageData(this.histogram.imgOut);
+            drawFromImageData(this.edgeExtraction.imgOut,this.edgeExtraction.width);
         }
         this.dCanvas.textCenter(this.message,this.dwidth/2,this.dheight*7/8,"lime",this.dheight/16+"px 'Times");
     }

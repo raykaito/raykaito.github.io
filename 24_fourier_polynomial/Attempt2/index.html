@@ -42,7 +42,7 @@
 		        <font color="white">Zoom</font><br>
 			</td>
 			<td align="center" class="untouchable" width="60%">
-		        <input class="slider" type="range" min="1" max="50" value="1" step="any" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
+		        <input class="slider" type="range" min="1" max="50" value="1" step="0.1" id="sliderZoom" oninput="sliderZoomUpdated()" style="display:inline-block;margin:0">
 			</td>
 		</tr>
 		<tr>
@@ -213,81 +213,46 @@
 		}
 		//Prepare streamer
 		const streamer = new VideoStream(document.getElementById("cameraMedia"));
-		function drawFromImageData(imgData){
-			canvas.ct.putImageData(imgData,0,0);//[0:BLK, 1: Start, 2:checked, 255:WHT]
-			const imgWidth  = imgData.width;
-			const imgHeight = imgData.height;
-			let xmax = ymax = 0;
+		function drawFromImageData(imgData,imgWidth){
+			canvas.ct.putImageData(imgData,0,0);
+			let xmax = 0;
 			let xmin = imgWidth;
-			let ymin = imgHeight;
-			let startingPointFound = false;
-			for(let iNow=0;iNow<imgData.data.length/4;iNow++){
+			let ymax = 0;
+			let ymin = imgData.data.length/4/imgWidth;
+			for(let i=0;i<imgData.data.length/4;i++){
 				//Go through each pixel and find a black point
-				if(imgData.data[iNow*4]!=255){
-					let dirNow = 0;
+				if(imgData.data[i*4]==0){
+					bRecorded[bRecorded.length] = xRecorded.length;
+					let iNow = i;
 					let shapeDone = false;
 					while(!shapeDone){
-						//Check if iNow is the first point or not
-						if(startingPointFound){
-							imgData.data[iNow*4]=2;
-						}else{
-							imgData.data[iNow*4]=1;
-							startingPointFound = true;
-						}
-						//Update the XY position and record it;
-						let xyNow= [(iNow%imgWidth),Math.floor(iNow/imgWidth)];
-						xRecorded[xRecorded.length] = xyNow[0];
-						yRecorded[yRecorded.length] = xyNow[1];
-						//Update the xyMinMax if needed
-						xmax = Math.max(xyNow[0],xmax);
-						xmin = Math.min(xyNow[0],xmin);
-						ymax = Math.max(xyNow[1],ymax);
-						ymin = Math.min(xyNow[1],ymin);
-						//Get ready to find new [iNow]
-						let newIFound = false;
-						for(let dir=dirNow+8;dir<dirNow+16;dir+=2){
-							//Check pixel in [dir-1] direction
-							const xA = xyNow[0]+dxy[dir-1][0];
-							const yA = xyNow[1]+dxy[dir-1][1];
-							const iA = xA+yA*imgWidth;
-							const pixelValueA = imgData.data[iA*4];
-							if(pixelValueA!=255){
-								newIFound = true;
-								if(pixelValueA==1){
-									shapeDone = true;
-									break;
-								}else{
-									iNow = iA;
-									dirNow = (dir-2)%8;
-									break;
-								}
-							}
-							//Check pixel in [dir] direction
-							const xB = xyNow[0]+dxy[dir][0];
-							const yB = xyNow[1]+dxy[dir][1];
-							const iB = xB+yB*imgWidth;
-							const pixelValueB = imgData.data[iB*4];
-							if(pixelValueB!=255){
-								newIFound = true;
-								if(pixelValueB==1){
-									shapeDone = true;
-									break;
-								}else{
-									iNow = iB;
-									dirNow = (dir)%8;
-									break;
-								}
+						imgData.data[iNow*4]=255;
+						const x = iNow%imgWidth;
+						const y = Math.floor(iNow/imgWidth);
+						xRecorded[xRecorded.length] = x;
+						yRecorded[yRecorded.length] = y;
+						xmax = Math.max(x,xmax);
+						xmin = Math.min(x,xmin);
+						ymax = Math.max(y,ymax);
+						ymin = Math.min(y,ymin);
+						let NewIFound = false;
+						for(let dir=0;dir<8;dir++){
+							const xTry = x+dxy[dir][0];
+							const yTry = y+dxy[dir][1];
+							const iTry = xTry+yTry*imgWidth;
+							if(imgData.data[iTry*4]==0){
+								NewIFound = true;
+								iNow = iTry;
+								break;
 							}
 						}
-						if(!newIFound){
+						if(!NewIFound){
 							shapeDone = true;
-							alert("NotFound!?");
 						}
 					}
 					break;
 				}
 			}
-			//Offset and Scale the xyRecroded
 			const xmid = (xmax+xmin)/2;
 			const ymid = (ymax+ymin)/2;
 			const scale = Math.min(width*0.8/(xmax-xmin),height*0.8/(ymax-ymin));
