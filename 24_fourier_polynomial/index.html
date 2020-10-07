@@ -34,7 +34,7 @@
 		        <font color="white">Number of Terms</font>
 			</td>
 			<td align="center" class="untouchable" width="60%">
-		        <input class="slider" type="range" min="1" max="50" value="1" id="sliderTerms" oninput="sliderTermsUpdated()" onchange="sliderTermsChanged()" style="display:inline-block;margin:0">
+		        <input class="slider" type="range" min="0" max="1" value="0" step="any" id="sliderTerms" oninput="sliderTermsUpdated()" onchange="sliderTermsChanged()" style="display:inline-block;margin:0">
 			</td>
 		</tr>
 		<tr id="controller" style="display:none;">
@@ -99,7 +99,7 @@
 		function resetAllForRecording(){
 			controller.style.display = "none";
 			terms.style.display = "none";
-			sliderTerms.value = 1;
+			sliderTerms.value = 0;
 			canvas.fillAll("white");
 			if(animation!=undefined)
 				cancelAnimationFrame(animation);
@@ -411,13 +411,17 @@
 		}
 
 		//Get fourier polynomial
-		let xList, yList;
+		let xList, yList, a, b;
 		function getReadyToFourierTransform(){
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
 			drawGraph(yRecorded,true ,"blue");
+			const n = 0.1;
 			terms.style.display = "table-row";
-			sliderTerms.max = Math.ceil(xRecorded.length);
+			termsMax = Math.ceil(xRecorded.length);
+			a = Math.pow((termsMax-1),(n/(n-1)));
+			a = Math.pow((termsMax-1),(n/(n-1)));
+			b = Math.log(Math.pow((termsMax-1),(1/(1-n))));
 			xList = new Array(xRecorded.length);
 			yList = new Array(yRecorded.length);
 			for(let i=0;i<xRecorded.length;i++){
@@ -430,20 +434,25 @@
 			},250);
 		}
 		let fourierCoefXY,fourierPolyX,fourierPolyY;
+		function getTermsFromSlider(){
+			console.log(Number(sliderTerms.value));
+			return 1+Math.floor(a*Math.exp(b*Number(sliderTerms.value)));
+		}
 		function sliderTermsUpdated(){
         	cancelAnimationFrame(animation);
 			clearTimeout(timeout);
 			drawShrunkDrawing(0.5);
 			drawGraph(xRecorded,false,"red");
 			drawGraph(yRecorded,true ,"blue");
-			fourierCoefXY = getFourierCoefficients(Number(sliderTerms.value),xList,yList);
+			const terms = getTermsFromSlider();
+			fourierCoefXY = getFourierCoefficients(terms,xList,yList);
 			[fourierPolyX,fourierPolyY] = getFourierPolynomials(fourierCoefXY,xList.length);
 			drawGraph(fourierPolyX,false,"pink");
 			drawGraph(fourierPolyY,true,"lightblue");
 			canvas.strokeColor("purple");
 			canvas.lines(fourierPolyX,fourierPolyY,undefined,0.5);
-			canvas.text("Number of Terms: "+sliderTerms.value,0,0,"black",height/30+"px 'Times'");
-			canvas.text("Number of Terms: "+sliderTerms.value,0,0,"black",height/30+"px 'Times'");
+			canvas.text("Number of Terms: "+terms,0,0,"black",height/30+"px 'Times'");
+			canvas.text("Number of Terms: "+terms,0,0,"black",height/30+"px 'Times'");
 			const armsXY = getFourierPolynomial(fourierCoefXY,0);
 			drawFourierPath();
 			drawFourierArm(armsXY);
@@ -495,8 +504,8 @@
 				const armLength = armsXY[0].length;
 				const chaseIndex = Math.floor(armLength*0.8);
 				shrinkRate = zoom;
-				xOffset = armsXY[1][chaseIndex];
-				yOffset = armsXY[0][chaseIndex];
+				xOffset = armsXY[1][armLength-1];
+				yOffset = armsXY[0][armLength-1];
 			}
 			drawShrunkDrawing(shrinkRate,xOffset,yOffset);
 			drawFourierPath(shrinkRate,xOffset,yOffset);
