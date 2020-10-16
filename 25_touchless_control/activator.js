@@ -23,6 +23,7 @@ async function loadJSinOrder(){
         await loadJS("https://raykaito.github.io/25_touchless_control/canvas.js");
         await loadJS("https://raykaito.github.io/25_touchless_control/vision_program.js");
         await loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
+        await loadJS("https://raykaito.github.io/25_touchless_control/runner.js");
     }
     console.log("Every JS file loaded");
 }
