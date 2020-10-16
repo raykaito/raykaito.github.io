@@ -7,8 +7,8 @@ class VideoStream{
         this.constraints = {
             audio:false,
             video:{
-                width:800,
-                height:800,
+                width:50,
+                height:50,
                 facingMode:(this.front?"user":"environment")
             }
         };
