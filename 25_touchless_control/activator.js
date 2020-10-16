@@ -1,39 +1,28 @@
-//Create an overlayed canvas which covers the window
-const fullScreenCanvas = document.createElement("canvas");
-
-fullScreenStyle = {position:"fixed", display:"block", width:"100%", height:"100%", top:"0", left:"0", right:"0", bottom:"0", backgroundColor:"rgba(0,0,0,0.5)", zIndex:"2", cursor:"pointer"};
-
-
-Object.assign(fullScreenCanvas.style, fullScreenStyle);
-document.body.appendChild(fullScreenCanvas);
-
+console.log("Running activator.js");
+//Prepare function to load js files
+function loadJS(url){
+    return new Promise(resolve => {
+        const script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = url;
+        script.onload = resolve;
+        document.body.appendChild(script);
+    });
+}
 /*
-//Debugger
-const debugSpace = document.getElementById("debugger");
-//Debugging tool for ios
-logCanvas = new LogCanvas();
-//logCanvas.appendSelf(debugSpace);
-function log(input){
-    logCanvas.newLine(input);
-}
-
-//Prepare streamer
-const streamer = new VideoStream(document.getElementById("cameraMedia"));
-
-//Usefull plots and graphs
-const plotA = new PlotCanvas();
-const plotB = new PlotCanvas();
-const plotC = new PlotCanvas();
-const graphA = new GraphCanvas();
-const graphB = new GraphCanvas();
-const graphC = new GraphCanvas();
-graphA.appendSelf(debugSpace);
-plotA.appendSelf(debugSpace);
-if(false){
-    plotB.appendSelf();
-    plotC.appendSelf();
-    graphB.appendSelf();
-    graphC.appendSelf();
-}
+//Load important JS files
+loadJS("https://raykaito.github.io/25_touchless_control/functions.js");
+loadJS("https://raykaito.github.io/25_touchless_control/canvas.js");
+loadJS("https://raykaito.github.io/25_touchless_control/vision_program.js");
+loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
 */
-console.log("Loaded: activator.js");
+async function loadJSinOrder(){
+    await loadJS("functions.js");
+    await loadJS("canvas.js");
+    await loadJS("vision_program.js");
+    await loadJS("video_stream.js");
+    await loadJS("runner.js");
+    console.log("Every JS file loaded");
+}
+
+loadJSinOrder();

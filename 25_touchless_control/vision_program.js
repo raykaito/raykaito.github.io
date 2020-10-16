@@ -3,7 +3,7 @@ class VisionProgram{
         this.oCanvas = new Canvas();
         this.oimgdata;
         //Prepare DisplayCanvas
-        this.dCanvas = new Canvas(document.getElementById('displayCanvas'));
+        this.dCanvas = new Canvas();
         this.resizeOcanvas(1,1);
 
         this.houghTrans = new houghTransform();

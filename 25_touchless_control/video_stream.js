@@ -3,7 +3,7 @@ class VideoStream{
         this.video = video;
         this.vProgram = new VisionProgram();
 
-        this.front=false;
+        this.front=true;
         this.constraints = {
             audio:false,
             video:{
