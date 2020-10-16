@@ -3,7 +3,7 @@ class VideoStream{
         this.video = video;
         this.vProgram = new VisionProgram();
 
-        this.front=false;
+        this.front=true;
         this.constraints = {
             audio:false,
             video:{
@@ -77,9 +77,9 @@ class VideoStream{
     }
     updateStreamerStatus(){
         if(this.streamerOn){
-            this.textStreamerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
+            //this.textStreamerStatus.innerHTML = "Camera <B><font color='green'>ON</font></B>/OFF";
         }else{
-            this.textStreamerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
+            //this.textStreamerStatus.innerHTML = "Camera ON/<B><font color='red'>OFF</font></B>";
         }
     }
 }
