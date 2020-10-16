@@ -20,6 +20,7 @@ function log(input){
 
 //Prepare streamer
 const streamer = new VideoStream(videoElement,fullScreenCanvas);
+fullScreenCanvas.onclick = (()=>streamer.stopScan());
 
 //Usefull plots and graphs
 const plotA = new PlotCanvas();

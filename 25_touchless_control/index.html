@@ -25,11 +25,15 @@
 		const body   = document.getElementById('Body'  );
 		showObject(body, table);
 
+		let on = false;
+
 		//Prepare function to load js files
 		const loadJSlocal=(url)=>{
+			if(on) return;
 		    const el = document.createElement("script");
 		    el.src = url;
 		    document.body.appendChild(el);
+		    on = true;
 		}
 
 	//--> 
