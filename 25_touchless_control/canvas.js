@@ -40,6 +40,10 @@ class Canvas{
             this.canvas.style.height = Math.floor(height)+"px";
         }
     }
+    resizeToFitScreen(){
+        this.canvas.width = window.innerWidth*this.pixelRatio;
+        this.canvas.height= window.innerHeight*this.pixelRatio;
+    }
     hideCanvas(){
         log("off2");
         this.canvas.style.display = "none";
@@ -66,6 +70,9 @@ class Canvas{
     fillAll(color="black"){
         this.fillRect(0,0,this.canvas.width,this.canvas.height,color);
     }
+    clearAll(){
+        this.ct.clearRect(0,0,this.canvas.width,this.canvas.height);
+    }
     drawRect(dx=0,dy=0,width=this.canvas.width,height=this.canvas.height,color="black"){
         this.ct.strokeStyle = color;
         this.ct.beginPath();
@@ -86,6 +93,11 @@ class Canvas{
     //imageData
     createImageData(w=this.canvas.width,h=this.canvas.height){
         this.imgdata = this.ct.createImageData(w,h);
+    }
+    drawFrame(color){
+        const frameWidth = 3*this.pixelRatio;
+        this.fillAll(color);
+        this.ct.clearRect(frameWidth,frameWidth,this.canvas.width-frameWidth*2,this.canvas.height-frameWidth*2);
     }
 }
 class PlotCanvas extends Canvas{

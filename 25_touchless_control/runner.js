@@ -1,14 +1,14 @@
 //Create an overlayed canvas which covers the window
-const fullScreenCanvas = document.createElement("canvas");
+const fullScreenCanvas = new Canvas(document.createElement("canvas"));
 const videoElement = document.createElement("video");
 
-fullScreenStyle = {position:"fixed", display:"block", width:"100%", height:"100%", top:"0", left:"0", right:"0", bottom:"0", backgroundColor:"rgba(0,0,0,0.5)", zIndex:"2", cursor:"pointer"};
+fullScreenStyle = {position:"fixed", display:"block", width:"100%", height:"100%", top:"0", left:"0", right:"0", bottom:"0", zIndex:"2", cursor:"pointer"};
 videoElementStyle = {position:"fixed", display:"none", width:"100px", height:"100px", top:"0", left:"0", zIndex:"1", cursor:"pointer"};
 videoElementProperties = {controls:true, autoplay:true, playsinline:true };
-Object.assign(fullScreenCanvas.style, fullScreenStyle);
+Object.assign(fullScreenCanvas.canvas.style, fullScreenStyle);
 Object.assign(videoElement.style, videoElementStyle);
 Object.assign(videoElement, videoElementProperties);
-document.body.appendChild(fullScreenCanvas);
+document.body.appendChild(fullScreenCanvas.canvas);
 document.body.appendChild(videoElement);
 
 //Debugging tool for ios
@@ -19,7 +19,7 @@ function log(input){
 }
 
 //Prepare streamer
-const streamer = new VideoStream(videoElement);
+const streamer = new VideoStream(videoElement,fullScreenCanvas);
 
 //Usefull plots and graphs
 const plotA = new PlotCanvas();

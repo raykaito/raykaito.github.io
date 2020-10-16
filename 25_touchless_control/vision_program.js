@@ -1,57 +1,29 @@
 class VisionProgram{
-    constructor(){
+    constructor(fullScreenCanvas){
         this.oCanvas = new Canvas();
         this.oimgdata;
         //Prepare DisplayCanvas
-        this.dCanvas = new Canvas();
-        this.dCanvas.appendSelf();
+        this.dCanvas = fullScreenCanvas;
         this.resizeOcanvas(1,1);
-
-        this.houghTrans = new houghTransform();
-        this.histogram = new Histogram();
-        this.edgeExtraction = new Binary();
     }
     resizeOcanvas(width,height){
         this.oCanvas.resize(width,height);
         this.oCanvas.resizeStyle(width,height,true);
-        this.dCanvas.flexResize(0.95,height/width);
-        this.dCanvas.fillAll("white");
-        table.width = this.dCanvas.canvas.style.width;
         this.width = width;
         this.height= height;
-        this.wScale = this.dCanvas.canvas.width /this.oCanvas.canvas.width;
-        this.hScale = this.dCanvas.canvas.height/this.oCanvas.canvas.height;
     }
     run(video){
+        //Load video to Ocanvas and prepare Dcanvas
         this.oCanvas.drawImage(video,0,0,this.width,this.height);
-        this.dCanvas.drawImage(video,0,0,this.width,this.height);
         this.oimgdata = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
+        this.dCanvas.resizeToFitScreen();
+        this.dCanvas.drawFrame("lime");
+        const sideLength = Math.min(this.dCanvas.canvas.width, this.dCanvas.canvas.height);
+        const dWipeOffset = Math.floor(sideLength/100);
+        const dWipeLength = Math.floor(sideLength/6);
 
-        const width = 200;
-        const height = 200;
-
-        const lineDetectionROI_L = this.newROI((this.width-width)/2,7*(this.height-height)/8,width,height);
-        this.histogram.autoBinarizeWithOtsuMethod(lineDetectionROI_L);
-        graphA.update(this.histogram.bin);
-        graphA.ct.strokeStyle = "red";
-        graphA.ct.lineWidth = 1;
-        graphA.line(this.histogram.thresh+1,1,this.histogram.thresh+1,101);
-
-        this.edgeExtraction.updateROI(this.histogram.passROI);
-        this.edgeExtraction.extractEdge(this.histogram.passROI);
-        //this.displayImageDataD(this.edgeExtraction);
-
-        const [inter_L, angle_L] = this.houghTrans.autoIntAngleAquisition(this.edgeExtraction.passROI);
-        this.displayImageDataD(this.houghTrans);
-        plotA.ct.strokeStyle = "red";
-        plotA.ct.lineWidth = 1;
-        for(let i=0;i<this.houghTrans.maxIndex.length;i++){
-            const x = this.houghTrans.maxIndex[i]%this.houghTrans.rangeThetaIndex+1;
-            const y = Math.floor(this.houghTrans.maxIndex[i]/this.houghTrans.rangeThetaIndex)+1;
-            plotA.drawRect(x-3,y-3,7,7,"red");
-            plotA.drawRect(x-2,y-2,5,5,"red");
-        }
-
+        this.dCanvas.drawImage(video,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
+        this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
     }
     newROI(x=0,y=0,width=1,height=1,theta=0,dx=0,dy=0){
         x=Math.floor(x);
@@ -123,7 +95,7 @@ class VisionProgram{
             this.dCanvas.translate(x*this.wScale,y*this.hScale);
             this.dCanvas.rotateRad(theta);
             this.dCanvas.drawRect(-1,-1,tc.width*this.wScale+2,tc.height*this.hScale+2,"lime");
-            this.dCanvas.drawImage(tc,0,0,tc.width,tc.height,0,0,tc.width*this.wScale,tc.height*this.hScale);
+            this.dCanvas.drawImage(tc,0,0);
             imgData.ddraw(this.dCanvas);
             this.dCanvas.ct.restore();
         }

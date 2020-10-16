@@ -1,7 +1,7 @@
 class VideoStream{
-    constructor(video){
+    constructor(video,fullScreenCanvas){
         this.video = video;
-        this.vProgram = new VisionProgram();
+        this.vProgram = new VisionProgram(fullScreenCanvas);
 
         this.front=true;
         this.constraints = {
@@ -26,9 +26,11 @@ class VideoStream{
     handleSuccess(stream){
         this.video.srcObject = stream;
         const mediaSettings = stream.getTracks()[0].getSettings();
-        this.videoWidth = mediaSettings.width;
-        this.videoHeight= mediaSettings.height;
-        this.vProgram.resizeOcanvas(this.videoWidth,this.videoHeight)
+        const sideLength = Math.min(mediaSettings.width, mediaSettings.height);
+        this.videoWidth = sideLength;
+        this.videoHeight= sideLength;
+        console.log(this.videoWidth,this.videoHeight);
+        this.vProgram.resizeOcanvas(this.videoWidth,this.videoHeight);
         this.video.play();
         this.streamerOn = true;
         this.drawVideo();
