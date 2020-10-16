@@ -1,4 +1,4 @@
-alert("Running activator.js");
+console.log("Running activator.js");
 //Prepare function to load js files
 function loadJS(url){
     return new Promise(resolve => {
