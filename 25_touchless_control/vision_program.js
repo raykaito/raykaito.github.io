@@ -4,6 +4,7 @@ class VisionProgram{
         this.oimgdata;
         //Prepare DisplayCanvas
         this.dCanvas = new Canvas();
+        this.dCanvas.appendSelf();
         this.resizeOcanvas(1,1);
 
         this.houghTrans = new houghTransform();

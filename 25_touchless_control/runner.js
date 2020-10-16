@@ -3,7 +3,7 @@ const fullScreenCanvas = document.createElement("canvas");
 const videoElement = document.createElement("video");
 
 fullScreenStyle = {position:"fixed", display:"block", width:"100%", height:"100%", top:"0", left:"0", right:"0", bottom:"0", backgroundColor:"rgba(0,0,0,0.5)", zIndex:"2", cursor:"pointer"};
-videoElementStyle = {position:"fixed", display:"block", width:"100px", height:"100px", top:"0", left:"0", zIndex:"1", cursor:"pointer"};
+videoElementStyle = {position:"fixed", display:"none", width:"100px", height:"100px", top:"0", left:"0", zIndex:"1", cursor:"pointer"};
 videoElementProperties = {controls:true, autoplay:true, playsinline:true };
 Object.assign(fullScreenCanvas.style, fullScreenStyle);
 Object.assign(videoElement.style, videoElementStyle);
