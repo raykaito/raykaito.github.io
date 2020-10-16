@@ -9,19 +9,21 @@ function loadJS(url){
         document.body.appendChild(script);
     });
 }
-/*
-//Load important JS files
-loadJS("https://raykaito.github.io/25_touchless_control/functions.js");
-loadJS("https://raykaito.github.io/25_touchless_control/canvas.js");
-loadJS("https://raykaito.github.io/25_touchless_control/vision_program.js");
-loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
-*/
 async function loadJSinOrder(){
-    await loadJS("functions.js");
-    await loadJS("canvas.js");
-    await loadJS("vision_program.js");
-    await loadJS("video_stream.js");
-    await loadJS("runner.js");
+    const localTest = false;
+    //Load important JS files
+    if(localTest){
+        await loadJS("functions.js");
+        await loadJS("canvas.js");
+        await loadJS("vision_program.js");
+        await loadJS("video_stream.js");
+        await loadJS("runner.js");
+    }else{
+        await loadJS("https://raykaito.github.io/25_touchless_control/functions.js");
+        await loadJS("https://raykaito.github.io/25_touchless_control/canvas.js");
+        await loadJS("https://raykaito.github.io/25_touchless_control/vision_program.js");
+        await loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
+    }
     console.log("Every JS file loaded");
 }
 
