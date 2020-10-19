@@ -56,7 +56,8 @@ class VideoStream{
     drawVideo(){
         if(this.streamerOn){
             this.vProgram.run(this.video);
-            this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
+            //this.animeRequest = requestAnimationFrame(()=>{this.drawVideo();});
+            this.animeRequest = setTimeout(()=>{this.drawVideo();},30);
         }
     }
     addDiscNumber(number){

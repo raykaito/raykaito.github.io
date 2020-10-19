@@ -10,7 +10,7 @@ function loadJS(url){
     });
 }
 async function loadJSinOrder(){
-    const localTest = false;
+    const localTest = true;
     //Load important JS files
     if(localTest){
         await loadJS("functions.js");
