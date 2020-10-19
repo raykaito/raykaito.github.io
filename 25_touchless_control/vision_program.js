@@ -11,7 +11,7 @@ class VisionProgram{
         this.shakeRate = new Array(this.smoothNumber).fill(0);
 
         //Record of center of mass (x,y) for Fourier Polynomial
-        this.listNumber = 20;
+        this.listNumber = 15;
         this.xList = new Array(this.listNumber).fill(25);
         this.yList = new Array(this.listNumber).fill(25);
 
