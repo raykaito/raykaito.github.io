@@ -1,51 +1,42 @@
 class VisionProgram{
     constructor(fullScreenCanvas){
-        //Prepare Original/Display Canvas
         this.oCanvas = new Canvas();
         this.oimgdata = new Array(2);//for Odd and Even
-        this.dCanvas = fullScreenCanvas;
-        
-        //For smoothening the data
-        this.smoothNumber = 5;
-        this.turnRate = new Array(this.smoothNumber).fill(0);
-        this.shakeRate = new Array(this.smoothNumber).fill(0);
-
-        //Record of center of mass (x,y) for Fourier Polynomial
         this.listNumber = 15;
+        this.smoothNumber = 5;
+        this.spreadFactor = new Array(this.smoothNumber).fill(10);
+        this.difference = new Array(this.difference).fill(0);
         this.xList = new Array(this.listNumber).fill(25);
         this.yList = new Array(this.listNumber).fill(25);
-
-        //Parameters to control the vision program
         this.counter = -1;
-        this.mode = 0;//0:Scanning 1:Idle
-        this.modeChangeAsked = 0;
-        this.modeChangeAskedTime = 0;
-        this.modeChangeAccepetedTime = 0;
+        //Prepare DisplayCanvas
+        this.dCanvas = fullScreenCanvas;
+        this.resizeOcanvas(1,1);
     }
     resizeOcanvas(width,height){
-        //Resize the original canvas
         this.oCanvas.resize(width,height);
         this.oCanvas.resizeStyle(width,height,true);
         this.width = width;
         this.height= height;
-        
-        //Prepare the Image data
         this.oimgdata[0] = this.oCanvas.ct.createImageData(width,height);
         this.oimgdata[1] = this.oCanvas.ct.createImageData(width,height);
         this.oimgdiff = this.oCanvas.ct.createImageData(width,height);
-        this.oimgdiff.data.fill(255);
+        console.log("counter,cmx,cmy,cwTotal,ccwTotal,diff,totalMass,variance");
     }
     run(video){
-        //Inclement Counter and Update OddEven (0,1)
         this.counter++;
+        //Load video to Ocanvas and prepare Dcanvas
         const oddEven = this.counter%2;
-
-        //Load video to original canvas
         this.oCanvas.drawImage(video,0,0,this.width,this.height);
         this.oimgdata[oddEven] = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        if(this.counter<=1) return;
-
-        //Get center of mass (x,y) and total difference
+        if(this.counter==0) return;
+        this.oimgdiff = this.oCanvas.ct.createImageData(this.width,this.height);
+        this.dCanvas.resizeToFitScreen();
+        this.dCanvas.drawFrame("lime");
+        const sideLength = Math.min(this.dCanvas.canvas.width, this.dCanvas.canvas.height);
+        const dWipeOffset = Math.floor(sideLength/100);
+        const dWipeLength = Math.floor(sideLength/6);
+        //Get CM position, delta position, total Mass and std
         let totalDifference = 0;
         let cmx = 0;
         let cmy = 0;
@@ -58,68 +49,37 @@ class VisionProgram{
             this.oimgdiff.data[4*i+0] = localDifference;
             this.oimgdiff.data[4*i+1] = localDifference;
             this.oimgdiff.data[4*i+2] = localDifference;
+            this.oimgdiff.data[4*i+3] = 255;
             totalDifference += localDifference;
             cmx += localDifference*x;
             cmy += localDifference*y;
         }
         cmx /= totalDifference;
         cmy /= totalDifference;
-
-        //Add center of mass to the x and y list
+        let variance = 0;
+        for(let i=0;i<this.width*this.height;i++){
+            const [x,y] = this.i2xy(i);
+            variance += Math.pow((x-cmx),2)*this.oimgdiff.data[4*i+0];
+            variance += Math.pow((y-cmy),2)*this.oimgdiff.data[4*i+0];
+        }
+        variance/=this.width*this.height;
         this.xList[this.counter%this.listNumber] = cmx;
         this.yList[this.counter%this.listNumber] = cmy;
-
-        //Get fourier coefficients based on the x and y list
         const coeff = getFourierCoefficients(this.xList,this.yList);
         const [cwTotal,ccwTotal]= sum(coeff[0],coeff[1]);
+        const diff = cwTotal-ccwTotal;
+        this.spreadFactor[this.counter%this.smoothNumber] = totalDifference/variance;
+        this.difference[this.counter%this.smoothNumber] = diff;
+        if(average(this.spreadFactor)==NaN)alert("stop");
+        console.log(this.counter+","+cmx+","+cmy+","+cwTotal+","+ccwTotal+","+average(this.difference)+","+totalDifference+","+variance);
+        this.oCanvas.ct.putImageData(this.oimgdiff,0,0);
 
-        //Calculate the turn rate which controls the scroll
-        this.turnRate[this.counter%this.smoothNumber] = cwTotal-ccwTotal;
-        this.shakeRate[this.counter%this.smoothNumber]= totalDifference;
-        //console.log(this.counter+","+cmx+","+cmy+","+cwTotal+","+ccwTotal+","+average(this.turnRate)+","+totalDifference+","+0);
-
-        if(this.mode==0){
-            //Prepare display canvas
-            this.dCanvas.resizeToFitScreen();
-            this.dCanvas.drawFrame(this.mode?"red":"lime");
-
-            //Prepare wipe information
-            const sideLength = Math.min(this.dCanvas.canvas.width, this.dCanvas.canvas.height);
-            const dWipeOffset = Math.floor(sideLength/100)*this.dCanvas.pixelRatio;
-            const dWipeLength = Math.floor(sideLength/6);
-            const dcmx = dWipeLength*(cmx/this.width);
-            const dcmy = dWipeLength*(cmy/this.height);
-
-            //Draw wipe
-            this.oimgdiff.data[4*(Math.floor(cmx)+Math.floor(cmy)*this.width)+2]=255
-            this.oCanvas.ct.putImageData(this.oimgdiff,0,0);
-            this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
-            //Check for turn or mode change
-            if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)*2);
-                this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
-                this.modeChangeAsked = 0;
-            }
-            this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
-        }else{
-            this.dCanvas.fillAll("black");
+        this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
+        this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
+        if(Math.abs(average(this.difference))>average(this.spreadFactor)/2&&Math.abs(average(this.difference))>15){
+            window.scrollBy(0,average(this.difference)*5);
+            this.dCanvas.fillRect(dWipeOffset+this.dCanvas.pixelRatio*(2*cmx-5),dWipeOffset+this.dCanvas.pixelRatio*(2*cmy-5),this.dCanvas.pixelRatio*10,this.dCanvas.pixelRatio*10,"red");
         }
-        //Check for Mode Change
-        if(getVariance(this.shakeRate)>40000){
-            if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>1000){
-                this.modeChangeAsked = 1;
-                this.modeChangeAskedTime = Date.now();
-            }
-        }
-        if(this.modeChangeAsked){
-            if(Date.now()-this.modeChangeAskedTime>400){
-                this.modeChangeAsked = 0;
-                this.modeChangeAccepetedTime = Date.now();
-                this.mode = (this.mode+1)%2;
-            }
-        }
-        console.log(this.modeChangeAsked,getVariance(this.shakeRate));
-
 
     }
     xy2i(xy,width=this.width){
@@ -136,19 +96,6 @@ function average(array){
         total+=array[i];
     }
     return total/array.length;
-}
-
-function getVariance(array){
-    let total = 0;
-    for(let i=0;i<array.length;i++){
-        total+=array[i];
-    }
-    const average = total/array.length
-    let variance = 0;
-    for(let i=0;i<array.length;i++){
-        variance += Math.pow((array[i]-average),2);
-    }
-    return Math.sqrt(variance/array.length);
 }
 
 function num2n(num){
