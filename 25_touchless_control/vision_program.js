@@ -100,7 +100,7 @@ class VisionProgram{
             }
             //Check for turn or mode change
             if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)/5);
+                window.scrollBy(0,average(this.turnRate)/2);
                 console.log(average(this.turnRate));
                 this.modeChangeAsked = 0;
                 this.modeChangeAccepetedTime = Date.now();
