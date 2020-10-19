@@ -25,6 +25,7 @@ async function loadJSinOrder(){
         await loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
         await loadJS("https://raykaito.github.io/25_touchless_control/runner.js");
     }
+    openFullScreen();
     console.log("Every JS file loaded");
 }
 

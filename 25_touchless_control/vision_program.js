@@ -43,7 +43,7 @@ class VisionProgram{
         //Load video to original canvas
         this.oCanvas.drawImage(video,0,0,this.width,this.height);
         this.oimgdata[oddEven] = this.oCanvas.ct.getImageData(0,0,this.width,this.height);
-        if(this.counter<=1) return;
+        if(this.counter<=this.smoothNumber) return;
 
         //Get center of mass (x,y) and total difference
         let totalDifference = 0;
@@ -83,26 +83,28 @@ class VisionProgram{
             this.dCanvas.resizeToFitScreen();
             this.dCanvas.drawFrame(this.mode?"red":"lime");
 
-            //Prepare wipe information
-            const sideLength = Math.min(this.dCanvas.canvas.width, this.dCanvas.canvas.height);
-            const dWipeOffset = Math.floor(sideLength/100)*this.dCanvas.pixelRatio;
-            const dWipeLength = Math.floor(sideLength/6);
-            const dcmx = dWipeLength*(cmx/this.width);
-            const dcmy = dWipeLength*(cmy/this.height);
+            if(false){
+                //Prepare wipe information
+                const sideLength = Math.min(this.dCanvas.canvas.width, this.dCanvas.canvas.height);
+                const dWipeOffset = Math.floor(sideLength/100)*this.dCanvas.pixelRatio;
+                const dWipeLength = Math.floor(sideLength/6);
+                const dcmx = dWipeLength*(cmx/this.width);
+                const dcmy = dWipeLength*(cmy/this.height);
 
-            //Draw wipe
-            this.oimgdiff.data[4*(Math.floor(cmx)+Math.floor(cmy)*this.width)+2]=255
-            this.oCanvas.ct.putImageData(this.oimgdiff,0,0);
-            this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
+                //Draw wipe
+                this.oimgdiff.data[4*(Math.floor(cmx)+Math.floor(cmy)*this.width)+2]=255
+                this.oCanvas.ct.putImageData(this.oimgdiff,0,0);
+                this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
+                this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
+                this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
+            }
             //Check for turn or mode change
             if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)/15);
+                window.scrollBy(0,average(this.turnRate)/5);
                 console.log(average(this.turnRate));
-                this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
                 this.modeChangeAsked = 0;
                 this.modeChangeAccepetedTime = Date.now();
             }
-            this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
         }else{
             this.dCanvas.fillAll("black");
         }
