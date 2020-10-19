@@ -96,7 +96,8 @@ class VisionProgram{
             this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
             //Check for turn or mode change
             if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)*2);
+                window.scrollBy(0,average(this.turnRate)/3);
+                console.log(average(this.turnRate));
                 this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
                 this.modeChangeAsked = 0;
             }
@@ -118,7 +119,6 @@ class VisionProgram{
                 this.mode = (this.mode+1)%2;
             }
         }
-        console.log(this.modeChangeAsked,getVariance(this.shakeRate));
 
 
     }

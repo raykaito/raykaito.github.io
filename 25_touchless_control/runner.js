@@ -1,13 +1,13 @@
 //Open Full Screen
 const documentElem = document.documentElement;
 if (documentElem.requestFullscreen) {
-documentElem.requestFullscreen();
+	documentElem.requestFullscreen();
 } else if (documentElem.mozRequestFullScreen) { /* Firefox */
-documentElem.mozRequestFullScreen();
+	documentElem.mozRequestFullScreen();
 } else if (documentElem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-documentElem.webkitRequestFullscreen();
+	documentElem.webkitRequestFullscreen();
 } else if (documentElem.msRequestFullscreen) { /* IE/Edge */
-documentElem.msRequestFullscreen();
+	documentElem.msRequestFullscreen();
 }
 
 //Create an overlayed canvas which covers the window
