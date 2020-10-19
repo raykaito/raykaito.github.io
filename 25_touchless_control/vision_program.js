@@ -96,10 +96,11 @@ class VisionProgram{
             this.dCanvas.drawImage(this.oCanvas.canvas,0,0,this.width,this.height,dWipeOffset,dWipeOffset,dWipeLength,dWipeLength);
             //Check for turn or mode change
             if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)/3);
+                window.scrollBy(0,average(this.turnRate)/15);
                 console.log(average(this.turnRate));
                 this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
                 this.modeChangeAsked = 0;
+                this.modeChangeAccepetedTime = Date.now();
             }
             this.dCanvas.drawRect(dWipeOffset,dWipeOffset,dWipeLength,dWipeLength,"black");
         }else{
@@ -107,13 +108,13 @@ class VisionProgram{
         }
         //Check for Mode Change
         if(getVariance(this.shakeRate)>40000){
-            if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>1000){
+            if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>2000){
                 this.modeChangeAsked = 1;
                 this.modeChangeAskedTime = Date.now();
             }
         }
         if(this.modeChangeAsked){
-            if(Date.now()-this.modeChangeAskedTime>400){
+            if(Date.now()-this.modeChangeAskedTime>200){
                 this.modeChangeAsked = 0;
                 this.modeChangeAccepetedTime = Date.now();
                 this.mode = (this.mode+1)%2;
