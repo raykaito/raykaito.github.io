@@ -120,7 +120,7 @@ class VisionProgram{
         //this.dCanvas.drawImage(grapher.canvas,0,0,grapher.canvas.width,grapher.canvas.height,0,50,grapher.canvas.width,grapher.canvas.height);
         //Check for Mode Change
         if(getVariance(this.shakeRate)>40000){
-            if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>2000){
+            if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>500){
                 this.modeChangeAsked = 1;
                 this.modeChangeAskedTime = Date.now();
             }
