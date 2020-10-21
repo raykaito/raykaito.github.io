@@ -29,7 +29,6 @@ class VideoStream{
         const sideLength = Math.min(mediaSettings.width, mediaSettings.height);
         this.videoWidth = sideLength;
         this.videoHeight= sideLength;
-        console.log(this.videoWidth,this.videoHeight);
         this.vProgram.resizeOcanvas(this.videoWidth,this.videoHeight);
         this.video.play();
         this.streamerOn = true;

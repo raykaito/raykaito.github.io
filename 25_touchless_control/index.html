@@ -10,11 +10,10 @@
 </head>
 
 
-<body id="Body" style="height:20000px;" onclick="loadJSlocal('activator.js')">
-
+<body id="Body" style="height:20000px;">
 	<table id="Table" border="0" align="center">
 		<tr>
-			Tap on screen to enable touchless control.
+			<p onclick="loadJSlocal('activator.js')">Tap on HERE to enable touchless control.</p>
 		</tr>
 	</table>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
@@ -25,16 +24,13 @@
 		const body   = document.getElementById('Body'  );
 		showObject(body, table);
 
-		let on = false;
-
 		//Prepare function to load js files
 		const loadJSlocal=(url)=>{
-			if(on) return;
 		    const el = document.createElement("script");
 		    el.src = url;
 		    document.body.appendChild(el);
-		    on = true;
 		}
+		//loadJSlocal('activator.js');
 
 	//--> 
 	</script>

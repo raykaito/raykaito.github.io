@@ -11,7 +11,7 @@ class VisionProgram{
         this.shakeRate = new Array(this.smoothNumber).fill(0);
 
         //Record of center of mass (x,y) for Fourier Polynomial
-        this.listNumber = 15;
+        this.listNumber = 20;
         this.xList = new Array(this.listNumber).fill(25);
         this.yList = new Array(this.listNumber).fill(25);
 
@@ -21,6 +21,7 @@ class VisionProgram{
         this.modeChangeAsked = 0;
         this.modeChangeAskedTime = 0;
         this.modeChangeAccepetedTime = 0;
+        console.log("this.counter,cmx,cmy,cwTotal,ccwTotal,turnRate,totalDifference");
     }
     resizeOcanvas(width,height){
         //Resize the original canvas
@@ -28,6 +29,8 @@ class VisionProgram{
         this.oCanvas.resizeStyle(width,height,true);
         this.width = width;
         this.height= height;
+        this.scanWidthMin = this.width/6;
+        this.scanWidthMax = this.width-this.scanWidthMin;
         
         //Prepare the Image data
         this.oimgdata[0] = this.oCanvas.ct.createImageData(width,height);
@@ -52,9 +55,11 @@ class VisionProgram{
         for(let i=0;i<this.width*this.height;i++){
             const [x,y] = this.i2xy(i);
             let localDifference = 0;
-            localDifference += Math.abs(this.oimgdata[0].data[4*i+0] - this.oimgdata[1].data[4*i+0]);
-            localDifference += Math.abs(this.oimgdata[0].data[4*i+1] - this.oimgdata[1].data[4*i+1]);
-            localDifference += Math.abs(this.oimgdata[0].data[4*i+2] - this.oimgdata[1].data[4*i+2]);
+            if(x<this.scanWidthMin||x>this.scanWidthMax||y<this.scanWidthMin||y>this.scanWidthMax){
+                localDifference += Math.abs(this.oimgdata[0].data[4*i+0] - this.oimgdata[1].data[4*i+0]);
+                localDifference += Math.abs(this.oimgdata[0].data[4*i+1] - this.oimgdata[1].data[4*i+1]);
+                localDifference += Math.abs(this.oimgdata[0].data[4*i+2] - this.oimgdata[1].data[4*i+2]);
+            }
             this.oimgdiff.data[4*i+0] = localDifference;
             this.oimgdiff.data[4*i+1] = localDifference;
             this.oimgdiff.data[4*i+2] = localDifference;
@@ -64,6 +69,8 @@ class VisionProgram{
         }
         cmx /= totalDifference;
         cmy /= totalDifference;
+        
+        this.oimgdiff.data[4*this.xy2i([cmx,cmy])+1] = 255;
 
         //Add center of mass to the x and y list
         this.xList[this.counter%this.listNumber] = cmx;
@@ -71,12 +78,13 @@ class VisionProgram{
 
         //Get fourier coefficients based on the x and y list
         const coeff = getFourierCoefficients(this.xList,this.yList);
-        const [cwTotal,ccwTotal]= sum(coeff[0],coeff[1]);
+        const [mag,freq]= sum(coeff[0],coeff[1]);
+        //grapher.update(this.xList,1);
 
         //Calculate the turn rate which controls the scroll
-        this.turnRate[this.counter%this.smoothNumber] = cwTotal-ccwTotal;
+        this.turnRate[this.counter%this.smoothNumber] = freq;
         this.shakeRate[this.counter%this.smoothNumber]= totalDifference;
-        //console.log(this.counter+","+cmx+","+cmy+","+cwTotal+","+ccwTotal+","+average(this.turnRate)+","+totalDifference+","+0);
+        console.log(this.counter+","+cmx+","+cmy+","+mag+","+freq+","+average(this.turnRate)+","+Math.abs(average(this.turnRate)));
 
         if(this.mode==0){
             //Prepare display canvas
@@ -99,15 +107,17 @@ class VisionProgram{
                 this.dCanvas.fillRect(dWipeOffset+dcmx-5,dWipeOffset+dcmy-5,10,10,"red");
             }
             //Check for turn or mode change
-            if(Math.abs(average(this.turnRate))>15&&this.mode==0){
-                window.scrollBy(0,average(this.turnRate)/2);
-                console.log(average(this.turnRate));
+            if(Math.abs(average(this.turnRate))>2&&this.mode==0){
+                window.scrollBy(0,average(this.turnRate)*Math.abs(average(this.turnRate)));
+                //console.log(average(this.turnRate));
                 this.modeChangeAsked = 0;
                 this.modeChangeAccepetedTime = Date.now();
             }
         }else{
             this.dCanvas.fillAll("black");
         }
+        //this.dCanvas.ct.putImageData(this.oimgdiff,0,0);
+        //this.dCanvas.drawImage(grapher.canvas,0,0,grapher.canvas.width,grapher.canvas.height,0,50,grapher.canvas.width,grapher.canvas.height);
         //Check for Mode Change
         if(getVariance(this.shakeRate)>40000){
             if(this.modeChangeAsked == 0&&Date.now()-this.modeChangeAccepetedTime>2000){
@@ -154,49 +164,59 @@ function getVariance(array){
     return Math.sqrt(variance/array.length);
 }
 
-function num2n(num){
-    const odd = (num%2==1);
-    if(odd){
-        return Math.ceil(num/2);
-    }else{
-        return Math.ceil(num/2)*-1;
-    }
-}
-
 function sum(arrayx,arrayy){
-    let totalPosi = 0;
-    let totalNega = 0;
-    for(let num=1;num<arrayx.length;num++){
-        const n = num2n(num);
-        if(n>0){
-            totalPosi+=n*n*Math.sqrt(arrayx[n]*arrayx[n]+arrayy[n]*arrayy[n]);
-        }else{
-            totalNega+=n*n*Math.sqrt(arrayx[n]*arrayx[n]+arrayy[n]*arrayy[n]);
-        }
+    //Take care of Odds first (positive freq);
+    let sigo = new Array((arrayx.length+1)/2);
+    for(let index=1;index<arrayx.length;index+=2){
+        const frequency = (index+1)/2;
+        sigo[frequency] = Math.sqrt(arrayx[index]*arrayx[index]+arrayy[index]*arrayy[index]);
     }
-    return [totalPosi,totalNega];
+    //Take care of Evens (negative freq);
+    let sige = new Array((arrayx.length+1)/2);
+    for(let index=2;index<arrayx.length;index+=2){
+        const frequency = index/2;
+        sige[frequency] = Math.sqrt(arrayx[index]*arrayx[index]+arrayy[index]*arrayy[index]);
+    }
+    let mag = freq = 0;
+    for(let index=1;index<sige.length;index++){
+        mag += sigo[index]-sige[index];
+        freq += (sigo[index]-sige[index])*index;
+    }
+    if(Math.abs(mag)>15){
+        freq/=Math.abs(mag);
+    }else{
+        freq = 0;
+    }
+    return [mag,freq];
 }
-
 
 function getFourierCoefficients(list,ilist){
-    const numMax = Math.floor(list.length/5)*2+1;
+    const indexMax = 23;
+    const freqMin = 1;
+    const freqMax = 4;
     const T = list.length;
     const omega = 2*Math.PI/T;
     const fourierCoefficients = new Array(2);
-    fourierCoefficients[0] = new Array(numMax);
-    fourierCoefficients[1] = new Array(numMax);
-    for(let num=0;num<numMax;num++){
-        const n = num2n(num);
+    fourierCoefficients[0] = new Array(indexMax).fill(0);
+    fourierCoefficients[1] = new Array(indexMax).fill(0);
+    for(let index=0;index<indexMax;index++){
+        let freq = 0;
+        if(index!=0){
+            const odd = index%2;
+            freq = (index+odd-2)/(indexMax-3);// freq = [0/40,40/40]
+            freq = freq*(freqMax-freqMin)+freqMin;// freq = [freqMin,freqMax];
+            if(!odd) freq*=-1; //Even is negative
+        }
         let integral = 0;
         let integrali= 0;
         for(let t=0;t<list.length;t++){
-            integral +=( list[t])*Math.cos(-1*n*t*omega);
-            integrali+=( list[t])*Math.sin(-1*n*t*omega);
-            integrali+=(ilist[t])*Math.cos(-1*n*t*omega);
-            integral -=(ilist[t])*Math.sin(-1*n*t*omega);
+            integral +=( list[t]-fourierCoefficients[0][0])*Math.cos(-1*freq*t*omega);
+            integrali+=( list[t]-fourierCoefficients[0][0])*Math.sin(-1*freq*t*omega);
+            integrali+=(ilist[t]-fourierCoefficients[1][0])*Math.cos(-1*freq*t*omega);
+            integral -=(ilist[t]-fourierCoefficients[1][0])*Math.sin(-1*freq*t*omega);
         }
-        fourierCoefficients[0][n] = integral/T;
-        fourierCoefficients[1][n] = integrali/T;
+        fourierCoefficients[0][index] = integral/T;
+        fourierCoefficients[1][index] = integrali/T;
     }
     return fourierCoefficients;
 }

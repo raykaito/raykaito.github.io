@@ -1,4 +1,6 @@
 console.log("Running activator.js");
+//Check if local test
+
 //Prepare function to load js files
 function loadJS(url){
     return new Promise(resolve => {
@@ -10,7 +12,7 @@ function loadJS(url){
     });
 }
 async function loadJSinOrder(){
-    const localTest = true;
+    const localTest = false;
     //Load important JS files
     if(localTest){
         await loadJS("functions.js");
@@ -25,6 +27,7 @@ async function loadJSinOrder(){
         await loadJS("https://raykaito.github.io/25_touchless_control/video_stream.js");
         await loadJS("https://raykaito.github.io/25_touchless_control/runner.js");
     }
+    openFullScreen();
     console.log("Every JS file loaded");
 }
 

@@ -25,20 +25,19 @@ Object.assign(videoElement, videoElementProperties);
 document.body.appendChild(fullScreenCanvas.canvas);
 document.body.appendChild(videoElement);
 
-//Debugging tool for ios
-const logCanvas = new LogCanvas();
-//logCanvas.appendSelf(document.body);
-function log(input){
-    logCanvas.newLine(input);
+function turnOn(){
+	streamer.startScan();
+	fullScreenCanvas.canvas.style.display = "block";
+}
+function turnOff(){
+	streamer.stopScan();
+	fullScreenCanvas.canvas.style.display = "none";
+	alert("Exit Touchless Control Mode.");
 }
 
 //Prepare streamer
 const streamer = new VideoStream(videoElement,fullScreenCanvas);
-fullScreenCanvas.canvas.onclick = (()=>{
-	streamer.stopScan();
-	fullScreenCanvas.canvas.style.display = "none";
-	alert("Exit Touchless Control Mode.");
-});
+fullScreenCanvas.canvas.onclick = (turnOff);
 
 streamer.switchStreamerOnOff();
 
