@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Solver</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=720, initial-scale=1"/>
+</head>
+
+
+<body onload="updateTable();" onKeyPress="main(window.event.keyCode);" id="Body">
+	<table id="Table" border="0" align="center" width="700" opacity="0">
+	
+		<tr>
+			<td colspan="2" align="center">
+				<B> <Font size="6"><titleda>
+					Sudoku Solver
+				</Font></titleda></B>
+				<hr>
+			</td>
+		</tr>
+		<tr>
+			<td align="center">	
+			<beautiful>
+				<table id="Puzzle" border="8" cellspacing="0" cellpadding="1" width="700" align="center" bgcolor="white">
+				<form name="field">
+				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=0 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=1 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=2 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=3 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=4 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=5 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=6 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=7 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=8 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>			
+					<tr height ="75" align="center">
+						<td><input type="text"  id=9 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=10 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=11 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=12 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=13 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=14 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=15 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=16 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=17 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td style="border-bottom:solid 5px;"><input type="text"  id=18 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=19 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=20 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;border-left:solid 5px;"><input type="text"  id=21 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=22 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=23 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;border-left:solid 5px;"><input type="text"  id=24 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=25 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=26 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=27 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=28 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=29 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=30 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=31 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=32 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=33 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=34 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=35 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=36 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=37 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=38 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=39 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=40 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=41 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=42 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=43 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=44 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td style="border-bottom:solid 5px;"><input type="text"  id=45 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=46 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=47 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;border-left:solid 5px;"><input type="text"  id=48 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=49 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=50 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;border-left:solid 5px;"><input type="text"  id=51 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=52 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-bottom:solid 5px;"><input type="text"  id=53 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=54 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=55 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=56 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=57 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=58 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=59 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=60 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=61 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=62 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=63 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=64 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=65 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=66 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=67 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=68 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=69 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=70 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=71 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr>				
+					<tr height ="75" align="center">
+						<td><input type="text"  id=72 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=73 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=74 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=75 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=76 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=77 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td style="border-left:solid 5px;"><input type="text"  id=78 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=79 value="0" size="10" style="text-align: center;border: none;"></td>
+						<td><input type="text"  id=80 value="0" size="10" style="text-align: center;border: none;"></td>
+					</tr height ="75" align="center">
+				
+				</form>
+				</table>
+			</beautiful>
+			</td>
+		</tr>
+		<tr><td align="center">
+			<br><br>Hit ENTER to solve.
+		</td></tr>
+	</table>
+
+
+<script type="text/javascript" src="ALfunctions.js"></script>
+<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+<script>
+	let i=0;
+	while(true){
+		i++;
+		console.log(i);
+		if(i==10000000){
+			break;
+		}
+	}
+	alert("done");
+
+</script>
+
+</body>
+
+</html>

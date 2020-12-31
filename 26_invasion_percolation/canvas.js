@@ -7,8 +7,12 @@ constructor(canvas){
     //Pixels
     this.pixValue = new Array(this.canvas.width*this.canvas.height);
     this.pixState = new Array(this.canvas.width*this.canvas.height);
+    //Ques
+    this.queIndexList = new Array(this.canvas.width*this.canvas.height);
+    this.queValueList = new Array(this.canvas.width*this.canvas.height);
+    this.queCount = 0;
     //Add Event listeners
-    this.canvas.addEventListener('mousedown', (event)=>{this.touch(event);}, false);
+    this.canvas.addEventListener('mousedown',  (event)=>{this.touch(event);}, false);
     this.canvas.addEventListener('touchstart', (event)=>{this.touch(event);}, false);
     //Reset Everything
     this.reset();
@@ -25,6 +29,11 @@ resize(){
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
 }
+addQue(pixelIndex, pixelValue){
+    for(queIndex=0;queIndex<queCount;queIndex++){
+        
+    }
+}
 reset(){
     //Iterations
     this.loop = true;
@@ -40,6 +49,12 @@ reset(){
         this.pixValue[pixelIndex] = Math.random();
         this.setPix(pixelIndex,Math.floor(this.pixValue[pixelIndex]*64)+192);
     }
+    for(let pixelIndex=0;pixelIndex<this.pixValue.length;pixelIndex++){
+        if(pixelIndex%width==0){
+            this.addQue(pixelIndex,this.pixValue[pixelIndex]);
+        }
+    }
+    queList
     console.log(this.pixValue);
     //Start
     this.startAnimation();
@@ -49,7 +64,7 @@ invade(){
 }
 startAnimation(){
     if(!this.loop) return;
-    //this.invade();
+    this.invade();
     this.ct.putImageData(this.imageData,0,0);
     text1.textContent = "Number of iterations: "+this.invasionCount;
     text2.textContent = "Length of side: "+this.clusterCount;
