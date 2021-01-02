@@ -31,6 +31,12 @@
 
 		<tr>
 			<td align="left">
+		        <input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="sliderChanged()" oninput="sliderChanged()" style="margin:0">
+			</td>
+		</tr>
+
+		<tr>
+			<td align="left">
 				<div id="Text1"></div><br>
 				<div id="Text2"></div><br>
 			</td>
@@ -38,6 +44,7 @@
 
 	</table>
 	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/heapScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
@@ -45,11 +52,17 @@
 		const tableElement  = document.getElementById('Table' );
 		const bodyElement   = document.getElementById('Body'  );
 		const canvasElement = document.getElementById('Canvas');
+		const slider = document.getElementById('slider');
 		const text1 = document.getElementById('Text1');
 		const text2 = document.getElementById('Text2');
 		showObject(bodyElement, tableElement);
 
 		const canvas = new Canvas(canvasElement);
+
+		const sliderChanged = () => {
+			canvas.sequence = slider.value;
+			canvas.updateField();
+		}
 	//--> 
 	</script>
 
