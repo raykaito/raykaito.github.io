@@ -28,7 +28,7 @@ resize(){
     this.canvas.height = this.canvas.width;
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
-    slider.style.width=this.canvas.width+"px";
+    slider.style.width=this.canvas.width/this.pixelRatio+"px";
 }
 touch(event){
     if(this.loop){
