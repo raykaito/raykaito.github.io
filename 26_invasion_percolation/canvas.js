@@ -7,7 +7,9 @@ constructor(canvas){
     //Pixels
     this.sequence = 0;
     this.pixValue = new Array(this.canvas.width*this.canvas.height);
-    this.invasionSequence = new Array(this.canvas.width*this.canvas.height).fill(0);//[0:UnQued, -1:Qued, +:InvadedSequence]
+    this.invadedSequence = new Array(this.canvas.width*this.canvas.height).fill(0);//[0:UnQued, -1:Qued, +:InvadedSequence]
+    this.trappedSequence  = new Array(this.canvas.width*this.canvas.height).fill(0);//[0:Not trapped, +:TrappedSequence]
+    this.clusterIndex = new Array(this.canvas.width*this.canvas.height).fill(0);//[0:Not trapped, -1:MainCluster, Cluster ID]
     this.queHeap = new heap();
     //Add Event listeners
     this.canvas.addEventListener('mousedown',  (event)=>{this.touch(event);}, false);
@@ -87,14 +89,14 @@ reset(){
     this.addQue(this.xy2i(Math.floor(this.canvas.width/2),Math.floor(this.canvas.height/2)));
     this.getInvasionSequence();
     slider.max = this.canvas.width*this.canvas.height;
-    //Start
+    this.updateField();
     //this.startAnimation();
 }
 addQue(pixelIndex){
-    if(this.invasionSequence[pixelIndex]!=0) return;
+    if(this.invadedSequence[pixelIndex]!=0) return;
     else{
         this.queHeap.addValueIndex(this.pixValue[pixelIndex],pixelIndex);
-        this.invasionSequence[pixelIndex] = -1;
+        this.invadedSequence[pixelIndex] = -1;
     }
 }
 getInvasionSequence(){
@@ -102,7 +104,7 @@ getInvasionSequence(){
         this.invasionCount++;
         const invadeIndex = this.queHeap.popValueIndex();
         const invadeXY = this.i2xy(invadeIndex);
-        this.invasionSequence[invadeIndex] = this.invasionCount;
+        this.invadedSequence[invadeIndex] = this.invasionCount;
         this.setPix(invadeIndex,0);
         //getNeighbor and add to que
         const xNeighbor = [invadeXY[0]+1 ,invadeXY[0]   ,invadeXY[0]-1 ,invadeXY[0]  ];
@@ -114,9 +116,107 @@ getInvasionSequence(){
         }
     }
 }
+applyTrapping(){
+    //Define Main Cluster at beggining
+    for(let x=0;x<this.canvas.width;x++){
+        const yMin = 0;
+        const yMax = this.canvas.height-1;
+        this.clusterIndex[this.xy2i(x,yMin)] = -1;
+        this.clusterIndex[this.xy2i(x,yMax)] = -1;
+    }
+    for(let y=0;y<this.canvas.height;y++){
+        const xMin = 0;
+        const xMax = this.canvas.width-1;
+        this.clusterIndex[this.xy2i(xMin,y)] = -1;
+        this.clusterIndex[this.xy2i(xMax,y)] = -1;
+    }
+    //Aquire Sorted Pore List
+    let sortedPoreList = new Array(this.canvas.width*this.canvas.height+1);
+    for(let poreIndex=0;poreIndex<this.invadedSequence.length;poreIndex++){
+        sortedPoreList[this.invadedSequence[poreIndex]] = poreIndex;
+    }
+    //get Clusters
+    let openClusterHeap = new heap();
+    let poreListForEachCluster = new Array();
+    for(let sequence = this.sortedPoreList.length-1;sequence>0;sequence--){
+        let neighborIndex = new Array(4).fill(0);//[0:Not trapped, -1:MainCluster, Cluster ID]
+        //getNeighbor and add to que
+        const xNeighbor = [invadeXY[0]+1 ,invadeXY[0]   ,invadeXY[0]-1 ,invadeXY[0]  ];
+        const yNeighbor = [invadeXY[1]   ,invadeXY[1]+1 ,invadeXY[1]   ,invadeXY[1]-1];
+        let neighborCondition = 0;//[0: All Not Trapped (New) 1: Cluster Found (Grow) 2: More Clusters Found (Merge) 3: Main (Cluster Trapped)]
+        for(let throat=0;throat<4;throat++){
+            if(xNeighbor[throat]>=this.width ||xNeighbor[throat]<0) break;
+            if(yNeighbor[throat]>=this.height||yNeighbor[throat]<0) break;
+            const localNeighborIndex = this.clusterIndex[this.xy2i(xNeighbor[throat],yNeighbor[throat])];
+            neighborIndex[throat] = localNeighborIndex;
+            //Update Neighbor Condition
+            if(localNeighborIndex==-1){
+                neighborCondition = 3;
+            }else if(localNeighborIndex>0){
+                if(neighborCondition<2){
+                    neighborCondition++;
+                }
+            }
+        }
+        //Birdth of a new Cluster
+        if(neighborCondition==0){
+            let newClusterIndex = poreListForEachCluster.length;
+            if(openClusterHeap.valueTree.length!=0){
+                newClusterIndex = openClusterHeap.popValueIndex();
+            }
+            poreListForEachCluster[newClusterIndex] = [this.sortedPoreList[sequence]];
+            this.clusterIndex[this.sortedPoreList[sequence]] = newClusterIndex;
+        }
+        //Grow Clusters
+        if(neighborCondition==1){
+            //Get Cluster ID
+            let clusterIndex;
+            for(let throat=0;throat<4;throat++){
+                if(neighborIndex[throat]>0){
+                    clusterIndex = neighborIndex[throat];
+                    break;
+                }
+            }
+            poreListForEachCluster[clusterIndex][poreListForEachCluster[clusterIndex].length] = [this.sortedPoreList[sequence]];
+        }
+        //Merge Clusters
+        if(neighborCondition==2){
+            let parentClusterIndex=0;
+            //Get Cluster Index (minimum neighborIndex)
+            for(let throat=0;throat<4;throat++){
+                if(neighborIndex[throat]>0){
+                    if(parentClusterIndex==0){
+                        parentClusterIndex = neighborIndex[throat];
+                    }else{
+                        if(neighborIndex[throat]<parentClusterIndex){
+                            parentClusterIndex = neighborIndex[throat];
+                        }
+                    }
+                }
+            }
+            //Merge them one by one
+            for(let throat=0;throat<4;throat++){
+                if(neighborIndex[throat]!=0&&neighborIndex[throat]!=clusterIndex){
+                    const childClusterIndex = neighborIndex[throat];
+                    const childClusterPoreCount = poreListForEachCluster[childClusterIndex].length;
+                    openClusterHeap.addValueIndex(childClusterIndex,childClusterIndex);
+                    for(let clusterMemberIndex=0;clusterMemberIndex<childClusterPoreCount;clusterMemberIndex++){
+                        const parentClusterPoreCount = poreListForEachCluster[parentClusterIndex].length;
+                        poreListForEachCluster[parentClusterIndex][parentClusterPoreCount] = poreListForEachCluster[childClusterIndex][clusterMemberIndex];
+                        this.clusterIndex[poreListForEachCluster[childClusterIndex][clusterMemberIndex]] = parentClusterIndex;
+                    }
+                }
+            }
+        }
+        //Trapped Cluster
+        if(neighborCondition==3){
+
+        }
+    }
+}
 updateField(){
     for(let index = 0; index<this.canvas.width*this.canvas.height; index++){
-        if(this.invasionSequence[index]<this.sequence){
+        if(this.invadedSequence[index]<this.sequence){
             this.setPix(index,0);
         }else{
             //this.setPix(index,255);
