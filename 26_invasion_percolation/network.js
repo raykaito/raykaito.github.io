@@ -79,22 +79,29 @@ runInvasionPercolation(){
 }
 applyTrapping(){
     //CreateReverseOrder
-    let reverseOrderIndex = new Uint32Array(this.area);
+    let reverseOrderIndex = new Uint32Array(this.area+1);
 
     //Cluster Information
     let clusterMap = new Int32Array(this.area).fill(-1);
-    let mergedClusterControl = new Uint32Array(this.area);
+    let merClus = new Int32Array(this.area);
     let nextClusterIndex = 0;
     let confirmedClusterIndex = 0;
     //Define Sink
+    for(let siteIndex=0; siteIndex<this.area; siteIndex++){
+        const [x,y] = this.i2xy(siteIndex);
+        if(x==0||x==this.xMax-1||y==0||y==this.yMax-1){
+            clusterMap[siteIndex]=-2;
+            //console.log("Sink ("+x+","+y+")");
+        }
+    }
 
     for(let i=0; i<this.area; i++){
         reverseOrderIndex[this.invadedSequence[i]] = i;
     }
-    for(let sequence=this.area; sequence>0; i--){
-        let neighboringClusterIndex = new Array();
-        let neighboringClusterCount = 0;
-        let minNeighboringClusterIndex = this.area;
+    for(let sequence=this.area; sequence>0; sequence--){
+        let neiClusList = new Array();
+        let neiClusCou = 0;
+        let minNeiClusIn = this.area;
         const nextSiteIndex = reverseOrderIndex[sequence];
         const nextSiteXY = this.i2xy(nextSiteIndex);
 
@@ -105,49 +112,82 @@ applyTrapping(){
             if(xNeighbor[direction]>=this.xMax ||xNeighbor[direction]<0) continue;
             if(yNeighbor[direction]>=this.yMax ||yNeighbor[direction]<0) continue;
 
-            const neighborIndex = this.xy2i(xNeighbor[direction],yNeighbor[direction]);
-            const neighborClusterIndex = mergedClusterControl[clusterMap[neighborIndex]];
-            if(neighborClusterIndex!=-1){
-                neighboringClusterIndex[neighboringClusterCount] = neighborClusterIndex;
-                if(neighborClusterIndex<minNeighboringClusterIndex){
-                    minNeighboringClusterIndex = neighborClusterIndex;
+            const neiSiteIn = this.xy2i(xNeighbor[direction],yNeighbor[direction]);
+
+            //Get Cluster index
+            let neiClusIn = clusterMap[neiSiteIn];
+            if(neiClusIn>=0){
+                neiClusIn = merClus[neiClusIn];
+            }
+            if(neiClusIn!=-1){
+                //Skip if Duplicated Cluster
+                let duplicateFound = false;
+                for(let neiClusListIn=0; neiClusListIn<neiClusCou; neiClusListIn++){
+                    if(neiClusIn==neiClusList[neiClusListIn]){
+                        duplicateFound = true;
+                        break;
+                    }
                 }
-                neighboringClusterCount++;
+                if(duplicateFound) continue;
+                //if unique, add to neiClusList
+                neiClusList[neiClusCou] = neiClusIn;
+                if(neiClusIn<minNeiClusIn){
+                    minNeiClusIn = neiClusIn;
+                }
+                neiClusCou++;
             }
         }
-        if(neighboringClusterCount==0){
+        if(neiClusCou==0){
             //Birth of a new cluster
+            //console.log("newCluster"+nextClusterIndex);
             clusterMap[nextSiteIndex] = nextClusterIndex;
-            mergedClusterControl[nextClusterIndex] = nextClusterIndex;
+            merClus[nextClusterIndex] = nextClusterIndex;
             nextClusterIndex++;
-        }else if(neighboringClusterCount==1){
+        }else if(neiClusCou==1){
             //Extend existing cluster
-            clusterMap[nextSiteIndex] = minNeighboringClusterIndex;
-        }else if(minNeighboringClusterIndex>=0){
+            //console.log("extendCluster"+minNeiClusIn);
+            clusterMap[nextSiteIndex] = minNeiClusIn;
+        }else if(minNeiClusIn>=0){
             //Merge clusters
-            for(let mergedClusterControlIndex=0; mergedClusterControlIndex<mergedClusterControl.length; mergedClusterControlIndex++){
-                for(let neighboringClusterIndexIndex=0; neighboringClusterIndexIndex<neighboringClusterCount; neighboringClusterIndexIndex++){
-                    if(mergedClusterControl[mergedClusterControlIndex]==neighboringClusterIndex[neighboringClusterIndexIndex]){
-                        mergedClusterControl[mergedClusterControlIndex]=minNeighboringClusterIndex;
+            //console.log("mergeClusters"+neiClusList);
+            for(let merClusIn=0; merClusIn<merClus.length; merClusIn++){
+                for(let neiClusListIn=0; neiClusListIn<neiClusCou; neiClusListIn++){
+                    if(merClus[merClusIn]==neiClusList[neiClusListIn]){
+                        merClus[merClusIn]=minNeiClusIn;
                     }
                 }
             }
-        }else if(minNeighboringClusterIndex==-2){
+        }else if(minNeiClusIn==-2){
+            //console.log("here"+sequence);
             //reached sink
-            if(neighboringClusterCount==1){
-                clusterMap[nextSiteIndex]=-2;
-            }else{
-                for(let neighboringClusterIndexIndex=0; neighboringClusterIndexIndex<neighboringClusterCount; neighboringClusterIndexIndex++){
-                    for(let mergedClusterControlIndex=0; mergedClusterControlIndex<mergedClusterControl.length; mergedClusterControlIndex++){
+            for(let neiClusListIn=0; neiClusListIn<neiClusCou; neiClusListIn++){
+                const theNeiClusIn = neiClusList[neiClusListIn];
+                //console.log(theNeiClusIn);
+                if(theNeiClusIn!=-2){
+                    //Extract cluster Information
+                    for(let siteIndex=0;siteIndex<this.area;siteIndex++){
+                        //console.log("here");
+                        const siteCluster = clusterMap[siteIndex];
+                        //clusterMap[siteIndex] = -2;
+                        if(theNeiClusIn==merClus[siteCluster]){
+                            this.clusterIndex[siteIndex] = confirmedClusterIndex;
+                            this.trappedSequence[siteIndex] = sequence;
                         }
-                        if(mergedClusterControl[mergedClusterControlIndex]==neighboringClusterIndex[neighboringClusterIndexIndex]){
-                            mergedClusterControl[mergedClusterControlIndex]=minNeighboringClusterIndex;
+                    }
+                    confirmedClusterIndex++;
+
+                    //Update merClus and add them to Sink (-2)
+                    for(let merClusIn=0; merClusIn<merClus.length; merClusIn++){
+                        if(merClus[merClusIn]==theNeiClusIn){
+                            merClus[merClusIn]=-2;
                         }
+                    }
                 }
             }
         }
     }
-
+    console.log(this.trappedSequence);
+    console.log("done");
 }
 i2xy(i){
     return [i%this.xMax, Math.floor(i/this.xMax)];
@@ -158,10 +198,13 @@ xy2i(x,y){
 drawSelf(sequence){
     this.sliderLock = true;
     for(let index = 0; index<this.area; index++){
-        if(this.invadedSequence[index]<sequence){
+        if(this.trappedSequence[index]<sequence&&this.trappedSequence[index]>=0){
+            this.canvas.setPix(index,0);
+            this.canvas.setPix(index,255,1);
+        }else if(this.invadedSequence[index]<sequence){
             //this.setPix(index,Math.floor(255*this.invadedSequence[index]/(this.canvas.width*this.canvas.height)));
             this.canvas.setPix(index, 0);
-        }else{
+        }else {
             //this.setPix(index,255);
             this.canvas.setPix(index,Math.floor(this.value[index]*64)+192);
         }

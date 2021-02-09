@@ -64,6 +64,7 @@
 		network.setInletsLeft();
 		//network.setInletsCenter();
 		network.runInvasionPercolation();
+		network.applyTrapping();
 
 		const sliderChanged = () => {
 			if(!network.sliderLock){

@@ -21,13 +21,20 @@ resize(){
     this.pixelRatio = window.devicePixelRatio;
     this.canvas.style.width  = this.canvas.width + "px";
     this.canvas.style.height = this.canvas.width + "px";
+    ///////
+    this.canvas.width = 10;
+    this.pixelRatio = 1;
+    this.canvas.style.width  = this.canvas.width*40 + "px";
+    this.canvas.style.height = this.canvas.width*40 + "px";
+    ///////
     this.canvas.width  = this.canvas.width;
     this.canvas.height = this.canvas.width;
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
-    slider.style.width=this.canvas.width/this.pixelRatio+"px";
+    slider.style.width=this.canvas.width/this.pixelRatio*50+"px";
 }
 touch(event){
+    return;
     if(this.loop){
         cancelAnimationFrame(this.animationRequest);
     }else{
