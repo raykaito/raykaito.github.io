@@ -44,7 +44,6 @@
 
 	</table>
 	<script type="text/javascript" src="canvas.js"></script>
-	<script type="text/javascript" src="network.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/heapScript.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
@@ -59,16 +58,10 @@
 		showObject(bodyElement, tableElement);
 
 		const canvas = new Canvas(canvasElement);
-		const network = new Network(canvas.canvas.width,canvas.canvas.height,canvas);
-		network.assignRandomValues();
-		network.setInletsLeft();
-		//network.setInletsCenter();
-		network.runInvasionPercolation();
 
 		const sliderChanged = () => {
-			if(!network.sliderLock){
-				network.drawSelf(slider.value);
-			}
+			canvas.sequence = slider.value;
+			canvas.updateField();
 		}
 	//--> 
 	</script>
