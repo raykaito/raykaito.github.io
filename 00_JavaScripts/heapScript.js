@@ -26,7 +26,7 @@ class heap{
 		}
 	}
 
-	//----------Remove Value----------
+	//----------Remove Value on Top----------
 	popValueIndex(){
 		const valueToRemove = this.valueTree[0];
 		const indexToRemove = this.indexTree[0];
