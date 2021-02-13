@@ -78,6 +78,104 @@ runInvasionPercolation(){
     this.drawSelf(0);
 }
 applyTrapping(){
+    //getReverseOrderIndex
+    let reverseOrderIndex = new Uint32Array(this.area+1);
+    for(let i=0; i<this.area; i++){
+        reverseOrderIndex[this.invadedSequence[i]] = i;
+    }
+
+    //Cluster Information
+    let clusterSeq = new Int32Array(this.area).fill(-1);
+    let clusterLabel = new Int32Array(this.area).fill(-1);
+    let nextConfirmedClusterIndex = 0;
+    let nextClusterLabel = 0;
+
+    for(let sequence=this.area; sequence>0; sequence--){
+        //Get next site index and XY
+        const nextSiteIndex = reverseOrderIndex[sequence];
+        const nextSiteXY = this.i2xy(nextSiteIndex);
+
+        //Initialize Variables
+        let sinkFound = false;
+        let neiClusCou = 0;
+        let neiClusList = new Array();
+        let message = ("Seq:"+sequence+" ("+nextSiteXY[0]+","+nextSiteIndex+")");
+
+        //check for neighboring clusters and get their index
+        const xNeighbor = [nextSiteXY[0]+1 ,nextSiteXY[0]   ,nextSiteXY[0]-1 ,nextSiteXY[0]  ];
+        const yNeighbor = [nextSiteXY[1]   ,nextSiteXY[1]+1 ,nextSiteXY[1]   ,nextSiteXY[1]-1];
+
+        //Check each direction and check for Sink and Clusters
+        for(let direction=0;direction<4;direction++){
+            if(xNeighbor[direction]>=this.xMax ||xNeighbor[direction]<0||yNeighbor[direction]>=this.yMax ||yNeighbor[direction]<0){
+                //Now its part of a sink
+                sinkFound = true;
+                continue;
+            }
+
+            //Get Cluster index
+            const neiSiteIn = this.xy2i(xNeighbor[direction], yNeighbor[direction]);
+            const neiClusIn = clusterSeq[neiSiteIn];
+
+            //identify the cluster
+            if(neiClusIn!=-1){
+                if(neiClusIn==-2){
+                    sinkFound = true;
+                }else{
+                    neiClusList[neiClusCou] = neiClusIn;
+                    neiClusCou++;
+                }
+            }
+        }
+        if(sinkFound){
+            message+="    Sink";
+            if(neiClusCou==0){
+                //New sink
+                message+=" No Clus";
+                clusterSeq[nextSiteIndex] = -2;
+                clusterLabel[nextSiteIndex] = -2;
+            }else{
+                //Trapping and expansion of a sink
+                message+=" ClusCou:"+neiClusCou;
+                for(let neiClusIn = 0; neiClusIn<neiClusCou; neiClusIn++){
+                    let currClusSite = neiClusList[neiClusIn];
+                    let counter=0;
+                    while(true){
+                        counter++;
+                        if(counter>100)break;
+                        let nextClusSite = clusterSeq[currClusSite];
+                        if(nextClusSite==-2) break;
+                        clusterSeq[currClusSite] = -2;
+                        this.clusterIndex[currClusSite] = nextConfirmedClusterIndex;
+                        this.trappedSequence[currClusSite] = sequence;
+                        currClusSite = nextClusSite;
+                    }
+                    message+="counter:"+counter;
+                    nextConfirmedClusterIndex++;
+                }
+            }
+        }else{
+            message+= " No Sink";
+            if(neiClusCou==0){
+                clusterLabel[nextSiteIndex] = nextClusterLabel;
+            }else if(neiClusCou==1){
+                //Expand
+            }else{
+                //Union
+            }
+            clusterSeq[nextSiteIndex] = nextSiteIndex;
+            for(let neiClusIn = 0; neiClusIn<neiClusCou; neiClusIn++){
+                const temp = clusterSeq[nextSiteIndex];
+                clusterSeq[nextSiteIndex] = clusterSeq[neiClusList[neiClusIn]];
+                clusterSeq[neiClusList[neiClusIn]] = temp;
+                message+=" Swapped";
+            }
+        }
+        //console.log(message);
+    }
+    console.log("done");
+}
+applyTrapping_bak(){
     //CreateReverseOrder
     let reverseOrderIndex = new Uint32Array(this.area+1);
 
@@ -198,9 +296,12 @@ xy2i(x,y){
 drawSelf(sequence){
     this.sliderLock = true;
     for(let index = 0; index<this.area; index++){
-        if(this.trappedSequence[index]<sequence&&this.trappedSequence[index]>=0){
+        if(this.trappedSequence[index]<sequence&&this.trappedSequence[index]>=0&&true){
             this.canvas.setPix(index,0);
             this.canvas.setPix(index,255,1);
+            if(this.invadedSequence[index]<sequence){
+                this.canvas.setPix(index,255,2);
+            }
         }else if(this.invadedSequence[index]<sequence){
             //this.setPix(index,Math.floor(255*this.invadedSequence[index]/(this.canvas.width*this.canvas.height)));
             this.canvas.setPix(index, 0);
@@ -211,6 +312,7 @@ drawSelf(sequence){
     }
     this.canvas.ct.putImageData(this.canvas.imageData,0,0);
     this.sliderLock = false;
+    text1.textContent = "Sequence: "+sequence;
 }
 }
 console.log("Loaded: network.js");
