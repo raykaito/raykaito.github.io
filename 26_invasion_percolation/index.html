@@ -29,19 +29,6 @@
 			</td>
 		</tr>
 
-		<tr>
-			<td align="left">
-		        <input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="sliderChanged()" oninput="sliderChanged()" style="margin:0">
-			</td>
-		</tr>
-
-		<tr>
-			<td align="left">
-				<div id="Text1"></div><br>
-				<div id="Text2"></div><br>
-			</td>
-		</tr>
-
 	</table>
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="network.js"></script>
@@ -53,24 +40,16 @@
 		const tableElement  = document.getElementById('Table' );
 		const bodyElement   = document.getElementById('Body'  );
 		const canvasElement = document.getElementById('Canvas');
-		const slider = document.getElementById('slider');
-		const text1 = document.getElementById('Text1');
-		const text2 = document.getElementById('Text2');
 		showObject(bodyElement, tableElement);
 
 		const canvas = new Canvas(canvasElement);
 		const network = new Network(canvas.canvas.width,canvas.canvas.height,canvas);
 		network.assignRandomValues();
-		network.setInletsLeft();
-		//network.setInletsCenter();
+		network.setInletsTop();
 		network.runInvasionPercolation();
 		network.applyTrapping();
-
-		const sliderChanged = () => {
-			if(!network.sliderLock){
-				network.drawSelf(slider.value);
-			}
-		}
+		network.organizeInvadedSequence();
+		setTimeout(()=>{network.startAnimation()},500);
 	//--> 
 	</script>
 
