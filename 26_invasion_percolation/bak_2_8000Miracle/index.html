@@ -4,8 +4,8 @@
 
 <head>
 	<title>Invasion Percolation</title>
-	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
-	<link rel="icon" type="image/png" href="../icon.png">
+	<link rel="stylesheet" href="../../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../../icon.png">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 
@@ -31,15 +31,15 @@
 
 		<tr>
 			<td align="center">
-				<canvas id="LogCanvas" style="display:none" onclick="canvasClicked()"></canvas>
+				<canvas id="LogCanvas" onclick="canvasClicked()"></canvas>
 			</td>
 		</tr>
 
 	</table>
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="network.js"></script>
-	<script type="text/javascript" src="../00_JavaScripts/heapScript.js"></script>
-	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript" src="../../00_JavaScripts/heapScript.js"></script>
+	<script type="text/javascript" src="../../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
 	 
@@ -70,35 +70,52 @@
 		}
 		log("Width:"+canvas.canvas.width);
 
+		let timeS;
+		let timeOut;
+
+		const step = (stepc=0) =>{
+			switch(stepc){
+				case -1:
+					log("start Running");
+					break;
+				case 0: 
+					timeS = Date.now();
+					network.resetNetwork();
+					log("ResetNetW: "+(Date.now()-timeS));
+					break;
+				case 1:
+					timeS = Date.now();
+					network.setInletsTop();
+					log("SetInlets: "+(Date.now()-timeS));
+					break;
+				case 2: 
+					timeS = Date.now();
+					network.runInvasionPercolation();
+					log("");
+					log("RunInvPer: "+(Date.now()-timeS));
+					break;
+				case 3: 
+					timeS = Date.now();
+					network.applyTrapping();
+					log("AppTrapin: "+(Date.now()-timeS));
+					network.drawSelf();
+					break;
+				case 4:
+					return;
+			}
+			clearTimeout(timeOut);
+        	timeOut = setTimeout(()=>{step(stepc+1);},100);
+
+		}
+
 		const run = () =>{
-			log("");
-			log("");
-			let timeS = Date.now();
-			network.resetNetwork();
-			log("ResetNetW: "+(Date.now()-timeS));
-
-			timeS = Date.now();
-			network.setInletsTop();
-			log("SetInlets: "+(Date.now()-timeS));
-
-			timeS = Date.now();
-			network.runInvasionPercolation();
-			log("RunInvPer: "+(Date.now()-timeS));
-
-			timeS = Date.now();
-			network.applyTrapping();
-			log("AppTrapin: "+(Date.now()-timeS));
-
-			timeS = Date.now();
-			network.organizeInvadedSequence();
-			log("OrgInvSeq: "+(Date.now()-timeS));
-
-			setTimeout(()=>{network.startAnimation()},500);
+			clearTimeout(timeOut);
+			step(-1);
 		}
 		const canvasClicked = () => {
 			run();
 		}
-		run();
+        setTimeout(()=>{run();},1000);
 
 	//--> 
 	</script>

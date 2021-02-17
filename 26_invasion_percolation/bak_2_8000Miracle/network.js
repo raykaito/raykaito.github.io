@@ -5,6 +5,7 @@ constructor(xMax,yMax,canvas){
     this.xMax = xMax;
     this.yMax = yMax;
     this.area = xMax*yMax;
+    this.percent = this.area/100;
 
     //index and location
     this.index = new Uint32Array(this.area);
@@ -19,6 +20,7 @@ resetNetwork(){
 
     //parameters for trapping
     this.trappedSequence = new Int32Array(this.area).fill(-1);
+    this.currentPercent = 0;
 
     //parameters for animation
     this.organizedInvadedSequence;
@@ -69,6 +71,10 @@ runInvasionPercolation(){
     for(let i=0;i<this.area;i++){
         //Inclement Sequence
         this.sequence++;
+        if(this.sequence/this.percent>this.currentPercent){
+            this.currentPercent++;
+            console.log("progress:"+this.currentPercent);
+        }
 
         //Get nextSiteInfromation
         const invadedSiteIndex = this.queHeap.popValueIndex();
@@ -89,7 +95,7 @@ runInvasionPercolation(){
             this.addQue(this.xy2i(xNeighbor[direction],yNeighbor[direction]));
         }
     }
-    this.drawSelf(0);
+    this.drawSelf(this.breakthroughSequence);
     console.log("invasion percolation done");
 }
 applyTrapping(){

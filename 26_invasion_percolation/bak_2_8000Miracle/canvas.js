@@ -25,19 +25,17 @@ class Canvas{
         }
     }
     //Canvas Functions
-    resize(whRatio = 1){
+    resize(){
         this.canvas.width = Math.floor(window.innerWidth)-20;
         if(Math.floor(window.innerWidth)>540)   this.canvas.width = 520;
         if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
         //this.canvas.width = 20;
-        this.pixelRatio = window.devicePixelRatio;
-        //this.canvas.width = 8000/this.pixelRatio;
         this.canvas.style.width  = this.canvas.width + "px";
-        this.canvas.style.height = this.canvas.width*whRatio + "px";
-        this.canvas.width  = this.canvas.width;
-        this.canvas.height = this.canvas.width*whRatio;
-        this.canvas.width *= this.pixelRatio;
-        this.canvas.height*= this.pixelRatio;
+        this.canvas.style.height = this.canvas.width + "px";
+        this.pixelRatio = window.devicePixelRatio;
+        const side = 8000;
+        this.canvas.width  = side;
+        this.canvas.height = side;
     }
     setPix(index, value,rgb=3){
         //Set the pixel based on type
@@ -74,7 +72,19 @@ class LogCanvas extends Canvas{
         super(canvas);
         this.lineSize = lineSize;
         this.font = ""+lineSize+"px 'Times'";
-        this.resize(0.4);
+
+        this.canvas.width = Math.floor(window.innerWidth)-20;
+        if(Math.floor(window.innerWidth)>540)   this.canvas.width = 520;
+        if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
+        //this.canvas.width = 20;
+        this.canvas.style.width  = this.canvas.width + "px";
+        this.canvas.style.height = this.canvas.width*0.4 + "px";
+        this.pixelRatio = window.devicePixelRatio;
+        this.canvas.width  = this.canvas.width;
+        this.canvas.height = this.canvas.width*0.4;
+        this.canvas.width *= this.pixelRatio;
+        this.canvas.height*= this.pixelRatio;
+
         this.ct.fillStyle = "white";
         this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
         this.newLine("Logger Started...");
