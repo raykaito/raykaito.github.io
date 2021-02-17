@@ -15,11 +15,11 @@ constructor(xMax,yMax,canvas){
         this.xPosition[i] = i%xMax;
         this.yPosition[i] = Math.floor(i/xMax);
     }
-
+}
+resetNetwork(){
     //parameters for invasion percolation
     this.value = new Array(this.area).fill(-1);
-    this.quedSequence = new Int32Array(this.area).fill(-1);
-    this.unquedSequence = new Int32Array(this.area).fill(-1);
+    this.qued = new Uint8Array(this.area).fill(0);
     this.invadedSequence = new Int32Array(this.area).fill(-1); //[1, this.area]
     this.breakthroughSequence = -1;
     this.sequence = -1;
@@ -27,7 +27,6 @@ constructor(xMax,yMax,canvas){
     //parameters for trapping
     this.clusterIndex = new Int32Array(this.area).fill(-1);// [0, clusterCount-1]
     this.trappedSequence = new Int32Array(this.area).fill(-1);
-    this.trappedSequence2 = new Int32Array(this.area).fill(-1);
 
     //parameters for animation
     this.organizedInvadedSequence;
@@ -42,8 +41,8 @@ constructor(xMax,yMax,canvas){
     this.totalFrame = 600;
     this.currFrame = 0;
     this.passedBreakthrough = false;
-}
-assignRandomValues(){
+
+    //Assign random Values
     this.sequence = 0;
     for(let i=0; i<this.area; i++){
         this.value[i] = Math.random();
@@ -51,10 +50,10 @@ assignRandomValues(){
     console.log("assign random values done");
 }
 addQue(index){
-    if(this.quedSequence[index]!=-1) return;
+    if(this.qued[index]) return;
     else{
         this.queHeap.addValueIndex(this.value[index],index);
-        this.quedSequence[index] = this.sequence;
+        this.qued[index] = 1;
     }
 }
 setInletsTop(){
@@ -83,7 +82,6 @@ runInvasionPercolation(){
         const invadedSiteIndex = this.queHeap.popValueIndex();
         const invadedSiteXY = this.i2xy(invadedSiteIndex);
         this.invadedSequence[invadedSiteIndex] = this.sequence;
-        this.unquedSequence[invadedSiteIndex] = this.sequence;
         if(this.breakthroughSequence==-1){
             if(invadedSiteXY[1]==this.yMax-1){
                 this.breakthroughSequence = this.sequence;
@@ -102,140 +100,6 @@ runInvasionPercolation(){
     this.drawSelf(0);
     console.log("invasion percolation done");
 }
-applyTrapping2(){
-    //getReverseOrderIndex
-    let reverseOrderIndex = new Uint32Array(this.area+1);
-    for(let i=0; i<this.area; i++){
-        reverseOrderIndex[this.invadedSequence[i]] = i;
-    }
-
-    //Cluster Information
-    let clusterSeq = new Int32Array(this.area).fill(-1);
-    let clusterLabel = new Int32Array(this.area).fill(-1);
-    let nextClusterLabel = 0;
-    let nextConfirmedClusterIndex = 0;
-
-    for(let sequence=this.area; sequence>0; sequence--){
-        //Get next site index and XY
-        const nextSiteIndex = reverseOrderIndex[sequence];
-        const nextSiteXY = this.i2xy(nextSiteIndex);
-
-        //Initialize Variables
-        let sinkFound = false;
-        let neiClusCou = 0;
-        let neiClusSeqList = new Array();
-        let neiClusLabelList = new Array();
-        //let message = ("Seq:"+sequence+" ("+nextSiteXY[0]+","+nextSiteIndex+")");
-
-        //check for neighboring clusters and get their index
-        const xNeighbor = [nextSiteXY[0]+1 ,nextSiteXY[0]   ,nextSiteXY[0]-1 ,nextSiteXY[0]  ];
-        const yNeighbor = [nextSiteXY[1]   ,nextSiteXY[1]+1 ,nextSiteXY[1]   ,nextSiteXY[1]-1];
-
-        //Check each direction and check for Sink and Clusters
-        for(let direction=0;direction<4;direction++){
-            if(xNeighbor[direction]>=this.xMax ||xNeighbor[direction]<0||yNeighbor[direction]>=this.yMax ||yNeighbor[direction]<0){
-                //Now its part of a sink
-                sinkFound = true;
-                continue;
-            }
-
-            //Get Cluster index
-            const neiSiteIn = this.xy2i(xNeighbor[direction], yNeighbor[direction]);
-            const neiClusSeq = clusterSeq[neiSiteIn];
-            const neiClusLabel = clusterLabel[neiSiteIn];
-
-            //identify the cluster
-            if(neiClusLabel!=-1){
-                if(neiClusLabel==-2){
-                    sinkFound = true;
-                }else{
-                    let duplicate = false;
-                    for(let labelIn = 0; labelIn<neiClusCou; labelIn++){
-                        if(neiClusLabelList[labelIn]==neiClusLabel){
-                            duplicate = true;
-                            break;
-                        }
-                    }
-                    if(duplicate){
-                        continue;
-                    }else{
-                        neiClusSeqList[neiClusCou] = neiClusSeq;
-                        neiClusLabelList[neiClusCou] = neiClusLabel;
-                        neiClusCou++;
-                    }
-                }
-            }
-        }
-        if(sinkFound){
-            //message+="    Sink";
-            if(neiClusCou==0){
-                //New sink
-                //message+=" No Clus";
-                clusterLabel[nextSiteIndex] = -2;
-            }else{
-                //Trapping and expansion of a sink
-                //message+=" ClusCou:"+neiClusCou;
-                clusterLabel[nextSiteIndex] = -2;
-                for(let neiClusSeqIn = 0; neiClusSeqIn<neiClusCou; neiClusSeqIn++){
-                    let counter=0;
-                    let currClusSite = neiClusSeqList[neiClusSeqIn];
-                    let alreadyTrapped = false;
-                    while(clusterLabel[currClusSite]!=-2){
-                        counter++;
-                        clusterLabel[currClusSite] = -2;
-                        if(!alreadyTrapped&&this.trappedSequence[currClusSite]!=-1){
-                            //message+="alreadyTrappedAt"+this.trappedSequence[currClusSite];
-                            alreadyTrapped=true;
-                        }
-                        this.clusterIndex[currClusSite] = nextConfirmedClusterIndex;
-                        this.trappedSequence[currClusSite] = sequence;
-                        currClusSite = clusterSeq[currClusSite];
-                    }
-                    //message+="ClusCount:"+counter;
-                    nextConfirmedClusterIndex++;
-                }
-            }
-        }else{
-            //message+= " No Sink";
-            if(neiClusCou==0){
-                //message+=" newClus";
-                clusterSeq[nextSiteIndex] = nextSiteIndex;
-                clusterLabel[nextSiteIndex] = nextClusterLabel;
-                nextClusterLabel++;
-            }else if(neiClusCou==1){
-                //message+=" expand";
-                clusterLabel[nextSiteIndex] = neiClusLabelList[0];
-                clusterSeq[nextSiteIndex] = clusterSeq[neiClusSeqList[0]];
-                clusterSeq[neiClusSeqList[0]] = nextSiteIndex;
-                //message+=" Swapped";
-            }else{
-                //message+=" union";
-                const unionLabel = neiClusLabelList[0];
-                clusterSeq[nextSiteIndex] = nextSiteIndex;
-                clusterLabel[nextSiteIndex] = unionLabel; 
-                for(let neiClusSeqIn = 0; neiClusSeqIn<neiClusCou; neiClusSeqIn++){
-                    const temp = clusterSeq[nextSiteIndex];
-                    clusterSeq[nextSiteIndex] = clusterSeq[neiClusSeqList[neiClusSeqIn]];
-                    clusterSeq[neiClusSeqList[neiClusSeqIn]] = temp;
-                    //Update label if Index>0
-                    if(neiClusSeqIn>0){
-                        let counter = 0;
-                        let currClusSite = clusterSeq[nextSiteIndex];
-                        while(clusterLabel[currClusSite]!=unionLabel){
-                            counter++;
-                            clusterLabel[currClusSite] = unionLabel;
-                            currClusSite = clusterSeq[currClusSite];
-                        }
-                        //message+=" relabelCount:"+counter;
-                    }
-                    //message+=" Swapped";
-                }                
-            }
-        }
-        //console.log(message);
-    }
-    console.log("Apply trapping done");
-}
 applyTrapping(){
     //getReverseOrderIndex
     let reverseOrderIndex = new Uint32Array(this.area+1);
@@ -244,131 +108,103 @@ applyTrapping(){
     }
 
     //Cluster Information
-    let clusterSeq = new Int32Array(this.area).fill(-1);
-    let clusterLabel = new Int32Array(this.area).fill(-1);
-    let nextClusterLabel = 0;
-    let nextConfirmedClusterIndex = 0;
+    let clusterLabel = new Int8Array(this.area).fill(-1);
 
     for(let sequence=this.area; sequence>0; sequence--){
         //Get next site index and XY
         const nextSiteIndex = reverseOrderIndex[sequence];
         const nextSiteXY = this.i2xy(nextSiteIndex);
 
-        //Initialize Variables
-        let sinkFound = false;
-        let neiClusCou = 0;
-        let neiClusSeqList = new Array();
-        let neiClusLabelList = new Array();
-        //let message = ("Seq:"+sequence+" ("+nextSiteXY[0]+","+nextSiteIndex+")");
-
         //check for neighboring clusters and get their index
         const xNeighbor = [nextSiteXY[0]+1 ,nextSiteXY[0]   ,nextSiteXY[0]-1 ,nextSiteXY[0]  ];
         const yNeighbor = [nextSiteXY[1]   ,nextSiteXY[1]+1 ,nextSiteXY[1]   ,nextSiteXY[1]-1];
 
-        //Check each direction and check for Sink and Clusters
+        //Check each direction and check for Sink
+        let sinkFound = false;
         for(let direction=0;direction<4;direction++){
             if(xNeighbor[direction]>=this.xMax ||xNeighbor[direction]<0||yNeighbor[direction]>=this.yMax ||yNeighbor[direction]<0){
                 //Now its part of a sink
                 sinkFound = true;
-                continue;
+                break;
             }
-
-            //Get Cluster index
+            //Check if neighbor is Sink
             const neiSiteIn = this.xy2i(xNeighbor[direction], yNeighbor[direction]);
-            const neiClusSeq = clusterSeq[neiSiteIn];
             const neiClusLabel = clusterLabel[neiSiteIn];
-
-            //identify the cluster
-            if(neiClusLabel!=-1){
-                if(neiClusLabel==-2){
-                    sinkFound = true;
-                }else{
-                    let duplicate = false;
-                    for(let labelIn = 0; labelIn<neiClusCou; labelIn++){
-                        if(neiClusLabelList[labelIn]==neiClusLabel){
-                            duplicate = true;
-                            break;
-                        }
-                    }
-                    if(duplicate){
-                        continue;
-                    }else{
-                        neiClusSeqList[neiClusCou] = neiClusSeq;
-                        neiClusLabelList[neiClusCou] = neiClusLabel;
-                        neiClusCou++;
-                    }
-                }
+            if(neiClusLabel==-2){
+                sinkFound = true;
+                break;
             }
         }
         if(sinkFound){
-            //message+="    Sink";
-            if(neiClusCou==0){
-                //New sink
-                //message+=" No Clus";
-                clusterLabel[nextSiteIndex] = -2;
-            }else{
-                //Trapping and expansion of a sink
-                //message+=" ClusCou:"+neiClusCou;
-                clusterLabel[nextSiteIndex] = -2;
-                for(let neiClusSeqIn = 0; neiClusSeqIn<neiClusCou; neiClusSeqIn++){
-                    let counter=0;
-                    let currClusSite = neiClusSeqList[neiClusSeqIn];
-                    let alreadyTrapped = false;
-                    while(clusterLabel[currClusSite]!=-2){
-                        counter++;
-                        clusterLabel[currClusSite] = -2;
-                        if(!alreadyTrapped&&this.trappedSequence[currClusSite]!=-1){
-                            //message+="alreadyTrappedAt"+this.trappedSequence[currClusSite];
-                            alreadyTrapped=true;
+            //Sink is found
+            for(let direction=0;direction<4;direction++){
+                const neiSiteIn = this.xy2i(xNeighbor[direction], yNeighbor[direction]);
+                const neiClusLabel = clusterLabel[neiSiteIn];
+                if(neiClusLabel==0){
+                    //Trapped! Fill the cluster
+
+                    //Set up variables
+                    let tx = new Array();//Temps[]
+                    let ty = new Array();//Temps[]
+                    let left, right;
+                    let tim = 0;            //Temp Index Maximum
+                    let tic = 0;            //Temp Index Current
+                    tx[0] = xNeighbor[direction];
+                    ty[0] = yNeighbor[direction];
+
+                    while(tim!=-1){
+                        //go up until the end
+                        while(ty[tic]>=0&&clusterLabel[this.xy2i(tx[tic],ty[tic]-1)]==0){
+                            ty[tic]--;
                         }
-                        this.clusterIndex[currClusSite] = nextConfirmedClusterIndex;
-                        this.trappedSequence[currClusSite] = sequence;
-                        currClusSite = clusterSeq[currClusSite];
+
+                        //Trun off Left Right and check for yMin
+                        left  = false;
+                        right = false;
+                        while(ty[tic]<this.yMax&&clusterLabel[this.xy2i(tx[tic],ty[tic])]==0){
+                            //Travel down one by one
+                            let index = this.xy2i(tx[tic],ty[tic]);
+                            clusterLabel[index] = -2;
+                            this.trappedSequence[index] = sequence;
+
+                            //Check for Cell on Left
+                            if(tx[tic]>0){
+                                if(left!=(clusterLabel[this.xy2i(tx[tic]-1,ty[tic])]==0)){
+                                    left = !left;
+                                    if(left){
+                                        ty.splice(0,0,ty[tic]);
+                                        tx.splice(0,0,tx[tic]-1);
+                                        tim++;
+                                        tic++;
+                                    }
+                                }
+                            }
+
+                            //Check for Cell on Right
+                            if(tx[tic]<this.xMax-1){
+                                if(right!=(clusterLabel[this.xy2i(tx[tic]+1,ty[tic])]==0)){
+                                    right = !right;
+                                    if(right){
+                                        ty.splice(0,0,ty[tic]);
+                                        tx.splice(0,0,tx[tic]+1);
+                                        tim++;
+                                        tic++;
+                                    }
+                                }
+                            }
+                            ty[tic]++;
+                        }
+                        tim--;
+                        tic=tim;
                     }
-                    //message+="ClusCount:"+counter;
-                    nextConfirmedClusterIndex++;
                 }
             }
+            clusterLabel[nextSiteIndex] = -2;
         }else{
-            //message+= " No Sink";
-            if(neiClusCou==0){
-                //message+=" newClus";
-                clusterSeq[nextSiteIndex] = nextSiteIndex;
-                clusterLabel[nextSiteIndex] = nextClusterLabel;
-                nextClusterLabel++;
-            }else if(neiClusCou==1){
-                //message+=" expand";
-                clusterLabel[nextSiteIndex] = neiClusLabelList[0];
-                clusterSeq[nextSiteIndex] = clusterSeq[neiClusSeqList[0]];
-                clusterSeq[neiClusSeqList[0]] = nextSiteIndex;
-                //message+=" Swapped";
-            }else{
-                //message+=" union";
-                const unionLabel = neiClusLabelList[0];
-                clusterSeq[nextSiteIndex] = nextSiteIndex;
-                clusterLabel[nextSiteIndex] = unionLabel; 
-                for(let neiClusSeqIn = 0; neiClusSeqIn<neiClusCou; neiClusSeqIn++){
-                    const temp = clusterSeq[nextSiteIndex];
-                    clusterSeq[nextSiteIndex] = clusterSeq[neiClusSeqList[neiClusSeqIn]];
-                    clusterSeq[neiClusSeqList[neiClusSeqIn]] = temp;
-                    //Update label if Index>0
-                    if(neiClusSeqIn>0){
-                        let counter = 0;
-                        let currClusSite = clusterSeq[nextSiteIndex];
-                        while(clusterLabel[currClusSite]!=unionLabel){
-                            counter++;
-                            clusterLabel[currClusSite] = unionLabel;
-                            currClusSite = clusterSeq[currClusSite];
-                        }
-                        //message+=" relabelCount:"+counter;
-                    }
-                    //message+=" Swapped";
-                }                
-            }
+            clusterLabel[nextSiteIndex] = 0;
         }
-        //console.log(message);
     }
-    console.log("Apply trapping done");
+    console.log("Apply trapping2 done");
 }
 organizeInvadedSequence(){
     //Get untrapped Inv Seq where trapped will be -1
@@ -407,7 +243,6 @@ organizeInvadedSequence(){
             this.sequenceToIndex[seq][nextSeqIndex] = index;
         }
     }
-
     console.log("Organize Invasion Sequence done");
 }
 i2xy(i){
@@ -434,11 +269,7 @@ drawSelf(sequence=this.area+1,partialUpdate = false){
 }
 updateIndex(index,sequence){
     if(this.trappedSequence[index]<sequence&&this.trappedSequence[index]>=0){
-        if(mode==0||true){
-            this.canvas.setRandomColor(index,this.trappedSequence[index]);
-        }else{
-            this.canvas.setPix(index,255);
-        }
+        this.canvas.setRandomColor(index,this.trappedSequence[index]);
     }else if(this.invadedSequence[index]<sequence){
         this.canvas.setPix(index,Math.floor(255*this.invadedSequence[index]/(this.canvas.width*this.canvas.height)));
     }else {

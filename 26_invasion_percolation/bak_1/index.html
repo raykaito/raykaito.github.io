@@ -25,7 +25,7 @@
 
 		<tr>
 			<td align="center">
-				<canvas id="Canvas" onclick="canvasClicked()"></canvas>
+				<canvas id="Canvas"></canvas>
 			</td>
 		</tr>
 
@@ -53,13 +53,13 @@
 		const logCanvas = new LogCanvas(logCanvasElement);
 		const network = new Network(canvas.canvas.width,canvas.canvas.height,canvas);
 		
+		let mode = 0;
 		const log = (line = "") => {
 			logCanvas.newLine(line);
 		}
 		const on = (line = "") => {
 			logCanvas.onLine(line);
 		}
-		let mode = 0;
 		const titleClicked = () => {
 			mode = (mode+1)%2;
 			if(mode){
@@ -70,35 +70,31 @@
 		}
 		log("Width:"+canvas.canvas.width);
 
-		const run = () =>{
-			log("");
-			log("");
-			let timeS = Date.now();
-			network.resetNetwork();
-			log("ResetNetW: "+(Date.now()-timeS));
+		let timeS = Date.now();
+		network.assignRandomValues();
+		log("AssignRnd: "+(Date.now()-timeS));
 
-			timeS = Date.now();
-			network.setInletsTop();
-			log("SetInlets: "+(Date.now()-timeS));
+		timeS = Date.now();
+		network.setInletsTop();
+		log("SetInlets: "+(Date.now()-timeS));
 
-			timeS = Date.now();
-			network.runInvasionPercolation();
-			log("RunInvPer: "+(Date.now()-timeS));
+		timeS = Date.now();
+		network.runInvasionPercolation();
+		log("RunInvPer: "+(Date.now()-timeS));
 
-			timeS = Date.now();
-			network.applyTrapping();
-			log("AppTrapn1: "+(Date.now()-timeS));
+		timeS = Date.now();
+		network.applyTrapping();
+		log("AppTrapn1: "+(Date.now()-timeS));
 
-			timeS = Date.now();
-			network.organizeInvadedSequence();
-			log("OrgInvSeq: "+(Date.now()-timeS));
+		timeS = Date.now();
+		network.applyTrapping2();
+		log("AppTrapn2: "+(Date.now()-timeS));
 
-			setTimeout(()=>{network.startAnimation()},500);
-		}
-		const canvasClicked = () => {
-			run();
-		}
-		run();
+		timeS = Date.now();
+		network.organizeInvadedSequence();
+		log("OrgInvSeq: "+(Date.now()-timeS));
+
+		setTimeout(()=>{network.startAnimation()},500);
 
 	//--> 
 	</script>

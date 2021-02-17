@@ -31,7 +31,7 @@ class Canvas{
         if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
         //this.canvas.width = 20;
         this.pixelRatio = window.devicePixelRatio;
-        //this.canvas.width = 1500/this.pixelRatio;
+        //this.canvas.width = 2000/this.pixelRatio;
         this.canvas.style.width  = this.canvas.width + "px";
         this.canvas.style.height = this.canvas.width*whRatio + "px";
         this.canvas.width  = this.canvas.width;
