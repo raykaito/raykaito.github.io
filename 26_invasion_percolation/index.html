@@ -31,7 +31,7 @@
 
 		<tr>
 			<td align="center">
-				<canvas id="LogCanvas"></canvas>
+				<canvas id="LogCanvas" style="display:none"></canvas>
 			</td>
 		</tr>
 
@@ -62,13 +62,14 @@
 		}
 		const titleClicked = () => {
 			mode = (mode+1)%2;
-			if(!mode){
+			if(mode){
 				logCanvas.showCanvas();
 			}else{
 				logCanvas.hideCanvas();
 			}
-			network.drawSelf();
 		}
+		log("Width:"+canvas.canvas.width);
+
 		let timeS = Date.now();
 		network.assignRandomValues();
 		log("AssignRnd: "+(Date.now()-timeS));

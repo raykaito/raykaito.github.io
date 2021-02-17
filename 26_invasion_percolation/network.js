@@ -434,7 +434,7 @@ drawSelf(sequence=this.area+1,partialUpdate = false){
 }
 updateIndex(index,sequence){
     if(this.trappedSequence[index]<sequence&&this.trappedSequence[index]>=0){
-        if(mode==0){
+        if(mode==0||true){
             this.canvas.setRandomColor(index,this.trappedSequence[index]);
         }else{
             this.canvas.setPix(index,255);
