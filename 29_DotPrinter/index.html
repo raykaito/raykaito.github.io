@@ -54,10 +54,17 @@
 				<table class="main" id="Table"class="untouchable" width="100%">
 					<tr>
 						<td width="35%">
-							Scale <a id="scaleText"></a>:<br>
-							Brightness <a id="brightnessText"></a>:
+							Background<br>
+							Scale: <a id="scaleText"></a><br>
+							Brightness: <a id="brightnessText"></a><br>
+							Dot used: <a id="dotCountText"></a><br>
 						</td>
 						<td width="65%">
+							<select id="bgMode" onchange="bgModeChanged()">
+								<option value="0">BG-non</option>
+								<option value="1">BG-light</option>
+								<option value="2">BG-gray</option>
+							</select><br>
 							<input id="sliderScale" class="sliderfullwidth" type="range" width="100%"><br>
 			   				<input id="sliderBrightness" class="sliderfullwidth" type="range" width="100%">
 			   			</td>
@@ -75,7 +82,6 @@
 	<script type="text/javascript" src="colorList.js"></script>
 	<script type="text/javascript" src="canvas.js"></script>
 	<script type="text/javascript" src="inputManager.js"></script>
-	<script type="text/javascript" src="vision_program.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
 	<script type="text/javascript">
 	<!--
@@ -86,10 +92,12 @@
 		const pcanvas = document.getElementById('CanvasPreview');
 		const tcanvas = document.createElement('canvas');
 		const file   = document.getElementById("folder");
+		const bgMode = document.getElementById("bgMode");
 		const sScale = document.getElementById("sliderScale");
 		const sBrightness = document.getElementById("sliderBrightness");
 		const tScale = document.getElementById("scaleText");
 		const tBrightness = document.getElementById("brightnessText");
+		const tDots = document.getElementById("dotCountText");
 		const step1 = document.getElementById("step1");
 		const step2 = document.getElementById("step2");
 

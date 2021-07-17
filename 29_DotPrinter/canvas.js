@@ -13,13 +13,14 @@ let scale;
 
 // Vision P Variables
 let colorLen = bg[0].length; // Number of colors
-let bgIndex = 2;//0: non, 1: light, 2: gray
+let bgIndex = 0;//0: non, 1: light, 2: gray
 let statMap = new Int16Array(theArea); // SM[pixInd] = -1:unPaintable 0:Paintable 1:↑ok 2:→ok 3:↓ok 4:←ok 5:painted 6:BLACK
 let colorMap = new Int16Array(theArea); //colorMap[pixInd] = colorInd;
 let leftTopMap = new Int16Array(theArea); //LTMap[pixInd] = 0 if none, 1 if left most, 2, if top most 3 if both
 let paintableCount = new Uint16Array(colorLen); //Number of paintable pixels
 const dirList = [-theWidth, 1, theWidth, -1];
 let inst;
+let totalPainted=0;
 
 const initCanvas = () => {
     pixelRatio = window.devicePixelRatio;
@@ -64,6 +65,7 @@ const drawOriginalImage = (fileImage) => {
 }
 
 const updatePreview = () =>{
+    bgIndex = bgMode.value;
     updateText();
 
     tct.fillStyle = "black";
@@ -99,13 +101,17 @@ const updatePreview = () =>{
             dotCount++;
         }
     }
-    console.log("require "+dotCount+" dots");
+    tDots.text = ""+dotCount;
     pct.putImageData(timgdata, 0, 0);
 }
 
 const getInstruction = () => {
     inst = "";
-    while(paint());
+    let first = true;
+    if(totalPainted == 0) first = false;
+    while(paint(first));
+    totalPainted++;
+    //console.log("Total Painted:"+totalPainted);
     return;
 }
 
@@ -114,6 +120,8 @@ const updatePaintStat = () => {
     // Reset paintableCount
     for(let i=0; i<colorLen; i++){
             paintableCount[i] = 0;
+    }
+    for(let i=0; i<theArea; i++){
             leftTopMap[i] = 0;
     }
     //Check stats for each pixel
@@ -127,7 +135,9 @@ const updatePaintStat = () => {
         }
         //Check pixel on bottom
         if(i+theWidth<theArea&&colorMap[i]==colorMap[i+theWidth]){
-            if((i-theWidth)>=0&&colorMap[i]!=colorMap[i-theWidth]) leftTopMap[i]+=2;
+            if((i-theWidth)>=0&&colorMap[i]!=colorMap[i-theWidth]){
+                leftTopMap[i] += 2;
+            }
             //update stats
             if(statMap[i]==-1) statMap[i] = 0;
             if(statMap[i+theWidth]==-1) statMap[i+theWidth] = 0;
@@ -150,30 +160,16 @@ const updatePaintStat = () => {
                 statMap[i] = 3;
             }
         }
-        if(statMap[i]!=-1&&statMap[i]!=5&&statMap[i]!=6){
-            paintableCount[colorMap[i]]++;
-        }
-        /*
-        if(statMap[i]==5){
-            timgdata.data[i*4+0] = 0;
-            timgdata.data[i*4+1] = 255;
-            timgdata.data[i*4+2] = 0;
-        }else if(leftTopMap[i]>0){
-            timgdata.data[i*4 + 0] = 255;
-            timgdata.data[i*4 + 1] *= 0.25;
-            timgdata.data[i*4 + 2] *= 0.25;
-        }else if(statMap[i]!=0){
-            timgdata.data[i*4 + 0] = 255;
-            timgdata.data[i*4 + 1] *= 0.75;
-            timgdata.data[i*4 + 2] *= 0.75;
-        }else{
-            // doNothing
-        }*/
     }
     //pct.putImageData(timgdata, 0, 0);
+    for(let i=0; i<theArea; i++){//Scans in +x dir
+        if(statMap[i]>=0&&statMap[i]<=4){
+            paintableCount[colorMap[i]]++;
+        }
+    }
 }
 
-const paint = () => {
+const paint = (first) => {
     // Update the paintable stats of the drawing
     updatePaintStat();
 
@@ -186,30 +182,37 @@ const paint = () => {
             targetColInd = i;
         }
     }
-    inst += "Select,"+targetColInd+",\r\n";
+    inst += "Select,"+targetColInd+",";
     
     //Horizontal first;
     let paintedCount = 0;
     for(let i=0; i<theArea; i++){
-        if(colorMap[i]==targetColInd&&leftTopMap[i]%2==1){
+        //if(first) console.log("i="+i+"leftTopMap[i]%2="+leftTopMap[i]%2);
+        if(colorMap[i]==targetColInd&&(leftTopMap[i]%2)==1){
             painted = false;
             const startPixInd = i;
             let offset = 0;
+            if(first){
+                    timgdata.data[(i+offset)*4+2]=255;
+                    timgdata.data[(i+offset)*4+1]*=0;
+                    timgdata.data[(i+offset)*4+0]*=0;}
             do{
                 if(statMap[(i+offset)]!=5){
-                    statMap[(i+offset)]=5;
                     painted = true;
+                    statMap[(i+offset)]=5;
                     paintedCount++;
+                    totalPainted++;
+            if(first&&offset!=0){
+                    timgdata.data[(i+offset)*4+0]=255;
+                    timgdata.data[(i+offset)*4+1]*=0.75;
+                    timgdata.data[(i+offset)*4+2]*=0.75;}
                 }
-                timgdata.data[(i+offset)*4+0]=255;
-                timgdata.data[(i+offset)*4+1]*=0.25;
-                timgdata.data[(i+offset)*4+2]*=0.25;
                 offset++;
             }while((i+offset)%theWidth<theWidth&&colorMap[(i+offset)]==targetColInd);
             const endPixInd = (i+offset)-1;
             if(painted){
-                inst += "Start,"+startPixInd%theWidth+","+Math.floor(startPixInd/theWidth)+",\r\n";
-                inst += "End,"+endPixInd%theWidth+","+Math.floor(endPixInd/theWidth)+",\r\n";
+                inst += "Start,"+startPixInd%theWidth+","+Math.floor(startPixInd/theWidth)+",";
+                inst += "End,"+endPixInd%theWidth+","+Math.floor(endPixInd/theWidth)+",";
             }
         }
     }
@@ -220,21 +223,27 @@ const paint = () => {
             painted = false;
             const startPixInd = i;
             let offset = 0;
+            if(first&&0){
+                    timgdata.data[(i+offset)*4+2]=255;
+                    timgdata.data[(i+offset)*4+1]*=0;
+                    timgdata.data[(i+offset)*4+0]*=0;}
             do{
                 if(statMap[(i+offset)]!=5){
-                    statMap[(i+offset)]=5;
                     painted = true;
+                    statMap[(i+offset)]=5;
                     paintedCount++;
+                    totalPainted++;
+            if(first){
+                    timgdata.data[(i+offset)*4+0]=255;
+                    timgdata.data[(i+offset)*4+1]*=0.75;
+                    timgdata.data[(i+offset)*4+2]*=0.75;}
                 }
-                timgdata.data[(i+offset)*4+0]=255;
-                timgdata.data[(i+offset)*4+1]*=0.25;
-                timgdata.data[(i+offset)*4+2]*=0.25;
                 offset+=theWidth;
             }while((i+offset)<theArea&&colorMap[(i+offset)]==targetColInd);
             const endPixInd = (i+offset)-theWidth;
             if(painted){
-                inst += "Start,"+startPixInd%theWidth+","+Math.floor(startPixInd/theWidth)+",\r\n";
-                inst += "End,"+endPixInd%theWidth+","+Math.floor(endPixInd/theWidth)+",\r\n";
+                inst += "Start,"+startPixInd%theWidth+","+Math.floor(startPixInd/theWidth)+",";
+                inst += "End,"+endPixInd%theWidth+","+Math.floor(endPixInd/theWidth)+",";
             }
         }
     }
@@ -243,28 +252,40 @@ const paint = () => {
     for(let i=0; i<theArea; i++){
         if(colorMap[i]==targetColInd&&statMap[i]>=1&&statMap[i]<=4){
             if(statMap[i]==1){
-                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+"\r\n";
-                inst += "End,"+(i-theWidth)%theWidth+","+Math.floor((i-theWidth)/theWidth)+"\r\n";
+                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+",";
+                inst += "End,"+(i-theWidth)%theWidth+","+Math.floor((i-theWidth)/theWidth)+",";
             }else if(statMap[i]==2){
-                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+"\r\n";
-                inst += "End,"+(i+1)%theWidth+","+Math.floor((i+1)/theWidth)+"\r\n";
+                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+",";
+                inst += "End,"+(i+1)%theWidth+","+Math.floor((i+1)/theWidth)+",";
             }else if(statMap[i]==3){
-                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+"\r\n";
-                inst += "End,"+(i+theWidth)%theWidth+","+Math.floor((i+theWidth)/theWidth)+"\r\n";
+                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+",";
+                inst += "End,"+(i+theWidth)%theWidth+","+Math.floor((i+theWidth)/theWidth)+",";
             }else if(statMap[i]==4){
-                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+"\r\n";
-                inst += "End,"+(i-1)%theWidth+","+Math.floor((i-1)/theWidth)+"\r\n";
+                inst += "Start,"+i%theWidth+","+Math.floor(i/theWidth)+",";
+                inst += "End,"+(i-1)%theWidth+","+Math.floor((i-1)/theWidth)+",";
             }else{
                 alert("unknown error. This should not happen.");
             }
             statMap[i]=5;
             paintedCount++;
+            totalPainted++;
             timgdata.data[i*4+0]=255;
-            timgdata.data[i*4+1]*=0.25;
-            timgdata.data[i*4+2]*=0.25;
+            timgdata.data[i*4+1]*=0.75;
+            timgdata.data[i*4+2]*=0.75;
         }
     }
-    console.log("painted: "+paintedCount);
+    console.log("painted: "+paintedCount+", paintable:"+paintableCount[targetColInd]);
+
+
+    // Paint the paintable
+    for(let i=0; i<theArea; i++){
+        if(colorMap[i] == targetColInd&&statMap[i]>=0&&statMap[i]<=4){
+            statMap[i] =5;
+            timgdata.data[i*4 + 0] = 0;
+            timgdata.data[i*4 + 1] = 255;
+            timgdata.data[i*4 + 2] = 0;
+        }
+    }
     pct.putImageData(timgdata, 0, 0);
     if(paintedCount){
         return 1;
