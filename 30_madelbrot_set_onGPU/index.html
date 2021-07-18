@@ -1,0 +1,94 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Mandelbrot Set</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Mandelbrot Set
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="left">
+				<div id="Text1"></div><br>
+				<div id="Text2"></div><br>
+			</td>
+		</tr>
+
+	</table>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		const tableElement  = document.getElementById('Table' );
+		const bodyElement   = document.getElementById('Body'  );
+		const canvasElement = document.getElementById('Canvas');
+		const text1 = document.getElementById('Text1');
+		const text2 = document.getElementById('Text2');
+		showObject(bodyElement, tableElement);
+
+		const canvas = new Canvas(canvasElement);
+	//--> 
+	</script>
+
+	<script src="../00_Libraries/gpujs/gpu-browser.min.js"></script>
+	<script>
+		const generateMatrices = () => {
+		const matrices = [[], []]
+		for (let y = 0; y < 1024; y++){
+		    matrices[0].push([])
+		    matrices[1].push([])
+		    for (let x = 0; x < 1024; x++){
+		    matrices[0][y].push(Math.random())
+		    matrices[1][y].push(Math.random())
+		    }
+		}
+		return matrices
+		}
+
+		console.log("GPU Supported:"+GPU.isGPUSupported);
+		const gpu = new GPU();
+		//const gpu = new GPU({ mode: 'cpu', });
+		const startTime = Date.now();
+		const multiplyMatrix = gpu.createKernel(function(a, b) {
+		let sum = 0;
+		for (let i = 0; i < 1024; i++) {
+		    sum += a[this.thread.y][i] * b[i][this.thread.x];
+		}
+		return sum;
+		}).setOutput([1024, 1024]);
+
+
+		const matrices = generateMatrices();
+		const out = multiplyMatrix(matrices[0], matrices[1]);
+
+		console.log("time: "+(Date.now()-startTime)+"ms");
+	</script>
+
+
+</body>
+
+
+</html>
