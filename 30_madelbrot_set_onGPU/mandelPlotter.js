@@ -15,7 +15,7 @@ constructor(width, height){
         let mandelDeathMap = -1;
         let xVal = xMap[this.thread.x];
         let yVal = yMap[this.thread.x];
-        for(let counter = 0; counter < 2000; counter++){
+        for(let counter = 0; counter < 5000; counter++){
             const newx = xVal * xVal - yVal * yVal + xMap[this.thread.x];
             const newy = xVal * yVal * 2 + yMap[this.thread.x];
             xVal = newx;
