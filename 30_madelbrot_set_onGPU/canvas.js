@@ -12,7 +12,8 @@ constructor(canvas){
     this.canvas.addEventListener('mouseup'  ,  (event) => {this.release(event);},   false);
     this.canvas.addEventListener('touchend'  , (event) => {this.release(event);},   false);
     //Initialize ROI
-    this.center = [0, 0];
+    this.centerX = 0;
+    this.centerY = 0;
     this.sideLength = 4;
     //Initialize MandelPlotter
     this.mandelPlotter = new MandelPlotter(this.canvas.width, this.canvas.height);
@@ -71,17 +72,20 @@ moveMouse(event){
 }
 release(event){    
     this.loop = false;
-    const [x, y] = this.getXY(event);
-    const [xPix, yPix] = this.touchXY;
-    const [cx, cy] = this.getModXY(xPix, yPix);
-    const halfSide = Math.abs(x - this.touchXY[0]);
-    if(halfSide == 0){
+    const [xPixEnd, yPixEnd] = this.getXY(event);
+    const [xPixStart, yPixStart] = this.touchXY;
+    [this.centerX, this.centerY] = this.getModXY(xPixStart, yPixStart);
+    const sideLengthPix = Math.abs(xPixEnd - xPixStart);
+    if(sideLengthPix == 0){
         this.sideLength *= 0.5;
     }else{
-        this.sideLength *= (2 * halfSide / this.canvas.width);
+        this.sideLength *= (2 * sideLengthPix / this.canvas.width);
     }
     this.resetCanvas();
-    this.updateMandelBrotSet(cx - this.sideLength, cy - this.sideLength, cx + this.sideLength, cy + this.sideLength);
+    this.updateMandelBrotSet(this.centerX - this.sideLength / 2,
+                             this.centerY - this.sideLength / 2,
+                             this.centerX + this.sideLength / 2,
+                             this.centerY + this.sideLength / 2);
 }
 updateMandelBrotSet(xMin, yMin, xMax, yMax){
     //get mandelbrot set
@@ -94,14 +98,14 @@ getXY(event){
     event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX - rect.left - document.scrollingElement.scrollLeft;
-    let y = event.pageY - rect.top - document.scrollingElement.scrollTop;
+    let y = event.pageY - rect.top  - document.scrollingElement.scrollTop;
     x *= this.pixelRatio;
     y *= this.pixelRatio;
     return [x,y];
 }
-getModXY(x,y){
-    const xMod = this.center[0]+(x/this.canvas.width-1/2)*this.sideLength;
-    const yMod = this.center[1]+(y/this.canvas.width-1/2)*this.sideLength;
+getModXY(xPix, yPix){
+    const xMod = this.centerX+(xPix/this.canvas.width  - 1/2) * this.sideLength;
+    const yMod = this.centerY+(yPix/this.canvas.height - 1/2) * this.sideLength;
     return [xMod,yMod];
 }
 setPix(index, value){
