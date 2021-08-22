@@ -30,8 +30,21 @@ resetCanvas(){
     this.touchXY = [0, 0];
 }
 updateCanvas(){
+    let min = -2;
     for(let i = 0; i < this.mandelPlotter.area; i++){
-        this.minIteration = 0;
+        if(this.deathMap[i] != -1){
+            if(min == -2){
+                min = this.deathMap[i];
+            }else if(this.deathMap[i] < min){
+                min = this.deathMap[i];
+            }else{
+                // min is still min
+            }
+        } 
+    }
+    this.minIteration = min;
+    console.log(this.minIteration);
+    for(let i = 0; i < this.mandelPlotter.area; i++){
         if(this.deathMap[i] == -1){
             this.setPix(i, 255);
         }else{
