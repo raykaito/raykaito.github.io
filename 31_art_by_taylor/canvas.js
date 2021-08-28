@@ -129,7 +129,7 @@ getModXY(xPix, yPix){
     return [xMod,yMod];
 }
 setPix(index, value, type = -1){
-    value = 255;
+    //value = 255;
     if(type == -1){
         //Set the pixel based on type
         this.imageData.data[4 * index + 0] = value;
