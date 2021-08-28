@@ -23,8 +23,9 @@ resizeCanvas(){
     this.canvas.width = Math.floor(window.innerWidth) - 20;
     if(Math.floor(window.innerWidth) > 540) this.canvas.width = 520;
     if(Math.floor(window.innerWidth) < 320) this.canvas.width = 320;
-    this.canvas.width = 1920;
-    this.canvas.height = 1080;
+    this.canvas.height = this.canvas.width;
+    //this.canvas.width = 1920;
+    //this.canvas.height = 1080;
     this.pixelRatio = window.devicePixelRatio;
     this.canvas.style.width  = this.canvas.width + "px";
     this.canvas.style.height = this.canvas.height + "px";
