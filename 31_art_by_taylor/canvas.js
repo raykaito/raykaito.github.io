@@ -45,29 +45,32 @@ resetCanvas(){
     this.newIndex = this.getRand(this.canvas.width*this.canvas.height);
 }
 startAnimation(){
-    requestAnimationFrame(() => {canvas.startAnimation()});
+    this.animation = requestAnimationFrame(() => {canvas.startAnimation()});
+    for(let speed = 0; speed < 1000; speed++){
     const xy = this.i2xy(this.newIndex);
     let unOccupiedFound = false;
     for(let range = 1; ; range++){
         const dir = this.getRand(8*range);
+        //const dir = 6;
         for(let circonference = 0; circonference < 8*range; circonference++){
             let dx, dy;
-            const section = Math.floor((dir+circonference)/(range*2));
+            let pos = (dir + circonference) % (8*range);
+            const section = Math.floor((pos)/(range*2));
             if(section == 0){
-                dx = dir+circonference-range;
+                dx = pos-range;
                 dy = -range;
             }
             if(section == 1){
                 dx = +range;
-                dy = dir + circonference - 3 * range;
+                dy = pos - 3 * range;
             }
             if(section == 2){
-                dx = range - (dir + circonference - 4 * range);
+                dx = range - (pos - 4 * range);
                 dy = +range;
             }
             if(section == 3){
                 dx = -range;
-                dy = range - (dir + circonference - 6 * range);
+                dy = range - (pos - 6 * range);
             }
             const newIndexTemp = this.xy2i(xy[0]+dx, xy[1] + dy);
             if(this.imageData.data[4*newIndexTemp+0]==0&&
@@ -89,46 +92,18 @@ startAnimation(){
             this.dcolor[i] *= -1;
             this.color[i] += this.dcolor[i];
         }
-    }
+    }}
     this.updateCanvas();
 }
 updateCanvas(){
     this.ct.putImageData(this.imageData, 0, 0);
 }
 touch(event){
-    this.loop = false;
-    this.move = false;
-    this.touchStart = true;
-    this.touchXY = this.getXY(event);
-    this.lastMove = Date.now();
-    this.ct.strokeStyle = "lime";
-    this.ct.lineWidth = this.pixelRatio;
+    cancelAnimationFrame(this.animation);
 }
 moveMouse(event){
-    if(this.touchStart == false) return;
-    if(Date.now() - this.lastMove < 15) return;
-    this.lastMove = Date.now();
-    this.ct.putImageData(this.imageData, 0, 0);
-    const [x,y] = this.getXY(event);
-    const halfSide = Math.abs(x - this.touchXY[0]);
-    this.ct.strokeRect(this.touchXY[0] - halfSide, this.touchXY[1] - halfSide, halfSide * 2, halfSide * 2);
 }
-release(event){    
-    this.loop = false;
-    const [xPixEnd, yPixEnd] = this.getXY(event);
-    const [xPixStart, yPixStart] = this.touchXY;
-    [this.centerX, this.centerY] = this.getModXY(xPixStart, yPixStart);
-    const sideLengthPix = Math.abs(xPixEnd - xPixStart);
-    if(sideLengthPix == 0){
-        this.sideLength *= 0.5;
-    }else{
-        this.sideLength *= (2 * sideLengthPix / this.canvas.width);
-    }
-    this.resetCanvas();
-    this.updateMandelBrotSet(this.centerX - this.sideLength / 2,
-                             this.centerY - this.sideLength / 2,
-                             this.centerX + this.sideLength / 2,
-                             this.centerY + this.sideLength / 2);
+release(event){   
 }
 getXY(event){
     event.preventDefault();
@@ -145,6 +120,7 @@ getModXY(xPix, yPix){
     return [xMod,yMod];
 }
 setPix(index, value, type = -1){
+    value = 255;
     if(type == -1){
         //Set the pixel based on type
         this.imageData.data[4 * index + 0] = value;
