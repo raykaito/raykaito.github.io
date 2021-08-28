@@ -23,11 +23,13 @@ resizeCanvas(){
     this.canvas.width = Math.floor(window.innerWidth) - 20;
     if(Math.floor(window.innerWidth) > 540) this.canvas.width = 520;
     if(Math.floor(window.innerWidth) < 320) this.canvas.width = 320;
+    this.canvas.width = 1920;
+    this.canvas.height = 1080;
     this.pixelRatio = window.devicePixelRatio;
     this.canvas.style.width  = this.canvas.width + "px";
-    this.canvas.style.height = this.canvas.width + "px";
+    this.canvas.style.height = this.canvas.height + "px";
     this.canvas.width  = this.canvas.width;
-    this.canvas.height = this.canvas.width;
+    this.canvas.height = this.canvas.height;
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
 }
@@ -60,9 +62,15 @@ startAnimation(){
             }
             const dir = this.getRand(8*range);
             //const dir = 6;
-            for(let circonference = 0; circonference < 8*range; circonference++){
+            const dir2 = this.getRand(2);
+            for(let circonference = 0; circonference < 8 * range; circonference++){
                 let dx, dy;
-                let pos = (dir + circonference) % (8*range);
+                let pos;
+                if(dir2==0){
+                    pos = (dir + circonference) % (8 * range);
+                }else{
+                    pos = (dir + 8 * range - circonference) % (8 * range);
+                }
                 const section = Math.floor((pos)/(range*2));
                 if(section == 0){
                     dx = pos-range;
@@ -95,9 +103,10 @@ startAnimation(){
         //updateMap and color
         for(let i = 0; i < 3; i++){
             this.setPix(this.newIndex, this.color[i], i);
-            this.color[i] += this.dcolor[i];
+            this.color[i] += this.dcolor[i]/40;
             if(this.color[i] > 255 || this.color[i] < 0){
-                this.dcolor[i] *= -1;
+                this.dcolor[i] = this.getRand(5) + 1;
+                if(this.color[i] > 255) this.dcolor[i] *= -1;
                 this.color[i] += this.dcolor[i];
             }
         }
@@ -144,16 +153,20 @@ i2xy(i){
 }
 xy2i(x, y){
     if(x<0){
-        x = x % this.canvas.width + this.canvas.width;
-    }else if(x > this.canvas.width){
-        x = x % this.canvas.width;
+        //x = x % this.canvas.width + this.canvas.width;
+        x = 0;
+    }else if(x >= this.canvas.width){
+        //x = x % this.canvas.width;
+        x = this.canvas.width - 1;
     }
     if(y<0){
-        y = y % this.canvas.height + this.canvas.height;
-    }else if(y > this.canvas.height){
-        y = y % this.canvas.height;
+        //y = y % this.canvas.height + this.canvas.height;
+        y = 0;
+    }else if(y >= this.canvas.height){
+        //y = y % this.canvas.height;
+        y = this.canvas.height - 1;
     }
-    return this.canvas.height*y+x;
+    return this.canvas.width*y+x;
 }
 getRand(number){
     return Math.floor(Math.random()*number);
