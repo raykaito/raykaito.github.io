@@ -47,52 +47,61 @@ resetCanvas(){
 startAnimation(){
     this.animation = requestAnimationFrame(() => {canvas.startAnimation()});
     for(let speed = 0; speed < 1000; speed++){
-    const xy = this.i2xy(this.newIndex);
-    let unOccupiedFound = false;
-    for(let range = 1; ; range++){
-        const dir = this.getRand(8*range);
-        //const dir = 6;
-        for(let circonference = 0; circonference < 8*range; circonference++){
-            let dx, dy;
-            let pos = (dir + circonference) % (8*range);
-            const section = Math.floor((pos)/(range*2));
-            if(section == 0){
-                dx = pos-range;
-                dy = -range;
+    //console.log("here"+speed);
+        //console.log(speed);
+        const xy = this.i2xy(this.newIndex);
+        let unOccupiedFound = false;
+        for(let range = 1; ; range++){
+            if(range > this.canvas.width){
+                console.log("outOfBound");
+                this.updateCanvas();
+                cancelAnimationFrame(this.animation);
+                return;
             }
-            if(section == 1){
-                dx = +range;
-                dy = pos - 3 * range;
-            }
-            if(section == 2){
-                dx = range - (pos - 4 * range);
-                dy = +range;
-            }
-            if(section == 3){
-                dx = -range;
-                dy = range - (pos - 6 * range);
-            }
-            const newIndexTemp = this.xy2i(xy[0]+dx, xy[1] + dy);
-            if(this.imageData.data[4*newIndexTemp+0]==0&&
-                this.imageData.data[4*newIndexTemp+1]==0&&
-                this.imageData.data[4*newIndexTemp+2]==0){
-                this.newIndex = newIndexTemp;
-                unOccupiedFound = true;
-                console.log("dir:"+dir+", circ:"+circonference+", sec:"+section+",xy:"+dx+","+dy);
+            const dir = this.getRand(8*range);
+            //const dir = 6;
+            for(let circonference = 0; circonference < 8*range; circonference++){
+                let dx, dy;
+                let pos = (dir + circonference) % (8*range);
+                const section = Math.floor((pos)/(range*2));
+                if(section == 0){
+                    dx = pos-range;
+                    dy = -range;
+                }
+                if(section == 1){
+                    dx = +range;
+                    dy = pos - 3 * range;
+                }
+                if(section == 2){
+                    dx = range - (pos - 4 * range);
+                    dy = +range;
+                }
+                if(section == 3){
+                    dx = -range;
+                    dy = range - (pos - 6 * range);
+                }
+                const newIndexTemp = this.xy2i(xy[0]+dx, xy[1] + dy);
+                if(this.imageData.data[4*newIndexTemp+0]==0&&
+                    this.imageData.data[4*newIndexTemp+1]==0&&
+                    this.imageData.data[4*newIndexTemp+2]==0){
+                    this.newIndex = newIndexTemp;
+                    unOccupiedFound = true;
+                    //console.log("dir:"+dir+", circ:"+circonference+", sec:"+section+",xy:"+dx+","+dy);
+                }
+                if(unOccupiedFound) break;
             }
             if(unOccupiedFound) break;
         }
-        if(unOccupiedFound) break;
-    }
-    //updateMap and color
-    for(let i = 0; i < 3; i++){
-        this.setPix(this.newIndex, this.color[i], i);
-        this.color[i] += this.dcolor[i];
-        if(this.color[i] > 255 || this.color[i] < 0){
-            this.dcolor[i] *= -1;
+        //updateMap and color
+        for(let i = 0; i < 3; i++){
+            this.setPix(this.newIndex, this.color[i], i);
             this.color[i] += this.dcolor[i];
+            if(this.color[i] > 255 || this.color[i] < 0){
+                this.dcolor[i] *= -1;
+                this.color[i] += this.dcolor[i];
+            }
         }
-    }}
+    }
     this.updateCanvas();
 }
 updateCanvas(){
@@ -134,7 +143,17 @@ i2xy(i){
     return [i % this.canvas.width, Math.floor(i / this.canvas.width)];
 }
 xy2i(x, y){
-    return this.canvas.width*y+x;
+    if(x<0){
+        x = x % this.canvas.width + this.canvas.width;
+    }else if(x > this.canvas.width){
+        x = x % this.canvas.width;
+    }
+    if(y<0){
+        y = y % this.canvas.height + this.canvas.height;
+    }else if(y > this.canvas.height){
+        y = y % this.canvas.height;
+    }
+    return this.canvas.height*y+x;
 }
 getRand(number){
     return Math.floor(Math.random()*number);
