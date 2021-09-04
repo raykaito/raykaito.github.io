@@ -9,8 +9,9 @@ constructor(canvas){
 
     // GPU variables
     this.canvasgpu = new GPU({
-      canvas: this.canvas,
-      context: this.ct
+        mode:'gpu',
+        canvas: this.canvas,
+        context: this.ct
     });
     console.log("GPU supported:"+GPU.isGPUSupported);
     this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, newPath){
@@ -186,7 +187,9 @@ setPath(x, y, xo = -1, yo){
 findNextPath(){
     let probabilitySum = 0;
     for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
-        probabilitySum += this.getProbability(bondIndex);
+        const bondX = this.bond[bondIndex][1][0];
+        const bondY = this.bond[bondIndex][1][1];
+        probabilitySum += this.potentialMap[bondX][bondY];
     }
     let rand = Math.random() * probabilitySum;
     for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
@@ -199,11 +202,6 @@ findNextPath(){
             return [bondX, bondY];
         }
     }
-}
-getProbability(bondIndex){
-    const bondX = this.bond[bondIndex][1][0];
-    const bondY = this.bond[bondIndex][1][1];
-    return this.potentialMap[bondX][bondY];
 }
 solveLEQ(){
     /*
@@ -218,6 +216,7 @@ solveLEQ(){
     for(let i = 0; i < 1; i++){
         this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
    }
+   this.potentialMap = this.potentialMap.toArray();
 }
 updateCanvas_Potential(){
     for(let x = 0; x < this.width; x++){

@@ -2,43 +2,67 @@ class Canvas{
 constructor(canvas){
     //Initialize Canvas and its size
     this.canvas = canvas;
-    this.ct = canvas.getContext("2d");
+    this.ct = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
-    this.resetCanvas();
+    this.width = this.canvas.width;
+    this.height= this.canvas.height;
+
+    // GPU variables
+    this.canvasgpu = new GPU({
+        mode:'gpu',
+        canvas: this.canvas,
+        context: this.ct
+    });
+    console.log("GPU supported:"+GPU.isGPUSupported);
+    this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, newPath){
+        const index = this.thread.x + this.thread.y * this.constants.width;
+        if(newPath[index] > 0){
+            this.color(0, 0.5, 1);
+        }else{
+            const value = Math.min(255, 5 * pathCounter[index])
+            this.color(value / 256, value / 256, value / 256);
+        }
+    })
+    .setOutput([this.width, this.height])
+    .setConstants({width:this.width})
+    .setGraphical(true);
 
     //Initialize potential and pixStatus Map
-    this.potentialMap = new Array(this.canvas.width); // potential value [0,1]
-    this.pixStatusMap = new Array(this.canvas.width); // 0: uninvaded, 1: boundary, 2: path
-    this.parentMap = new Array(this.canvas.width);
-    for(let x = 0; x < this.canvas.width; x++){
-        this.potentialMap[x] = new Array(this.canvas.height);
-        this.pixStatusMap[x]  = new Array(this.canvas.height);
-        this.parentMap[x] = new Array(this.canvas.height);
-        for(let y = 0; y < this.canvas.height; y++){
+    this.potentialMap = new Array(this.width); // potential value [0,1]
+    this.pixStatusMap = new Array(this.width); // 0: uninvaded, 1: boundary, 2: path
+    this.parentMap = new Array(this.width);
+    for(let x = 0; x < this.width; x++){
+        this.potentialMap[x] = new Array(this.height);
+        this.pixStatusMap[x]  = new Array(this.height);
+        this.parentMap[x] = new Array(this.height);
+        for(let y = 0; y < this.height; y++){
             this.potentialMap[x][y] = 0.5;
             this.pixStatusMap[x][y] = 0;
             this.parentMap[x][y] = [0, 0];
         }
     }
-    this.pathCounter = new Array(this.canvas.width*this.canvas.height);
-    for(let i = 0; i < this.canvas.width * this.canvas.height; i++){
+
+    //Initialize pathCounter and newPath
+    this.pathCounter = new Array(this.width*this.height);
+    this.newPath = new Array(this.width*this.height);
+    for(let i = 0; i < this.width * this.height; i++){
         this.pathCounter[i] = 0;
+        this.newPath[i] = 0;
     }
 
     //Variables
     this.bond = new Array();
     this.counter = 0;
+    this.animatingNow = false;
 
     //Initialize LES
-    this.LES = new LaplaceEqSolver(this.canvas.width, this.canvas.height);
+    this.LES = new LaplaceEqSolver(this.width, this.height);
 
     //Set boundary and path
     this.setBoundary();
-    this.setPath(Math.floor(this.canvas.width/2), Math.floor(this.canvas.height/2));
+    this.setPath(Math.floor(this.width/2), Math.floor(this.height/2));
     this.solveLEQ();
-    this.updateCanvas();
-    this.ct.putImageData(this.imageData, 0, 0);
-    this.animatingNow = false;
+    this.updateCanvas(this.pathCounter, this.newPath);
     this.startAnimation();
 }
 toggleAnimation(){
@@ -60,16 +84,11 @@ resizeCanvas(){
     this.canvas.style.width  = this.canvas.width / this.pixelRatio + "px";
     this.canvas.style.height = this.canvas.width / this.pixelRatio + "px";
 }
-resetCanvas(){
-    this.ct.fillStyle = "black";
-    this.ct.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.imageData = this.ct.getImageData(0, 0, this.canvas.width, this.canvas.height);
-}
 setBoundary(){
-    const xCen = this.canvas.width / 2;
-    const yCen = this.canvas.height/ 2;
-    for(let x = 0; x < this.canvas.width; x++){
-        for(let y = 0; y < this.canvas.height; y++){
+    const xCen = this.width / 2;
+    const yCen = this.height/ 2;
+    for(let x = 0; x < this.width; x++){
+        for(let y = 0; y < this.height; y++){
             if( (x - xCen) * (x - xCen) + (y - yCen) * (y - yCen) > xCen * xCen * 0.99){
                 this.pixStatusMap[x][y] = 1;
                 this.potentialMap[x][y] = 1;
@@ -189,10 +208,10 @@ getProbability(bondIndex){
 }
 solveLEQ(){
     /*
-    for(let x = 0; x < this.canvas.width; x++){
-        for(let y = 0; y < this.canvas.height; y++){
+    for(let x = 0; x < this.width; x++){
+        for(let y = 0; y < this.height; y++){
             if(this.pixStatusMap[x][y] == 0){
-                this.potentialMap[x][y] = 1;
+                this.potentialMap[x][y] = 0;
             }
         }
     }
@@ -200,18 +219,19 @@ solveLEQ(){
     for(let i = 0; i < 1; i++){
         this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
    }
+   this.potentialMap = this.potentialMap.toArray();
 }
-updateCanvas2(){
-    for(let x = 0; x < this.canvas.width; x++){
-        for(let y = 0; y < this.canvas.height; y++){
+updateCanvas_Potential(){
+    for(let x = 0; x < this.width; x++){
+        for(let y = 0; y < this.height; y++){
             this.setPix([x, y], this.interpolate(this.potentialMap[x][y]));
             //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
         }
     }
 }
-updateCanvas(){
-    for(let x = 0; x < this.canvas.width; x++){
-        for(let y = 0; y < this.canvas.height; y++){
+updateCanvas_CPU(){
+    for(let x = 0; x < this.width; x++){
+        for(let y = 0; y < this.height; y++){
             this.setPix([x, y], Math.max(0, 5 * this.pathCounter[this.xy2i([x,y])]));
             //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
         }
@@ -221,12 +241,10 @@ startAnimation(){
     this.animatingNow = true;
     let newXY;
     this.solveLEQ();
-    for(let speed = 0; speed < 1; speed++){
-        newXY = this.findNextPath();
-    }
-    this.updateCanvas();
+    newXY = this.findNextPath();
     this.paintNewPath(newXY);
-    this.ct.putImageData(this.imageData, 0, 0);
+    this.updateCanvas(this.pathCounter, this.newPath);
+    //this.ct.putImageData(this.imageData, 0, 0);
     if(this.animatingNow) this.animation = requestAnimationFrame(() => {this.startAnimation();});
 }
 stopAnimation(){
@@ -235,15 +253,13 @@ stopAnimation(){
     this.animatingNow = false;
 }
 paintNewPath(newXY){
-    this.setPix(newXY, 0  , 0);
-    this.setPix(newXY, 128, 1);
-    this.setPix(newXY, 255, 2);
+    for(let i = 0; i < this.width * this.height; i++){
+        this.newPath[i] = 0;
+    }
     this.pathCounter[this.xy2i(newXY)]++;
+    this.newPath[this.xy2i(newXY)] = 1;
     while(this.parentMap[newXY[0]][newXY[1]] != -1){
         newXY = this.parentMap[newXY[0]][newXY[1]];
-        this.setPix(newXY, 0  , 0);
-        this.setPix(newXY, 128, 1);
-        this.setPix(newXY, 255, 2);
         let rand = Math.random();
         let offset = 0;
         while(rand < 0.1){
@@ -259,32 +275,14 @@ paintNewPath(newXY){
         }else{
             this.pathCounter[this.xy2i([newXY[0] , newXY[1] + offset])]++;
         }
+        this.newPath[this.xy2i(newXY)] = 1;
     }
-}
-setPix(index, value, type = -1){
-    if(index.length == 2){
-        index = this.xy2i(index);
-    }
-    if(type == -1){
-        //Set the pixel based on type
-        this.imageData.data[4 * index + 0] = value;
-        this.imageData.data[4 * index + 1] = value;
-        this.imageData.data[4 * index + 2] = value;
-    }else{
-        this.imageData.data[4 * index + type] = value;
-    }
-}
-interpolate(value){
-    //return value * 256;
-    if(value == 0) return 0;
-    if(value == 1) return 255;
-    return value * 128 + 127;
 }
 i2xy(i){
-    return [i % this.canvas.width, Math.floor(i / this.canvas.width)];
+    return [i % this.width, Math.floor(i / this.width)];
 }
 xy2i([x, y]){
-    return x + y * this.canvas.width;
+    return x + y * this.width;
 }
 }
 console.log("Loaded: canvas.js");

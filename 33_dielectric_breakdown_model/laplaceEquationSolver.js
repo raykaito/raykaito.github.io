@@ -6,7 +6,7 @@ constructor(width, height){
     this.area = this.width * this.height;
 
     // GPU variables
-    this.gpu = new GPU();
+    this.gpu = new GPU({mode:'gpu'});
     console.log("GPU supported:"+GPU.isGPUSupported);
     this.solveLaplaceEquation = this.gpu.createKernel(function(potentialMap, pixStatusMap){
         const thx = this.thread.y;
@@ -20,10 +20,10 @@ constructor(width, height){
                     potentialMap[thx    ][thy + 1] / 4 + 
                     potentialMap[thx    ][thy - 1] / 4);
         }
-    }).setOutput([this.width, this.height]);
-}
-updatePotentialField(potentialMap, pixStatusMap) {
-    return this.solveLaplaceEquation(potentialMap, pixStatusMap);
+    })
+    .setOutput([this.width, this.height])
+    .setPipeline(true);
+    this.solveLaplaceEquation.immutable = true;
 }
 xy2i(x, y){
     return x + y * this.width;
