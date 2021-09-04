@@ -14,16 +14,13 @@ constructor(width, height){
         if(pixStatusMap[thx][thy] != 0){
             return potentialMap[thx][thy];
         }else{
-            //const offset = (0.5 - potentialMap[thx][thy]) * 0.05;
             return (potentialMap[thx + 1][thy    ] / 4 + 
                     potentialMap[thx - 1][thy    ] / 4 + 
                     potentialMap[thx    ][thy + 1] / 4 + 
                     potentialMap[thx    ][thy - 1] / 4);
         }
     })
-    .setOutput([this.width, this.height])
-    .setPipeline(true);
-    this.solveLaplaceEquation.immutable = true;
+    .setOutput([this.width, this.height]);
 }
 xy2i(x, y){
     return x + y * this.width;

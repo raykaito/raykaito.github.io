@@ -16,15 +16,27 @@ constructor(canvas){
         context: this.gl
     });
     console.log("GPU supported:"+GPU.isGPUSupported);
-    this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, newPath){
+    this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, potentialMap, newPath, displaySettings){
         const x = Math.floor(this.thread.x / this.constants.pr);
         const y = Math.floor(this.thread.y / this.constants.pr);
         const index = x + y * this.constants.width;
-        if(newPath[index] > 0){
-            this.color(0, 0.5, 1);
-        }else{
+        if(newPath[index] > 0 && (displaySettings[3] != 0 || displaySettings[4] != 0 || displaySettings[5] != 0)){
+            const r2 = displaySettings[3];
+            const g2 = displaySettings[4] + displaySettings[5] * 0.5;
+            const b2 = displaySettings[5];
+            this.color(r2, g2, b2);
+        }else if(potentialMap[x][y] == 0){
             const value = Math.min(255, 5 * pathCounter[index])
-            this.color(value / 256, value / 256, value / 256);
+            const r1 = displaySettings[0];
+            const g1 = displaySettings[1];
+            const b1 = displaySettings[2];
+            this.color(r1 * value / 256, g1 * value / 256, b1 * value / 256);
+        }else{
+            const value3 = potentialMap[x][y] * 0.5;
+            const r3 = displaySettings[6];
+            const g3 = displaySettings[7];
+            const b3 = displaySettings[8];
+            this.color(r3 * value3, g3 * value3, b3 * value3);
         }
     })
     .setOutput([this.cwidth, this.cheight])
@@ -66,7 +78,7 @@ constructor(canvas){
     this.setBoundary();
     this.setPath(Math.floor(this.width/2), Math.floor(this.height/2));
     this.solveLEQ();
-    this.updateCanvas(this.pathCounter, this.newPath);
+    this.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
     this.startAnimation();
 }
 toggleAnimation(){
@@ -208,35 +220,7 @@ findNextPath(){
     }
 }
 solveLEQ(){
-    /*
-    for(let x = 0; x < this.width; x++){
-        for(let y = 0; y < this.height; y++){
-            if(this.pixStatusMap[x][y] == 0){
-                this.potentialMap[x][y] = 0;
-            }
-        }
-    }
-    */
-    for(let i = 0; i < 1; i++){
-        this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
-   }
-   this.potentialMap = this.potentialMap.toArray();
-}
-updateCanvas_Potential(){
-    for(let x = 0; x < this.width; x++){
-        for(let y = 0; y < this.height; y++){
-            this.setPix([x, y], this.interpolate(this.potentialMap[x][y]));
-            //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
-        }
-    }
-}
-updateCanvas_CPU(){
-    for(let x = 0; x < this.width; x++){
-        for(let y = 0; y < this.height; y++){
-            this.setPix([x, y], Math.max(0, 5 * this.pathCounter[this.xy2i([x,y])]));
-            //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
-        }
-    }
+    this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
 }
 startAnimation(){
     this.animatingNow = true;
@@ -244,7 +228,7 @@ startAnimation(){
     this.solveLEQ();
     newXY = this.findNextPath();
     this.paintNewPath(newXY);
-    this.updateCanvas(this.pathCounter, this.newPath);
+    this.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
     //this.ct.putImageData(this.imageData, 0, 0);
     if(this.animatingNow) this.animation = requestAnimationFrame(() => {this.startAnimation();});
 }

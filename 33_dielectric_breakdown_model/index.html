@@ -15,7 +15,7 @@
 	<table id="Table" border="0" align="center">
 	
 		<tr>
-			<td align="center">
+			<td align="center" colspan="3">
 				<Font size="10" Font color="black"><TNR>
 					<a style="text-decoration: none; color:black" onclick="canvas.toggleAnimation();">
 						Dielectric Breakdown Model
@@ -26,15 +26,42 @@
 		</tr>
 
 		<tr>
-			<td align="center">
+			<td align="center" colspan="3">
 				<canvas id="Canvas"></canvas>
 			</td>
 		</tr>
 
 		<tr>
-			<td align="left">
+			<td align="left" colspan="3">
 				<div id="Text1"></div><br>
 				<div id="Text2"></div><br>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="left" colspan="3">
+				<b><u>Display Settings:</u></b>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="left">
+				Electron path<br>
+				 <input type="checkbox" id="r1" name="r1" checked onchange = "updateSettings();"><label for="r1">Red</label><br>
+				 <input type="checkbox" id="g1" name="g1" checked onchange = "updateSettings();"><label for="g1">Green</label><br>
+				 <input type="checkbox" id="b1" name="b1" checked onchange = "updateSettings();"><label for="b1">Blue</label><br>
+			</td>
+			<td align="left">
+				Last breakdown<br>
+				 <input type="checkbox" id="r2" name="r2"         onchange = "updateSettings();"><label for="r2">Red</label><br>
+				 <input type="checkbox" id="g2" name="g2"         onchange = "updateSettings();"><label for="g2">Green</label><br>
+				 <input type="checkbox" id="b2" name="b2" checked onchange = "updateSettings();"><label for="b2">Blue</label><br>
+			</td>
+			<td align="left">
+				Electric potential<br>
+				 <input type="checkbox" id="r3" name="r3"         onchange = "updateSettings();"><label for="r3">Red</label><br>
+				 <input type="checkbox" id="g3" name="g3"         onchange = "updateSettings();"><label for="g3">Green</label><br>
+				 <input type="checkbox" id="b3" name="b3"         onchange = "updateSettings();"><label for="b3">Blue</label><br>
 			</td>
 		</tr>
 
@@ -51,7 +78,27 @@
 		const canvasElement = document.getElementById('Canvas');
 		const text1 = document.getElementById('Text1');
 		const text2 = document.getElementById('Text2');
+		// boxes
+		const box = new Array();
+		box[0] = document.getElementById("r1");
+		box[1] = document.getElementById("g1");
+		box[2] = document.getElementById("b1");
+		box[3] = document.getElementById("r2");
+		box[4] = document.getElementById("g2");
+		box[5] = document.getElementById("b2");
+		box[6] = document.getElementById("r3");
+		box[7] = document.getElementById("g3");
+		box[8] = document.getElementById("b3");
+
 		showObject(bodyElement, tableElement);
+
+		let displaySettings = new Array(9);
+		const updateSettings = () => {
+			for(let i = 0; i < 9; i++){
+				displaySettings[i] = box[i].checked?1:0;
+			}
+		}
+		updateSettings();
 
 		const canvas = new Canvas(canvasElement);
 	//--> 
