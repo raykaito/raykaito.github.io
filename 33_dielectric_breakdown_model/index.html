@@ -15,8 +15,8 @@
 	<table id="Table" border="0" align="center">
 	
 		<tr>
-			<td align="center" colspan="3">
-				<Font size="10" Font color="black"><TNR>
+			<td align="center" colspan="2">
+				<Font size="6" Font color="black"><TNR>
 					<a style="text-decoration: none; color:black" onclick="canvas.toggleAnimation();">
 						Dielectric Breakdown Model
 			   		</a>
@@ -26,42 +26,56 @@
 		</tr>
 
 		<tr>
-			<td align="center" colspan="3">
+			<td align="center" colspan="2">
 				<canvas id="Canvas"></canvas>
 			</td>
 		</tr>
 
 		<tr>
-			<td align="left" colspan="3">
-				<div id="Text1"></div><br>
-				<div id="Text2"></div><br>
+			<td align="left" colspan="2">
+				<div id="Text1"></div>
+				<div id="Text2"></div>
 			</td>
 		</tr>
 
 		<tr>
-			<td align="left" colspan="3">
-				<b><u>Display Settings:</u></b>
+			<td align="right" width="50%">
+				<b><u><br>Display Settings:</u></b>
+			</td>
+			<td>
 			</td>
 		</tr>
 
 		<tr>
-			<td align="left">
-				Electron path<br>
-				 <input type="checkbox" id="r1" name="r1" checked onchange = "updateSettings();"><label for="r1">Red</label><br>
-				 <input type="checkbox" id="g1" name="g1" checked onchange = "updateSettings();"><label for="g1">Green</label><br>
-				 <input type="checkbox" id="b1" name="b1" checked onchange = "updateSettings();"><label for="b1">Blue</label><br>
+			<td align="right">
+				Accumulated path:
 			</td>
-			<td align="left">
-				Last breakdown<br>
-				 <input type="checkbox" id="r2" name="r2"         onchange = "updateSettings();"><label for="r2">Red</label><br>
-				 <input type="checkbox" id="g2" name="g2"         onchange = "updateSettings();"><label for="g2">Green</label><br>
-				 <input type="checkbox" id="b2" name="b2" checked onchange = "updateSettings();"><label for="b2">Blue</label><br>
+			<td>
+				 <input type="checkbox" id="r1" name="r1" checked onchange = "updateSettings();"><label for="r1">R</label>
+				 <input type="checkbox" id="g1" name="g1" checked onchange = "updateSettings();"><label for="g1">G</label>
+				 <input type="checkbox" id="b1" name="b1" checked onchange = "updateSettings();"><label for="b1">B</label>
 			</td>
-			<td align="left">
-				Electric potential<br>
-				 <input type="checkbox" id="r3" name="r3"         onchange = "updateSettings();"><label for="r3">Red</label><br>
-				 <input type="checkbox" id="g3" name="g3"         onchange = "updateSettings();"><label for="g3">Green</label><br>
-				 <input type="checkbox" id="b3" name="b3"         onchange = "updateSettings();"><label for="b3">Blue</label><br>
+		</tr>
+
+		<tr>
+			<td align="right">
+				Latest breakdown:
+			</td>
+			<td>
+				 <input type="checkbox" id="r2" name="r2"         onchange = "updateSettings();"><label for="r2">R</label>
+				 <input type="checkbox" id="g2" name="g2"         onchange = "updateSettings();"><label for="g2">G</label>
+				 <input type="checkbox" id="b2" name="b2" checked onchange = "updateSettings();"><label for="b2">B</label>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="right">
+				Electric potential:
+			</td>
+			<td>
+				 <input type="checkbox" id="r3" name="r3"         onchange = "updateSettings();"><label for="r3">R</label>
+				 <input type="checkbox" id="g3" name="g3"         onchange = "updateSettings();"><label for="g3">G</label>
+				 <input type="checkbox" id="b3" name="b3"         onchange = "updateSettings();"><label for="b3">B</label>
 			</td>
 		</tr>
 
