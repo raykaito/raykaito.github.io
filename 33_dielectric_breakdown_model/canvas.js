@@ -84,8 +84,10 @@ constructor(canvas){
 toggleAnimation(){
     if(this.animatingNow){
         this.stopAnimation();
+        text2.textContent = "Start/Pause Animation [ll]"
     }else{
         this.startAnimation();
+        text2.textContent = "Start/Pause Animation [▶]"
     }
 }
 resizeCanvas(){
