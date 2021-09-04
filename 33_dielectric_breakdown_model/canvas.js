@@ -81,8 +81,8 @@ resizeCanvas(){
     this.canvas.style.height = this.canvas.width + "px";
     this.canvas.width  = this.canvas.width;
     this.canvas.height = this.canvas.width;
-    this.canvas.style.width  = this.canvas.width / this.pixelRatio + "px";
-    this.canvas.style.height = this.canvas.width / this.pixelRatio + "px";
+    this.canvas.width *= this.pixelRatio;
+    this.canvas.height*= this.pixelRatio;
 }
 setBoundary(){
     const xCen = this.width / 2;
