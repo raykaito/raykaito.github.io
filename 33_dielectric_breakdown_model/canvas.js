@@ -57,8 +57,8 @@ resizeCanvas(){
     this.canvas.style.height = this.canvas.width + "px";
     this.canvas.width  = this.canvas.width;
     this.canvas.height = this.canvas.width;
-    this.canvas.width *= this.pixelRatio;
-    this.canvas.height*= this.pixelRatio;
+    this.canvas.style.width  = this.canvas.width / this.pixelRatio + "px";
+    this.canvas.style.height = this.canvas.width / this.pixelRatio + "px";
 }
 resetCanvas(){
     this.ct.fillStyle = "black";
@@ -169,7 +169,6 @@ findNextPath(){
         probabilitySum += this.getProbability(bondIndex);
     }
     let rand = Math.random() * probabilitySum;
-    console.log(rand/probabilitySum);
     for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
         const bondX = this.bond[bondIndex][1][0];
         const bondY = this.bond[bondIndex][1][1];
@@ -187,6 +186,15 @@ getProbability(bondIndex){
     return this.potentialMap[bondX][bondY];
 }
 solveLEQ(){
+    /*
+    for(let x = 0; x < this.canvas.width; x++){
+        for(let y = 0; y < this.canvas.height; y++){
+            if(this.pixStatusMap[x][y] == 0){
+                this.potentialMap[x][y] = 1;
+            }
+        }
+    }
+    */
     for(let i = 0; i < 1; i++){
         this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
    }
@@ -202,7 +210,7 @@ updateCanvas2(){
 updateCanvas(){
     for(let x = 0; x < this.canvas.width; x++){
         for(let y = 0; y < this.canvas.height; y++){
-            this.setPix([x, y], Math.max(0, 3 * this.pathCounter[this.xy2i([x,y])]));
+            this.setPix([x, y], Math.max(0, 5 * this.pathCounter[this.xy2i([x,y])]));
             //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
         }
     }
@@ -234,7 +242,21 @@ paintNewPath(newXY){
         this.setPix(newXY, 0  , 0);
         this.setPix(newXY, 128, 1);
         this.setPix(newXY, 255, 2);
-        this.pathCounter[this.xy2i(newXY)]++;
+        let rand = Math.random();
+        let offset = 0;
+        while(rand < 0.1){
+            rand *= 10;
+            offset++;
+        }
+        if(rand < 0.25){
+            this.pathCounter[this.xy2i([newXY[0] - offset, newXY[1]])]++;
+        }else if(rand < 0.5){
+            this.pathCounter[this.xy2i([newXY[0] + offset, newXY[1]])]++;
+        }else if(rand < 0.75){
+            this.pathCounter[this.xy2i([newXY[0] , newXY[1] - offset])]++;
+        }else{
+            this.pathCounter[this.xy2i([newXY[0] , newXY[1] + offset])]++;
+        }
     }
 }
 setPix(index, value, type = -1){
