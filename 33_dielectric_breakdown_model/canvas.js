@@ -20,6 +20,10 @@ constructor(canvas){
             this.parentMap[x][y] = [0, 0];
         }
     }
+    this.pathCounter = new Array(this.canvas.width*this.canvas.height);
+    for(let i = 0; i < this.canvas.width * this.canvas.height; i++){
+        this.pathCounter[i] = 0;
+    }
 
     //Variables
     this.bond = new Array();
@@ -161,13 +165,12 @@ setPath(x, y, xo = -1, yo){
 }
 findNextPath(){
     let probabilitySum = 0;
-    for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
-        const bondX = this.bond[bondIndex][1][0];
-        const bondY = this.bond[bondIndex][1][1];
-        probabilitySum += this.potentialMap[bondX][bondY];
+    for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
+        probabilitySum += this.getProbability(bondIndex);
     }
     let rand = Math.random() * probabilitySum;
-    for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+    console.log(rand/probabilitySum);
+    for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
         const bondX = this.bond[bondIndex][1][0];
         const bondY = this.bond[bondIndex][1][1];
         rand -= this.potentialMap[bondX][bondY];
@@ -178,15 +181,28 @@ findNextPath(){
         }
     }
 }
+getProbability(bondIndex){
+    const bondX = this.bond[bondIndex][1][0];
+    const bondY = this.bond[bondIndex][1][1];
+    return this.potentialMap[bondX][bondY];
+}
 solveLEQ(){
     for(let i = 0; i < 1; i++){
         this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
    }
 }
-updateCanvas(){
+updateCanvas2(){
     for(let x = 0; x < this.canvas.width; x++){
         for(let y = 0; y < this.canvas.height; y++){
             this.setPix([x, y], this.interpolate(this.potentialMap[x][y]));
+            //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
+        }
+    }
+}
+updateCanvas(){
+    for(let x = 0; x < this.canvas.width; x++){
+        for(let y = 0; y < this.canvas.height; y++){
+            this.setPix([x, y], Math.max(0, 3 * this.pathCounter[this.xy2i([x,y])]));
             //this.setPix([x, y], this.interpolate(this.pixStatusMap[x][y]));
         }
     }
@@ -209,10 +225,16 @@ stopAnimation(){
     this.animatingNow = false;
 }
 paintNewPath(newXY){
-    this.setPix(newXY,255, 0);
+    this.setPix(newXY, 0  , 0);
+    this.setPix(newXY, 128, 1);
+    this.setPix(newXY, 255, 2);
+    this.pathCounter[this.xy2i(newXY)]++;
     while(this.parentMap[newXY[0]][newXY[1]] != -1){
         newXY = this.parentMap[newXY[0]][newXY[1]];
-        this.setPix(newXY,255, 0);
+        this.setPix(newXY, 0  , 0);
+        this.setPix(newXY, 128, 1);
+        this.setPix(newXY, 255, 2);
+        this.pathCounter[this.xy2i(newXY)]++;
     }
 }
 setPix(index, value, type = -1){

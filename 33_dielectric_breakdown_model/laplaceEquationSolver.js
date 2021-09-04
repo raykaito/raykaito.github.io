@@ -14,6 +14,7 @@ constructor(width, height){
         if(pixStatusMap[thx][thy] != 0){
             return potentialMap[thx][thy];
         }else{
+            //const offset = (0.5 - potentialMap[thx][thy]) * 0.05;
             return (potentialMap[thx + 1][thy    ] / 4 + 
                     potentialMap[thx - 1][thy    ] / 4 + 
                     potentialMap[thx    ][thy + 1] / 4 + 
