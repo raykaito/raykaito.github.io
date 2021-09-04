@@ -210,8 +210,8 @@ updateCanvas(){
 startAnimation(){
     this.animatingNow = true;
     let newXY;
+    this.solveLEQ();
     for(let speed = 0; speed < 1; speed++){
-        this.solveLEQ();
         newXY = this.findNextPath();
     }
     this.updateCanvas();
