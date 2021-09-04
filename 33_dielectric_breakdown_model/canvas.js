@@ -2,20 +2,24 @@ class Canvas{
 constructor(canvas){
     //Initialize Canvas and its size
     this.canvas = canvas;
-    this.ct = canvas.getContext('webgl2', { premultipliedAlpha: false });
+    this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
-    this.width = this.canvas.width;
-    this.height= this.canvas.height;
+    this.cwidth = this.canvas.width;
+    this.cheight= this.canvas.height;
+    this.width  = this.cwidth / this.pixelRatio;
+    this.height = this.cheight / this.pixelRatio;
 
     // GPU variables
     this.canvasgpu = new GPU({
         mode:'gpu',
         canvas: this.canvas,
-        context: this.ct
+        context: this.gl
     });
     console.log("GPU supported:"+GPU.isGPUSupported);
     this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, newPath){
-        const index = this.thread.x + this.thread.y * this.constants.width;
+        const x = Math.floor(this.thread.x / this.constants.pr);
+        const y = Math.floor(this.thread.y / this.constants.pr);
+        const index = x + y * this.constants.width;
         if(newPath[index] > 0){
             this.color(0, 0.5, 1);
         }else{
@@ -23,8 +27,8 @@ constructor(canvas){
             this.color(value / 256, value / 256, value / 256);
         }
     })
-    .setOutput([this.width, this.height])
-    .setConstants({width:this.width})
+    .setOutput([this.cwidth, this.cheight])
+    .setConstants({width:this.width, pr:this.pixelRatio})
     .setGraphical(true);
 
     //Initialize potential and pixStatus Map
