@@ -25,7 +25,7 @@ constructor(canvas){
             const g2 = displaySettings[4] + displaySettings[5] * 0.5;
             const b2 = displaySettings[5];
             this.color(r2, g2, b2);
-        }else if(potentialMap[x][y] == 0){
+        }else if(pathCounter[index] != 0){
             const value = Math.min(255, 5 * pathCounter[index])
             const r1 = displaySettings[0];
             const g1 = displaySettings[1];
