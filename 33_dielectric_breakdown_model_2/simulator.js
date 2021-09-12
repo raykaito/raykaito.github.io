@@ -1,4 +1,4 @@
-class LaplaceEqSolver{
+class Simulator{
 constructor(width, height, canvasIn, glIn, pixelRatio, cwidth, cheight){
     //Mandel Map Variables
     this.width = width;
@@ -135,4 +135,4 @@ xy2i(x, y){
     return x + y * this.width;
 }
 }
-console.log("Loaded: MandelPlotter.js");
+console.log("Loaded: simulator.js");

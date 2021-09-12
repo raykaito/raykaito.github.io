@@ -1,4 +1,4 @@
-class Canvas{
+class KernelManager{
 constructor(canvas){
     //Initialize Canvas and its size
     this.canvas = canvas;
@@ -10,11 +10,11 @@ constructor(canvas){
     this.height = this.cheight / this.pixelRatio;
 
     //Initialize LES
-    this.LES = new LaplaceEqSolver(this.width, this.height, this.canvas, this.gl, this.pixelRatio, this.cwidth, this.cheight);
+    this.sim = new Simulator(this.width, this.height, this.canvas, this.gl, this.pixelRatio, this.cwidth, this.cheight);
 
     //Initialize PotentialMapK
-    this.potentialMapK = this.LES.generatePotentialMap();
-    this.potentialMapK = this.LES.setBoundaryCircular(this.potentialMapK, Math.floor(this.width / 2), Math.floor(this.height / 2));
+    this.potentialMapK = this.sim.generatePotentialMap();
+    this.potentialMapK = this.sim.setBoundaryCircular(this.potentialMapK, Math.floor(this.width / 2), Math.floor(this.height / 2));
 
     //Initialize potential and pixStatus Map
     this.potentialMap = new Array(this.width); // potential value [0,1]
@@ -49,7 +49,7 @@ constructor(canvas){
     this.setPath(Math.floor(this.width/2), Math.floor(this.height/2));
     this.solveLEQ();
     this.solveLEQK();
-    this.LES.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
+    this.sim.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
     this.startAnimation();
 }
 toggleAnimation(){
@@ -96,7 +96,7 @@ setPath(x, y, xo = -1, yo){
     //Update Status and potential
     this.pixStatusMap[x][y] = 2;
     this.potentialMap[x][y] = 0;
-    this.potentialMapK = this.LES.setPotentialZero(this.potentialMapK, x, y);
+    this.potentialMapK = this.sim.setPotentialZero(this.potentialMapK, x, y);
 
     // Check a neighbor and add bond if not invaded
     if(this.pixStatusMap[x - 1][y    ] == 0){
@@ -175,19 +175,19 @@ setPath(x, y, xo = -1, yo){
     }
 }
 findNextPath(potentialMapK, bond, length, randomNum){
-    return this.LES.findNextPath(potentialMapK, bond, length, randomNum);
+    return this.sim.findNextPath(potentialMapK, bond, length, randomNum);
 }
 returnArray(kernelIn){
     return kernelIn.toArray();
 }
 updateCanvas(){
-    this.LES.updateCanvas(this.pathCounter, this.potentialMapK, this.newPath, displaySettings);
+    this.sim.updateCanvas(this.pathCounter, this.potentialMapK, this.newPath, displaySettings);
 }
 solveLEQ(){
-    this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
+    this.potentialMap = this.sim.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
 }
 solveLEQK(){
-    this.potentialMapK = this.LES.solveLEQ(this.potentialMapK, this.pixStatusMap);
+    this.potentialMapK = this.sim.solveLEQ(this.potentialMapK, this.pixStatusMap);
 }
 startAnimation(){
     this.animatingNow = true;
@@ -241,4 +241,4 @@ xy2i([x, y]){
     return x + y * this.width;
 }
 }
-console.log("Loaded: canvas.js");
+console.log("Loaded: kernelManager.js");

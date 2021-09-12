@@ -9,12 +9,39 @@ constructor(canvas){
     this.width  = this.cwidth / this.pixelRatio;
     this.height = this.cheight / this.pixelRatio;
 
-    //Initialize LES
-    this.LES = new LaplaceEqSolver(this.width, this.height, this.canvas, this.gl, this.pixelRatio, this.cwidth, this.cheight);
-
-    //Initialize PotentialMapK
-    this.potentialMapK = this.LES.generatePotentialMap();
-    this.potentialMapK = this.LES.setBoundaryCircular(this.potentialMapK, Math.floor(this.width / 2), Math.floor(this.height / 2));
+    // GPU variables
+    this.canvasgpu = new GPU({
+        mode:'gpu',
+        canvas: this.canvas,
+        context: this.gl
+    });
+    console.log("GPU supported:"+GPU.isGPUSupported);
+    this.updateCanvas = this.canvasgpu.createKernel(function(pathCounter, potentialMap, newPath, displaySettings){
+        const x = Math.floor(this.thread.x / this.constants.pr);
+        const y = Math.floor(this.thread.y / this.constants.pr);
+        const index = x + y * this.constants.width;
+        if(newPath[index] > 0 && (displaySettings[3] != 0 || displaySettings[4] != 0 || displaySettings[5] != 0)){
+            const r2 = displaySettings[3];
+            const g2 = displaySettings[4] + displaySettings[5] * 0.5;
+            const b2 = displaySettings[5];
+            this.color(r2, g2, b2);
+        }else if(pathCounter[index] != 0){
+            const value = Math.min(255, 5 * pathCounter[index])
+            const r1 = displaySettings[0];
+            const g1 = displaySettings[1];
+            const b1 = displaySettings[2];
+            this.color(r1 * value / 256, g1 * value / 256, b1 * value / 256);
+        }else{
+            const value3 = potentialMap[x][y] * 0.5;
+            const r3 = displaySettings[6];
+            const g3 = displaySettings[7];
+            const b3 = displaySettings[8];
+            this.color(r3 * value3, g3 * value3, b3 * value3);
+        }
+    })
+    .setOutput([this.cwidth, this.cheight])
+    .setConstants({width:this.width, pr:this.pixelRatio})
+    .setGraphical(true);
 
     //Initialize potential and pixStatus Map
     this.potentialMap = new Array(this.width); // potential value [0,1]
@@ -44,12 +71,14 @@ constructor(canvas){
     this.counter = 0;
     this.animatingNow = false;
 
+    //Initialize LES
+    this.LES = new LaplaceEqSolver(this.width, this.height);
+
     //Set boundary and path
     this.setBoundary();
     this.setPath(Math.floor(this.width/2), Math.floor(this.height/2));
     this.solveLEQ();
-    this.solveLEQK();
-    this.LES.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
+    this.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
     this.startAnimation();
 }
 toggleAnimation(){
@@ -96,17 +125,16 @@ setPath(x, y, xo = -1, yo){
     //Update Status and potential
     this.pixStatusMap[x][y] = 2;
     this.potentialMap[x][y] = 0;
-    this.potentialMapK = this.LES.setPotentialZero(this.potentialMapK, x, y);
 
     // Check a neighbor and add bond if not invaded
     if(this.pixStatusMap[x - 1][y    ] == 0){
-        this.bond.push(x, y, x - 1, y);
+        this.bond[this.bond.length] = [[x, y], [x - 1, y    ]];
     // Check a neighbor and remove bond if invaded
     }else if(this.pixStatusMap[x - 1][y    ] == 2){
-        for(let bondIndex = 0; bondIndex < this.bond.length / 4; bondIndex++){
-            if(this.bond[4 * bondIndex + 2 * 1 + 0] == (x - 1) &&
-               this.bond[4 * bondIndex + 2 * 1 + 1] == y){
-                this.bond.splice(bondIndex * 4, 4);
+        for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+            if(this.bond[bondIndex][1][0] == (x - 1) &&
+               this.bond[bondIndex][1][1] == y){
+                this.bond.splice(bondIndex, 1);
             }
         }
     }else if(this.pixStatusMap[x - 1][y    ] == 1){
@@ -117,13 +145,13 @@ setPath(x, y, xo = -1, yo){
 
     // Check a neighbor and add bond if not invaded
     if(this.pixStatusMap[x + 1][y    ] == 0){
-        this.bond.push(x, y, x + 1, y);
+        this.bond[this.bond.length] = [[x, y], [x + 1, y    ]];
     // Check a neighbor and remove bond if invaded
     }else if(this.pixStatusMap[x + 1][y    ] == 2){
-        for(let bondIndex = 0; bondIndex < this.bond.length / 4; bondIndex++){
-            if(this.bond[4 * bondIndex + 2 * 1 + 0] == (x + 1) &&
-               this.bond[4 * bondIndex + 2 * 1 + 1] == y){
-                this.bond.splice(bondIndex * 4, 4);
+        for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+            if(this.bond[bondIndex][1][0] == (x + 1) &&
+               this.bond[bondIndex][1][1] == y){
+                this.bond.splice(bondIndex, 1);
             }
         }
     }else if(this.pixStatusMap[x + 1][y    ] == 1){
@@ -134,13 +162,13 @@ setPath(x, y, xo = -1, yo){
 
     // Check a neighbor and add bond if not invaded
     if(this.pixStatusMap[x    ][y - 1] == 0){
-        this.bond.push(x, y, x , y - 1);
+        this.bond[this.bond.length] = [[x, y], [x    , y - 1]];
     // Check a neighbor and remove bond if invaded
     }else if(this.pixStatusMap[x    ][y - 1] == 2){
-        for(let bondIndex = 0; bondIndex < this.bond.length / 4; bondIndex++){
-            if(this.bond[4 * bondIndex + 2 * 1 + 0] == x &&
-               this.bond[4 * bondIndex + 2 * 1 + 1] == (y - 1)){
-                this.bond.splice(bondIndex * 4, 4);
+        for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+            if(this.bond[bondIndex][1][0] == x &&
+               this.bond[bondIndex][1][1] == (y - 1)){
+                this.bond.splice(bondIndex, 1);
             }
         }
     }else if(this.pixStatusMap[x    ][y - 1] == 1){
@@ -151,13 +179,13 @@ setPath(x, y, xo = -1, yo){
 
     // Check a neighbor and add bond if not invaded
     if(this.pixStatusMap[x    ][y + 1] == 0){
-        this.bond.push(x, y, x , y + 1);
+        this.bond[this.bond.length] = [[x, y], [x    , y + 1]];
     // Check a neighbor and remove bond if invaded
     }else if(this.pixStatusMap[x    ][y + 1] == 2){
-        for(let bondIndex = 0; bondIndex < this.bond.length / 4; bondIndex++){
-            if(this.bond[4 * bondIndex + 2 * 1 + 0] == x &&
-               this.bond[4 * bondIndex + 2 * 1 + 1] == (y + 1)){
-                this.bond.splice(bondIndex * 4, 4);
+        for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+            if(this.bond[bondIndex][1][0] == x &&
+               this.bond[bondIndex][1][1] == (y + 1)){
+                this.bond.splice(bondIndex, 1);
             }
         }
     }else if(this.pixStatusMap[x    ][y + 1] == 1){
@@ -167,40 +195,43 @@ setPath(x, y, xo = -1, yo){
     }
 
     //Remove bond to new pixel
-    for(let bondIndex = 0; bondIndex < this.bond.length / 4; bondIndex++){
-        if(this.bond[4 * bondIndex + 2 * 1 + 0] == x &&
-           this.bond[4 * bondIndex + 2 * 1 + 1] == y){
-            this.bond.splice(bondIndex * 4, 4);
+    for(let bondIndex = 0; bondIndex < this.bond.length; bondIndex++){
+        if(this.bond[bondIndex][1][0] == x &&
+           this.bond[bondIndex][1][1] == y){
+            this.bond.splice(bondIndex, 1);
         }
     }
 }
-findNextPath(potentialMapK, bond, length, randomNum){
-    return this.LES.findNextPath(potentialMapK, bond, length, randomNum);
-}
-returnArray(kernelIn){
-    return kernelIn.toArray();
-}
-updateCanvas(){
-    this.LES.updateCanvas(this.pathCounter, this.potentialMapK, this.newPath, displaySettings);
+findNextPath(){
+    let probabilitySum = 0;
+    for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
+        const bondX = this.bond[bondIndex][1][0];
+        const bondY = this.bond[bondIndex][1][1];
+        probabilitySum += this.potentialMap[bondX][bondY];
+    }
+    let rand = Math.random() * probabilitySum;
+    for(let bondIndex = this.bond.length - 1; bondIndex >= 0; bondIndex--){
+        const bondX = this.bond[bondIndex][1][0];
+        const bondY = this.bond[bondIndex][1][1];
+        rand -= this.potentialMap[bondX][bondY];
+        if(rand < 0){
+            //bondIndex at this moment is to be invaded next
+            this.setPath(bondX, bondY, this.bond[bondIndex][0][0], this.bond[bondIndex][0][1]);
+            return [bondX, bondY];
+        }
+    }
 }
 solveLEQ(){
     this.potentialMap = this.LES.solveLaplaceEquation(this.potentialMap, this.pixStatusMap);
 }
-solveLEQK(){
-    this.potentialMapK = this.LES.solveLEQ(this.potentialMapK, this.pixStatusMap);
-}
 startAnimation(){
     this.animatingNow = true;
-    let newXY, newXYK;
-    //this.solveLEQ();
-    this.solveLEQK();
-    const randomNum = Math.random();
-    //newXY = this.findNextPath(randomNum);
-    newXYK = this.findNextPath(this.potentialMapK, this.bond, this.bond.length, randomNum);
-    newXYK = this.returnArray(newXYK)[0];
-    this.setPath(newXYK[0], newXYK[1], newXYK[2], newXYK[3]);
-    this.paintNewPath([newXYK[0], newXYK[1]]);
-    this.updateCanvas();
+    let newXY;
+    this.solveLEQ();
+    newXY = this.findNextPath();
+    this.paintNewPath(newXY);
+    this.updateCanvas(this.pathCounter, this.potentialMap, this.newPath, displaySettings);
+    //this.ct.putImageData(this.imageData, 0, 0);
     if(this.animatingNow) this.animation = requestAnimationFrame(() => {this.startAnimation();});
 }
 stopAnimation(){
