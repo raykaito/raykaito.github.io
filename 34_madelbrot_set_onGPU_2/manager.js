@@ -1,103 +1,3 @@
-class Canvas{
-    constructor(canvas){
-        //Initialize Canvas and its size
-        this.canvas = canvas;
-        this.ct = canvas.getContext("2d");
-        this.resize();
-        //ColorMapInfo
-        this.randColorRGB = new Array();
-        this.prepareRandColor();
-        //ImageData
-        this.ct.fillStyle = "white";
-        this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
-        this.imageData = this.ct.getImageData(0,0,this.canvas.width,this.canvas.height);
-    }
-    prepareRandColor(){
-        const colorList = ["aqua","aquamarine","beige","cyan","cornsilk","lawngreen","lime","palegreen","springgreen","yellow","pink","lightpink"];
-        for(let colorListIn = 0; colorListIn<colorList.length; colorListIn++){
-            this.ct.fillStyle = colorList[colorListIn];
-            this.ct.fillRect(0,0,1,1);
-            this.imageData = this.ct.getImageData(0,0,1,1);
-            this.randColorRGB[colorListIn] = new Uint8Array(3);
-            this.randColorRGB[colorListIn][0] = this.imageData.data[0];
-            this.randColorRGB[colorListIn][1] = this.imageData.data[1];
-            this.randColorRGB[colorListIn][2] = this.imageData.data[2];
-        }
-    }
-    //Canvas Functions
-    resize(whRatio = 1){
-        this.canvas.width = Math.floor(window.innerWidth)-20;
-        if(Math.floor(window.innerWidth)>540)   this.canvas.width = 520;
-        if(Math.floor(window.innerWidth)<320)   this.canvas.width = 320;
-        //this.canvas.width = 20;
-        this.pixelRatio = window.devicePixelRatio;
-        //this.canvas.width = 8000/this.pixelRatio;
-        this.canvas.style.width  = this.canvas.width + "px";
-        this.canvas.style.height = this.canvas.width*whRatio + "px";
-        this.canvas.width  = this.canvas.width;
-        this.canvas.height = this.canvas.width*whRatio;
-        this.canvas.width *= this.pixelRatio;
-        this.canvas.height*= this.pixelRatio;
-    }
-    setPix(index, value,rgb=3){
-        //Set the pixel based on type
-        if(rgb==3){
-            this.imageData.data[4*index+0] = value;
-            this.imageData.data[4*index+1] = value;
-            this.imageData.data[4*index+2] = value;
-        }else{
-            this.imageData.data[4*index+rgb] = value;
-        }
-    }
-    setRandomColor(index,value){
-        const colorIndex = value%this.randColorRGB.length;
-        this.imageData.data[4*index+0] = this.randColorRGB[colorIndex][0];
-        this.imageData.data[4*index+1] = this.randColorRGB[colorIndex][1];
-        this.imageData.data[4*index+2] = this.randColorRGB[colorIndex][2];
-    }
-    text(string="empty string", x=0, y=0, color="black", font="10px 'Times'", ta="left", tbl="top"){
-        this.ct.fillStyle = color;
-        this.ct.font = font;
-        this.ct.textAlign = ta;
-        this.ct.textBaseline = tbl;
-        this.ct.fillText(string,x,y);
-    }
-    hideCanvas(){
-        this.canvas.style.display = "none";
-    }
-    showCanvas(){
-        this.canvas.style.display = "inline";
-    }
-}
-class LogCanvas extends Canvas{
-    constructor(canvas=document.createElement("canvas"),lineSize=16){
-        super(canvas);
-        this.lineSize = lineSize;
-        this.font = ""+lineSize+"px 'Times'";
-        this.resize(0.4);
-        this.ct.fillStyle = "white";
-        this.ct.fillRect(0,0,this.canvas.width,this.canvas.height);
-        this.newLine("Logger Started...");
-    }
-    newLine(string="Empty"){
-        if(string.isArray){
-            let newString = "";
-            string.forEach((element)=>{
-                newString = newString+","+element;
-            });
-            string = newString;
-        }
-        this.text(string,0,0,"black",this.font);
-        this.ct.drawImage(this.canvas,0,this.lineSize);
-        this.ct.fillStyle = "white";
-        this.ct.fillRect(0,0,this.canvas.width,this.lineSize);
-    }
-    onLine(string="Empty"){
-        this.ct.fillStyle = "white";
-        this.ct.fillRect(0,0,this.canvas.width,this.lineSize);
-        this.text(string,0,0,"black",this.font);        
-    }
-}
 class Manager{
 constructor(canvas){
     //Initialize Canvas and its size
@@ -106,17 +6,6 @@ constructor(canvas){
     this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
     //Add Event listeners
-    /*
-    this.touchStart = false;
-    this.touchXY = [0, 0];
-    this.canvas.addEventListener('mousedown',  (event) => {this.touch(event);},     false);
-    this.canvas.addEventListener('touchstart', (event) => {this.touch(event);},     false);
-    this.canvas.addEventListener('mousemove',  (event) => {this.moveMouse(event);}, false);
-    this.canvas.addEventListener('touchmove',  (event) => {this.moveMouse(event);}, false);
-    this.canvas.addEventListener('mouseup'  ,  (event) => {this.release(event);},   false);
-    this.canvas.addEventListener('touchend'  , (event) => {this.release(event);},   false);
-    this.canvas.addEventListener('mousewheel', (event) => {this.mouseWheel(event);},false);
-    */
     this.panStarted = false;
     this.pinchStarted = false;
     this.canvas.addEventListener('touchstart', (event) => {this.touchHandler(event);}, false);
@@ -200,9 +89,10 @@ touchHandler(event){
             const newdy = Math.abs(newPinchXY0[1] - newPinchXY1[1]);
             const newdd = newdx * newdx + newdy * newdy;
             const scale = Math.sqrt(lastdd/newdd);
+            const [x, y] = this.modXY([newCenterX, newCenterY]);
             this.sideLength *= scale;
-            this.xCorner += (newCenterX - this.xCorner) * (1 - scale);
-            this.yCorner += (newCenterY - this.yCorner) * (1 - scale);
+            this.xCorner += (x - this.xCorner) * (1 - scale);
+            this.yCorner += (y - this.yCorner) * (1 - scale);
             //Update lastPinchXY
             this.pinchXY0[0] = newPinchXY0[0];
             this.pinchXY0[1] = newPinchXY0[1];
@@ -219,35 +109,6 @@ touchHandler(event){
         this.pinchStarted = false;
     }
 }
-/*
-touch(event){
-    if(this.touchStart) return;
-    this.touchStart = true;
-    this.touchXY = this.getXY(event);
-    this.lastMoveXY = this.getXYmouse(event);
-    this.lastMove = Date.now();
-}
-moveMouse(event){
-    if(this.touchStart == false) return;
-    if(Date.now() - this.lastMove < 17) return;
-    this.lastMove = Date.now();
-    const [xpix, ypix] = this.getXYmouse(event);
-    const scale = (1 + (ypix - this.lastMoveXY[1])/100);
-    console.log((ypix - this.lastMoveXY[1]) + ", " + scale);
-    this.sideLength *= scale;
-    this.xCorner += (this.touchXY[0] - this.xCorner) * (1 - scale);
-    this.yCorner += (this.touchXY[1] - this.yCorner) * (1 - scale);
-    this.sideLength = Math.fround(this.sideLength);
-    this.xCorner= Math.fround(this.xCorner);
-    this.yCorner= Math.fround(this.yCorner);
-    this.lastMoveXY[0] = xpix;
-    this.lastMoveXY[1] = ypix;
-    this.initializeMandelbrotMap();
-}
-release(event){    
-    this.touchStart = false;
-}
-*/
 mouseWheel(event){
     event.preventDefault();
     if(Date.now() - this.lastMove < 16) return;
