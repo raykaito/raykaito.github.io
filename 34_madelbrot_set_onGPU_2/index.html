@@ -17,8 +17,8 @@
 		<tr>
 			<td align="center">
 				<Font size="10" Font color="black"><TNR>
-					<a href="../34_madelbrot_set_onGPU_2/index.html" style="text-decoration: none; color:black">
-						Mandelbrot Set
+					<a href="../16_madelbrot_set/index.html" style="text-decoration: none; color:black">
+						Mandelbrot Set on GPU 2
 			   		</a>
 				</Font></TNR>
 				<hr>
@@ -39,8 +39,10 @@
 		</tr>
 
 	</table>
-	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="manager.js"></script>
+	<script type="text/javascript" src="mandelPlotter.js"></script>
 	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script src="../00_Libraries/gpujs/gpu-browser.js"></script>
 	<script type="text/javascript">
 	<!--
 	 
@@ -51,9 +53,10 @@
 		const text2 = document.getElementById('Text2');
 		showObject(bodyElement, tableElement);
 
-		const canvas = new Canvas(canvasElement);
+		const manager = new Manager(canvasElement);
 	//--> 
 	</script>
+
 
 </body>
 
