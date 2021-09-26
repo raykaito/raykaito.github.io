@@ -168,6 +168,9 @@ touchHandler(event){
             this.panXY[0] = newPanXY[0];
             this.panXY[1] = newPanXY[1];
             //update Canvas
+            this.sideLength = Math.fround(this.sideLength);
+            this.xCorner= Math.fround(this.xCorner);
+            this.yCorner= Math.fround(this.yCorner);
             this.initializeMandelbrotMap();
         }
     }else{
@@ -198,12 +201,17 @@ touchHandler(event){
             const newdd = newdx * newdx + newdy * newdy;
             const scale = Math.sqrt(lastdd/newdd);
             this.sideLength *= scale;
-
+            this.xCorner += (newCenterX - this.xCorner) * (1 - scale);
+            this.yCorner += (newCenterY - this.yCorner) * (1 - scale);
+            //Update lastPinchXY
             this.pinchXY0[0] = newPinchXY0[0];
             this.pinchXY0[1] = newPinchXY0[1];
             this.pinchXY1[0] = newPinchXY1[0];
             this.pinchXY1[1] = newPinchXY1[1];
-            //update Canvas
+            //Update Canvas
+            this.sideLength = Math.fround(this.sideLength);
+            this.xCorner= Math.fround(this.xCorner);
+            this.yCorner= Math.fround(this.yCorner);
             this.initializeMandelbrotMap();
             l.newLine("Ver1."+this.pinchXY0 + "----" + this.pinchXY1);
         }
