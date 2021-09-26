@@ -18,7 +18,7 @@ constructor(canvas){
     this.xCorner = -2;
     this.yCorner = -2;
     this.sideLength = 4;
-    this.iterationCount = 10000;
+    this.iterationCount = 100;
     //Initialize MandelPlotter
     this.counter = 0;
     this.mandelPlotter = new MandelPlotter(this.canvas.width, this.canvas.height, this.canvas, this.gl);
