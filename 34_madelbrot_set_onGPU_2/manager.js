@@ -18,16 +18,18 @@ constructor(canvas){
     this.xCorner = -2;
     this.yCorner = -2;
     this.sideLength = 4;
-    this.iterationCount = 10000;
+    this.iterationCount = 100;
     //Initialize MandelPlotter
     this.mandelPlotter = new MandelPlotter(this.canvas.width, this.canvas.height, this.canvas, this.gl);
     //Reset...or start
+    this.plotDone = false;
     this.initializeMandelbrotMap();
 }
 initializeMandelbrotMap(){
     text1.textContent = "Number of iterations: "+this.iterationCount;
     text2.textContent = "Length of side: "+this.sideLength.toExponential(3);
     this.mandelPlotter.plotMandelbrotSet(this.xCorner, this.yCorner, this.xCorner + this.sideLength, this.yCorner + this.sideLength, this.iterationCount);
+    this.plotDone = true;
 }
 resizeCanvas(){
     this.canvas.width = Math.floor(window.innerWidth) - 20;
@@ -70,7 +72,7 @@ release(event){
 }
 mouseWheel(event){
     event.preventDefault();
-    if(Date.now() - this.lastMove < 15) return;
+    if(Date.now() - this.lastMove < 16) return;
     this.lastMove = Date.now();
     const scale = (1 - event.wheelDelta/1200);
     const [x, y] = this.getXY(event);

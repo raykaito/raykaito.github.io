@@ -33,8 +33,8 @@
 
 		<tr>
 			<td align="left">
-				<div id="Text1"></div><br>
-				<div id="Text2"></div><br>
+				<a id="Text2"></a><br>
+				<a id="Text1"></a>   <input id="slidernIter" class="sliderfullwidth" type="range" width="50%"><br>
 			</td>
 		</tr>
 
@@ -51,9 +51,23 @@
 		const canvasElement = document.getElementById('Canvas');
 		const text1 = document.getElementById('Text1');
 		const text2 = document.getElementById('Text2');
+		const nIteration = document.getElementById("slidernIter");
 		showObject(bodyElement, tableElement);
 
 		const manager = new Manager(canvasElement);
+
+		// Slider Scale;
+		nIteration.onchange = () => {manager.initializeMandelbrotMap();};
+		nIteration.oninput = () => {changenIter();};
+		nIteration.step = 0.01;
+		nIteration.value = 2;
+		nIteration.min = 0;
+		nIteration.max = 4;
+
+		const changenIter = () => {
+			manager.iterationCount = Math.floor(Math.pow(10, nIteration.value));
+		    text1.textContent = "Number of iterations: "+manager.iterationCount;
+		}
 	//--> 
 	</script>
 
