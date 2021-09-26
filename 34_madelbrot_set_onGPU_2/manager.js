@@ -159,10 +159,10 @@ touchHandler(event){
         if(this.panStarted == false){
             this.panStarted = true;
             this.panXY = this.getXYpix(event.touches[0]);
-            l.newLine("newPanStarted at :" + this.panXY[0] + "," this.panXY[1]);
+            l.newLine("newPanStarted at :" + this.panXY[0] + "," + this.panXY[1]);
         }else{
             const newPanXY = this.getXYpix(event.touches[0]);
-            l.newLine("Panning at :" + this.panXY[0] + "," this.panXY[1]);
+            l.newLine("Panning at :" + this.panXY[0] + "," + this.panXY[1]);
             this.xCorner += (newPanXY[0] - this.panXY[0]) * this.sideLength / this.width;
             this.yCorner += (newPanXY[1] - this.panXY[1]) * this.sideLength / this.height;
             this.panXY[0] = newPanXY[0];
