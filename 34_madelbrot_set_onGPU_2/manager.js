@@ -177,11 +177,11 @@ touchHandler(event){
         if(this.pinchStarted == false){
             this.pinchStarted = true;
             this.pinchXY0 = this.getXYtouch(event, 0);
-            this.pinchXY1 = this.getXYtouch(event, -1);
+            this.pinchXY1 = this.getXYtouch(event, 1);
         }else{
             //Find new touches
             const newPinchXY0 = this.getXYtouch(event, 0);
-            const newPinchXY1 = this.getXYtouch(event, -1);
+            const newPinchXY1 = this.getXYtouch(event, 1);
             //Find pan
             const lastCenterX = (this.pinchXY0[0] + this.pinchXY1[0]) / 2;
             const lastCenterY = (this.pinchXY0[1] + this.pinchXY1[1]) / 2;
