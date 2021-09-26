@@ -158,10 +158,10 @@ touchHandler(event){
     if(touchCount == 1){
         if(this.panStarted == false){
             this.panStarted = true;
-            this.panXY = this.getXYpix(event.touches[0]);
+            this.panXY = this.getXYpixTouch(event, 0);
             l.newLine("newPanStarted at :" + this.panXY[0] + "," + this.panXY[1]);
         }else{
-            const newPanXY = this.getXYpix(event.touches[0]);
+            const newPanXY = this.getXYpixTouch(event, 0);
             l.newLine("Panning at :" + this.panXY[0] + "," + this.panXY[1]);
             this.xCorner += (newPanXY[0] - this.panXY[0]) * this.sideLength / this.width;
             this.yCorner += (newPanXY[1] - this.panXY[1]) * this.sideLength / this.height;
@@ -174,8 +174,8 @@ touchHandler(event){
     if(touchCount == 2){
         if(this.pinchStarted = false){
             this.pinchStarted = true;
-            this.pinchXY0 = this.getXYpix(event.touches[0]);
-            this.pinchXY1 = this.getXYpix(event.touches[1]);
+            this.pinchXY0 = this.getXYpixTouch(event, 0);
+            this.pinchXY1 = this.getXYpixTouch(event, 0);
         }
     }else{
         this.pinchStarted = false;
@@ -223,6 +223,15 @@ mouseWheel(event){
     this.xCorner= Math.fround(this.xCorner);
     this.yCorner= Math.fround(this.yCorner);
     this.initializeMandelbrotMap();
+}
+getXYpixTouch(event, index){
+    event.preventDefault();
+    const rect = event.target.getBoundingClientRect();
+    let x = event.touches[index].pageX-rect.left-document.scrollingElement.scrollLeft;
+    let y = event.touches[index].pageY-rect.top -document.scrollingElement.scrollTop;
+    x *= this.pixelRatio;
+    y *= this.pixelRatio;
+    return [x,y];
 }
 getXYpix(event){
     event.preventDefault();
