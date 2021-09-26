@@ -35,6 +35,8 @@
 			<td align="left">
 				<a id="Text2"></a><br>
 				<a id="Text1"></a>   <input id="slidernIter" class="sliderfullwidth" type="range" width="50%"><br>
+
+				<canvas id="LogCanvas" style="display:block" onclick="canvasClicked()"></canvas>
 			</td>
 		</tr>
 
@@ -45,6 +47,8 @@
 	<script src="../00_Libraries/gpujs/gpu-browser.js"></script>
 	<script type="text/javascript">
 	<!--
+		const logCanvasElement = document.getElementById('LogCanvas');
+		const l = new LogCanvas(logCanvasElement);
 	 
 		const tableElement  = document.getElementById('Table' );
 		const bodyElement   = document.getElementById('Body'  );
@@ -68,6 +72,7 @@
 			manager.iterationCount = Math.floor(Math.pow(10, nIteration.value));
 		    text1.textContent = "Number of iterations: "+manager.iterationCount;
 		}
+
 	//--> 
 	</script>
 
