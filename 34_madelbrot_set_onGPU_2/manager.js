@@ -154,7 +154,7 @@ resizeCanvas(){
 }
 touchHandler(event){
     event.preventDefault();
-    const touchCount = event.touches.length;
+    const touchCount = event.touches.length + 1;
     if(touchCount == 1){
         if(this.panStarted == false){
             this.panStarted = true;
@@ -167,24 +167,44 @@ touchHandler(event){
             console.log([newPanXY[0], this.panXY[0], this.sideLength, this.canvas.width]);
             this.panXY[0] = newPanXY[0];
             this.panXY[1] = newPanXY[1];
+            //update Canvas
             this.initializeMandelbrotMap();
         }
     }else{
         this.panStarted = false;
     }
     if(touchCount == 2){
-        if(this.pinchStarted = false){
+        if(this.pinchStarted == false){
             this.pinchStarted = true;
             this.pinchXY0 = this.getXYtouch(event, 0);
-            this.pinchXY1 = this.getXYtouch(event, 1);
+            this.pinchXY1 = this.getXYtouch(event, -1);
         }else{
+            //Find new touches
             const newPinchXY0 = this.getXYtouch(event, 0);
-            const newPinchXY1 = this.getXYtouch(event, 1);
+            const newPinchXY1 = this.getXYtouch(event, -1);
+            //Find pan
+            const lastCenterX = (this.pinchXY0[0] + this.pinchXY1[0]) / 2;
+            const lastCenterY = (this.pinchXY0[1] + this.pinchXY1[1]) / 2;
+            const newCenterX = (newPinchXY0[0] + newPinchXY1[0]) / 2;
+            const newCenterY = (newPinchXY0[1] + newPinchXY1[1]) / 2;
+            this.xCorner -= (newCenterX - lastCenterX) * this.sideLength / this.canvas.width;
+            this.yCorner -= (newCenterY - lastCenterY) * this.sideLength / this.canvas.height;
+            //Find scale
+            const lastdx = Math.abs(this.pinchXY0[0] - this.pinchXY1[0]);
+            const lastdy = Math.abs(this.pinchXY0[1] - this.pinchXY1[1]);
+            const lastdd = lastdx * lastdx + lastdy * lastdy;
+            const newdx = Math.abs(newPinchXY0[0] - newPinchXY1[0]);
+            const newdy = Math.abs(newPinchXY0[1] - newPinchXY1[1]);
+            const newdd = newdx * newdx + newdy * newdy;
+            const scale = Math.sqrt(lastdd/newdd);
+            this.sideLength *= scale;
 
             this.pinchXY0[0] = newPinchXY0[0];
             this.pinchXY0[1] = newPinchXY0[1];
             this.pinchXY1[0] = newPinchXY1[0];
             this.pinchXY1[1] = newPinchXY1[1];
+            //update Canvas
+            this.initializeMandelbrotMap();
             l.newLine("Ver1."+this.pinchXY0 + "----" + this.pinchXY1);
         }
     }else{
@@ -235,6 +255,9 @@ mouseWheel(event){
     this.initializeMandelbrotMap();
 }
 getXYtouch(event, index){
+    if(index==-1){
+        return [this.canvas.width/2,this.canvas.height/2];
+    }
     event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.touches[index].pageX-rect.left-document.scrollingElement.scrollLeft;
