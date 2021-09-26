@@ -116,6 +116,7 @@ constructor(canvas){
     this.canvas.addEventListener('touchend'  , (event) => {this.release(event);},   false);
     this.canvas.addEventListener('mousewheel', (event) => {this.mouseWheel(event);},false);
     */
+    this.panStarted = false;
     this.pinchStarted = false;
     this.canvas.addEventListener('touchstart', (event) => {this.touchHandler(event);}, false);
     this.canvas.addEventListener('touchmove',  (event) => {this.touchHandler(event);}, false);
