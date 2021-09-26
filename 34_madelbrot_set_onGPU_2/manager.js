@@ -5,6 +5,7 @@ constructor(canvas){
     this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
     //Add Event listeners
+    /*
     this.touchStart = false;
     this.touchXY = [0, 0];
     this.canvas.addEventListener('mousedown',  (event) => {this.touch(event);},     false);
@@ -14,6 +15,11 @@ constructor(canvas){
     this.canvas.addEventListener('mouseup'  ,  (event) => {this.release(event);},   false);
     this.canvas.addEventListener('touchend'  , (event) => {this.release(event);},   false);
     this.canvas.addEventListener('mousewheel', (event) => {this.mouseWheel(event);},false);
+    */
+    this.pinchStarted = false;
+    this.canvas.addEventListener('touchstart', (event) => {this.touchHandler(event);}, false);
+    this.canvas.addEventListener('touchmove',  (event) => {this.touchHandler(event);}, false);
+    this.canvas.addEventListener('touchend'  , (event) => {this.touchHandler(event);}, false);
     //Initialize ROI
     this.xCorner = -2;
     this.yCorner = -2;
@@ -43,6 +49,33 @@ resizeCanvas(){
     this.canvas.width *= this.pixelRatio;
     this.canvas.height*= this.pixelRatio;
 }
+touchHandler(event){
+    const touchCount = event.touches.length;
+    if(touchCount == 1){
+        if(this.panStarted == false){
+            this.panStarted = true;
+            this.panXY = this.getXYpix(event.touches[0]);
+        }else{
+            const newPanXY = this.getXYpix(event.touches[0]);
+            this.xCorner += (newPanXY[0] - this.panXY[0]) * this.sideLength / this.width;
+            this.yCorner += (newPanXY[1] - this.panXY[1]) * this.sideLength / this.height;
+            this.panXY[0] = newPanXY[0];
+            this.panXY[1] = newPanXY[1];
+        }
+    }else{
+        this.panStarted = false;
+    }
+    if(touchCount == 2){
+        if(this.pinchStarted = false){
+            this.pinchStarted = true;
+            this.pinchXY0 = this.getXYpix(event.touches[0]);
+            this.pinchXY1 = this.getXYpix(event.touches[1]);
+        }
+    }else{
+        this.pinchStarted = false;
+    }
+}
+/*
 touch(event){
     if(this.touchStart) return;
     this.touchStart = true;
@@ -70,6 +103,7 @@ moveMouse(event){
 release(event){    
     this.touchStart = false;
 }
+*/
 mouseWheel(event){
     event.preventDefault();
     if(Date.now() - this.lastMove < 16) return;
