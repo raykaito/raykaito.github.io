@@ -122,6 +122,7 @@ constructor(canvas){
     this.canvas.addEventListener('touchstart', (event) => {this.touchHandler(event);}, false);
     this.canvas.addEventListener('touchmove',  (event) => {this.touchHandler(event);}, false);
     this.canvas.addEventListener('touchend'  , (event) => {this.touchHandler(event);}, false);
+    this.canvas.addEventListener('mousewheel', (event) => {this.mouseWheel(event);},false);
     //Initialize ROI
     this.xCorner = -2;
     this.yCorner = -2;
@@ -157,9 +158,10 @@ touchHandler(event){
     if(touchCount == 1){
         if(this.panStarted == false){
             this.panStarted = true;
-            this.panXY = this.getXYpixTouch(event, 0);
+            this.panXY = this.getXYtouch(event, 0);
         }else{
-            const newPanXY = this.getXYpixTouch(event, 0);
+            const newPanXY = this.getXYtouch(event, 0);
+            l.newLine("Ver1."+newPanXY);
             this.xCorner -= (newPanXY[0] - this.panXY[0]) * this.sideLength / this.canvas.width;
             this.yCorner -= (newPanXY[1] - this.panXY[1]) * this.sideLength / this.canvas.height;
             console.log([newPanXY[0], this.panXY[0], this.sideLength, this.canvas.width]);
@@ -173,8 +175,17 @@ touchHandler(event){
     if(touchCount == 2){
         if(this.pinchStarted = false){
             this.pinchStarted = true;
-            this.pinchXY0 = this.getXYpixTouch(event, 0);
-            this.pinchXY1 = this.getXYpixTouch(event, 0);
+            this.pinchXY0 = this.getXYtouch(event, 0);
+            this.pinchXY1 = this.getXYtouch(event, 1);
+        }else{
+            const newPinchXY0 = this.getXYtouch(event, 0);
+            const newPinchXY1 = this.getXYtouch(event, 1);
+
+            this.pinchXY0[0] = newPinchXY0[0];
+            this.pinchXY0[1] = newPinchXY0[1];
+            this.pinchXY1[0] = newPinchXY1[0];
+            this.pinchXY1[1] = newPinchXY1[1];
+            l.newLine("Ver1."+this.pinchXY0 + "----" + this.pinchXY1);
         }
     }else{
         this.pinchStarted = false;
@@ -185,14 +196,14 @@ touch(event){
     if(this.touchStart) return;
     this.touchStart = true;
     this.touchXY = this.getXY(event);
-    this.lastMoveXY = this.getXYpix(event);
+    this.lastMoveXY = this.getXYmouse(event);
     this.lastMove = Date.now();
 }
 moveMouse(event){
     if(this.touchStart == false) return;
     if(Date.now() - this.lastMove < 17) return;
     this.lastMove = Date.now();
-    const [xpix, ypix] = this.getXYpix(event);
+    const [xpix, ypix] = this.getXYmouse(event);
     const scale = (1 + (ypix - this.lastMoveXY[1])/100);
     console.log((ypix - this.lastMoveXY[1]) + ", " + scale);
     this.sideLength *= scale;
@@ -214,7 +225,7 @@ mouseWheel(event){
     if(Date.now() - this.lastMove < 16) return;
     this.lastMove = Date.now();
     const scale = (1 - event.wheelDelta/1200);
-    const [x, y] = this.getXY(event);
+    const [x, y] = this.modXY(this.getXYmouse(event));
     this.sideLength *= scale;
     this.xCorner += (x - this.xCorner) * (1 - scale);
     this.yCorner += (y - this.yCorner) * (1 - scale);
@@ -223,16 +234,16 @@ mouseWheel(event){
     this.yCorner= Math.fround(this.yCorner);
     this.initializeMandelbrotMap();
 }
-getXYpixTouch(event, index){
+getXYtouch(event, index){
     event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.touches[index].pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.touches[index].pageY-rect.top -document.scrollingElement.scrollTop;
     x *= this.pixelRatio;
     y *= this.pixelRatio;
-    return [x,y];
+    return [Math.floor(x),Math.floor(y)];
 }
-getXYpix(event){
+getXYmouse(event){
     event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
@@ -241,16 +252,10 @@ getXYpix(event){
     y *= this.pixelRatio;
     return [x,y];
 }
-getXY(event){
-    event.preventDefault();
-    const rect = event.target.getBoundingClientRect();
-    let xPix = event.pageX - rect.left - document.scrollingElement.scrollLeft;
-    let yPix = event.pageY - rect.top  - document.scrollingElement.scrollTop;
-    xPix *= this.pixelRatio;
-    yPix *= this.pixelRatio;
-    const x = this.xCorner + (xPix / this.canvas.width  ) * this.sideLength;
-    const y = this.yCorner + (yPix / this.canvas.height ) * this.sideLength;
-    return [x, y];
+modXY([x,y]){
+    const xMod = this.xCorner + (x / this.canvas.width  ) * this.sideLength;
+    const yMod = this.yCorner + (y / this.canvas.height ) * this.sideLength;
+    return [xMod,yMod];
 }
 }
 console.log("Loaded: canvas.js");
