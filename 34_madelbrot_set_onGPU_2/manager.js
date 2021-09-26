@@ -101,6 +101,7 @@ class LogCanvas extends Canvas{
 class Manager{
 constructor(canvas){
     //Initialize Canvas and its size
+    l.newLine("Ver1.");
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
@@ -167,6 +168,7 @@ touchHandler(event){
             this.yCorner += (newPanXY[1] - this.panXY[1]) * this.sideLength / this.height;
             this.panXY[0] = newPanXY[0];
             this.panXY[1] = newPanXY[1];
+            this.initializeMandelbrotMap();
         }
     }else{
         this.panStarted = false;
