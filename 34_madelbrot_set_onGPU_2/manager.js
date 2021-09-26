@@ -152,20 +152,17 @@ resizeCanvas(){
     this.canvas.height*= this.pixelRatio;
 }
 touchHandler(event){
-    l.newLine("touchHandlerCalled.");
     event.preventDefault();
     const touchCount = event.touches.length;
-    l.newLine("touchCount:" + touchCount);
     if(touchCount == 1){
         if(this.panStarted == false){
             this.panStarted = true;
             this.panXY = this.getXYpixTouch(event, 0);
-            l.newLine("newPanStarted at :" + this.panXY[0] + "," + this.panXY[1]);
         }else{
             const newPanXY = this.getXYpixTouch(event, 0);
-            l.newLine("Panning at :" + this.panXY[0] + "," + this.panXY[1]);
-            this.xCorner += (newPanXY[0] - this.panXY[0]) * this.sideLength / this.width;
-            this.yCorner += (newPanXY[1] - this.panXY[1]) * this.sideLength / this.height;
+            this.xCorner -= (newPanXY[0] - this.panXY[0]) * this.sideLength / this.canvas.width;
+            this.yCorner -= (newPanXY[1] - this.panXY[1]) * this.sideLength / this.canvas.height;
+            console.log([newPanXY[0], this.panXY[0], this.sideLength, this.canvas.width]);
             this.panXY[0] = newPanXY[0];
             this.panXY[1] = newPanXY[1];
             this.initializeMandelbrotMap();
