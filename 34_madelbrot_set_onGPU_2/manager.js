@@ -1,7 +1,6 @@
 class Manager{
 constructor(canvas){
     //Initialize Canvas and its size
-    l.newLine("Ver1.");
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
@@ -50,7 +49,6 @@ touchHandler(event){
             this.panXY = this.getXYtouch(event, 0);
         }else{
             const newPanXY = this.getXYtouch(event, 0);
-            l.newLine("Ver1."+newPanXY);
             this.xCorner -= (newPanXY[0] - this.panXY[0]) * this.sideLength / this.canvas.width;
             this.yCorner -= (newPanXY[1] - this.panXY[1]) * this.sideLength / this.canvas.height;
             console.log([newPanXY[0], this.panXY[0], this.sideLength, this.canvas.width]);
@@ -103,7 +101,6 @@ touchHandler(event){
             this.xCorner= Math.fround(this.xCorner);
             this.yCorner= Math.fround(this.yCorner);
             this.initializeMandelbrotMap();
-            l.newLine("Ver1."+this.pinchXY0 + "----" + this.pinchXY1);
         }
     }else{
         this.pinchStarted = false;
