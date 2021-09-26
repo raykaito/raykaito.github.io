@@ -154,7 +154,7 @@ resizeCanvas(){
 }
 touchHandler(event){
     event.preventDefault();
-    const touchCount = event.touches.length + 1;
+    const touchCount = event.touches.length;
     if(touchCount == 1){
         if(this.panStarted == false){
             this.panStarted = true;
