@@ -1,9 +1,14 @@
 class Manager{
-constructor(canvas){
+constructor(canvas, text1, text2){
     //Initialize Canvas and its size
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl2', { premultipliedAlpha: false });
     this.resizeCanvas();
+
+    //Initialize text elements
+    this.text1 = text1;
+    this.text2 = text2;
+
     //Add Event listeners
     this.panStarted = false;
     this.pinchStarted = false;
@@ -11,22 +16,23 @@ constructor(canvas){
     this.canvas.addEventListener('touchmove',  (event) => {this.touchHandler(event);}, false);
     this.canvas.addEventListener('touchend'  , (event) => {this.touchHandler(event);}, false);
     this.canvas.addEventListener('mousewheel', (event) => {this.mouseWheel(event);},false);
+
     //Initialize ROI
     this.xCorner = -2;
     this.yCorner = -2;
-    this.sideLength = 4;
+    this.windowLength = 4;
     this.iterationCount = 100;
+
     //Initialize MandelPlotter
     this.mandelPlotter = new MandelPlotter(this.canvas.width, this.canvas.height, this.canvas, this.gl);
-    //Reset...or start
-    this.plotDone = false;
-    this.initializeMandelbrotMap();
+
+    //plot Mandelbrot set
+    this.plotMandelbrotSet();
 }
-initializeMandelbrotMap(){
-    text1.textContent = "Number of iterations: "+this.iterationCount;
-    text2.textContent = "Length of side: "+this.sideLength.toExponential(3);
-    this.mandelPlotter.plotMandelbrotSet(this.xCorner, this.yCorner, this.xCorner + this.sideLength, this.yCorner + this.sideLength, this.iterationCount);
-    this.plotDone = true;
+plotMandelbrotSet(){
+    this.text1.textContent = "Number of iterations: "+this.iterationCount;
+    this.text2.textContent = "Length of side: "+this.windowLength.toExponential(3);
+    this.mandelPlotter.plotMandelbrotSet(this.xCorner, this.yCorner, this.xCorner + this.windowLength, this.yCorner + this.windowLength, this.iterationCount);
 }
 resizeCanvas(){
     this.canvas.width = Math.floor(window.innerWidth) - 20;
@@ -43,28 +49,31 @@ resizeCanvas(){
 touchHandler(event){
     event.preventDefault();
     const touchCount = event.touches.length;
+
+    //Pan
     if(touchCount == 1){
         if(this.panStarted == false){
+            //Pan Started
             this.panStarted = true;
             this.panXY = this.getXYtouch(event, 0);
         }else{
             const newPanXY = this.getXYtouch(event, 0);
-            this.xCorner -= (newPanXY[0] - this.panXY[0]) * this.sideLength / this.canvas.width;
-            this.yCorner -= (newPanXY[1] - this.panXY[1]) * this.sideLength / this.canvas.height;
-            console.log([newPanXY[0], this.panXY[0], this.sideLength, this.canvas.width]);
+            this.xCorner -= (newPanXY[0] - this.panXY[0]) * this.windowLength / this.canvas.width;
+            this.yCorner -= (newPanXY[1] - this.panXY[1]) * this.windowLength / this.canvas.height;
             this.panXY[0] = newPanXY[0];
             this.panXY[1] = newPanXY[1];
+
             //update Canvas
-            this.sideLength = Math.fround(this.sideLength);
-            this.xCorner= Math.fround(this.xCorner);
-            this.yCorner= Math.fround(this.yCorner);
-            this.initializeMandelbrotMap();
+            this.plotMandelbrotSet();
         }
     }else{
         this.panStarted = false;
     }
+
+    //Pinch
     if(touchCount == 2){
         if(this.pinchStarted == false){
+            //Pinch Started
             this.pinchStarted = true;
             this.pinchXY0 = this.getXYtouch(event, 0);
             this.pinchXY1 = this.getXYtouch(event, 1);
@@ -72,35 +81,40 @@ touchHandler(event){
             //Find new touches
             const newPinchXY0 = this.getXYtouch(event, 0);
             const newPinchXY1 = this.getXYtouch(event, 1);
-            //Find pan
+
+            //Find last and new center point
             const lastCenterX = (this.pinchXY0[0] + this.pinchXY1[0]) / 2;
             const lastCenterY = (this.pinchXY0[1] + this.pinchXY1[1]) / 2;
             const newCenterX = (newPinchXY0[0] + newPinchXY1[0]) / 2;
             const newCenterY = (newPinchXY0[1] + newPinchXY1[1]) / 2;
-            this.xCorner -= (newCenterX - lastCenterX) * this.sideLength / this.canvas.width;
-            this.yCorner -= (newCenterY - lastCenterY) * this.sideLength / this.canvas.height;
-            //Find scale
+
+            //Shift x and y corner based on the change in the centerpoints
+            this.xCorner -= (newCenterX - lastCenterX) * this.windowLength / this.canvas.width;
+            this.yCorner -= (newCenterY - lastCenterY) * this.windowLength / this.canvas.height;
+
+            //Find last and new distance between points
             const lastdx = Math.abs(this.pinchXY0[0] - this.pinchXY1[0]);
             const lastdy = Math.abs(this.pinchXY0[1] - this.pinchXY1[1]);
             const lastdd = lastdx * lastdx + lastdy * lastdy;
             const newdx = Math.abs(newPinchXY0[0] - newPinchXY1[0]);
             const newdy = Math.abs(newPinchXY0[1] - newPinchXY1[1]);
             const newdd = newdx * newdx + newdy * newdy;
+
+            //Modify the window length based on the scale
             const scale = Math.sqrt(lastdd/newdd);
-            const [x, y] = this.modXY([newCenterX, newCenterY]);
-            this.sideLength *= scale;
+            const [x, y] = this.modXYcoordinate([newCenterX, newCenterY]);
+            this.windowLength *= scale;
             this.xCorner += (x - this.xCorner) * (1 - scale);
             this.yCorner += (y - this.yCorner) * (1 - scale);
+
             //Update lastPinchXY
             this.pinchXY0[0] = newPinchXY0[0];
             this.pinchXY0[1] = newPinchXY0[1];
             this.pinchXY1[0] = newPinchXY1[0];
             this.pinchXY1[1] = newPinchXY1[1];
-            //Update Canvas
-            this.sideLength = Math.fround(this.sideLength);
-            this.xCorner= Math.fround(this.xCorner);
-            this.yCorner= Math.fround(this.yCorner);
-            this.initializeMandelbrotMap();
+
+            //plot the Mandelbrot set
+            this.plotMandelbrotSet();
         }
     }else{
         this.pinchStarted = false;
@@ -110,21 +124,20 @@ mouseWheel(event){
     event.preventDefault();
     if(Date.now() - this.lastMove < 16) return;
     this.lastMove = Date.now();
+
+    //Modify the window length based on the scale
     const scale = (1 - event.wheelDelta/1200);
-    const [x, y] = this.modXY(this.getXYmouse(event));
-    this.sideLength *= scale;
+    const [x, y] = this.modXYcoordinate(this.getXYmouse(event));
+    this.windowLength *= scale;
     this.xCorner += (x - this.xCorner) * (1 - scale);
     this.yCorner += (y - this.yCorner) * (1 - scale);
-    this.sideLength = Math.fround(this.sideLength);
-    this.xCorner= Math.fround(this.xCorner);
-    this.yCorner= Math.fround(this.yCorner);
-    this.initializeMandelbrotMap();
+    this.plotMandelbrotSet();
 }
 getXYtouch(event, index){
+    //Return the xy coordinate from touch event
     if(index==-1){
         return [this.canvas.width/2,this.canvas.height/2];
     }
-    event.preventDefault();
     const rect = event.target.getBoundingClientRect();
     let x = event.touches[index].pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.touches[index].pageY-rect.top -document.scrollingElement.scrollTop;
@@ -133,7 +146,7 @@ getXYtouch(event, index){
     return [Math.floor(x),Math.floor(y)];
 }
 getXYmouse(event){
-    event.preventDefault();
+    //Return the xy coordinate from mouse event
     const rect = event.target.getBoundingClientRect();
     let x = event.pageX-rect.left-document.scrollingElement.scrollLeft;
     let y = event.pageY-rect.top-document.scrollingElement.scrollTop;
@@ -141,9 +154,10 @@ getXYmouse(event){
     y *= this.pixelRatio;
     return [x,y];
 }
-modXY([x,y]){
-    const xMod = this.xCorner + (x / this.canvas.width  ) * this.sideLength;
-    const yMod = this.yCorner + (y / this.canvas.height ) * this.sideLength;
+modXYcoordinate([x,y]){
+    //Convert pixel coordinate to actual coordinate
+    const xMod = this.xCorner + (x / this.canvas.width  ) * this.windowLength;
+    const yMod = this.yCorner + (y / this.canvas.height ) * this.windowLength;
     return [xMod,yMod];
 }
 }

@@ -50,23 +50,23 @@
 	 
 		const tableElement  = document.getElementById('Table' );
 		const bodyElement   = document.getElementById('Body'  );
-		const canvasElement = document.getElementById('Canvas');
+		const canvas = document.getElementById('Canvas');
 		const text1 = document.getElementById('Text1');
 		const text2 = document.getElementById('Text2');
 		const nIteration = document.getElementById("slidernIter");
 		showObject(bodyElement, tableElement);
 
-		const manager = new Manager(canvasElement);
+		const manager = new Manager(canvas, text1, text2);
 
-		// Slider Scale;
-		nIteration.onchange = () => {manager.initializeMandelbrotMap();};
-		nIteration.oninput = () => {changenIter();};
+		// Initialize slider
 		nIteration.step = 0.01;
 		nIteration.value = 2;
 		nIteration.min = 0;
 		nIteration.max = 4;
+		nIteration.oninput = () => {change_nIteration();};
+		nIteration.onchange = () => {manager.plotMandelbrotSet();};
 
-		const changenIter = () => {
+		const change_nIteration = () => {
 			manager.iterationCount = Math.floor(Math.pow(10, nIteration.value));
 		    text1.textContent = "Number of iterations: "+manager.iterationCount;
 		}
