@@ -42,9 +42,10 @@ p {
 }
 
 @media screen and (max-width: 600px){
-	.topnav a:not(:first-child){display: none;}
+	.topnav a:not(.active){display: none;}
 	.topnav.responsive a{
 		display: block;
+
 	}
 	.topnav a{
 		text-align: center;
