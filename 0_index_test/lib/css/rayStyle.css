@@ -59,6 +59,10 @@ p {
 		right: 0;
 		top: 0;
 	}
+	.topnav a.active{
+		background-color: #101010;
+		color: white;
+	}
 	.topnav.responsive a.active{
 		background-color: #707070;
 		color: white;
