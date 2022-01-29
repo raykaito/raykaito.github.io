@@ -9,7 +9,7 @@ const clickOnTopnavi = (targetID) => {
 		//switchTopnaviStyle
 		const topnavi = document.getElementById("rayTopnavi");
 		if (topnavi.className === "topnavi"){
-			topnavi.className += " responsive";
+			topnavi.className += " showNavi";
 		} else {
 			topnavi.className = "topnavi";
 		}

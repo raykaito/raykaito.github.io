@@ -63,17 +63,17 @@ p {
 	user-select: none;
 	overflow: hidden;
 	background-color: #101010;
+	cursor: pointer;
 }
 
 .topnavi a{
-	cursor: pointer;
 	float: left;
 	display: block;
 	color: #f2f2f2;
 	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
 	font-size: 17px;
+	text-decoration: none;
+	padding: 12px 16px;
 }
 
 .topnavi a:hover{
@@ -82,7 +82,6 @@ p {
 
 .topnavi a.active{
 	background-color: #707070;
-	color: white;
 }
 
 .topnavi .icon {
@@ -90,11 +89,6 @@ p {
 }
 
 @media screen and (max-width: 600px){
-	.topnavi a:not(:first-child){display: none;}
-	.topnavi.responsive a{
-		display: block;
-
-	}
 	.topnavi a{
 		text-align: center;
 		display: block;
@@ -107,11 +101,23 @@ p {
 		right: 0;
 		top: 0;
 	}
-	.topnavi:not(.responsive) a.active{
-		background-color: #101010;
-		color: white;
+	.topnavi a:not(:first-child, :last-child){
+		visibility: hidden;
+		height: 0px;
+		padding: 0;
+		opacity: 0;
+		transition-duration: 0.25s;
 	}
-	.topnavi.responsive a.active{
+	.topnavi.showNavi a{
+		visibility: visible;
+		height: auto;
+		padding: 12px 16px;
+		opacity: 1;
+	}
+	.topnavi:not(.showNavi) a.active{
+		background-color: #101010;
+	}
+	.topnavi.showNavi a.active{
 		background-color: #707070;
 	}
 }
