@@ -26,7 +26,7 @@ const switchTopnaviActive = async (targetID) => {
 
 	//Activate the selected one
 	document.getElementById(targetID).className = "active";
-	await wait(250);
+	await wait(1250);
 	topnavi.className = "topnavi";
 }
 
@@ -38,7 +38,7 @@ const switchMainContentActive = async (targetID) => {
 	for(let i = 0; i < mainContentChildren.length; i++){
 		mainContentChildren[i].className = "hideContent";
 	}
-	await wait(125);
+	await wait(500);
 	for(let i = 0; i < mainContentChildren.length; i++){
 		mainContentChildren[i].style.display = "none";
 	}
