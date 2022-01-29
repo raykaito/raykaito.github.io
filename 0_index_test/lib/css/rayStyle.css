@@ -1,3 +1,4 @@
+/* ---------------General--------------- */
 body {
 	font-family: "Times New Roman";
 	margin: 0;
@@ -12,13 +13,60 @@ p {
 	margin: 5pt;
 	text-align: justify;
 }
-
-.topnav {
+/* ---------------General--------------- */
+/* ---------------MainPage--------------- */
+@keyframes fadeIn{
+	0% {
+		color:  transparent;
+		text-shadow: unset;
+	}
+	1% {
+		color:  transparent;
+		text-shadow: 0 0 10px rgba(0, 0, 0, 0);
+	}
+	99%{
+		color:  transparent;
+		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+	}
+	100%{
+		color:  black;
+		text-shadow: unset;
+	}
+}
+@keyframes fadeOut{
+	0% {
+		color:  black;
+		text-shadow: unset;
+	}
+	1% {
+		color:  transparent;
+		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+	}
+	99%{
+		color:  transparent;
+		text-shadow: 0 0 20px rgba(0, 0, 0, 0);
+	}
+	100%{
+		color:  transparent;
+		text-shadow: unset;
+	}
+}
+.hideContent{
+	animation: fadeOut 0.125s normal forwards;
+}
+.showContent{
+	animation: fadeIn 0.125s normal forwards;
+}
+/* ---------------MainPage--------------- */
+/* ---------------TopNavi--------------- */
+.topnavi {
+	user-select: none;
 	overflow: hidden;
 	background-color: #101010;
 }
 
-.topnav a{
+.topnavi a{
+	cursor: pointer;
 	float: left;
 	display: block;
 	color: #f2f2f2;
@@ -28,43 +76,43 @@ p {
 	font-size: 17px;
 }
 
-.topnav a:hover{
+.topnavi a:hover{
 	text-shadow: 0pt 0pt 5pt white, 0pt 0pt 5pt white;
 }
 
-.topnav a.active{
+.topnavi a.active{
 	background-color: #707070;
 	color: white;
 }
 
-.topnav .icon {
+.topnavi .icon {
 	display: none;
 }
 
 @media screen and (max-width: 600px){
-	.topnav a:not(:first-child){display: none;}
-	.topnav.responsive a{
+	.topnavi a:not(:first-child){display: none;}
+	.topnavi.responsive a{
 		display: block;
 
 	}
-	.topnav a{
+	.topnavi a{
 		text-align: center;
 		display: block;
 		float: none;
 	}
-	.topnav a.icon{
+	.topnavi a.icon{
 		position: absolute;
 		display: block;
 		float: right;
 		right: 0;
 		top: 0;
 	}
-	.topnav a.active{
+	.topnavi:not(.responsive) a.active{
 		background-color: #101010;
 		color: white;
 	}
-	.topnav.responsive a.active{
+	.topnavi.responsive a.active{
 		background-color: #707070;
-		color: white;
 	}
 }
+/* ---------------TopNavi--------------- */

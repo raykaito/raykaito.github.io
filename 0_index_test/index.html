@@ -10,22 +10,58 @@
 </head>
 
 <body>
-	<div class = "topnav" id ="rayTopnav">
-		<a href = "index.html" class = "active">Top</a>
-		<a href = "1_about.html">About</a>
-		<a href = "2_projects.html">Projects</a>
-		<a href = "3_gallery.html">Gallery</a>
-		<a href = "4_contacts.html">Contact</a>
-		<a href="javascript:void(0);" class="icon" onclick="switchTopnavStyle()">≡</a>
+	<div class = "topnavi" id ="rayTopnavi" onclick="clickOnTopnavi(event.target.id)">
+		<a id = "navi_top" class = "active">Top</a>
+		<a id = "navi_about">About</a>
+		<a id = "navi_projects">Projects</a>
+		<a id = "navi_gallery">Gallery</a>
+		<a id = "navi_icon" class = "icon">≡</a>
 	</div>
-
-	<div class = "header">
-		<h1>Welcome to Ray's Homepage</h1>
-	</div>
-
-	<p>
-		ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
-	</p>
 	
-	<script src="lib/js/rayScript.js"></script>
+	<div id = "mainContent">
+		<div id = "top" class = "showContent" style="display: none;">
+			<div class = "header">
+				<h1>Welcome to Ray's Homepage</h1>
+			</div>
+
+			<p>
+				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+			</p>
+		</div>
+
+		<div id = "about" class = "hideContent" style="display: none;">
+			<div class = "header">
+				<h1>About Ray Kaito</h1>
+			</div>
+
+			<p>
+				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+			</p>
+		</div>
+
+		<div id = "projects" class = "hideContent" style="display: none;">
+			<div class = "header">
+				<h1>Ray's little projects</h1>
+			</div>
+
+			<p>
+				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+			</p>
+		</div>
+
+		<div id = "gallery" class = "hideContent" style="display: none;">
+			<div class = "header">
+				<h1>Gallery</h1>
+			</div>
+
+			<p>
+				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+			</p>
+		</div>
+	</div>
+
+	<script src="lib/js/rayScript_css_controller.js"></script>
+	<script type="text/javascript">
+		clickOnTopnavi("navi_top");
+	</script>
 </body>
