@@ -10,53 +10,78 @@
 </head>
 
 <body>
-	<div class = "topnavi" id ="rayTopnavi" onclick="clickOnTopnavi(event.target.id)">
-		<a id = "navi_top" class = "active">Top</a>
-		<a id = "navi_about">About</a>
-		<a id = "navi_projects">Projects</a>
-		<a id = "navi_gallery">Gallery</a>
-		<a id = "navi_icon" class = "icon">≡</a>
+	<div class = "topnaviContainer">
+		<div class = "topnavi" id ="rayTopnavi" onclick="clickOnTopnavi(event.target.id)">
+			<a id = "navi_top" class = "active">Top</a>
+			<a id = "navi_about">About</a>
+			<a id = "navi_projects">Projects</a>
+			<a id = "navi_gallery">Gallery</a>
+			<a id = "navi_icon" class = "icon">≡</a>
+		</div>
 	</div>
 	
-	<div id = "mainContent">
-		<div id = "top" class = "showContent" style="display: none;">
-			<div class = "header">
-				<h1>Welcome to Ray's site</h1>
+	<div class = "contentsContainer">
+		<div class = "mainContent" id = "mainContent">
+			<div id = "top" class = "showContent" style="display: none;">
+				<div class="frame">
+					<div class = "header">
+						<h1>Welcome to Ray's site</h1>
+					</div>
+
+					<p>
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+					</p>
+				</div>
 			</div>
 
-			<p>
-				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
-			</p>
+			<div id = "about" class = "hideContent" style="display: none;">
+				<div class="frame">
+					<div class = "header">
+						<h1>About Ray </h1>
+					</div>
+
+					<p>
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+					</p>
+				</div>
+			</div>
+
+			<div id = "projects" class = "hideContent" style="display: none;">
+				<div class="frame">
+					<div class = "header">
+						<h1>Ray's projects</h1>
+					</div>
+
+					<p>
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+					</p>
+				</div>
+			</div>
+
+			<div id = "gallery" class = "hideContent" style="display: none;">
+				<div class="frame">
+					<div class = "header">
+						<h1>Ray's Gallery</h1>
+					</div>
+
+					<p>
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+						ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
+					</p>
+				</div>
+			</div>
 		</div>
 
-		<div id = "about" class = "hideContent" style="display: none;">
-			<div class = "header">
-				<h1>About Ray </h1>
+		<div class = "sideContent" id = "sideContent">
+			<div id = "contact" class = "hideContent" style="display: none;">
+				<div class="frame">
+					<h2>Contact</h2>
+					<p>
+						Email : dummy@dmail.com<br>
+						Phone : (123) 4567 - 8901
+				</div>
 			</div>
-
-			<p>
-				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
-			</p>
-		</div>
-
-		<div id = "projects" class = "hideContent" style="display: none;">
-			<div class = "header">
-				<h1>Ray's projects</h1>
-			</div>
-
-			<p>
-				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
-			</p>
-		</div>
-
-		<div id = "gallery" class = "hideContent" style="display: none;">
-			<div class = "header">
-				<h1>Ray's Gallery</h1>
-			</div>
-
-			<p>
-				ようこそ、カイトウのホームページへ。このサイトは私が趣味で個人的に作ったものであり、とくに社会に貢献することもなければ、誰かの役に立つ情報を含んでいるわけでもありません。
-			</p>
 		</div>
 	</div>
 

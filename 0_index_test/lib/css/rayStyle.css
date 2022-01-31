@@ -1,8 +1,7 @@
 /* ---------------General--------------- */
 body {
-	font-family: "Times New Roman";
+	font-family: "游明朝";
 	margin: auto;
-	max-width: 800px;
 }
 
 h1 {
@@ -10,61 +9,27 @@ h1 {
 	font-size: 1.75em;
 }
 
+h2 {
+	margin: 5pt;
+}
+
 p {
 	margin: 5pt;
 	text-align: justify;
 }
+
 /* ---------------General--------------- */
-/* ---------------MainPage--------------- */
-@keyframes fadeIn{
-	0% {
-		color:  transparent;
-		text-shadow: unset;
-	}
-	1% {
-		color:  transparent;
-		text-shadow: 0 0 10px rgba(0, 0, 0, 0);
-	}
-	99%{
-		color:  transparent;
-		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
-	}
-	100%{
-		color:  black;
-		text-shadow: unset;
-	}
-}
-@keyframes fadeOut{
-	0% {
-		color:  black;
-		text-shadow: unset;
-	}
-	1% {
-		color:  transparent;
-		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
-	}
-	99%{
-		color:  transparent;
-		text-shadow: 0 0 20px rgba(0, 0, 0, 0);
-	}
-	100%{
-		color:  transparent;
-		text-shadow: unset;
-	}
-}
-.hideContent{
-	animation: fadeOut 0.5s normal forwards;
-}
-.showContent{
-	animation: fadeIn 0.5s normal forwards;
-}
-/* ---------------MainPage--------------- */
+
 /* ---------------TopNavi--------------- */
-.topnavi {
+.topnaviContainer{
 	user-select: none;
-	overflow: hidden;
 	background-color: #101010;
 	cursor: pointer;
+}
+.topnavi {
+	overflow: hidden;
+	margin:  auto;
+	max-width: 800px;
 }
 
 .topnavi a{
@@ -99,8 +64,8 @@ p {
 	.topnavi a.icon{
 		position: absolute;
 		display: block;
-		float: right;
-		right: 0;
+		float: left;
+		left: 0;
 		top: 0;
 	}
 	.topnavi a:not(:first-child, :last-child){
@@ -124,3 +89,79 @@ p {
 	}
 }
 /* ---------------TopNavi--------------- */
+
+/* ---------------MainPage--------------- */
+.frame{
+	margin: 5px;
+	border-radius: 15px 15px 15px 15px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+}
+
+.contentsContainer{
+	margin:  auto;
+	max-width: 800px;
+}
+.mainContent{
+	float: left;
+	width:  70%;
+}
+.sideContent{
+	float: right;
+	width: 30%;
+}
+
+@keyframes fadeIn{
+	0% {
+		color:  transparent;
+		text-shadow: unset;
+	}
+	1% {
+		color:  transparent;
+		text-shadow: 0 0 10px rgba(0, 0, 0, 0);
+	}
+	99%{
+		color:  transparent;
+		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+	}
+	100%{
+		color:  black;
+		text-shadow: unset;
+	}
+}
+
+@keyframes fadeOut{
+	0% {
+		color:  black;
+		text-shadow: unset;
+	}
+	1% {
+		color:  transparent;
+		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+	}
+	99%{
+		color:  transparent;
+		text-shadow: 0 0 20px rgba(0, 0, 0, 0);
+	}
+	100%{
+		color:  transparent;
+		text-shadow: unset;
+	}
+}
+.hideContent{
+	animation: fadeOut 0.5s normal forwards;
+}
+.showContent{
+	animation: fadeIn 0.5s normal forwards;
+}
+
+@media screen and (max-width: 600px){
+	.mainContent{
+		float: center;
+		width:  100%;
+	}
+	.sideContent{
+		float: center;
+		width: 100%;
+	}
+}
+/* ---------------MainPage--------------- */

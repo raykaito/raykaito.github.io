@@ -34,13 +34,21 @@ const switchMainContentActive = async (targetID) => {
 	//Deactivate all
 	targetID = targetID.slice(5);
 	const mainContent = document.getElementById("mainContent");
+	const sideContent = document.getElementById("sideContent");
 	mainContentChildren = mainContent.children;
+	sideContentChildren = sideContent.children;
 	for(let i = 0; i < mainContentChildren.length; i++){
 		mainContentChildren[i].className = "hideContent";
+	}
+	for(let i = 0; i < sideContentChildren.length; i++){
+		sideContentChildren[i].className = "hideContent";
 	}
 	await wait(500);
 	for(let i = 0; i < mainContentChildren.length; i++){
 		mainContentChildren[i].style.display = "none";
+	}
+	for(let i = 0; i < sideContentChildren.length; i++){
+		sideContentChildren[i].style.display = "none";
 	}
 
 
@@ -48,6 +56,10 @@ const switchMainContentActive = async (targetID) => {
 	const targetElement = document.getElementById(targetID);
 	targetElement.style.display = "block";
 	targetElement.className = "showContent"
+	for(let i = 0; i < sideContentChildren.length; i++){
+		sideContentChildren[i].style.display = "block";
+		sideContentChildren[i].className = "showContent"
+	}
 }
 
 const wait = millisec => {
