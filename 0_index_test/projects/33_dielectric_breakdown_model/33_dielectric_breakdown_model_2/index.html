@@ -1,0 +1,151 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Dielectric Breakdown Model</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+	
+		<tr>
+			<td align="center">
+				<Font size="6" Font color="black"><TNR>
+					<a style="text-decoration: none; color:black" onclick="toggleTable();">
+						Dielectric Breakdown Model
+			   		</a>
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+
+				<table id="custom" width="100%" style="display:none">
+
+					<tr>
+						<td align="left" colspan="2">
+							<div id="Text1"></div>
+							<div id="Text2"onclick="kernelMngr.toggleAnimation();">Start/Pause Animation [▶]</div>
+						</td>
+					</tr>
+
+					<tr>
+						<td align="right" width="50%">
+							<b><u><br>Display Settings:</u></b>
+						</td>
+						<td>
+						</td>
+					</tr>
+
+					<tr>
+						<td align="right">
+							Accumulated path:
+						</td>
+						<td>
+							 <input type="checkbox" id="r1" name="r1" checked onchange = "updateSettings();"><label for="r1">R</label>
+							 <input type="checkbox" id="g1" name="g1" checked onchange = "updateSettings();"><label for="g1">G</label>
+							 <input type="checkbox" id="b1" name="b1" checked onchange = "updateSettings();"><label for="b1">B</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td align="right">
+							Latest breakdown:
+						</td>
+						<td>
+							 <input type="checkbox" id="r2" name="r2"         onchange = "updateSettings();"><label for="r2">R</label>
+							 <input type="checkbox" id="g2" name="g2"         onchange = "updateSettings();"><label for="g2">G</label>
+							 <input type="checkbox" id="b2" name="b2" checked onchange = "updateSettings();"><label for="b2">B</label>
+						</td>
+					</tr>
+
+					<tr>
+						<td align="right">
+							Electric potential:
+						</td>
+						<td>
+							 <input type="checkbox" id="r3" name="r3"         onchange = "updateSettings();"><label for="r3">R</label>
+							 <input type="checkbox" id="g3" name="g3"         onchange = "updateSettings();"><label for="g3">G</label>
+							 <input type="checkbox" id="b3" name="b3"         onchange = "updateSettings();"><label for="b3">B</label>
+						</td>
+					</tr>
+
+				</table>
+
+			</td>
+		</tr>
+
+					
+
+	</table>
+	<script type="text/javascript" src="kernelManager.js"></script>
+	<script type="text/javascript" src="simulator.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script src="../00_Libraries/gpujs/gpu-browser.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		const tableElement  = document.getElementById('Table' );
+		const bodyElement   = document.getElementById('Body'  );
+		const canvasElement = document.getElementById('Canvas');
+		showObject(bodyElement, tableElement);
+
+		// Custom things
+		let displaySettings = new Array(9);
+		let customMode = true;
+
+		const customTable  = document.getElementById('custom');
+		const text1 = document.getElementById('Text1');
+		const text2 = document.getElementById('Text2');
+		const box = new Array();
+		box[0] = document.getElementById("r1");
+		box[1] = document.getElementById("g1");
+		box[2] = document.getElementById("b1");
+		box[3] = document.getElementById("r2");
+		box[4] = document.getElementById("g2");
+		box[5] = document.getElementById("b2");
+		box[6] = document.getElementById("r3");
+		box[7] = document.getElementById("g3");
+		box[8] = document.getElementById("b3");
+
+
+		const updateSettings = () => {
+			for(let i = 0; i < 9; i++){
+				displaySettings[i] = box[i].checked?1:0;
+			}
+		}
+		const toggleTable = () => {
+			customMode = !customMode;
+			if(customMode){
+				customTable.style.display = "table";
+			}else{
+				customTable.style.display = "none";
+			}
+		}
+		toggleTable();
+
+
+		updateSettings();
+		const kernelMngr = new KernelManager(canvasElement);
+	//--> 
+	</script>
+
+
+</body>
+
+
+</html>

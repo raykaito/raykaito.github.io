@@ -1,0 +1,79 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>TENET</title>
+	<link rel="stylesheet" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" bgcolor = 'black'>
+	<canvas id="Canvas" style="border:0px solid #000000;"></canvas>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
+	<script type="text/javascript">
+	<!--
+		const body = document.getElementById("Body");
+		const canvas = new Canvas(document.getElementById('Canvas'));
+		canvas.flexResize();
+		canvas.fillAll("white");
+		const revolutionSec = 5;
+		const startTime = new Date();
+		const startSec = startTime.getSeconds() + startTime.getMilliseconds()/1000;
+
+		const width = canvas.canvas.width;
+		const height= canvas.canvas.height;
+		const xc = width/2;
+		const yc = height/2;
+		const gap = width/5;
+		const fontSize = height/10;
+		const font = "arial";
+
+        const bodyWidth = window.innerWidth;
+        const bodyHeight = window.innerHeight;
+		canvas.canvas.style.marginLeft = Math.floor((bodyWidth-width/canvas.pixelRatio)/2)+"px";
+		canvas.canvas.style.marginTop = Math.floor((bodyHeight-height/canvas.pixelRatio)/2)+"px";
+
+		function animate(){
+			//Get Time
+            requestAnimationFrame(animate);
+            const newTime = new Date();
+            const newSec = newTime.getSeconds() + newTime.getMilliseconds()/1000;
+            const seconds = (60+newSec-startSec)%revolutionSec;
+            const radian = 2*Math.PI*(seconds)/revolutionSec;
+            let bgColor = "black";
+            let txColor = "white";
+            if(radian>Math.PI){
+            	bgColor = "white";
+            	txColor = "black";
+            }
+
+            //Animate
+            body.style.backgroundColor = bgColor;
+            canvas.fillAll(bgColor);
+            canvas.ct.save();
+            canvas.translate(xc,yc);
+            canvas.rotateRad(radian);
+            canvas.text("T",-gap*2,fontSize/13,txColor,fontSize+"px "+font,"center","middle");
+            canvas.text("E",-gap*1,fontSize/13,txColor,fontSize+"px "+font,"center","middle");
+            canvas.text("N",-gap*0,fontSize/13,txColor,fontSize+"px "+font,"center","middle");
+            canvas.rotateRad(Math.PI);
+            canvas.text("T",-gap*2,fontSize/13,txColor,fontSize+"px "+font,"center","middle");
+            canvas.text("E",-gap*1,fontSize/13,txColor,fontSize+"px "+font,"center","middle");
+            canvas.ct.restore();
+		}
+		animate();
+
+
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

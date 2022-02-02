@@ -1,0 +1,295 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Fourier Polynomial</title>
+	<link rel="stylesheet" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" bgcolor = 'black'>
+
+	<table id="Table" border="0" align="center">
+		<tr>
+			<td align="left">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td align="center" class="untouchable">
+		        <input class="slider" type="range" min="1" max="50" value="1" id="slider" oninput="sliderUpdated()" onchange="sliderChanged()" style="display:none;margin:0">
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
+	<script type="text/javascript">
+	<!--
+		//Setup Elements
+		const body = document.getElementById("Body");
+		const canvas = new Canvas(document.getElementById('Canvas'));
+		const slider = document.getElementById('slider');
+
+		//Setup Canvas
+		canvas.flexResize();
+		const width  = canvas.canvas.width;
+		const height = canvas.canvas.height;
+		canvas.fillAll("white");
+		slider.style.width = canvas.canvas.style.width;
+		console.log(canvas.canvas.style.width);
+
+		//Setup Variables
+		let xRecorded;
+		let yRecorded;
+		let readyForRecord = false;
+		let animation;
+		startRecording();
+
+		//Record Figure
+		function startRecording(){
+			xRecorded = new Array();
+			yRecorded = new Array();
+			readyForRecord = true;
+			alert("Draw something on this canvas.");
+		}
+		function drawRecording(){
+			const currentIndex = xRecorded.length-1;
+			const xi = xRecorded[currentIndex-1];
+			const yi = yRecorded[currentIndex-1];
+			const xf = xRecorded[currentIndex];
+			const yf = yRecorded[currentIndex];
+			canvas.lineWidth(1);
+			canvas.strokeColor("black");
+			canvas.lines(xRecorded,yRecorded);
+		}
+
+		//Animate the shrunk version
+		let totalFrames, frameCount;
+		function getReadyToAnimateShrink(){
+			totalFrames = 30;
+			frameCount = 0;
+			animateShrink();
+		}
+		function drawShrunkDrawing(shrinkRate){
+				canvas.fillAll("white");
+				canvas.lineWidth(1);
+				canvas.drawRect(0,0,width*shrinkRate,height*shrinkRate,"green");
+				canvas.strokeColor("black");
+				canvas.lines(xRecorded,yRecorded,shrinkRate);
+		}
+		function animateShrink(){
+			if(frameCount<=totalFrames){
+				requestAnimationFrame(animateShrink);
+				drawShrunkDrawing(0.5+(totalFrames-frameCount)/totalFrames*0.5);
+				frameCount++;
+			}else{
+				setTimeout(()=>{getReadyToAnimateWaves()},250);
+				return;
+			}
+		}
+
+		//Animate the waves in X and Y
+		function getReadyToAnimateWaves(){
+			totalFrames = xRecorded.length;
+			frameCount = 0;
+			drawReflection(frameCount);
+			setTimeout(()=>{animateWaves();},750);
+		}
+		function drawGraph(list,top=false,color="red",indexMax){
+			const xLine = new Array();
+			const tLine = new Array();
+			if(indexMax==undefined)
+				indexMax = list.length;
+			for(let i=0;i<indexMax;i++){
+				if(top)
+					xLine[i] = list[i]/2;
+				else
+					xLine[i] = list[i]/2+height/2;
+				tLine[i] = width/2*(1+i/list.length);
+			}
+			canvas.strokeColor(color);
+			canvas.lines(tLine,xLine);
+			if(top){
+				canvas.text("Y coordinate vs Time",width/2,0,"black",height/30+"px 'Times'");
+			}else{
+				canvas.text("X coordinate vs Time",width/2,height/2,"black",height/30+"px 'Times'");
+			}
+		}
+		function drawReflection(index){
+			const x = new Array(4);
+			const y = new Array(4);
+			x[0] = x[3] = width*0.5*(1+index/totalFrames);
+			x[1] = x[2] = xRecorded[index]/2;
+			y[0] = y[1] = yRecorded[index]/2;
+			y[2] = y[3] = height/2+xRecorded[index]/2;
+			canvas.circle(xRecorded[index]/2,yRecorded[index]/2,5,"red");
+			canvas.strokeColor("green");
+			canvas.line(0,height/2,width/2,height);
+			canvas.strokeColor("gray");
+			canvas.lines(x,y);
+		}
+		function animateWaves(){
+			if(frameCount<totalFrames){
+				requestAnimationFrame(animateWaves);
+				frameCount++;
+				drawShrunkDrawing(0.5);
+				drawReflection(frameCount);
+				drawGraph(xRecorded,false,"red" ,frameCount);
+				drawGraph(yRecorded,true ,"blue",frameCount);
+			}else{
+				setTimeout(()=>{getReadyToFourierTransform()},500);
+				return;
+			}
+		}
+
+		//Get fourier polynomial
+		let xList, yList;
+		function getReadyToFourierTransform(){
+			drawShrunkDrawing(0.5);
+			drawGraph(xRecorded,false,"red");
+			drawGraph(yRecorded,true ,"blue");
+			slider.style.display = "inline-block";
+			slider.max = Math.ceil(xRecorded.length/2);
+			xList = new Array(xRecorded.length);
+			yList = new Array(yRecorded.length);
+			for(let i=0;i<xRecorded.length;i++){
+				xList[i] = xRecorded[i];
+				yList[i] = yRecorded[i];
+			}
+			setTimeout(()=>{
+				alert("Use the slider to select a number of terms for this fourier polynomial.");
+				sliderUpdated();
+			},250);
+		}
+		let fourierCoefX, fourierCoefY,fourierPolyX,fourierPolyY;
+		function sliderUpdated(){
+        	clearTimeout(animation);
+			drawShrunkDrawing(0.5);
+			drawGraph(xRecorded,false,"red");
+			drawGraph(yRecorded,true ,"blue");
+			fourierCoefX = getFourierCoefficients(Number(slider.value),xList);
+			fourierCoefY = getFourierCoefficients(Number(slider.value),yList);
+			fourierPolyX = getFourierPolynomials(fourierCoefX);
+			fourierPolyY = getFourierPolynomials(fourierCoefY);
+			drawGraph(fourierPolyX,false,"pink");
+			drawGraph(fourierPolyY,true ,"lightblue");
+			canvas.strokeColor("purple");
+			canvas.lines(fourierPolyX,fourierPolyY,0.5);
+			canvas.text("Number of Terms: "+slider.value,0,0,"black",height/30+"px 'Times'");
+			canvas.text("Number of Terms: "+slider.value,0,0,"black",height/30+"px 'Times'");
+
+		}
+		function sliderChanged(){
+			getReadyToAnimateFourierDrawing();
+		}
+		function getReadyToAnimateFourierDrawing(){
+			totalFrames = fourierPolyX.length;
+			frameCount = 0;
+			drawFourierDrawing(0);
+			setTimeout(()=>{animateFourierDrawing();},750);
+		}
+		function drawFourierDrawing(index){
+			drawShrunkDrawing(0.5);
+			const armsX = getFourierPolynomial(fourierCoefX,index);
+
+			canvas.strokeColor("red");
+			canvas.lines(armsX[1],armsX[0],0.5,0,height*3/4);
+			const armsY = getFourierPolynomial(fourierCoefY,index);
+			canvas.strokeColor("blue");
+			canvas.lines(armsY[0],armsY[1],0.5,width*3/4);
+
+			canvas.strokeColor("purple");
+			canvas.lines(fourierPolyX,fourierPolyY,0.5);
+			const bluex = armsY[0][armsY[0].length-1]/2+width*3/4;
+			const bluey = armsY[1][armsY[1].length-1]/2;
+			const redx  = armsX[1][armsX[1].length-1]/2;
+			const redy  = armsX[0][armsX[0].length-1]/2+height*3/4;
+			canvas.circle(fourierPolyX[index-1]/2,fourierPolyY[index-1]/2,5,"purple");
+			canvas.circle(armsX[1][0]/2          ,armsX[0][0]/2+height*3/4,5,"red");
+			canvas.circle(armsY[0][0]/2+width*3/4,armsY[1][0]/2           ,5,"blue");
+			canvas.strokeColor("pink");
+			canvas.line(redx ,redy ,redx ,bluey);
+			canvas.strokeColor("lightblue");
+			canvas.line(bluex,bluey,redx ,bluey);
+		}
+		function animateFourierDrawing(){
+			animation = setTimeout(animateFourierDrawing,30);
+			drawFourierDrawing(frameCount);
+			frameCount = (frameCount+1)%totalFrames;
+		}
+		function donothing(){
+			//nothing
+		}
+		//Calculate Fourier Polynomial
+		/*
+		exp(ix) = cos(x)+isin(x)
+		Xn = 1/T*Int(0→T){(x*exp(-in2πt/T) dt)}
+		*/
+		function getFourierCoefficients(num,list){
+			const T = list.length;
+			const omega = 2*Math.PI/T;
+			const fourierCoefficients = new Array(num);
+			for(let n=-fourierCoefficients.length+1;n<fourierCoefficients.length;n++){
+				fourierCoefficients[n] = new Array(2);
+				let integral = 0;
+				let integrali= 0;
+				for(let t=0;t<list.length;t++){
+					integral +=(list[t])*Math.cos(-1*n*t*omega);
+					integrali+=(list[t])*Math.sin(-1*n*t*omega);
+				}
+				fourierCoefficients[n][0] = integral/T;
+				fourierCoefficients[n][1] = integrali/T;
+			}
+			return fourierCoefficients;
+		}
+		function getFourierPolynomials(fourierCoefficients){
+			const T = xList.length;
+			const omega = 2*Math.PI/T;
+			const fourierPoly = new Array(T);
+			for(let t=0;t<T;t++){
+				let integral = 0;
+				let integrali= 0;
+				for(let n=-fourierCoefficients.length+1;n<fourierCoefficients.length;n++){
+					integral +=fourierCoefficients[n][0]*Math.cos(n*t*omega);
+					integral -=fourierCoefficients[n][1]*Math.sin(n*t*omega);
+					integrali+=fourierCoefficients[n][0]*Math.sin(n*t*omega);
+					integrali+=fourierCoefficients[n][1]*Math.cos(n*t*omega);
+				}
+				fourierPoly[t] = integral;
+			}
+			return fourierPoly;
+		}
+		function getFourierPolynomial(fourierCoefficients,t){
+			const T = xList.length;
+			const omega = 2*Math.PI/T;
+			const fourierPoly = new Array();
+			const fourierPolyi= new Array();
+			fourierPoly [0] = fourierCoefficients[0][0];
+			fourierPolyi[0] = fourierCoefficients[0][1];
+			for(let n=1;n<fourierCoefficients.length;n++){
+				fourierPoly [n] = fourierPoly [n-1];
+				fourierPolyi[n] = fourierPolyi[n-1];
+				fourierPoly [n] +=fourierCoefficients[ n][0]*Math.cos( n*t*omega);
+				fourierPoly [n] -=fourierCoefficients[ n][1]*Math.sin( n*t*omega);
+				fourierPoly [n] +=fourierCoefficients[-n][0]*Math.cos(-n*t*omega);
+				fourierPoly [n] -=fourierCoefficients[-n][1]*Math.sin(-n*t*omega);
+				fourierPolyi[n] +=fourierCoefficients[ n][0]*Math.sin( n*t*omega);
+				fourierPolyi[n] +=fourierCoefficients[ n][1]*Math.cos( n*t*omega);
+				fourierPolyi[n] -=fourierCoefficients[-n][0]*Math.sin(-n*t*omega);
+				fourierPolyi[n] -=fourierCoefficients[-n][1]*Math.cos(-n*t*omega);
+			}
+			console.log(fourierPolyi);
+			return [fourierPolyi,fourierPoly];
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>The Ecosystem</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+        <canvas id="field"></canvas>
+		<script src="canvas.js"></script>
+		<script src="field.js"></script>
+		<script src="creature.js"></script>
+		<script src="grass.js"></script>
+		<script>
+
+            const fieldCanvas = new Canvas(document.getElementById("field"));
+            fieldCanvas.resize(400,400);
+            fieldCanvas.fillAll("green");
+
+            console.log(fieldCanvas.canvas.width,fieldCanvas.canvas.height);
+
+            const field = new Field(fieldCanvas.canvas.width,fieldCanvas.canvas.height);
+            const grass = new Array();
+            for(let i=0;i<1;i++){
+                grass[i] = new Grass(200,200,i);
+            }
+
+            
+            function updateEcosystem() 
+            {
+                requestAnimationFrame(updateEcosystem);
+                fieldCanvas.fillAll("#D3BE9A");
+                //Update field,grass,and animals
+                const time = new Date();
+                const seconds = time.getSeconds();
+                field.update(seconds);
+                const grassLength=grass.length
+                for(let i=0;i<grassLength;i++){
+                    grass[i].update();
+                }
+                //Destruct Creatures
+                for(let i=0;i<grassLength;i++){
+                    grass[i].update();
+                }
+                //draw on Canvas
+                field.draw(fieldCanvas);
+                for(let i=0;i<grass.length;i++){
+                    grass[i].draw();
+                }
+            }
+            updateEcosystem();
+            
+            
+		</script>
+	</body>
+</html>

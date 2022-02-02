@@ -94,7 +94,11 @@ p {
 .frame{
 	margin: 5px;
 	border-radius: 15px 15px 15px 15px;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#contact p{
+	font-size: 12px;
 }
 
 .contentsContainer{
@@ -114,18 +118,20 @@ p {
 	0% {
 		color:  transparent;
 		text-shadow: unset;
+		opacity: 0;
 	}
 	1% {
 		color:  transparent;
-		text-shadow: 0 0 10px rgba(0, 0, 0, 0);
+		text-shadow: 0 0 10px black;
 	}
 	99%{
 		color:  transparent;
-		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+		text-shadow: 0 0 0px black;
 	}
 	100%{
 		color:  black;
 		text-shadow: unset;
+		opacity: 1;
 	}
 }
 
@@ -133,18 +139,20 @@ p {
 	0% {
 		color:  black;
 		text-shadow: unset;
+		opacity: 1;
 	}
 	1% {
 		color:  transparent;
-		text-shadow: 0 0 0px rgba(0, 0, 0, 1);
+		text-shadow: 0 0 0px black;
 	}
 	99%{
 		color:  transparent;
-		text-shadow: 0 0 20px rgba(0, 0, 0, 0);
+		text-shadow: 0 0 20px black;
 	}
 	100%{
 		color:  transparent;
 		text-shadow: unset;
+		opacity: 0;
 	}
 }
 .hideContent{

@@ -1,0 +1,81 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Ray's Vision System</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()">
+
+	<table class="main" id="Table">
+
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Ray's Vision System
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+	
+		<tr>
+			<td align="center">
+				<input type="file" id="inp" accept="image/*">
+				<input type="button" width="20%" value="1" onclick="button1()">
+				<input type="button" width="20%" value="2" onclick="button2()">
+				<input type="button" width="20%" value="3" onclick="button3()">
+				<input type="button" width="20%" value="4" onclick="button4()"><br>
+				<input class="slider" type="range" min="0" max="100" id="slider1" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100" id="slider2" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100" id="slider3" onchange="changeParameter()" oninput="changeParameter()">
+				<input class="slider" type="range" min="0" max="100"  id="slider4" onchange="changeParameter()" oninput="changeParameter()">
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="canvas" width="400" height="400"></canvas>
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="javascript.js"></script>
+	<script type="text/javascript" src="sudokuSolver.js"></script>
+	<script type="text/javascript" src="sudokuScanner.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/TrigScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/DataScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/StatScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/EyesScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/ItvlScript.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		var body = document.getElementById('Body');
+		var table = document.getElementById('Table');
+		var canvas = document.getElementById('canvas');
+		var slider  = document.getElementById('slider');
+		var slider2  = document.getElementById('slider2');
+		var slider3  = document.getElementById('slider3');
+
+		showObject(body, table);
+
+		function init(){
+			initCanvas();
+			initHcanvas();
+			initJS();
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

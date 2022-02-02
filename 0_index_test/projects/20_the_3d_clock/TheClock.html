@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>The Clock.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script>
+
+            
+			var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            
+            //var colors = [0xC41E3A, 0x009E60, 0x0051BA, 0xFF5800, 0xFFD500, 0xFFFFFF];
+            //var faceMaterials = colors.map(function(c) { return new THREE.MeshLambertMaterial({ color: c , ambient: c });});
+            //var cubeMaterials = new THREE.MeshFaceMaterial(faceMaterials);
+            
+            const texA = new THREE.TextureLoader().load("img/0.png");
+            const texB = new THREE.TextureLoader().load("img/1.png");
+            const texC = new THREE.TextureLoader().load("img/2.png");
+
+            var materials = [
+                new THREE.MeshBasicMaterial({map: texA}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
+                new THREE.MeshBasicMaterial({map: texB}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")}),
+                new THREE.MeshBasicMaterial({map: texC})
+            ];/*
+            const texA = new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png");
+            var materials = [
+                new THREE.MeshBasicMaterial({map:  texA}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/8w6LAV6.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/aVCY4ne.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")}),
+                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/nVAIICM.png")})
+            ];*/
+
+            console.log(materials);
+            texA.magFilter = THREE.NearestFilter;
+            texB.magFilter = THREE.NearestFilter;
+            texC.magFilter = THREE.NearestFilter;
+
+            var geometry = new THREE.BoxGeometry();
+            //var geometry2 = new THREE.BoxBufferGeometry(200, 200, 200);
+            var material = new THREE.MeshBasicMaterial( { color: 0x883300 } );
+            var cube = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial(materials) );
+            scene.add( cube );
+            camera.position.x = 5;
+            camera.lookAt(0,0,0);
+
+
+            var axesHelper = new THREE.AxesHelper( 5 );
+            scene.add( axesHelper );
+
+            const s=Math.sqrt(2);
+            
+            const quaternionT = new Array(12);
+            let w = [1,-0.707,0.5,0.707,-0.5,0,0,0,0.5,0.707,-0.5,-0.707];
+            let x = [0,0,0.5,0.707,-0.5,-0.707,1,-0.707,-0.5,-0.707,0.5,0];
+            let y = [0,0.707,-0.5,0,0.5,0.707,0,0,0.5,0,0.5,0];
+            let z = [0,0,0.5,0,0.5,0,0,0.707,0.5,0,-0.5,-0.707];
+            for(let i=0;i<12;i++){
+                quaternionT[i] = new THREE.Quaternion(x[i],y[i],z[i],w[i]);   
+            }
+            console.log(quaternionT );
+
+           var cubeQuat = cube.quaternion;
+            function animate() 
+            {
+                requestAnimationFrame( animate );
+                checkTime();
+                renderer.render( scene, camera );
+            }
+            animate();
+            function checkTime()
+            {
+                var currentdate = new Date();
+                var currentseconds = currentdate.getSeconds();
+                var currentmilliseconds = currentdate.getMilliseconds();
+
+                //console.log(quaternionT);
+                console.log(currentseconds%12);
+                cubeQuat.rotateTowards(quaternionT[11-currentseconds%12],Math.PI/20);
+            }
+		</script>
+	</body>
+</html>

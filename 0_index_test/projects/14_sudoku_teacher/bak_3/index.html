@@ -1,0 +1,125 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Teacher</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=320, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center" width="320">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Sudoku Teacher
+				</Font></TNR>
+				<hr>
+		        <video  id="player" controls autoplay playsinline width="1" height="1" opacity="0"></video><br>
+				<input type="button" value="Solve" onclick="sudoku.startSolving()">
+				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
+				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
+				<input type="button" value="Scan" onclick="startScan()">
+				</br>Progress:<input class="slider" type="range" min="0" max="0" value="0" id="slider" onchange="draw()" oninput="draw()">
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="RCanvas" style="display:none"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="sudoku.js"></script>
+	<script type="text/javascript" src="board_reader.js"></script>
+	<script type="text/javascript" src="number_reader.js"></script>
+	<script type="text/javascript" src="scanner.js"></script>
+	<script type="text/javascript" src="functions/TrigScript.js"></script>
+	<script type="text/javascript" src="functions/DataScript.js"></script>
+	<script type="text/javascript" src="functions/StatScript.js"></script>
+	<script type="text/javascript" src="functions/EyesScript.js"></script>
+	<script type="text/javascript" src="../../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+		let presetMode = false;
+		let recordMode= true;
+	 
+		let table  = document.getElementById('Table' );
+		let body   = document.getElementById('Body'  );
+		let canvas = document.getElementById('Canvas');
+		let rcanvas= document.getElementById('RCanvas');
+		let slider = document.getElementById('slider');
+		let metho  = document.getElementById('metho');
+		let phase  = document.getElementById('phase');
+		let video = document.getElementById("player");
+		showObject(body, table);
+
+		let scanner = false;
+		let animationStartTime;
+		const startScan = () => {
+			if(!presetMode)slider.value=0;
+			scanner = new Scanner();
+		}
+
+		const sudoku = new Sudoku();
+		initCanvas();
+		initEventlistener();
+		const handleSuccess = (stream) => {scanner.handleSuccess(stream);};
+		const drawVideo   = () => {scanner.drawVideo();};
+		const drawImage   = () => {scanner.drawImage();};
+		const scanNumbers = () => {scanner.drawProgress();};
+
+		if(presetMode){
+			for(let x=0;x<9;x++){
+				for(let i=0;i<9;i++){
+					//if(i!=4) continue;
+					sudoku.userInput(x,i,(x+1));
+				}
+			}
+		}/*
+		sudoku.userInput(0,0,2);
+		sudoku.userInput(1,2,7);
+		sudoku.userInput(2,2,3);
+		sudoku.userInput(3,0,4);
+		sudoku.userInput(5,1,7);
+		sudoku.userInput(7,1,6);
+		sudoku.userInput(8,0,5);
+		sudoku.userInput(6,2,9);
+		sudoku.userInput(8,2,1);
+		sudoku.userInput(0,3,6);
+		sudoku.userInput(1,5,5);
+		sudoku.userInput(2,5,8);
+		sudoku.userInput(4,4,2);
+		sudoku.userInput(5,3,3);
+		sudoku.userInput(7,5,2);
+		sudoku.userInput(6,5,3);
+		sudoku.userInput(8,4,9);
+		sudoku.userInput(8,8,6);
+		sudoku.userInput(7,7,5);
+		sudoku.userInput(6,7,4);
+		sudoku.userInput(4,6,7);
+		sudoku.userInput(3,8,9);
+		sudoku.userInput(5,8,2);
+		sudoku.userInput(1,6,4);
+		sudoku.userInput(2,7,6);
+		sudoku.userInput(0,7,7);
+		sudoku.userInput(0,8,3);*/
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

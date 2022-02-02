@@ -1,0 +1,76 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Sudoku Teacher</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=520, initial-scale=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center" width="320">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Sudoku Teacher
+				</Font></TNR>
+				<hr>
+				<input type="button" value="Solve" onclick="sudoku.startSolving()">
+				<input type="button" value="Show Method" onclick="sudoku.showHideMethod()" id="metho">
+				<input type="button" value="Input Sudoku" onclick="sudoku.changePhase()" id="phase">
+				</br>Progress:<input class="slider" type="range" min="0" max="15" value="0" id="slider" onchange="draw()" oninput="draw()">
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		let table  = document.getElementById('Table' );
+		let body   = document.getElementById('Body'  );
+		let canvas = document.getElementById('Canvas');
+		let slider = document.getElementById('slider');
+		let metho  = document.getElementById('metho');
+		let phase  = document.getElementById('phase');
+		showObject(body, table);
+
+		sudoku = new Sudoku();
+		initCanvas();
+		initEventlistener();
+		sudoku.userInput(1,2,1);
+		sudoku.userInput(7,4,1);
+		sudoku.userInput(5,8,1);
+		sudoku.userInput(2,4,2);
+		sudoku.userInput(7,5,3);
+		sudoku.userInput(5,7,3);
+		sudoku.userInput(0,6,4);
+		sudoku.userInput(4,0,4);
+		sudoku.userInput(2,2,5);
+		sudoku.userInput(4,3,5);
+		sudoku.userInput(6,4,5);
+		sudoku.userInput(0,7,6);
+		sudoku.userInput(8,6,6);
+		sudoku.userInput(7,7,8);
+		sudoku.userInput(4,4,8);
+		sudoku.userInput(8,0,9);
+		sudoku.userInput(0,3,9);
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

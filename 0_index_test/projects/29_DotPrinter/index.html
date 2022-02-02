@@ -1,0 +1,120 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Dot Painter</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+
+
+<body id="Body" onload="init()"class="untouchable">
+
+	<table class="main" id="Table"class="untouchable">
+	
+		<tr>
+			<td align="center">
+				<Font size="10" Font color="black"><TNR>
+			       Dot Painter
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td id="step1">
+				<Font size="5"><B>Step1:</B></Font> Load an Image.→<input type="file" id="folder"><br><br>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				Original Image:<br>
+				<canvas id="CanvasOriginal" width="400" height="300"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td id="step2">
+				<br><br><Font size="5"><B>Step2:</B></Font> Adjust parameters.<br><br>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center"> 
+				Preview:<br>
+				<canvas id="CanvasPreview" width="400" height="300"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="Left"class="untouchable">
+				<table class="main" id="Table"class="untouchable" width="100%">
+					<tr>
+						<td width="35%">
+							Background<br>
+							Scale: <a id="scaleText"></a><br>
+							Brightness: <a id="brightnessText"></a><br>
+							Dot used: <a id="dotCountText"></a><br>
+						</td>
+						<td width="65%">
+							<select id="bgMode" onchange="bgModeChanged()">
+								<option value="0">BG-non</option>
+								<option value="1">BG-light</option>
+								<option value="2">BG-gray</option>
+							</select><br>
+							<input id="sliderScale" class="sliderfullwidth" type="range" width="100%"><br>
+			   				<input id="sliderBrightness" class="sliderfullwidth" type="range" width="100%">
+			   			</td>
+			   		</tr>
+		   		</table>
+			</td>
+		</tr>
+		<tr>
+			<td id="step2">
+				<br><br><Font size="5"><B>Step3:</B></Font> Print the instruction.<input type="button" value="Print Instruction" onclick="outputInstruction();">
+			</td>
+		</tr>
+	</table>
+
+	<script type="text/javascript" src="colorList.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="inputManager.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		const table = document.getElementById('Table');
+		const body = document.getElementById('Body');
+		const ocanvas = document.getElementById('CanvasOriginal');
+		const pcanvas = document.getElementById('CanvasPreview');
+		const tcanvas = document.createElement('canvas');
+		const file   = document.getElementById("folder");
+		const bgMode = document.getElementById("bgMode");
+		const sScale = document.getElementById("sliderScale");
+		const sBrightness = document.getElementById("sliderBrightness");
+		const tScale = document.getElementById("scaleText");
+		const tBrightness = document.getElementById("brightnessText");
+		const tDots = document.getElementById("dotCountText");
+		const step1 = document.getElementById("step1");
+		const step2 = document.getElementById("step2");
+
+		showObject(body, table);
+
+		const checker   = new Image();
+
+		const init = () => {
+			initSlider();
+			initCanvas();
+			initEventlistener();
+		}
+	 
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

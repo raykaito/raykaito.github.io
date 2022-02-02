@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Touchless Control</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1"/>
+</head>
+
+
+<body id="Body" style="height:20000px;" onclick="loadJSlocal('activator.js')">
+
+	<table id="Table" border="0" align="center">
+		<tr>
+			Tap on screen to enable touchless control.
+		</tr>
+	</table>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+		//Opacity Control
+		const table  = document.getElementById('Table' );
+		const body   = document.getElementById('Body'  );
+		showObject(body, table);
+
+		let on = false;
+
+		//Prepare function to load js files
+		const loadJSlocal=(url)=>{
+			if(on) return;
+		    const el = document.createElement("script");
+		    el.src = url;
+		    document.body.appendChild(el);
+		    on = true;
+		}
+
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Disc Search</title>
+	<link rel="stylesheet" href="../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+		<tr>
+			<td align="left" onclick="discScanner.switchScannerOnOff()">
+		        <a id="textScannerStatus">Camera ON/OFF</a>
+		        <video  id="cameraMedia" controls autoplay playsinline opacity="0"  width="1" height="1" style="display:none;"></video>
+			</td>
+			<td align="right">
+		        <input id="searchBar" type="text" placeholder="タイトル 検索" onfocus="discScanner.switchScannerOnOff(false)">
+			</td>
+		</tr>
+		<tr>
+			<td align="left" colspan="2">
+		        <canvas id="displayCanvas" style="display:none" onclick="dcClicked()"></canvas>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" colspan="2">
+		        <font size="4.5ex"><table id="TVPrograms" border="0" width="100%">
+					<tr>
+						<td align="left" width="80%">
+							<U><B>タイトル</B></U>
+						</td>
+						<td align="center" width="20%">
+							<U><B>番号</B></U>
+						</td>
+					</tr>
+		        </table></font>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" colspan="2">
+		        <input type="file" id="fileInput" accept='text/plain' onchange='tvManager.loadLocalTxt(event)'>
+			</td>
+		</tr>
+		<tr>
+			<td id="debugger" align="left" colspan="2">
+		        <canvas id="codeDisplayCanvas" style="display:none"></canvas>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript" src="functions.js"></script>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="vision_program.js"></script>
+	<script type="text/javascript" src="scanner.js"></script>
+	<script type="text/javascript" src="load_tv_programs.js"></script>
+	<script type="text/javascript" src="../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+		//Opacity Control
+		const table  = document.getElementById('Table' );
+		const body   = document.getElementById('Body'  );
+		showObject(body, table);
+
+		//Table for listing TV Programs
+		const tvManager = new TVListManager();
+		let tvTable = document.getElementById('TVPrograms');
+
+		//Prepare DisplayCanvas & codeDisplayCanvas
+        const displayCanvas = new Canvas(document.getElementById("displayCanvas"));
+        displayCanvas.flexResize(0.95,0.25);
+		displayCanvas.fillAll();
+        table.width = displayCanvas.canvas.style.width;
+
+        //Debugger
+        const debugSpace = document.getElementById("debugger");
+		//Debugging tool for ios
+		logCanvas = new LogCanvas();
+        //logCanvas.appendSelf(debugSpace);
+		function log(input){
+			logCanvas.newLine(input);
+		}
+		//DisplayCode
+		const codeDisplayCanvas = new CodeCanvas(document.getElementById("codeDisplayCanvas"));
+		codeDisplayCanvas.flexResize(0.95,0.5);
+		codeDisplayCanvas.fillAll("white");
+		codeDisplayCanvas.displayCodes();
+
+		//Prepare scanner
+		const discScanner = new DiscScanner(document.getElementById("cameraMedia"),displayCanvas);
+
+		//Usefull plots and graphs
+		const plotA = new PlotCanvas();
+		const plotB = new PlotCanvas();
+		const plotC = new PlotCanvas();
+		const graphA = new GraphCanvas();
+		const graphB = new GraphCanvas();
+		const graphC = new GraphCanvas();
+		if(false){
+			plotA.appendSelf();
+			plotB.appendSelf();
+			plotC.appendSelf();
+			graphA.appendSelf();
+			graphB.appendSelf();
+			graphC.appendSelf();
+		}
+		tvManager.loadRemoteTxt("TV_Program_List.txt");
+
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

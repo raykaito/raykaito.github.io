@@ -1,0 +1,126 @@
+﻿<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<title>Invasion Percolation</title>
+	<link rel="stylesheet" href="../../rayStyle.css" type="text/css">
+	<link rel="icon" type="image/png" href="../../icon.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+
+<body id="Body">
+
+	<table id="Table" border="0" align="center">
+	
+		<tr>
+			<td align="center" onclick="titleClicked()">
+				<Font size="10" Font color="black"><TNR>
+			       Invasion Percolation
+				</Font></TNR>
+				<hr>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="Canvas"></canvas>
+			</td>
+		</tr>
+
+		<tr>
+			<td align="center">
+				<canvas id="LogCanvas" onclick="canvasClicked()"></canvas>
+			</td>
+		</tr>
+
+	</table>
+	<script type="text/javascript" src="canvas.js"></script>
+	<script type="text/javascript" src="network.js"></script>
+	<script type="text/javascript" src="../../00_JavaScripts/heapScript_fast.js"></script>
+	<script type="text/javascript" src="../../00_JavaScripts/opacityController.js"></script>
+	<script type="text/javascript">
+	<!--
+	 
+		const tableElement  = document.getElementById('Table' );
+		const bodyElement   = document.getElementById('Body'  );
+		const canvasElement = document.getElementById('Canvas');
+		const logCanvasElement = document.getElementById('LogCanvas');
+		showObject(bodyElement, tableElement);
+
+		const canvas = new Canvas(canvasElement);
+		const logCanvas = new LogCanvas(logCanvasElement);
+		const network = new Network(canvas.canvas.width,canvas.canvas.height,canvas);
+		
+		const log = (line = "") => {
+			logCanvas.newLine(line);
+		}
+		const on = (line = "") => {
+			logCanvas.onLine(line);
+		}
+		let mode = 0;
+		const titleClicked = () => {
+			mode = (mode+1)%2;
+			if(mode){
+				logCanvas.showCanvas();
+			}else{
+				logCanvas.hideCanvas();
+			}
+		}
+		log("Width:"+canvas.canvas.width);
+
+		let timeS;
+		let timeOut;
+
+		const step = (stepc=0) =>{
+			switch(stepc){
+				case -1:
+					log("start Running");
+					break;
+				case 0: 
+					timeS = Date.now();
+					network.resetNetwork();
+					log("ResetNetW: "+(Date.now()-timeS));
+					break;
+				case 1:
+					timeS = Date.now();
+					network.setInletsTop();
+					log("SetInlets: "+(Date.now()-timeS));
+					break;
+				case 2: 
+					timeS = Date.now();
+					network.runInvasionPercolation();
+					log("");
+					log("RunInvPer: "+(Date.now()-timeS));
+					break;
+				case 3: 
+					timeS = Date.now();
+					network.applyTrapping();
+					log("AppTrapin: "+(Date.now()-timeS));
+					network.drawSelf();
+					break;
+				case 4:
+					return;
+			}
+			clearTimeout(timeOut);
+        	timeOut = setTimeout(()=>{step(stepc+1);},100);
+
+		}
+
+		const run = () =>{
+			clearTimeout(timeOut);
+			step(-1);
+		}
+		const canvasClicked = () => {
+			run();
+		}
+        setTimeout(()=>{run();},1000);
+
+	//--> 
+	</script>
+
+</body>
+
+
+</html>

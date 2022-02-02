@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>The Ecosystem</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+        <canvas id="field"></canvas>
+        <script src="functions.js"></script>
+		<script src="canvas.js"></script>
+		<script src="field.js"></script>
+		<script src="creature.js"></script>
+		<script src="grass.js"></script>
+		<script>
+
+            const field = new Field();
+            const creatureMng = new CreatureManager();
+
+            const fieldCanvas = new Canvas(document.getElementById("field"));
+            fieldCanvas.resize(width,height);
+            fieldCanvas.fillAll("white");
+            const fieldImgData = fieldCanvas.ct.getImageData(0,0,width,height);
+            
+            function updateEcosystem() 
+            {
+                requestAnimationFrame(updateEcosystem);
+                //Update field,grass,and animals
+                const time = new Date();
+                const seconds = time.getSeconds();
+                const milliSec= time.getMilliseconds();
+                field.updateField(seconds+milliSec/1000);
+                creatureMng.updateCreatures();
+                //draw on Canvas
+                field.drawField(fieldImgData);
+                creatureMng.drawCreatures(fieldImgData);
+                fieldCanvas.ct.putImageData(fieldImgData,0,0);
+                if(fieldCanvas.moveStart){
+                    fieldCanvas.ct.lineWidth = 0;
+                    fieldCanvas.drawRect(fieldCanvas.touchXY[0],fieldCanvas.touchXY[1],fieldCanvas.slideXY[0]-fieldCanvas.touchXY[0],fieldCanvas.slideXY[1]-fieldCanvas.touchXY[1],"red");
+                }
+            }
+            updateEcosystem();
+            
+            
+		</script>
+	</body>
+</html>
