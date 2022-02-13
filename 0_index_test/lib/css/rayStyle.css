@@ -11,6 +11,7 @@ h1 {
 
 h2 {
 	margin: 5pt;
+	font-size: 1.25em;
 }
 
 p {
@@ -97,10 +98,6 @@ p {
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-#contact p{
-	font-size: 12px;
-}
-
 .contentsContainer{
 	margin:  auto;
 	max-width: 800px;
@@ -112,6 +109,7 @@ p {
 .sideContent{
 	float: right;
 	width: 30%;
+	font-size: 12px;
 }
 
 @keyframes fadeIn{
